@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const contentTypeSelect = document.getElementById('content-type');
     const markdownGroup = document.getElementById('markdown-group');
     const htmlGroup = document.getElementById('html-group');
+    const editWithAsta = document.getElementById('edit-with-asta');
+    const editWithAina = document.getElementById('edit-with-aina');
+    const slugInput = document.getElementById('page-slug');
     
     // Event Listeners
     addPageBtn?.addEventListener('click', () => openPageModal());
@@ -37,4 +40,21 @@ document.addEventListener('DOMContentLoaded', function() {
             switchTab(tabName);
         });
     });
+
+     // Function to update button links with the current slug value
+    function updateEditLinks() {
+        const currentSlug = slugInput.value || '';
+        editWithAsta.href = `/asta?slug=${currentSlug}`;
+        editWithAina.href = `/aina?slug=${currentSlug}`;
+    }
+    
+    // Update links when slug changes
+    slugInput.addEventListener('input', updateEditLinks);
+    
+    // Update links when form loads or modal opens
+    function initialLinkSetup() {
+        updateEditLinks();
+    }
+
+    initialLinkSetup();
 });
