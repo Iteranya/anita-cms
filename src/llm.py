@@ -3,10 +3,7 @@ from data.models import Prompt
 from src.config import load_or_create_config,DefaultConfig,get_key
 
 async def generate_response(task:Prompt):
-
     ai_config:DefaultConfig = load_or_create_config()
-
-
     client = OpenAI(
         base_url=task.endpoint or ai_config.ai_endpoint,
         api_key= task.ai_key or get_key(),
