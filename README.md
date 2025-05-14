@@ -86,4 +86,4 @@ AGPL-3.0 - Because open source should stay open!
 
 ---
 
-*"ANITA may not be the hero Gotham needs, but she's the CMS you deserve"* 🦇
+*"Disclaimer: Still Under Development"*
