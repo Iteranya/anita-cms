@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Markdown Editor</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="builder/style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Panel -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">
+                    <i class="fas fa-book-open"></i> Notes & Tools
+                </div>
+                <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle Sidebar">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            <div class="sidebar-content">
+                <textarea id="sidebar-textarea" placeholder="Use this space for quick notes, drafts, or other text..."></textarea>
+                <!-- You can add more tools or content here later -->
+                 <p style="color: var(--text-secondary); font-size: 0.9em; margin-top: 20px;">This is a collapsible sidebar panel.</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="main-content" id="main-content">
+            <div class="main-container">
+                <div class="pane left-pane">
+                    <div class="pane-title">
+                        <i class="fas fa-file-alt"></i> Raw Markdown
+                    </div>
+                    <textarea id="markdown-input" placeholder="Start typing your Markdown here..."></textarea>
+                </div>
+                <div class="pane right-pane">
+                    <div class="pane-title">
+                        <i class="fas fa-eye"></i> Preview
+                    </div>
+                    <div id="markdown-output"></div>
+                </div>
+            </div>
+
+            <div class="ai-section">
+                <form id="ai-form">
+                    <textarea id="ai-prompt" name="content" placeholder="Describe what you want the AI to add or modify in the Markdown document... (e.g., 'Add a section about project setup instructions', 'Rewrite the introduction to be more engaging', 'Generate a table comparing features A, B, and C')"></textarea>
+                    <button type="submit" id="ai-generate-button">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                        <span class="button-text">Generate with AI</span>
+                        <i class="fas fa-spinner fa-spin" style="display: none;"></i>
+                    </button>
+                </form>
+            </div>
+            <div class="top-right-button-container">
+                <button id="action-button" class="action-button" title="Save document">
+                    <i class="fas fa-save"></i>
+                    <span>Save</span>
+                </button>
+                <button id="latex-button" class="action-button" title="Export as LaTeX">
+                    <i class="fas fa-file-code-o "></i>
+                    <span>Export LaTeX</span>
+                </button>
+                <button id="project-button" class="action-button" title="Export to Overleaf">
+                    <i class="fas fa-leaf"></i>
+                    <span>Export Overleaf</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Area -->
+    <div id="notification-container" class="notification-container"></div>
+
+    <div id="slug-container" style="display: none;" data-slug=""></div>
+    <script type="module" src="builder/scripts/main.js"></script>
+</body>
+
+</html>

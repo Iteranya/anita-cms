@@ -10,8 +10,9 @@ DB_PATH = "pages.db"
 
 class PageDB:
     def __init__(self, db_path=DB_PATH):
-        self.conn = sqlite3.connect(db_path)
+        self.conn = sqlite3.connect(db_path, check_same_thread=False)
         self._create_table()
+        
 
     def _create_table(self):
         self.conn.execute('''

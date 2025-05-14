@@ -1,21 +1,31 @@
 from fastapi import APIRouter, HTTPException
 from typing import List
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from data.db import PageDB  # Make sure page_db.py is importable
+from data.db import PageDB  
 from data.models import Page as PageData
 
-router = APIRouter(prefix="/pages", tags=["Pages"])
+router = APIRouter(prefix="/admin", tags=["Admin"])
 db = PageDB()
-
 
 class PageModel(BaseModel):
     title: str
     slug: str
-    content: str | None = None
-    markdown: str | None = None
-    html: str | None = None
-    tags: List[str] | None = None
-    thumb: str | None = None
+    content: str | None = None # Contains stuff content summary for admin panel, like description
+    markdown: str | None = None # Markdown to render if html don't exist
+    html: str | None = None # HTML to render if markdown don't exist
+    tags: List[str] | None = None # List of keywords
+    thumb: str | None = None # Thumbnail link
+
+
+@router.get("/", response_class=HTMLResponse)
+async def get_html():
+    template_path = "static/admin/index.html"
+    
+    with open(template_path, "r") as f:
+        html = f.read()
+
+    return html
 
 
 @router.post("/", response_model=PageModel)
@@ -25,6 +35,10 @@ def create_page(page: PageModel):
     db.add_page(PageData(**page.dict()))
     return page
 
+
+@router.get("/list", response_model=List[PageModel])
+def list_pages():
+    return db.list_pages()
 
 @router.get("/{slug}", response_model=PageModel)
 def read_page(slug: str):
@@ -50,6 +64,3 @@ def delete_page(slug: str):
     return {"message": "Page deleted successfully"}
 
 
-@router.get("/", response_model=List[PageModel])
-def list_pages():
-    return db.list_pages()
