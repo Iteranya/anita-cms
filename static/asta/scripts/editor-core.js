@@ -134,7 +134,7 @@ export class MarkdownEditor {
                 applyButton.disabled = true;
                 
                 try {
-                    const response = await fetch('/edit-text', {
+                    const response = await fetch('/asta/edit-text', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'

@@ -36,92 +36,58 @@ export class AiGenerator {
         this.submitButton.disabled = true;
         this.submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
         
-        // Prepare data for the backend
         const currentMarkdown = String(this.editor.getValue());
         const side_panel = String(this.side_panel.value);
-        const context = "<notes>\n"+ side_panel + "\n</notes>\n\n<markdown_content>"+currentMarkdown + "\n</markdown_content>\n"
+        const context = "<notes>\n" + side_panel + "\n</notes>\n\n<markdown_content>" + currentMarkdown + "\n</markdown_content>\n";
         const requestData = {
             current_markdown: context,
             prompt: promptValue
         };
-        
+
         try {
-            // STEP 1: Send request to initiate generation
-            const response = await fetch('/generate-doc', {
+            const response = await fetch('/asta/generate-doc-stream', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(requestData)
             });
-            
-            if (!response.ok) {
-                let errorMsg = 'Failed to initiate AI generation.';
-                try {
-                    const errorData = await response.json();
-                    errorMsg = errorData.detail || errorMsg;
-                } catch (jsonError) {
-                    // Ignore if response is not JSON
-                }
-                throw new Error(errorMsg);
+
+            if (!response.ok || !response.body) {
+                throw new Error('Failed to connect to stream.');
             }
-            
-            const data = await response.json();
-            
-            if (data.id) {
-                await this.handleStreamResponse(data.id);
-            } else {
-                throw new Error("Failed to get stream ID from server.");
-            }
-            
+
+            await this.handleStreamResponse(response.body);
+
         } catch (error) {
             console.error('Error during AI generation:', error);
             this.resetFormState();
             NotificationSystem.show(`Yabai! ${error.message || 'Something went wrong'} (╥﹏╥)`, 'error');
         }
     }
-    
-    async handleStreamResponse(streamId) {
-        // Append a clear indicator before starting the stream        
-        const eventSource = new EventSource(`/stream/${streamId}`);
-        let generatedMarkdown = '';
-        let isFirstChunk = true;
-        
-        eventSource.onmessage = (event) => {
-            try {
-                const eventData = JSON.parse(event.data);
-                
-                if (eventData.markdown_chunk) {
-                    generatedMarkdown += eventData.markdown_chunk;
-                    // Append chunk to the textarea
-                    this.editor.appendValue(eventData.markdown_chunk);
-                    
-                    // Scroll to the bottom of the textarea
-                    this.editor.scrollToBottom();
-                    isFirstChunk = false;
-                }
-                
-                if (eventData.done) {
-                    eventSource.close();
-                    this.resetFormState();
-                    this.promptTextarea.value = ''; // Clear prompt on success
-                    
-                    // Show completion notification
-                    NotificationSystem.show('✧･ﾟ:* AI Generation Complete! *:･ﾟ✧', 'success');
-                }
-            } catch (parseError) {
-                console.error("Error parsing stream data:", parseError, "Raw data:", event.data);
+
+    async handleStreamResponse(stream) {
+        const reader = stream.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let done = false;
+        let fullContent = '';
+
+        while (!done) {
+            const { value, done: streamDone } = await reader.read();
+            if (value) {
+                const chunk = decoder.decode(value, { stream: !streamDone });
+                fullContent += chunk;
+                this.editor.appendValue(chunk);
+                this.editor.scrollToBottom();
             }
-        };
-        
-        eventSource.onerror = (error) => {
-            console.error("EventSource failed:", error);
-            eventSource.close();
-            this.resetFormState();
-            NotificationSystem.show('Stream connection error (╥﹏╥)', 'error');
-        };
+            done = streamDone;
+        }
+
+        this.resetFormState();
+        this.promptTextarea.value = ''; // Clear prompt
+        NotificationSystem.show('✧･ﾟ:* AI Generation Complete! *:･ﾟ✧', 'success');
     }
-    
+
     resetFormState() {
         this.submitButton.disabled = false;
         this.submitButton.innerHTML = this.originalButtonText;

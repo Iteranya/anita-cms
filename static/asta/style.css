@@ -328,7 +328,7 @@ textarea#markdown-input {
 }
 
 #markdown-output pre {
-    background-color: #0a0a0a;
+    background-color: #f0f5ff; /* Light blue background instead of dark */
     color: var(--text-primary);
     padding: 1em;
     border-radius: 6px;
@@ -380,7 +380,7 @@ textarea#markdown-input {
     border-left: 4px solid var(--accent-primary);
     padding: 10px 15px;
     margin: 1.5em 0;
-    background-color: rgba(20, 20, 20, 0.6);
+    background-color: #f8f9fa; /* Light background instead of dark */
     color: var(--text-secondary);
     border-radius: 0 4px 4px 0;
 }
@@ -440,12 +440,16 @@ textarea#markdown-input {
 }
 
 #markdown-output tr:nth-child(even) td {
-    background-color: rgba(29, 29, 29, 0.5);
+    background-color: #f5f9ff; /* Light blue instead of dark */
 }
 
 #markdown-output tr:hover td {
-    background-color: rgba(255, 58, 58, 0.1);
+    background-color: rgba(30, 136, 229, 0.1); /* Light blue accent hover instead of red */
 }
+/* 
+#markdown-output tr:hover td {
+    background-color: rgba(255, 58, 58, 0.1);
+} */
 
 #markdown-output img {
     max-width: 100%;

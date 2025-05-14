@@ -16,14 +16,14 @@ class Page:
 
 @dataclass
 class Prompt:
-    system:str
-    user:str
-    assistant:str
-    model:str
-    endpoint:str
-    temp:str
-    context:str
-    limit:str
-    ai_key:str
-    stop:str
+    system:str = None
+    user:str = None
+    assistant:str = None
+    model:str = None
+    endpoint:str = None
+    temp:str = None
+    context:str = None
+    limit:str = None
+    ai_key:str = None
+    stop:str = None
     stream:bool = False

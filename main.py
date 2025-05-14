@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 # Import routers
-from routes import admin_route
+from routes import admin_route,asta_route
 
 app = FastAPI()
 
@@ -25,6 +25,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(admin_route.router)
+app.include_router(asta_route.router)
 
 # Run the application with: uvicorn main:app --reload
 if __name__ == "__main__":

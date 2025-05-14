@@ -1,13 +1,12 @@
-import config
-import asyncio
-from concurrent.futures import ThreadPoolExecutor
-import json
-import asyncio
-from openai import OpenAI
-from src import config
 import re
 from data.models import Prompt
 from src import llm
+
+def regex_result(content: str):
+    match = re.search(r'<edited_content>(.*?)</edited_content>', content, re.DOTALL)
+    if match:
+        return match.group(1)
+    return None
 
 def title_to_filename(title):
     # Convert to lowercase
@@ -56,9 +55,15 @@ async def edit_with_llm(task):
     result = regex_result(result)
     return str(result)
 
+async def stream_markdown(context, instruction):
+    system_note = f"<context>{context}</context>\nWrite only in Markdown Format."
+    prompt = f"{instruction}"
 
-def regex_result(content: str):
-    match = re.search(r'<edited_content>(.*?)</edited_content>', content, re.DOTALL)
-    if match:
-        return match.group(1)
-    return None
+    new_prompt = Prompt(
+        system=system_note,
+        user=prompt,
+        assistant="Understood, here's the rewritten content"
+    )
+
+    async for chunk in llm.stream_response(new_prompt):
+        yield chunk  # Yield raw text chunk
