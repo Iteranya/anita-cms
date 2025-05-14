@@ -26,7 +26,7 @@ export function setupImagePasteHandler() {
           
           // Build final filename with slug if exists
           const finalFilename = slug ? `${slug}/${filename}` : filename;
-          const uploadEndpoint = slug ? '/files' : '/media';
+          const uploadEndpoint = '/media';
 
           try {
             // showNotification('Uploading image...', 'info');

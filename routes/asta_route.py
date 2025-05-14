@@ -1,13 +1,8 @@
-import asyncio
-import json
-import uuid
-import re
-from fastapi import APIRouter, Form, Body, HTTPException, Request
+from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse
-from pathlib import Path
 from src.asta import generate_markdown, edit_with_llm, stream_markdown
 
-router = APIRouter(prefix="/asta", tags=["Admin"])
+router = APIRouter(prefix="/asta", tags=["Asta"])
 
 @router.get("/", response_class=HTMLResponse)
 async def get_html(request: Request):

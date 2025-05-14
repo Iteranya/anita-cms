@@ -62,7 +62,7 @@ async def stream_markdown(context, instruction):
     new_prompt = Prompt(
         system=system_note,
         user=prompt,
-        assistant="Understood, here's the rewritten content"
+        assistant="Understood, here's the requested content in markdown: ```markdown\n"
     )
 
     async for chunk in llm.stream_response(new_prompt):
