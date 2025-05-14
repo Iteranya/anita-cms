@@ -51,7 +51,9 @@ export async function updateProject(slug, projectData) {
     if (response.status === 404) {
       throw new Error(`Project "${slug}" not found`);
     }
-    throw new Error(`Failed to update project: ${response.statusText}`);
+    const errorDetails = await response.json(); // <-- Get the full error
+    console.error('Full 422 Error:', errorDetails); // <-- Log it
+    throw new Error(`Failed to update: ${JSON.stringify(errorDetails)}`);
   }
 
   const project = await response.json();

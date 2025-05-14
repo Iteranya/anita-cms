@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize the HTML editor and preview
     const htmlCode = document.getElementById('html-code');
     const preview = document.getElementById('preview');
+    const slug = document.getElementById('slug-container').textContent;
     
     // Initialize welcome message
     const welcomeHTML = `
@@ -66,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initPreview(htmlCode, preview);
     initAiGeneration(htmlCode, updatePreview);
     setupFileHandlers(htmlCode, updatePreview);
-    setupDeployment(htmlCode);
+    setupDeployment(htmlCode,slug);
     //initSettingsManager();
     setupEffects();
     

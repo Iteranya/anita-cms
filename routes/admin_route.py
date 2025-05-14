@@ -50,6 +50,7 @@ def read_page(slug: str):
 
 @router.put("/{slug}", response_model=PageModel)
 def update_page(slug: str, page: PageModel):
+    print("Received data:", page.dict())
     if not db.get_page(slug):
         raise HTTPException(status_code=404, detail="Page not found")
     db.update_page(PageData(**page.dict()))

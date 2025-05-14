@@ -1,51 +1,22 @@
-// deploymentService.js - Deployment functionality
-import { showNotification } from './notifications.js';
+import { getProject,updateProject } from "./dbIntegration.js";
+import { showNotification } from "./notifications.js";
 
-/**
- * Set up deployment functionality
- * @param {HTMLTextAreaElement} htmlCode - The HTML editor element
- */
-export function setupDeployment(htmlCode) {
+
+export async function setupDeployment(htmlCode,slug) {
     // Open deployment modal
-    document.getElementById('deploy-btn').addEventListener('click', () => {
-        document.getElementById('deploy-modal').style.display = 'block';
-    });
-
-    // Handle deployment confirmation
-    document.getElementById('confirm-deploy').addEventListener('click', async () => {
-        const title = document.getElementById('site-title').value;
-        const content = htmlCode.value;
-        
-        if (!title) {
-            alert('Please enter a site title!');
-            return;
-        }
-
+    document.getElementById('deploy-btn').addEventListener('click', async () => {
         try {
-            const response = await fetch('/save-html', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    content: content,
-                    title: title
-                })
-            });
-
-            const result = await response.json();
-            
-            if (response.ok) {
-                showNotification(`Site deployed successfully! 🎉 Access it at <a href="/${result.path}" target="_blank">${result.path}</a>`, 'success');
-            } else {
-                showNotification(`Deployment failed: ${result.detail}`, 'error');
-            }
+            const project_data = await getProject(slug);
+            project_data.html = htmlCode.value;
+           
+            const result = await updateProject(slug, project_data);
+            console.log(result);
+           showNotification("Project Updated Successfully","success")
+            return { success: true };
         } catch (error) {
-            console.error('Deployment error:', error);
-            showNotification('Yabai! Deployment failed (╥﹏╥)', 'error');
+            console.error("Error updating project:", error);
+            showNotification(`Failed to update project: ${error.message}`,"error");
+            return { success: false, error };
         }
-        
-        document.getElementById('deploy-modal').style.display = 'none';
-        document.getElementById('site-title').value = '';
     });
 }
