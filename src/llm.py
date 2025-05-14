@@ -1,27 +1,33 @@
 from openai import OpenAI
-from src.data.config_data import load_or_create_config,Config,get_key
+from data.models import Prompt
+from src.config import load_or_create_config,DefaultConfig,get_key
 
-async def generate_response(task:QueueItem):
+async def generate_response(task:Prompt):
 
-    ai_config:Config = load_or_create_config()
+    ai_config:DefaultConfig = load_or_create_config()
+
 
     client = OpenAI(
-        base_url=ai_config.ai_endpoint,
-        api_key= get_key(),
+        base_url=task.endpoint or ai_config.ai_endpoint,
+        api_key= task.ai_key or get_key(),
         )
     
     completion = client.chat.completions.create(
-    model=ai_config.base_llm,
-    stop=task.stop,
-    temperature=ai_config.temperature, # I forgor :3
+    model=task.model or ai_config.base_llm,
+    stop=task.stop or [],
+    temperature=task.temp or ai_config.temperature, # I forgor :3
     messages=[
         {
+        "role":"system",
+        "content":task.system
+        },
+        {
         "role": "user",
-        "content": task.prompt
+        "content": task.user
         },
         {
         "role": "assistant",
-        "content": task.prefill
+        "content": task.assistant
         }
     ]
     )
