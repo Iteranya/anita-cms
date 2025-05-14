@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Home</title>
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Global Styles */
+        body {
+            background-color: #1a1a1a; /* Dark grey background */
+            color: #ffffff; /* White text */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                        url('/media/amiya.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 70vh; /* Increased height for more impact */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden; /* Prevents content bleed */
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Darker overlay */
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .hero-title {
+            font-size: 4rem; /* Larger title */
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.7); /* Enhanced text shadow */
+            animation: fadeInDown 1s ease-out; /* Animation */
+        }
+
+        /* Search Bar */
+        .search-container {
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative;
+            animation: fadeInUp 1s ease-out 0.5s; /* Delayed animation */
+            animation-fill-mode: both; /* Keep final state of animation */
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 50px 15px 20px; /* Adjusted padding */
+            font-size: 1.1rem;
+            border: 2px solid #007bff; /* Blue border */
+            border-radius: 50px; /* Rounded corners */
+            background-color: rgba(255, 255, 255, 0.1); /* Slightly transparent background */
+            color: #ffffff;
+            transition: all 0.3s ease;
+            outline: none; /* Remove default outline */
+        }
+
+        .search-input::placeholder {
+            color: #cccccc;
+        }
+
+        .search-input:focus {
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 123, 255, 0.5); /* Blue glow on focus */
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #007bff;
+            font-size: 1.3rem;
+        }
+
+        .gallery-container {
+            padding: 60px 15px;
+            max-width: 1400px; /* Add a max-width to prevent it from stretching too wide */
+            margin: 0 auto; /* This centers the container */
+        }
+
+        .grid-item {
+            padding: 15px;
+            display: block;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .card {
+            background-color: #2c2c2c; /* Slightly lighter dark grey for cards */
+            border: none; /* Remove default border */
+            border-radius: 10px; /* Rounded corners */
+            overflow: hidden; /* Ensure image corners are rounded */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%; /* Ensure cards in a row have same height */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-10px); /* Lift effect on hover */
+            box-shadow: 0 15px 30px rgba(0, 123, 255, 0.3); /* Blue shadow on hover */
+        }
+
+        .card-img-wrapper {
+            position: relative;
+            overflow: hidden;
+            height: 250px; /* Increased image height */
+        }
+
+        .card-img-top {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease, filter 0.4s ease;
+        }
+
+        .card:hover .card-img-top {
+            transform: scale(1.1); /* Zoom effect on hover */
+            filter: brightness(1.1); /* Slightly brighten image */
+        }
+
+        .no-image-placeholder {
+            background-color: #444444; /* Darker placeholder background */
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaaaaa;
+            font-size: 1rem;
+            flex-direction: column; /* Stack icon and text */
+            text-align: center;
+        }
+        
+        .no-image-placeholder i {
+            font-size: 3rem; /* Larger icon */
+            margin-bottom: 10px;
+        }
+
+        .card-body {
+            padding: 20px;
+            flex-grow: 1; /* Allows card body to fill remaining space */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Pushes button to bottom */
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 15px; /* More space below title */
+        }
+
+        .btn-view-gallery {
+            background-color: transparent;
+            border: 2px solid #007bff;
+            color: #007bff;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            align-self: flex-start; /* Align button to the start */
+            margin-top: auto; /* Pushes button down if content is short */
+        }
+
+        .btn-view-gallery:hover {
+            background-color: #007bff;
+            color: #ffffff;
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #0f0f0f; /* Very dark footer */
+            color: #aaaaaa;
+            padding: 30px 0;
+            text-align: center;
+            margin-top: 60px; /* Space above footer */
+            font-size: 0.9rem;
+        }
+        
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer a:hover {
+            color: #ffffff;
+        }
+
+        /* Utility Classes */
+        .container-fluid { padding-left: 0; padding-right: 0; }
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-left: -15px;
+            margin-right: -15px;
+            justify-content: center; /* This centers the grid items */
+        }
+        .col-xl-3, .col-lg-4, .col-md-6 {
+            position: relative;
+            width: 100%;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        @media (min-width: 768px) {
+            .col-md-6 { flex: 0 0 50%; max-width: 50%; }
+        }
+        @media (min-width: 992px) {
+            .col-lg-4 { flex: 0 0 33.33333%; max-width: 33.33333%; }
+        }
+        @media (min-width: 1200px) {
+            .col-xl-3 { flex: 0 0 25%; max-width: 25%; }
+        }
+        .d-flex { display: flex; }
+        .align-items-center { align-items: center; }
+        .justify-content-center { justify-content: center; }
+        .text-center { text-align: center; }
+        .mb-4 { margin-bottom: 1.5rem; } /* Bootstrap like spacing */
+        .fw-bold { font-weight: 700; } /* Bootstrap like font weight */
+        .shadow-sm { box-shadow: 0 .125rem .25rem rgba(0,0,0,.075); } /* Bootstrap like shadow */
+        .h-100 { height: 100%; }
+        .text-white { color: #ffffff; }
+        .bg-light { background-color: #f8f9fa; } /* Retained for potential use, though body is dark */
+        .py-5 { padding-top: 3rem; padding-bottom: 3rem; } /* Bootstrap like padding */
+        .g-4 { /* Bootstrap like grid gap */
+             --bs-gutter-x: 1.5rem; 
+             --bs-gutter-y: 1.5rem;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Scrollbar Styling (Optional, for a more industrial feel) */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #2c2c2c; 
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #0056b3; /* Darker blue */
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #007bff; /* Lighter blue on hover */
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Blog</h1>
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search galleries by title...">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Grid -->
+    <div class="gallery-container container-fluid">
+        <div class="row" id="galleryGrid">
+            {% for page in pages %}
+            <div class="col-md-6 col-lg-4 col-xl-3 grid-item">
+                <div class="card shadow-sm h-100">
+                    <div class="card-img-wrapper">
+                        {% if page.images and page.images[0].image %}
+                            <img src="{{ page.images[0].image }}" class="card-img-top" alt="{{ page.title }}">
+                        {% elif page.thumb %}
+                            <img src="{{ page.thumb }}" class="card-img-top" alt="{{ page.title }}">
+                        {% else %}
+                            <div class="no-image-placeholder">
+                                <i class="fas fa-image"></i> <!-- Icon for no image -->
+                                <span>No Image Available</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <div>
+                            <h5 class="card-title">{{ page.title }}</h5>
+                            <!-- Optional: Add a short description here if available -->
+                            <!-- <p class="card-text text-muted">Short description...</p> -->
+                        </div>
+                        <a href="/site/{{ page.slug }}" class="btn-view-gallery mt-auto">
+                            View Site <i class="fas fa-arrow-right ms-2"></i> <!-- Arrow icon -->
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            <!-- Add a message if no results found -->
+             <div id="noResultsMessage" class="col-12 text-center" style="display: none; padding: 40px 0;">
+                <i class="fas fa-search-minus fa-3x mb-3" style="color: #6c757d;"></i>
+                <h4 style="color: #aaaaaa;">No galleries found matching your search.</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+             <p>&copy; 2025 Amiya CMS Hub.</p>
+             <p>Hypergryph Pls Don't Bonk Me. I just like Bnnuy.</p>
+        </div>
+    </footer>
+
+
+    <!-- Custom JS -->
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const galleryGrid = document.getElementById('galleryGrid');
+        const cards = galleryGrid.querySelectorAll('.grid-item');
+        const noResultsMessage = document.getElementById('noResultsMessage');
+
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const titleElement = card.querySelector('.card-title');
+                // Check if titleElement exists before accessing textContent
+                if (titleElement) {
+                    const title = titleElement.textContent.toLowerCase();
+                    const isVisible = title.includes(searchTerm);
+                    
+                    if (isVisible) {
+                        card.style.display = 'block';
+                        card.style.opacity = '1'; // Fade in effect
+                         card.style.transform = 'scale(1)'; 
+                        visibleCount++;
+                    } else {
+                         card.style.opacity = '0'; // Fade out effect
+                         card.style.transform = 'scale(0.95)'; 
+                        // Use setTimeout to hide after the transition completes
+                         setTimeout(() => {
+                             // Check again if it should be hidden, in case the search term changed quickly
+                             if (!titleElement.textContent.toLowerCase().includes(searchInput.value.toLowerCase().trim())) {
+                                card.style.display = 'none';
+                             }
+                         }, 300); // Match transition duration
+                    }
+                }
+            });
+            
+            // Show or hide the 'no results' message
+             if (visibleCount === 0 && searchTerm !== '') {
+                 noResultsMessage.style.display = 'block';
+             } else {
+                 noResultsMessage.style.display = 'none';
+             }
+        });
+
+        // Initial animation for cards on load (optional)
+        document.addEventListener('DOMContentLoaded', () => {
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                     card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                     card.style.opacity = '1';
+                     card.style.transform = 'translateY(0)';
+                }, index * 100); // Staggered animation
+            });
+        });
+    </script>
+</body>
+</html>

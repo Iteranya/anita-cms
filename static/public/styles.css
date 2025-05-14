@@ -1,0 +1,288 @@
+:root {
+    --background: #1a1a1a;
+    --text-primary: #f0f0f0;
+    --text-secondary: #b0b0b0;
+    --accent: #34a8eb;
+    --border: #444;
+    --card-bg: #2a2a2a;
+    --header-bg: #222;
+    --code-bg: #333;
+    --blockquote-bg: #333;
+}
+
+* {
+    box-sizing: border-box;
+    transition: all 0.2s ease-out;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    color: var(--text-primary);
+    background-color: var(--background);
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    opacity: 0;
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.markdown-content {
+    background-color: var(--card-bg);
+    padding: 2em;
+    border-radius: 8px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.markdown-content::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+    font-weight: 600;
+    color: var(--text-primary);
+    position: relative;
+    display: inline-block;
+}
+
+h1 { 
+    font-size: 2.2em; 
+    border-bottom: 1px solid var(--border); 
+    padding-bottom: 0.3em; 
+    width: 100%;
+    animation: slideInFromLeft 0.6s ease-out;
+}
+
+@keyframes slideInFromLeft {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+h2 { 
+    font-size: 1.8em; 
+    border-bottom: 1px solid var(--border); 
+    padding-bottom: 0.3em; 
+    width: 100%;
+    animation: slideInFromRight 0.4s ease-out;
+}
+
+@keyframes slideInFromRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+h3 { font-size: 1.5em; }
+h4 { font-size: 1.3em; }
+h5 { font-size: 1.2em; }
+h6 { font-size: 1.1em; }
+
+p, ul, ol { 
+    margin-bottom: 16px; 
+    color: var(--text-secondary);
+}
+
+p strong, li strong {
+    color: var(--text-primary);
+}
+
+a { 
+    color: var(--accent); 
+    text-decoration: none; 
+    position: relative;
+    padding-bottom: 2px;
+}
+
+a:hover { 
+    text-decoration: none;
+}
+
+a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 1px;
+    bottom: 0;
+    left: 0;
+    background-color: var(--accent);
+    transition: width 0.3s ease-out;
+}
+
+a:hover::after {
+    width: 100%;
+}
+
+code {
+    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+    background-color: var(--code-bg);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-size: 85%;
+    color: #e6e6e6;
+}
+
+pre {
+    background-color: var(--code-bg);
+    border-radius: 6px;
+    padding: 16px;
+    overflow: auto;
+    line-height: 1.45;
+    box-shadow: inset 0 1px 5px rgba(0,0,0,0.3);
+    margin: 20px 0;
+}
+
+pre code {
+    background-color: transparent;
+    padding: 0;
+    font-size: 85%;
+    white-space: pre;
+}
+
+img {
+    max-width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    margin: 20px 0;
+    transition: transform 0.3s ease;
+}
+
+img:hover {
+    transform: scale(1.02);
+}
+
+blockquote {
+    padding: 1em 1.5em;
+    color: var(--text-secondary);
+    background-color: var(--blockquote-bg);
+    border-left: 4px solid var(--accent);
+    margin: 20px 0;
+    border-radius: 0 6px 6px 0;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 25px 0;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+table th, table td {
+    padding: 12px 15px;
+    border: 1px solid var(--border);
+}
+
+table th {
+    background-color: var(--header-bg);
+    font-weight: bold;
+    text-align: left;
+    color: var(--text-primary);
+}
+
+table tr {
+    background-color: var(--card-bg);
+    border-top: 1px solid var(--border);
+}
+
+table tr:nth-child(2n) {
+    background-color: var(--header-bg);
+}
+
+hr {
+    height: 1px;
+    padding: 0;
+    margin: 30px 0;
+    background-color: var(--border);
+    border: 0;
+    position: relative;
+}
+
+hr::after {
+    content: "•";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    background-color: var(--card-bg);
+    padding: 0 10px;
+    color: var(--accent);
+}
+
+ul, ol {
+    padding-left: 2em;
+}
+
+li {
+    margin-bottom: 8px;
+}
+
+.warning {
+    background-color: rgba(255, 100, 100, 0.1);
+    border-left: 4px solid #ff6464;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 0 6px 6px 0;
+}
+
+/* Custom styling for Amiya theme */
+.bnnuy {
+    display: inline-block;
+    font-size: 1.2em;
+    animation: hop 2s infinite;
+}
+
+@keyframes hop {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.feature-list li {
+    position: relative;
+    padding-left: 5px;
+    opacity: 0;
+    animation: fadeInItem 0.5s ease-out forwards;
+}
+
+.feature-list li:nth-child(1) { animation-delay: 0.1s; }
+.feature-list li:nth-child(2) { animation-delay: 0.2s; }
+.feature-list li:nth-child(3) { animation-delay: 0.3s; }
+.feature-list li:nth-child(4) { animation-delay: 0.4s; }
+.feature-list li:nth-child(5) { animation-delay: 0.5s; }
+.feature-list li:nth-child(6) { animation-delay: 0.6s; }
+.feature-list li:nth-child(7) { animation-delay: 0.7s; }
+.feature-list li:nth-child(8) { animation-delay: 0.8s; }
+
+@keyframes fadeInItem {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Add this to ensure content is visible when printing */
+@media print {
+    body, .markdown-content {
+        background-color: white;
+        color: black;
+    }
+    
+    .markdown-content::before {
+        display: none;
+    }
+
+    img, pre, blockquote {
+        box-shadow: none;
+    }
+}

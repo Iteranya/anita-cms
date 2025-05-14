@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from data.db import list_pages, get_page
-
-router = APIRouter(prefix="/", tags=["Public"])
+from fastapi.templating import Jinja2Templates
+from src.generator import generate_markdown_page
+router = APIRouter(tags=["Public"])
 templates = Jinja2Templates(directory="static/public")
 
 @router.get("/", response_class=HTMLResponse)
