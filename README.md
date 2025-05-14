@@ -86,4 +86,4 @@ AGPL-3.0 - Because open source should stay open!
 
 ---
 
-*"Disclaimer: Still Under Development"*
+*"Disclaimer: Yes, page.db accidentally saved in the repo, will delete later"*
