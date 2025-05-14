@@ -2,20 +2,19 @@ from fastapi import APIRouter, HTTPException
 from typing import List
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from data.db import PageDB  
+from data import db  # Import the db module with standalone functions
 from data.models import Page as PageData
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
-db = PageDB()
 
 class PageModel(BaseModel):
     title: str
     slug: str
-    content: str | None = None # Contains stuff content summary for admin panel, like description
-    markdown: str | None = None # Markdown to render if html don't exist
-    html: str | None = None # HTML to render if markdown don't exist
-    tags: List[str] | None = None # List of keywords
-    thumb: str | None = None # Thumbnail link
+    content: str | None = None  # Contains stuff content summary for admin panel, like description
+    markdown: str | None = None  # Markdown to render if html don't exist
+    html: str | None = None  # HTML to render if markdown don't exist
+    tags: List[str] | None = None  # List of keywords
+    thumb: str | None = None  # Thumbnail link
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -40,6 +39,7 @@ def create_page(page: PageModel):
 def list_pages():
     return db.list_pages()
 
+
 @router.get("/{slug}", response_model=PageModel)
 def read_page(slug: str):
     page = db.get_page(slug)
@@ -62,5 +62,3 @@ def delete_page(slug: str):
         raise HTTPException(status_code=404, detail="Page not found")
     db.delete_page(slug)
     return {"message": "Page deleted successfully"}
-
-

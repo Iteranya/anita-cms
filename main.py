@@ -2,12 +2,13 @@ import os
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from data import db
 import uvicorn
 # Import routers
-from routes import admin_route,asta_route,media_route
+from routes import admin_route,asta_route,media_route,aina_route
 
 app = FastAPI()
-
+db.get_connection()
 app.mount("/static",StaticFiles(directory="static"),name = "static-directory")
 
 # For templates
@@ -26,6 +27,7 @@ app.add_middleware(
 app.include_router(admin_route.router)
 app.include_router(asta_route.router)
 app.include_router(media_route.router)
+app.include_router(aina_route.router)
 
 # Run the application with: uvicorn main:app --reload
 if __name__ == "__main__":

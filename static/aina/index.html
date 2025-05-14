@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Playground | Aina's Coding Dojo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+
+
+/* notifications.js */
+
+:root {
+    --primary: #4CAF50;
+    --secondary: #2196F3;
+    --accent: #FF9800;
+    --light: #f5f9fa;
+    --dark: #263238;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--light) 0%, #e0f7fa 100%);
+    color: var(--dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    padding: 15px 30px;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 10;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary);
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+}
+
+.logo-text {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    background-clip: text; 
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 20px;
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+.panes-container {
+    display: flex;
+    gap: 20px;
+    height: calc(100vh - 180px);
+}
+
+.editor-pane, .preview-pane {
+    flex: 1;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+
+.editor-pane:hover, .preview-pane:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.pane-header {
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    color: white;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pane-header i {
+    font-size: 1.2rem;
+}
+
+.pane-content {
+    flex: 1;
+    padding: 15px;
+    overflow: auto;
+}
+
+textarea {
+    width: 100%;
+    height: 100%;
+    border: none;
+    resize: none;
+    font-family: 'Fira Code', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 10px;
+    background: #fafafa;
+    border-radius: 8px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+textarea:focus {
+    outline: none;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(33, 150, 243, 0.3);
+}
+
+#preview {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: white;
+    border-radius: 8px;
+}
+
+.generate-form {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-top: 20px;
+}
+
+.form-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    color: var(--secondary);
+}
+
+.form-header i {
+    font-size: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.3);
+    outline: none;
+}
+
+.btn {
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(33, 150, 243, 0.4);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn i {
+    font-size: 1rem;
+}
+
+.floating-characters {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.character {
+    position: absolute;
+    opacity: 0.1;
+    animation: float 15s infinite linear;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-20px) rotate(180deg);
+    }
+    100% {
+        transform: translateY(0) rotate(360deg);
+    }
+}
+
+.footer {
+    text-align: center;
+    padding: 15px;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .panes-container {
+        flex-direction: column;
+        height: auto;
+    }
+    
+    .editor-pane, .preview-pane {
+        min-height: 400px;
+    }
+}
+</style>
+</head>
+<body>
+    <div class="floating-characters">
+        <div class="character" style="top: 10%; left: 5%; font-size: 30px;">(>^.^)></div>
+        <div class="character" style="top: 30%; left: 80%; font-size: 40px;">(◕‿◕✿)</div>
+        <div class="character" style="top: 70%; left: 15%; font-size: 25px;">(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧</div>
+        <div class="character" style="top: 50%; left: 70%; font-size: 35px;">(づ｡◕‿‿◕｡)づ</div>
+    </div>
+    
+    <header class="header" style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="logo">
+            <img src="https://i.imgur.com/VQ2eNhq.jpeg" alt="Aina-chan" class="logo-img">
+            <h1 class="logo-text">Aina's HTML Playground</h1>
+        </div>
+        <!-- Top Right Buttons -->
+        <div class="header-buttons" style="display: flex; gap: 10px;">
+            <button class="btn" id="deploy-btn">
+                <i class="fas fa-rocket"></i> Deploy
+            </button>
+            <button class="btn" id="export-btn">
+                <i class="fas fa-file-export"></i> Export
+            </button>
+            <button class="btn" id="import-btn">
+                <i class="fas fa-file-import"></i> Import
+            </button>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="panes-container">
+            <div class="editor-pane">
+                <div class="pane-header">
+                    <i class="fas fa-code"></i>
+                    <h2>Editor</h2>
+                </div>
+                <div class="pane-content">
+                    <textarea id="html-code" placeholder="Write your HTML here, senpai~ (◕‿◕✿)"></textarea>
+                </div>
+            </div>
+            
+            <div class="preview-pane">
+                <div class="pane-header">
+                    <i class="fas fa-eye"></i>
+                    <h2>Preview</h2>
+                </div>
+                <div class="pane-content">
+                    <iframe id="preview"></iframe>
+                </div>
+            </div>
+        </div>
+        
+        <div class="generate-form">
+            <div class="form-header">
+                <i class="fas fa-magic"></i>
+                <h2>Website Generator</h2>
+            </div>
+            <form action="/generate-website" method="post">
+                <div class="form-group">
+                    <label for="content">Describe your dream website, onii-chan~</label>
+                    <textarea name="content" id="content" class="form-control" rows="4" required placeholder="I want a kawaii landing page with pink buttons and cat ears..."></textarea>
+                </div>
+                <button type="submit" class="btn">
+                    <i class="fas fa-wand-magic-sparkles"></i> Generate Website
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <footer class="footer">
+        <p>Made with ♥ by Aina-chan | HTML Playground v1.0</p>
+    </footer>
+    
+    <!-- Floating Action Button for Settings
+    <div id="fab" style="position: fixed; bottom: 20px; right: 20px;">
+        <button class="btn" style="border-radius: 50%; width: 60px; height: 60px; padding: 0; display: flex; justify-content: center; align-items: center;">
+            <i class="fas fa-cog" style="font-size: 1.5rem;"></i>
+        </button>
+    </div> -->
+    
+    <!-- Settings Panel (hidden by default) -->
+    <div id="settings-panel" style="position: fixed; bottom: 100px; right: 20px; background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); padding: 20px; width: 300px; display: none; z-index: 20;">
+        <h3 style="margin-bottom: 15px; color: var(--secondary);">AI Setup</h3>
+        <form id="ai-setup-form">
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label for="ai-endpoint" style="font-weight: 600; color: var(--dark);">AI End Point</label>
+                <input type="url" id="ai-endpoint" name="ai-endpoint" class="form-control" placeholder="https://openrouter.ai/api/v1">
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label for="ai-model" style="font-weight: 600; color: var(--dark);">AI Model</label>
+                <input type="text" id="ai-model" name="ai-model" class="form-control" placeholder="openrouter/quasar-alpha">
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label for="ai-temp" style="font-weight: 600; color: var(--dark);">AI Temp</label>
+                <input type="number" step="0.1" id="ai-temp" name="ai-temp" class="form-control" placeholder="Temperature">
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label for="system-prompt" style="font-weight: 600; color: var(--dark);">System Prompt</label>
+                <textarea id="system-prompt" name="system-prompt" class="form-control" rows="3" placeholder="Enter System Prompt"></textarea>
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label for="ai-key" style="font-weight: 600; color: var(--dark);">API Key</label>
+                <input type="text" id="ai-key" name="ai-key" class="form-control" placeholder="sk-xxxxxxxxxxxxxxx">
+            </div>
+            <button type="submit" class="btn">
+                <i class="fas fa-save"></i> Save Settings
+            </button>
+        </form>
+    </div>
+
+    <!-- Deployment Modal -->
+    <div id="deploy-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="background: white; width: 400px; padding: 20px; border-radius: 10px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+            <div class="modal-header" style="margin-bottom: 15px;">
+                <h3 style="color: var(--secondary);"><i class="fas fa-rocket"></i> Deploy Your Site</h3>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="site-title" class="form-control" placeholder="Enter site title (e.g. my-kawaii-page)" style="margin-bottom: 15px;">
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button class="btn" onclick="document.getElementById('deploy-modal').style.display = 'none'">
+                        Cancel
+                    </button>
+                    <button class="btn" id="confirm-deploy">
+                        <i class="fas fa-paper-plane"></i> Deploy
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+<script type="module" src="/static/aina/scripts/main.js"></script>
+</body>
+</html>

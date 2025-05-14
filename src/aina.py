@@ -5,16 +5,6 @@ from concurrent.futures import ThreadPoolExecutor
 # Create a thread pool for CPU-bound tasks
 executor = ThreadPoolExecutor()
 
-def save_html(html_content, file_name):
-    """Save HTML content to file - this can run in a separate thread"""
-    output_path = f"sites/drafts/{file_name}"
-    # Open file in text write mode (not binary)
-    with open(output_path, 'w', encoding='utf-8') as file:
-        file.write(html_content)
-    
-    print(f"HTML successfully saved to {output_path}")
-    return output_path
-
 def title_to_filename(title):
     # Convert to lowercase
     filename = title.lower()
