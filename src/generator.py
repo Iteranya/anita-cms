@@ -1,6 +1,6 @@
 import markdown as md_lib
 
-def generate_markdown_page(title:str,md: str, css = "static/public/styles.css", js = "static/public/script.js"):
+def generate_markdown_page(title:str,md: str, css = "static/markdown/styles.css", js = "static/markdown/script.js"):
 
     custom_css = load_from_file(css)
     custom_js = load_from_file(js)
