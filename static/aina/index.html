@@ -338,63 +338,6 @@ label {
     <footer class="footer">
         <p>Made with ♥ by Aina-chan | HTML Playground v1.0</p>
     </footer>
-    
-    <!-- Floating Action Button for Settings
-    <div id="fab" style="position: fixed; bottom: 20px; right: 20px;">
-        <button class="btn" style="border-radius: 50%; width: 60px; height: 60px; padding: 0; display: flex; justify-content: center; align-items: center;">
-            <i class="fas fa-cog" style="font-size: 1.5rem;"></i>
-        </button>
-    </div> -->
-    
-    <!-- Settings Panel (hidden by default) -->
-    <div id="settings-panel" style="position: fixed; bottom: 100px; right: 20px; background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); padding: 20px; width: 300px; display: none; z-index: 20;">
-        <h3 style="margin-bottom: 15px; color: var(--secondary);">AI Setup</h3>
-        <form id="ai-setup-form">
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label for="ai-endpoint" style="font-weight: 600; color: var(--dark);">AI End Point</label>
-                <input type="url" id="ai-endpoint" name="ai-endpoint" class="form-control" placeholder="https://openrouter.ai/api/v1">
-            </div>
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label for="ai-model" style="font-weight: 600; color: var(--dark);">AI Model</label>
-                <input type="text" id="ai-model" name="ai-model" class="form-control" placeholder="openrouter/quasar-alpha">
-            </div>
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label for="ai-temp" style="font-weight: 600; color: var(--dark);">AI Temp</label>
-                <input type="number" step="0.1" id="ai-temp" name="ai-temp" class="form-control" placeholder="Temperature">
-            </div>
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label for="system-prompt" style="font-weight: 600; color: var(--dark);">System Prompt</label>
-                <textarea id="system-prompt" name="system-prompt" class="form-control" rows="3" placeholder="Enter System Prompt"></textarea>
-            </div>
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label for="ai-key" style="font-weight: 600; color: var(--dark);">API Key</label>
-                <input type="text" id="ai-key" name="ai-key" class="form-control" placeholder="sk-xxxxxxxxxxxxxxx">
-            </div>
-            <button type="submit" class="btn">
-                <i class="fas fa-save"></i> Save Settings
-            </button>
-        </form>
-    </div>
-
-    <!-- Deployment Modal -->
-    <div id="deploy-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-        <div style="background: white; width: 400px; padding: 20px; border-radius: 10px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-            <div class="modal-header" style="margin-bottom: 15px;">
-                <h3 style="color: var(--secondary);"><i class="fas fa-rocket"></i> Deploy Your Site</h3>
-            </div>
-            <div class="modal-body">
-                <input type="text" id="site-title" class="form-control" placeholder="Enter site title (e.g. my-kawaii-page)" style="margin-bottom: 15px;">
-                <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                    <button class="btn" onclick="document.getElementById('deploy-modal').style.display = 'none'">
-                        Cancel
-                    </button>
-                    <button class="btn" id="confirm-deploy">
-                        <i class="fas fa-paper-plane"></i> Deploy
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
         
 <script type="module" src="/static/aina/scripts/main.js"></script>
 </body>
