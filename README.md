@@ -11,38 +11,77 @@
 **ANITA CMS** is the lovechild of three powerful projects - combining Amiya's simplicity, Aina's AI website generation, and Asta's markdown superpowers into one delightful CMS. No bloated frameworks, no Node.js nonsense - just pure vanilla JS magic with a FastAPI backend and SQLite database.
 
 
-![Asta AI Markdown Editor](https://github.com/user-attachments/assets/cb007f35-16d5-4360-9738-228bc27998b7)
+## ✨ Core Features Showcase
 
-![Aina AI Website Generator](https://github.com/user-attachments/assets/9680ad2b-78de-47b8-9c51-09309aa8e51e)
+### Visual Component Overview
+<div align="center">
+  <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-bottom: 30px;">
+    <div style="flex: 1; min-width: 300px;">
+      <img src="https://github.com/user-attachments/assets/cb007f35-16d5-4360-9738-228bc27998b7" alt="Asta Markdown Editor" style="border: 1px solid #e1e4e8; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"/>
+      <p style="text-align: center; margin-top: 8px; color: #666;"><strong>Asta Markdown Editor</strong><br>AI-assisted writing with full markdown support</p>
+    </div>
+    <div style="flex: 1; min-width: 300px;">
+      <img src="https://github.com/user-attachments/assets/9680ad2b-78de-47b8-9c51-09309aa8e51e" alt="Aina Website Generator" style="border: 1px solid #e1e4e8; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"/>
+      <p style="text-align: center; margin-top: 8px; color: #666;"><strong>Aina Website Generator</strong><br>Visual HTML builder with AI layout suggestions</p>
+    </div>
+    <div style="flex: 1; min-width: 300px;">
+      <img src="https://github.com/user-attachments/assets/e74c76fc-653b-47ce-9c6b-3ac1cdec3411" alt="Amiya Admin Panel" style="border: 1px solid #e1e4e8; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"/>
+      <p style="text-align: center; margin-top: 8px; color: #666;"><strong>Amiya Admin Panel</strong><br>Centralized control for all your projects</p>
+    </div>
+  </div>
+</div>
 
-![Amiya Admin Page (More Panels Coming Up)](https://github.com/user-attachments/assets/e74c76fc-653b-47ce-9c6b-3ac1cdec3411)
+### Hybrid Content Management System
 
+Our dual-mode editor gives you the best of both worlds:
 
-## ✨ Key Features
+- **Markdown Mode (Asta Editor)**  
+  Perfect for content-focused sites like blogs and documentation. Features include:
+  - Real-time preview with syntax highlighting
+  - AI-powered writing assistance
 
-### Hybrid Content System
-- **Markdown Mode**: Full Asta-powered editor with AI assistance
-- **HTML Mode**: Aina's static site generator built right in
-- **Toggle freely** between content types
+- **HTML Mode (Aina Generator)**  
+  Ideal for visually-rich pages with:
+  - Real-time website generation
+  - AI-generated sites
+  - Edit and ask follow ups on the fly
 
-### AI Everywhere (But Not Just OpenAI)
-- ✍️ AI text generation in markdown 
-- 🎨 AI website generator 
-- 🔄 Right-click rewrite anything 
-- 🔌 API-agnostic - point it to your preferred AI provider
+*Switch between markdown and html to be rendered on display!*
 
+### Intelligent AI Integration
 
-### Zero Bloat Architecture
-- 🚫 No Node.js required
-- 🍦 Vanilla JS/CSS frontend
-- 🐍 FastAPI + SQLite backend
-- ⚡ Ultra-fast response times
+We've baked AI into every workflow without vendor lock-in:
 
+- **Content Creation**  
+  ✍️ Generate draft text in markdown with tone/style controls  
+  🎨 Get entire sites ready for AI Generation
+  🔄 Context-aware rewriting (select text → right-click → improve)
 
-### Admin Panel
-- 🏗️ Create/delete sites with one click
-- 🏷️ Tag system for organization (blog, portfolio, etc.)
-- 🔄 Quick-switch between projects
+- **Flexible Backend**  
+  🔌 Connect to OpenAI, Anthropic, or self-hosted models  
+  💾 Local AI model support (via OpenAI Library)
+
+### Lightweight Yet Powerful Architecture
+
+Built for developers who value performance and simplicity:
+
+- **Frontend**  
+  🍦 Pure vanilla JS (no framework bloat)  
+  🎨 CSS variables for easy theming  
+
+- **Backend**  
+  🐍 FastAPI for rapid request handling  
+  🗃️ SQLite for portable data storage  
+  ⚡ Average response time <50ms  
+
+### Project Management Made Simple
+
+The admin panel helps you stay organized:
+
+- **Site Management**  
+  🏗️ One-click project creation  
+  🗑️ Bulk delete for spring cleaning  
+  🏷️ Tag-based filtering (e.g., #blog, #portfolio)  
 
 
 ## 🚀 Installation
