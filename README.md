@@ -1,11 +1,8 @@
-# Anita CMS 🎀
+![image](https://github.com/user-attachments/assets/8c1de477-b76f-4068-be5f-8f8d3a6363d7)# Anita CMS 🎀
 
 *"Amiya, Aina, and Asta walk into a codebase..."*
 
-<div align="center">
-  <!-- This creates a simple border effect around the image -->
-  <img src="https://github.com/user-attachments/assets/988871b4-9726-46e5-a72b-ebe551ad70f3" alt="Anita" width="450" style="border: 2px solid #f0f0f0; border-radius: 8px; padding: 5px;" />
-</div>
+![Anita](https://github.com/user-attachments/assets/988871b4-9726-46e5-a72b-ebe551ad70f3)
 
 
 **ANITA CMS** is the lovechild of three powerful projects - combining Amiya's simplicity, Aina's AI website generation, and Asta's markdown superpowers into one delightful CMS. No bloated frameworks, no Node.js nonsense - just pure vanilla JS magic with a FastAPI backend and SQLite database.
@@ -17,10 +14,13 @@
 - **HTML Mode**: Aina's static site generator built right in
 - **Toggle freely** between content types
 
-### AI Everywhere
-- ✍️ AI text generation in markdown
-- 🎨 AI website generator
-- 🔄 Right-click rewrite anything
+
+### AI Everywhere (But Not Just OpenAI)
+- ✍️ AI text generation in markdown 
+- 🎨 AI website generator 
+- 🔄 Right-click rewrite anything 
+- 🔌 API-agnostic - point it to your preferred AI provider
+
 
 ### Zero Bloat Architecture
 - 🚫 No Node.js required
@@ -76,7 +76,7 @@ python main.py
 | Frontend        | Vanilla JS          |
 | Markdown        | Asta Editor         |
 | HTML Generator  | Aina System         |
-| AI              | OpenAI API          |
+| AI              | OpenAI Library      |
 
 
 ## 🌈 Why ANITA?
