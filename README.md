@@ -10,13 +10,20 @@
 
 **ANITA CMS** is the lovechild of three powerful projects - combining Amiya's simplicity, Aina's AI website generation, and Asta's markdown superpowers into one delightful CMS. No bloated frameworks, no Node.js nonsense - just pure vanilla JS magic with a FastAPI backend and SQLite database.
 
+
+![Asta AI Markdown Editor](https://github.com/user-attachments/assets/cb007f35-16d5-4360-9738-228bc27998b7)
+
+![Aina AI Website Generator](https://github.com/user-attachments/assets/9680ad2b-78de-47b8-9c51-09309aa8e51e)
+
+![Amiya Admin Page (More Panels Coming Up)](https://github.com/user-attachments/assets/e74c76fc-653b-47ce-9c6b-3ac1cdec3411)
+
+
 ## ✨ Key Features
 
 ### Hybrid Content System
 - **Markdown Mode**: Full Asta-powered editor with AI assistance
 - **HTML Mode**: Aina's static site generator built right in
 - **Toggle freely** between content types
-
 
 ### AI Everywhere (But Not Just OpenAI)
 - ✍️ AI text generation in markdown 
