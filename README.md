@@ -1,8 +1,9 @@
-# ANITA CMS 🎀
+# Anita CMS 🎀
 
 *"Amiya, Aina, and Asta walk into a codebase..."*
 
-![ANITA Logo](https://github.com/user-attachments/assets/164c4cf0-7bf4-4af2-a537-174bd1575b07)
+![Anita](https://github.com/user-attachments/assets/988871b4-9726-46e5-a72b-ebe551ad70f3)
+
 
 **ANITA CMS** is the lovechild of three powerful projects - combining Amiya's simplicity, Aina's AI website generation, and Asta's markdown superpowers into one delightful CMS. No bloated frameworks, no Node.js nonsense - just pure vanilla JS magic with a FastAPI backend and SQLite database.
 
