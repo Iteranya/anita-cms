@@ -101,6 +101,49 @@ python main.py
 - **Hackable Core**: The opposite of "magic" frameworks - you can actually understand AND modify everything
 
 
+## 🗺️ Roadmap & Help Wanted
+
+### 🔐 Security & Multi-User (Urgent!)
+- [ ] **Config Panel** (HOW DID WE MISS THIS?!)
+- [ ] Authentication system
+- [ ] User roles/permissions
+- [ ] Session management
+- [ ] Audit logging
+
+### ✨ AI-Powered Site Creator (Dream Mode)
+- [ ] Sitemap schema generator ("It'll work, trust me")
+- [ ] AI layout suggestions
+- [ ] Content-first scaffolding
+- [ ] "Make it pop" button (for clients who say that)
+
+### 🎨 Customization Galore
+- [ ] Theme builder
+- [ ] Component playground
+- [ ] CSS variable editor
+- [ ] "Blog-ify" mode (for when you need that Medium clout)
+
+### 🐛 Bug Hunting Party
+- [ ] Stability improvements
+- [ ] Edge case testing
+- [ ] "That's not a bug, it's a feature" documentation
+- [ ] Performance profiling
+
+### 🤗 Emotional Support Needed
+```text
+   ╭───────────────────────────╮
+   │                           │
+   │   HUGS ACCEPTED HERE →    │
+   │         (.づ◡﹏◡)づ.       │
+   │                           │
+   ╰───────────────────────────╯
+```
+**Contribute by:**
+- Opening issues (even just to say hi)
+- Submitting PRs (or funny memes)
+- Starring the repo (serotonin boost)
+- Telling the dev "you got this" (lies help)
+
+*"Roadmap subject to change based on caffeine levels and existential dread"*
 
 ## ⚠️ Warning: Work in Progress
 
