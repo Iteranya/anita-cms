@@ -9,8 +9,10 @@ export const CONTENT_TYPES = {
     HTML: 'html'
 };
 
-export function openPageModal(page = null) {
+export async function openPageModal(page = null) {
     const pageModal = document.getElementById('page-modal');
+    const markdownGroup = document.getElementById('markdown-group');
+    const htmlGroup = document.getElementById('html-group');
     const slugInput = document.getElementById('page-slug');
     const editWithAsta = document.getElementById('edit-with-asta');
     const editWithAina = document.getElementById('edit-with-aina');
@@ -18,30 +20,59 @@ export function openPageModal(page = null) {
     setCurrentPageId(page?.slug ?? null);
     
     if (page) {
-        // Setup modal for editing existing page
-        document.getElementById('modal-title').textContent = 'Edit Page';
-        document.getElementById('page-title').value = page.title;
-        slugInput.value = page.slug;
-        slugInput.readOnly = true;
-        document.getElementById('page-description').value = page.content || '';
-        document.getElementById('page-thumbnail').value = page.thumb || '';
-        
-        // Populate content fields
-        document.getElementById('page-markdown').value = page.markdown || '';
-        document.getElementById('page-html').value = page.html || '';
-        
-        // Set content type (default to markdown if not specified)
-        const contentType = page.type || CONTENT_TYPES.MARKDOWN;
-        document.getElementById('content-type').value = contentType;
-        
-        // Update editor visibility based on content type
-        updateContentVisibility(contentType);
-        
-        // Update editor links
-        editWithAsta.href = `/asta?slug=${page.slug}`;
-        editWithAina.href = `/aina?slug=${page.slug}`;
-        
-        setTags(page.tags || []);
+        try {
+            // Fetch fresh data from the API
+            const response = await fetch(`/admin/${page.slug}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch page data');
+            }
+            const freshPageData = await response.json();
+            
+            // Setup modal with fresh data
+            document.getElementById('modal-title').textContent = 'Edit Page';
+            document.getElementById('page-title').value = freshPageData.title;
+            slugInput.value = freshPageData.slug;
+            slugInput.readOnly = true;
+            document.getElementById('page-description').value = freshPageData.content || '';
+            document.getElementById('page-thumbnail').value = freshPageData.thumb || '';
+            
+            // Populate content fields
+            document.getElementById('page-markdown').value = freshPageData.markdown || '';
+            document.getElementById('page-html').value = freshPageData.html || '';
+            
+            // Set content type (default to markdown if not specified)
+            const contentType = freshPageData.type || CONTENT_TYPES.MARKDOWN;
+            document.getElementById('content-type').value = contentType;
+            
+            // Update editor visibility based on content type
+            updateContentVisibility(contentType);
+            
+            // Update editor links
+            editWithAsta.href = `/asta?slug=${freshPageData.slug}`;
+            editWithAina.href = `/aina?slug=${freshPageData.slug}`;
+            
+            setTags(freshPageData.tags || []);
+        } catch (error) {
+            console.error('Error fetching page data:', error);
+            showToast('Failed to load page data', 'error');
+            // Fall back to the original page data if available
+            if (page) {
+                document.getElementById('modal-title').textContent = 'Edit Page';
+                document.getElementById('page-title').value = page.title;
+                slugInput.value = page.slug;
+                slugInput.readOnly = true;
+                document.getElementById('page-description').value = page.content || '';
+                document.getElementById('page-thumbnail').value = page.thumb || '';
+                document.getElementById('page-markdown').value = page.markdown || '';
+                document.getElementById('page-html').value = page.html || '';
+                const contentType = page.type || CONTENT_TYPES.MARKDOWN;
+                document.getElementById('content-type').value = contentType;
+                updateContentVisibility(contentType);
+                editWithAsta.href = `/asta?slug=${page.slug}`;
+                editWithAina.href = `/aina?slug=${page.slug}`;
+                setTags(page.tags || []);
+            }
+        }
     } else {
         // Setup modal for new page
         document.getElementById('modal-title').textContent = 'Add New Page';
