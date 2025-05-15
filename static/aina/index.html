@@ -15,24 +15,19 @@
         <div class="character" style="top: 50%; left: 70%; font-size: 35px;">(づ｡◕‿‿◕｡)づ</div>
     </div>
     
-    <header class="header" style="display: flex; justify-content: space-between; align-items: center;">
-        <div class="logo">
-            <img src="https://i.imgur.com/VQ2eNhq.jpeg" alt="Aina-chan" class="logo-img">
-            <h1 class="logo-text">Aina's HTML Playground</h1>
-        </div>
-        <!-- Top Right Buttons -->
-        <div class="header-buttons" style="display: flex; gap: 10px;">
-            <button class="btn" id="deploy-btn">
-                <i class="fas fa-rocket"></i> Deploy
-            </button>
-            <button class="btn" id="export-btn">
-                <i class="fas fa-file-export"></i> Export
-            </button>
-            <button class="btn" id="import-btn">
-                <i class="fas fa-file-import"></i> Import
-            </button>
-        </div>
-    </header>
+    <!-- <h1 class="logo-text">Aina's HTML Playground</h1> -->
+    
+    <div class="btn-group">
+        <button class="btn" id="deploy-btn">
+            <i class="fas fa-rocket"></i> Deploy
+        </button>
+        <button class="btn" id="export-btn">
+            <i class="fas fa-file-export"></i> Export
+        </button>
+        <button class="btn" id="import-btn">
+            <i class="fas fa-file-import"></i> Import
+        </button>
+    </div>
     
     <div class="container">
         <div class="panes-container">
@@ -67,7 +62,7 @@
                     <label for="content">Describe your dream website, onii-chan~</label>
                     <textarea name="content" id="content" class="form-control" rows="4" required placeholder="I want a kawaii landing page with pink buttons and cat ears..."></textarea>
                 </div>
-                <button type="submit" class="btn">
+                <button type="submit" class="btn generator-btn">
                     <i class="fas fa-wand-magic-sparkles"></i> Generate Website
                 </button>
             </form>
@@ -75,9 +70,10 @@
     </div>
     
     <footer class="footer">
-        <p>Made with ♥ by Aina-chan | HTML Playground v1.0</p>
+        <p>Made with ♥ by Aina-chan</p>
     </footer>
-<div id="slug-container" style="display: none;" data-slug=""></div>
-<script type="module" src="/static/aina/scripts/main.js"></script>
+    
+    <div id="slug-container" style="display: none;" data-slug=""></div>
+    <script type="module" src="/static/aina/scripts/main.js"></script>
 </body>
 </html>

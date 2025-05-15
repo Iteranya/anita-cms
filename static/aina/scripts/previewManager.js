@@ -5,9 +5,10 @@ export async function initPreview(htmlCode, preview, slug) {
     htmlCode.addEventListener('input', () => updatePreview(htmlCode, preview));
     // Initial update
     const project = await getProject(slug);  // Added 'const' declaration here
-    console.log(htmlCode.value);
-    console.log(project.html);
-    htmlCode.value = project.html;
+    if (project.html) {
+        htmlCode.value = project.html;
+    }
+    
 
     updatePreview(htmlCode, preview);
 }

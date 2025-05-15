@@ -61,9 +61,9 @@ document.addEventListener('DOMContentLoaded', function() {
 </body>
 </html>
     `;
-    if(slug==null || slug==""){
-        htmlCode.value = welcomeHTML;
-    }
+    
+    htmlCode.value = welcomeHTML;
+    
     
     (async function() {
         await initPreview(htmlCode, preview,slug);

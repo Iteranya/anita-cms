@@ -32,34 +32,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initializeButtons(slug, inputElement, sidePanel) {
     const actionButton = document.getElementById('action-button');
-    const projectButton = document.getElementById('project-button');
-    const latexButton = document.getElementById('latex-button');
 
     // Handle action button
     if (actionButton) {
         
         if (slug == null || slug == "") {
             actionButton.style.display = 'none';
-            projectButton.style.display = 'none';
-            latexButton.style.display = 'none';
         } else {
             actionButton.addEventListener('click', () => 
                 ButtonHandlers.handleActionButton(slug, inputElement.value, sidePanel.value)
             );
         }
-    }
-
-    // Handle project button
-    if (projectButton) {
-        projectButton.addEventListener('click', () => 
-            ButtonHandlers.handleProjectButton(slug, inputElement.value, sidePanel.value)
-        );
-    }
-
-    // Handle latex button
-    if (latexButton) {
-        latexButton.addEventListener('click', () => 
-            ButtonHandlers.handleLatexButton(slug, inputElement.value, sidePanel.value)
-        );
     }
 }
