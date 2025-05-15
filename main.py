@@ -1,4 +1,3 @@
-import os
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,9 +9,6 @@ from routes import admin_route,asta_route,media_route,aina_route,public_route
 app = FastAPI()
 db.get_connection()
 app.mount("/static",StaticFiles(directory="static"),name = "static-directory")
-
-# For templates
-# templates = Jinja2Templates(directory="templates")
 
 # Set up CORS
 app.add_middleware(
