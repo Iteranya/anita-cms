@@ -74,11 +74,43 @@ python main.py
 | HTML Generator  | Aina System         |
 | AI              | OpenAI API          |
 
+
 ## 🌈 Why ANITA?
 
-- **For Clients Who**: Need simple sites but keep asking for "just one more edit"
-- **For Developers Who**: Hate WordPress but need something deployable in minutes
-- **For Designers Who**: Want AI help making things "pop" without learning code
+### For The Underpaid Heroes
+- **$20 Website Warriors**: When clients pay in exposure bucks but demand production quality
+- **Interns Needing Wins**: Quick portfolio pieces that don't look like Geocities throwbacks
+- **0.5 Developer Teams**: Full-time responsibilities, half-time budget, zero-time patience for bloat
+
+### For The Vanilla Purists
+- **Node.js Allergy Sufferers**: Who break out in hives at `npm install`
+- **"Just Give Me Plain JS"** Crowd: Who want modern features without framework lock-in
+- **Build-Your-Own-Adventure** Devs: Tiny core you can extend without fighting someone else's abstractions
+
+### For The Time-Pressed
+- **"Need It Yesterday"** Clients: Who think "simple blog" means "launch in 20 minutes"
+- **Landing Page Mercenaries**: Who get paid per conversion, not per hour spent configuring
+- **"Make It Pop"** Designers: Who want AI-generated wow factor without touching DevTools
+
+### Secret Bonus
+- **Codebase Smaller Than**:
+  - Your average `node_modules` folder
+  - A single React component's dependency tree  
+  - The CSS for most "lightweight" frameworks
+- **Hackable Core**: The opposite of "magic" frameworks - you can actually understand AND modify everything
+
+
+
+## ⚠️ Warning: Work in Progress
+
+This project is currently in active development and **lacks critical security features**:
+- No built-in authentication system
+- No user management capabilities  
+- No role-based access control
+- No production-ready security measures
+
+**DO NOT USE IN PRODUCTION ENVIRONMENTS** without implementing proper security controls. The current version is intended for local development and testing purposes only.
+
 
 ## 📜 License
 
