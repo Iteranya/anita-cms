@@ -54,7 +54,7 @@ python main.py
 ```
 
 ### Windows Easy Mode
-1. Download `anita_installer.bat` from [Releases](https://github.com/your-repo/releases)
+1. Download `anita_installer.bat` from [Releases](https://github.com/Iteranya/anita-cms/releases)
 2. Double-click to:
    - Create virtual environment
    - Install dependencies
