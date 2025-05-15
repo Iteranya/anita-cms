@@ -4,6 +4,7 @@ import { initAiGeneration } from './aiIntegration.js';
 import { setupFileHandlers } from './fileHandler.js';
 import { setupDeployment } from './deploymentService.js';
 import { initSettingsManager } from './settingsManager.js';
+import { getProject } from './dbIntegration.js';
 import { setupEffects } from './effects.js';
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -60,30 +61,21 @@ document.addEventListener('DOMContentLoaded', function() {
 </body>
 </html>
     `;
+    if(slug==null || slug==""){
+        htmlCode.value = welcomeHTML;
+    }
     
-    htmlCode.value = welcomeHTML;
-    
+    (async function() {
+        await initPreview(htmlCode, preview,slug);
+        initAiGeneration(htmlCode, updatePreview);
+        setupFileHandlers(htmlCode, updatePreview);
+        setupDeployment(htmlCode,slug);
+        //initSettingsManager();
+        setupEffects();
+
+    })();
     // Initialize all modules
-    initPreview(htmlCode, preview);
-    initAiGeneration(htmlCode, updatePreview);
-    setupFileHandlers(htmlCode, updatePreview);
-    setupDeployment(htmlCode,slug);
-    //initSettingsManager();
-    setupEffects();
     
-    // // FAB event listener
-    // document.getElementById("fab").addEventListener("click", function() {
-    //     var panel = document.getElementById("settings-panel");
-    //     panel.style.display = panel.style.display === "none" || panel.style.display === "" ? "block" : "none";
-    // });
-    
-    // // Close modal when clicking outside
-    // window.addEventListener('click', function(event) {
-    //     const modal = document.getElementById('deploy-modal');
-    //     if (event.target === modal) {
-    //         modal.style.display = 'none';
-    //     }
-    // });
 });
 
 // Import and expose updatePreview for modules that need it

@@ -1,4 +1,3 @@
-// pageModal.js
 import { getCurrentPageId, setCurrentPageId, getTags, setTags } from './state.js';
 import { switchTab } from './tabService.js';
 import { fetchPages } from './pageService.js';
@@ -29,14 +28,18 @@ export function openPageModal(page = null) {
         editWithAsta.href = `/asta?slug=${currentSlug}`;
         editWithAina.href = `/aina?slug=${currentSlug}`;
         
+        // Key fix: Always populate both content fields regardless of content type
+        document.getElementById('page-markdown').value = page.markdown || '';
+        document.getElementById('page-html').value = page.html || '';
+        
+        // Then determine which content type to display based on the page data
+        const contentType = document.getElementById('content-type');
         if (page.html) {
-            document.getElementById('content-type').value = 'html';
-            document.getElementById('page-html').value = page.html;
+            contentType.value = 'html';
             markdownGroup.style.display = 'none';
             htmlGroup.style.display = 'block';
         } else {
-            document.getElementById('content-type').value = 'markdown';
-            document.getElementById('page-markdown').value = page.markdown || '';
+            contentType.value = 'markdown';
             markdownGroup.style.display = 'block';
             htmlGroup.style.display = 'none';
         }
