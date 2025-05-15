@@ -4,67 +4,71 @@ import { fetchPages } from './pageService.js';
 import { showToast } from './toastService.js';
 import { renderTags } from './tagService.js';
 
+export const CONTENT_TYPES = {
+    MARKDOWN: 'markdown',
+    HTML: 'html'
+};
+
 export function openPageModal(page = null) {
     const pageModal = document.getElementById('page-modal');
-    const markdownGroup = document.getElementById('markdown-group');
-    const htmlGroup = document.getElementById('html-group');
     const slugInput = document.getElementById('page-slug');
     const editWithAsta = document.getElementById('edit-with-asta');
     const editWithAina = document.getElementById('edit-with-aina');
     
-    setCurrentPageId(page ? page.slug : null);
+    setCurrentPageId(page?.slug ?? null);
     
     if (page) {
+        // Setup modal for editing existing page
         document.getElementById('modal-title').textContent = 'Edit Page';
         document.getElementById('page-title').value = page.title;
         slugInput.value = page.slug;
-        console.log("Should be Read Only")
-        slugInput.readOnly = true; // Make slug read-only when editing
+        slugInput.readOnly = true;
         document.getElementById('page-description').value = page.content || '';
         document.getElementById('page-thumbnail').value = page.thumb || '';
         
-        // Update editor button URLs
-        const currentSlug = page.slug;
-        editWithAsta.href = `/asta?slug=${currentSlug}`;
-        editWithAina.href = `/aina?slug=${currentSlug}`;
-        
-        // Key fix: Always populate both content fields regardless of content type
+        // Populate content fields
         document.getElementById('page-markdown').value = page.markdown || '';
         document.getElementById('page-html').value = page.html || '';
         
-        // Then determine which content type to display based on the page data
-        const contentType = document.getElementById('content-type');
-        if (page.html) {
-            contentType.value = 'html';
-            markdownGroup.style.display = 'none';
-            htmlGroup.style.display = 'block';
-        } else {
-            contentType.value = 'markdown';
-            markdownGroup.style.display = 'block';
-            htmlGroup.style.display = 'none';
-        }
+        // Set content type (default to markdown if not specified)
+        const contentType = page.type || CONTENT_TYPES.MARKDOWN;
+        document.getElementById('content-type').value = contentType;
+        
+        // Update editor visibility based on content type
+        updateContentVisibility(contentType);
+        
+        // Update editor links
+        editWithAsta.href = `/asta?slug=${page.slug}`;
+        editWithAina.href = `/aina?slug=${page.slug}`;
         
         setTags(page.tags || []);
-        renderTags();
     } else {
+        // Setup modal for new page
         document.getElementById('modal-title').textContent = 'Add New Page';
         document.getElementById('page-form').reset();
-        slugInput.readOnly = false; // Make slug editable when adding a new page
+        slugInput.readOnly = false;
         setTags([]);
-        renderTags();
         
         // Disable edit buttons for new pages
         editWithAsta.href = '#';
         editWithAina.href = '#';
     }
     
+    renderTags();
     switchTab('content');
     pageModal.classList.add('active');
 }
 
+function updateContentVisibility(contentType) {
+    const markdownGroup = document.getElementById('markdown-group');
+    const htmlGroup = document.getElementById('html-group');
+    
+    markdownGroup.style.display = contentType === CONTENT_TYPES.MARKDOWN ? 'block' : 'none';
+    htmlGroup.style.display = contentType === CONTENT_TYPES.HTML ? 'block' : 'none';
+}
+
 export function closePageModal() {
-    const pageModal = document.getElementById('page-modal');
-    pageModal.classList.remove('active');
+    document.getElementById('page-modal').classList.remove('active');
 }
 
 export function updateEditorLinks() {
@@ -75,86 +79,63 @@ export function updateEditorLinks() {
 
 export function savePage() {
     const currentPageId = getCurrentPageId();
-    const tags = getTags();
+    const contentType = document.getElementById('content-type').value;
     
     const pageData = {
         title: document.getElementById('page-title').value,
         slug: document.getElementById('page-slug').value,
         content: document.getElementById('page-description').value,
         thumb: document.getElementById('page-thumbnail').value,
-        tags: tags,
+        tags: getTags(),
+        type: contentType,
+        // Always include both content types, but only one will be "active"
+        markdown: document.getElementById('page-markdown').value,
+        html: document.getElementById('page-html').value
     };
+
+    console.log(pageData)
     
-    const contentType = document.getElementById('content-type').value;
-    if (contentType === 'markdown') {
-        pageData.markdown = document.getElementById('page-markdown').value;
-        pageData.html = null;
-    } else {
-        pageData.html = document.getElementById('page-html').value;
-        pageData.markdown = null;
-    }
-    
-    // Basic validation
     if (!pageData.title || !pageData.slug) {
         showToast('Title and slug are required', 'error');
         return;
     }
     
-    const method = currentPageId ? 'PUT' : 'POST';
-    const url = currentPageId ? `/admin/${currentPageId}` : '/admin';
-    
-    fetch(url, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json',
-        },
+    fetch(currentPageId ? `/admin/${currentPageId}` : '/admin', {
+        method: currentPageId ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(pageData)
     })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(err => {
-                throw new Error(err.detail || 'Failed to save page');
-            });
-        }
-        return response.json();
-    })
+    .then(handleResponse)
     .then(() => {
         showToast(`Page ${currentPageId ? 'updated' : 'created'} successfully`, 'success');
         closePageModal();
         fetchPages();
     })
-    .catch(error => {
-        console.error('Error saving page:', error);
-        showToast(error.message, 'error');
-    });
+    .catch(handleError);
 }
 
-// Setup event listeners for modal buttons
+function handleResponse(response) {
+    if (!response.ok) {
+        return response.json().then(err => {
+            throw new Error(err.detail || 'Failed to save page');
+        });
+    }
+    return response.json();
+}
+
+function handleError(error) {
+    console.error('Error saving page:', error);
+    showToast(error.message, 'error');
+}
+
 export function setupPageModalListeners() {
-    const closeModalBtn = document.getElementById('close-modal');
-    const cancelBtn = document.getElementById('cancel-btn');
-    const saveBtn = document.getElementById('save-btn');
-    const contentType = document.getElementById('content-type');
-    const slugInput = document.getElementById('page-slug');
+    document.getElementById('close-modal').addEventListener('click', closePageModal);
+    document.getElementById('cancel-btn').addEventListener('click', closePageModal);
+    document.getElementById('save-btn').addEventListener('click', savePage);
     
-    closeModalBtn.addEventListener('click', closePageModal);
-    cancelBtn.addEventListener('click', closePageModal);
-    saveBtn.addEventListener('click', savePage);
-    
-    // Update editor links when content type changes
-    contentType.addEventListener('change', () => {
-        const markdownGroup = document.getElementById('markdown-group');
-        const htmlGroup = document.getElementById('html-group');
-        
-        if (contentType.value === 'markdown') {
-            markdownGroup.style.display = 'block';
-            htmlGroup.style.display = 'none';
-        } else {
-            markdownGroup.style.display = 'none';
-            htmlGroup.style.display = 'block';
-        }
+    document.getElementById('content-type').addEventListener('change', (e) => {
+        updateContentVisibility(e.target.value);
     });
     
-    // Update editor links when slug changes (for new pages)
-    slugInput.addEventListener('input', updateEditorLinks);
+    document.getElementById('page-slug').addEventListener('input', updateEditorLinks);
 }

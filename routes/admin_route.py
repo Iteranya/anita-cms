@@ -15,6 +15,7 @@ class PageModel(BaseModel):
     html: str | None = None  # HTML to render if markdown don't exist
     tags: List[str] | None = None  # List of keywords
     thumb: str | None = None  # Thumbnail link
+    type:str = "markdown"
 
 
 @router.get("/", response_class=HTMLResponse)

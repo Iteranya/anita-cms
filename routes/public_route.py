@@ -30,7 +30,7 @@ async def render_site(slug: str):
     page = get_page(slug)
     if not page:
         raise HTTPException(status_code=404, detail="Page not found")
-    if page.html != None and page.html != "":
+    if page.type == 'html':
         return HTMLResponse(content=page.html, status_code=200)
     else:
         generated = generate_markdown_page(page.title,page.markdown)

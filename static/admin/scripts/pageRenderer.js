@@ -2,6 +2,7 @@
 import { getPages } from './state.js';
 import { openPageModal } from './pageModal.js';
 import { openDeleteModal } from './deleteModal.js';
+import {CONTENT_TYPES} from './pageModal.js'
 
 export function renderPages() {
     const pages = getPages();
@@ -35,8 +36,9 @@ export function renderPages() {
         // Content Type
         const typeCell = document.createElement('td');
         const typeBadge = document.createElement('span');
-        typeBadge.className = 'badge ' + (page.html ? 'badge-primary' : 'badge-gray');
-        typeBadge.textContent = page.html ? 'HTML' : 'Markdown';
+        console.log("Content Of Pages: "+pages[0].type)
+        typeBadge.className = 'badge ' + (page.type == CONTENT_TYPES.HTML ? 'badge-primary' : 'badge-gray');
+        typeBadge.textContent = page.type == CONTENT_TYPES.HTML ? 'HTML' : 'Markdown';
         typeCell.appendChild(typeBadge);
         row.appendChild(typeCell);
         
