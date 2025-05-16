@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anita-AI | A Cute CMS Project</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4a89dc;
+            --secondary: #3bafda;
+            --accent: #37bc9b;
+            --light: #f5f7fa;
+            --dark: #2c3e50;
+            --text: #34495e;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .header-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            z-index: 1;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="white"><circle cx="25" cy="25" r="3"/><circle cx="75" cy="25" r="3"/><circle cx="50" cy="50" r="3"/><circle cx="25" cy="75" r="3"/><circle cx="75" cy="75" r="3"/></svg>');
+            background-size: 50px;
+        }
+
+        nav {
+            background-color: white;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        section {
+            margin-bottom: 4rem;
+        }
+
+        h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 50px;
+            height: 4px;
+            background-color: var(--accent);
+            border-radius: 2px;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .tech-item {
+            background-color: var(--light);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tech-icon {
+            color: var(--primary);
+        }
+
+        .screenshot {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin: 1rem 0;
+            border: 1px solid #e1e4e8;
+        }
+
+        .quote {
+            font-style: italic;
+            padding: 2rem;
+            background-color: white;
+            border-left: 4px solid var(--accent);
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .quote::before {
+            content: '"';
+            font-size: 4rem;
+            position: absolute;
+            top: 0;
+            left: 1rem;
+            color: var(--light);
+            z-index: 0;
+        }
+
+        .quote-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .quote-author {
+            margin-top: 1rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .cta {
+            text-align: center;
+            padding: 3rem;
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            color: white;
+            border-radius: 8px;
+            margin: 3rem 0;
+        }
+
+        .cta h2 {
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .cta h2::after {
+            background-color: white;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background-color: white;
+            color: var(--primary);
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: color 0.3s;
+        }
+
+        .social-links a:hover {
+            color: var(--accent);
+        }
+
+        .copyright {
+            margin-top: 2rem;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .tagline {
+                font-size: 1.2rem;
+            }
+            
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-bg"></div>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-heart"></i>
+            </div>
+            <h1>Anita-AI</h1>
+            <p class="tagline">A cute CMS project born from love (and a little bit of spite)</p>
+        </div>
+    </header>
+
+    <nav>
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span style="font-weight: bold; color: var(--primary);">ANITA</span>
+            </div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#tech">Tech</a>
+                <a href="#why">Why</a>
+                <a href="#roadmap">Roadmap</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section id="intro">
+            <h2>Amiya, Aina, and Asta walk into a codebase...</h2>
+            <p>Anita is the lovechild of three powerful projects - combining Amiya's simplicity, Aina's AI website generation, and Asta's markdown superpowers into one delightful CMS. No bloated frameworks, no Node.js nonsense - just pure vanilla JS magic with a FastAPI backend and SQLite database.</p>
+            
+            <div style="display: flex; justify-content: center; margin: 2rem 0;">
+                <img src="https://github.com/user-attachments/assets/988871b4-9726-46e5-a72b-ebe551ad70f3" alt="Amiya, Asta, and Aina taking a selfie" class="screenshot" style="max-width: 600px;">
+            </div>
+            
+            <p>This isn't some corporate product - it's a passion project built by developers who just wanted something simple, cute, and not-WordPress.</p>
+        </section>
+
+        <section id="features">
+            <h2>What Makes Anita Special</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3 class="feature-title">Hybrid Content System</h3>
+                    <p>Switch between markdown and HTML modes depending on your needs. Write in beautiful markdown or craft pixel-perfect layouts - all in one editor.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3 class="feature-title">AI That Actually Helps</h3>
+                    <p>Not just another "AI-powered" gimmick. Real assistance for writing, layout suggestions, and content generation that doesn't get in your way.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-feather-alt"></i>
+                    </div>
+                    <h3 class="feature-title">Lightweight AF</h3>
+                    <p>The entire codebase is smaller than your average node_modules folder. No bloat, no nonsense - just what you need to get stuff done.</p>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+                <div>
+                    <h3 style="color: var(--dark); margin-bottom: 1rem;">Asta Markdown Editor</h3>
+                    <img src="https://github.com/user-attachments/assets/cb007f35-16d5-4360-9738-228bc27998b7" alt="Asta Markdown Editor" class="screenshot">
+                    <p>AI-assisted writing with full markdown support and real-time preview.</p>
+                </div>
+                <div>
+                    <h3 style="color: var(--dark); margin-bottom: 1rem;">Aina Website Generator</h3>
+                    <img src="https://github.com/user-attachments/assets/9680ad2b-78de-47b8-9c51-09309aa8e51e" alt="Aina Website Generator" class="screenshot">
+                    <p>Visual HTML builder with AI layout suggestions and live editing.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="tech">
+            <h2>Tech Stack</h2>
+            <p>Built for developers who value performance and simplicity:</p>
+            
+            <div class="tech-stack">
+                <div class="tech-item">
+                    <i class="fas fa-server tech-icon"></i>
+                    FastAPI + SQLite
+                </div>
+                <div class="tech-item">
+                    <i class="fab fa-js tech-icon"></i>
+                    Vanilla JS
+                </div>
+                <div class="tech-item">
+                    <i class="fas fa-file-alt tech-icon"></i>
+                    Asta Editor
+                </div>
+                <div class="tech-item">
+                    <i class="fas fa-magic tech-icon"></i>
+                    Aina System
+                </div>
+                <div class="tech-item">
+                    <i class="fas fa-brain tech-icon"></i>
+                    OpenAI Library
+                </div>
+            </div>
+            
+            <div class="quote">
+                <div class="quote-content">
+                    "The opposite of 'magic' frameworks - you can actually understand AND modify everything."
+                    <div class="quote-author">— A developer who hates black boxes</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="why">
+            <h2>Why Anita Exists</h2>
+            <p>Because sometimes you just need:</p>
+            
+            <ul style="margin-left: 2rem; margin-bottom: 2rem;">
+                <li style="margin-bottom: 0.5rem;">A simple CMS that doesn't make you want to cry</li>
+                <li style="margin-bottom: 0.5rem;">To avoid WordPress like the plague</li>
+                <li style="margin-bottom: 0.5rem;">Something cute to work on that's actually useful</li>
+                <li style="margin-bottom: 0.5rem;">A project where the codebase is smaller than the documentation</li>
+            </ul>
+            
+            <img src="https://github.com/user-attachments/assets/e74c76fc-653b-47ce-9c6b-3ac1cdec3411" alt="Amiya Admin Panel" class="screenshot">
+            <p style="text-align: center; margin-top: 0.5rem;">The admin panel that doesn't make you question your life choices</p>
+        </section>
+
+        <section id="roadmap">
+            <h2>What's Coming Next</h2>
+            <p>This is a passion project, so things happen when they happen. But here's what we're dreaming about:</p>
+            
+            <div style="background-color: white; padding: 2rem; border-radius: 8px; margin-top: 1rem; box-shadow: var(--shadow);">
+                <h3 style="color: var(--dark); margin-bottom: 1rem;">🔐 Security & Multi-User (Urgent!)</h3>
+                <ul style="margin-left: 2rem;">
+                    <li style="margin-bottom: 0.5rem;">Config Panel (HOW DID WE MISS THIS?!)</li>
+                    <li style="margin-bottom: 0.5rem;">Authentication system</li>
+                    <li style="margin-bottom: 0.5rem;">User roles/permissions</li>
+                </ul>
+                
+                <h3 style="color: var(--dark); margin-top: 2rem; margin-bottom: 1rem;">✨ AI-Powered Site Creator (Dream Mode)</h3>
+                <ul style="margin-left: 2rem;">
+                    <li style="margin-bottom: 0.5rem;">"Make it pop" button (for clients who say that)</li>
+                    <li style="margin-bottom: 0.5rem;">AI layout suggestions that don't suck</li>
+                </ul>
+                
+                <p style="margin-top: 1rem; font-style: italic;">"Roadmap subject to change based on caffeine levels and existential dread"</p>
+            </div>
+        </section>
+
+        <div class="cta">
+            <h2>Want to Play With Anita?</h2>
+            <p>It's free, it's cute, and it won't judge you for hating WordPress.</p>
+            <a href="https://github.com/Iteranya/anita-cms" class="btn">Check Out the Code</a>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div style="font-size: 2rem; margin-bottom: 1rem;">
+                <i class="fas fa-heart" style="color: var(--accent);"></i>
+            </div>
+            <p>Made with love (and Aina smiling smugly in the corner)</p>
+            
+            <div class="footer-links">
+                <a href="https://github.com/Iteranya/anita-cms">GitHub</a>
+            </div>
+            
+            <div class="copyright">
+                AGPL-3.0 - Because open source should stay open!<br>
+                "Disclaimer: Yes, page.db accidentally saved in the repo, will delete later"
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Simple animation for feature cards on scroll
+        const featureCards = document.querySelectorAll('.feature-card');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        featureCards.forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            observer.observe(card);
+        });
+
+        // Fun little easter egg
+        const logo = document.querySelector('.logo');
+        logo.addEventListener('click', () => {
+            logo.innerHTML = '<i class="fas fa-heart" style="color: #ff6b6b;"></i>';
+            setTimeout(() => {
+                logo.innerHTML = '<i class="fas fa-heart"></i>';
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
