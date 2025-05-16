@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from data.db import list_pages, get_page
 from fastapi.templating import Jinja2Templates
 from src.generator import generate_markdown_page
@@ -35,3 +35,8 @@ async def render_site(slug: str):
     else:
         generated = generate_markdown_page(page.title,page.markdown)
         return HTMLResponse(content=generated, status_code=200)
+
+# Example custom route in public_route.py
+@router.get("/about")
+async def serve_custom_page():
+    return FileResponse("static/public/about.html")
