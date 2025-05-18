@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const result = await res.json();
       if (result.status === 'success') {
-        window.location.href = '/'; // Redirect after login
+        window.location.href = '/admin'; // Redirect after login
       }
     } catch (err) {
       console.error('Login error:', err);
