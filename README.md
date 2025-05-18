@@ -155,13 +155,6 @@ python main.py
 
 ## 🗺️ Roadmap & Help Wanted
 
-### 🔐 Security & Multi-User (Urgent!)
-- [ ] **Config Panel** (HOW DID WE MISS THIS?!)
-- [x] Authentication system
-- [x] User roles/permissions (admin only for now)
-- [x] Session management
-- [ ] Audit logging
-
 ### ✨ AI-Powered Site Creator (Dream Mode)
 - [ ] Sitemap schema generator ("It'll work, trust me")
 - [ ] AI layout suggestions
@@ -196,14 +189,6 @@ python main.py
 - Telling the dev "you got this" (lies help)
 
 *"Roadmap subject to change based on caffeine levels and existential dread"*
-
-## ⚠️ Warning: Regarding Security
-
-This project is currently in active development and **only has basic security feature**:
-- Cookie Based Security
-- No user management capabilities  
-- No role-based access control
-- Single user authentication only
 
 ## 📜 License
 
