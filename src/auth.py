@@ -34,7 +34,7 @@ def get_user_data():
         raise RuntimeError("Invalid or missing secret.json file")
 
 def verify_password(plain_password: str, hashed_password: str):
-    print(f"Plain: {plain_password}\nHashed: {hashed_password}")
+    # print(f"Plain: {plain_password}\nHashed: {hashed_password}")
     return pwd_context.verify(plain_password, hashed_password)
 
 def authenticate_user(username: str, password: str):

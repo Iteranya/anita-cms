@@ -9,23 +9,24 @@
 </head>
 <body>
     <div class="container">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2><i class="fas fa-cog"></i> Admin Panel</h2>
-            </div>
-            <nav class="sidebar-nav">
-                <ul>
-                    <li>
-                        <a href="#" class="active" id="pages-link">
-                            <i class="fas fa-file-alt"></i>
-                            <span>Pages</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
+        <nav class="sidebar-nav">
+            <ul>
+                <li>
+                    <a href="#" class="active" id="pages-link">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Pages</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" id="config-link">
+                        <i class="fas fa-sliders-h"></i>
+                        <span>Config</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
 
-        <main class="main-content">
+        <main class="main-content active-panel" id="pages-panel">
             <div class="header">
                 <h1>Page Management</h1>
                 <button class="btn btn-primary" id="add-page-btn">
@@ -70,86 +71,125 @@
                 </div>
             </div>
         </main>
+
+        <main class="main-config" id="config-panel">
+            <div class="header">
+                <h1>System Configuration</h1>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3>AI Settings</h3>
+                </div>
+                <div class="card-body">
+                    <form id="config-form">
+                        <div class="form-group">
+                            <label for="system-note">System Note</label>
+                            <textarea id="system-note" class="form-control" rows="2" placeholder="Describe the AI behavior..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="ai-endpoint">AI Endpoint</label>
+                            <input type="text" id="ai-endpoint" class="form-control" placeholder="https://api.example.com/v1/chat">
+                        </div>
+                        <div class="form-group">
+                            <label for="base-llm">Base LLM</label>
+                            <input type="text" id="base-llm" class="form-control" placeholder="e.g., gpt-4, llama2">
+                        </div>
+                        <div class="form-group">
+                            <label for="temperature">Temperature</label>
+                            <input type="number" step="0.01" id="temperature" class="form-control" min="0" max="2" placeholder="0.7">
+                        </div>
+                        <div class="form-group">
+                            <label for="ai-key">API Key (Optional)</label>
+                            <input type="password" id="ai-key" class="form-control" placeholder="Enter to update key">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save Configuration</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
     </div>
+
     <!-- Edit Modal -->
     <!-- Add/Edit Page Modal -->
-<div class="modal" id="page-modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 id="modal-title">Add New Page</h3>
-            <button class="close-btn" id="close-modal">&times;</button>
-        </div>
-        <div class="modal-body">
-            <form id="page-form">
-                <input type="hidden" id="page-id">
-                <div class="tabs">
-                    <div class="tab active" data-tab="content">Content</div>
-                    <div class="tab" data-tab="seo">SEO</div>
-                    <div class="tab" data-tab="preview">Preview</div>
-                </div>
-                
-                <div class="tab-content active" data-tab-content="content">
-                    <div class="form-group">
-                        <label for="page-title">Title *</label>
-                        <input type="text" class="form-control" id="page-title" required>
+    <div class="modal" id="page-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Add New Page</h3>
+                <button class="close-btn" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="page-form">
+                    <input type="hidden" id="page-id">
+                    <div class="tabs">
+                        <div class="tab active" data-tab="content">Content</div>
+                        <div class="tab" data-tab="seo">SEO</div>
+                        <div class="tab" data-tab="preview">Preview</div>
                     </div>
-                    <div class="form-group">
-                        <label for="page-slug">Slug *</label>
-                        <input type="text" class="form-control" id="page-slug" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="content-type">Content Type *</label>
-                        <select class="form-control form-select" id="content-type">
-                            <option value="markdown">Markdown</option>
-                            <option value="html">HTML</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="markdown-group">
-                        <label for="page-markdown">Markdown Content</label>
-                        <div class="editor-controls">
-                            <textarea class="form-control form-textarea" id="page-markdown" readonly></textarea>
-                            <a href="#" id="edit-with-asta" class="btn btn-secondary edit-btn">Edit With Asta</a>
+                    
+                    <div class="tab-content active" data-tab-content="content">
+                        <div class="form-group">
+                            <label for="page-title">Title *</label>
+                            <input type="text" class="form-control" id="page-title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="page-slug">Slug *</label>
+                            <input type="text" class="form-control" id="page-slug" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="content-type">Content Type *</label>
+                            <select class="form-control form-select" id="content-type">
+                                <option value="markdown">Markdown</option>
+                                <option value="html">HTML</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="markdown-group">
+                            <label for="page-markdown">Markdown Content</label>
+                            <div class="editor-controls">
+                                <textarea class="form-control form-textarea" id="page-markdown" readonly></textarea>
+                                <a href="#" id="edit-with-asta" class="btn btn-secondary edit-btn">Edit With Asta</a>
+                            </div>
+                        </div>
+                        <div class="form-group" id="html-group" style="display: none;">
+                            <label for="page-html">HTML Content</label>
+                            <div class="editor-controls">
+                                <textarea class="form-control form-textarea" id="page-html" readonly></textarea>
+                                <a href="#" id="edit-with-aina" class="btn btn-secondary edit-btn">Edit With Aina</a>
+                            </div>
                         </div>
                     </div>
-                    <div class="form-group" id="html-group" style="display: none;">
-                        <label for="page-html">HTML Content</label>
-                        <div class="editor-controls">
-                            <textarea class="form-control form-textarea" id="page-html" readonly></textarea>
-                            <a href="#" id="edit-with-aina" class="btn btn-secondary edit-btn">Edit With Aina</a>
+                    
+                    <div class="tab-content" data-tab-content="seo">
+                        <div class="form-group">
+                            <label for="page-description">Description</label>
+                            <textarea class="form-control" id="page-description" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="page-thumbnail">Thumbnail URL</label>
+                            <input type="text" class="form-control" id="page-thumbnail">
+                        </div>
+                        <div class="form-group">
+                            <label for="page-tags">Tags</label>
+                            <div class="tags-input" id="tags-container">
+                                <input type="text" id="page-tags-input" placeholder="Add a tag and press Enter">
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="tab-content" data-tab-content="seo">
-                    <div class="form-group">
-                        <label for="page-description">Description</label>
-                        <textarea class="form-control" id="page-description" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="page-thumbnail">Thumbnail URL</label>
-                        <input type="text" class="form-control" id="page-thumbnail">
-                    </div>
-                    <div class="form-group">
-                        <label for="page-tags">Tags</label>
-                        <div class="tags-input" id="tags-container">
-                            <input type="text" id="page-tags-input" placeholder="Add a tag and press Enter">
+                    
+                    <div class="tab-content" data-tab-content="preview">
+                        <div class="preview-container" id="preview-content">
+                            Preview will be shown here
                         </div>
                     </div>
-                </div>
-                
-                <div class="tab-content" data-tab-content="preview">
-                    <div class="preview-container" id="preview-content">
-                        Preview will be shown here
-                    </div>
-                </div>
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-outline" id="cancel-btn">Cancel</button>
-            <button class="btn btn-primary" id="save-btn">Save Page</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancel-btn">Cancel</button>
+                <button class="btn btn-primary" id="save-btn">Save Page</button>
+            </div>
         </div>
     </div>
-</div>
 
     <!-- Delete Confirmation Modal -->
     <div class="modal" id="delete-modal">
@@ -170,7 +210,7 @@
 
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
-
+    </script>
     <script type="module" src="/static/admin/scripts/app.js"></script>
 </body>
 </html>

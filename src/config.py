@@ -37,5 +37,11 @@ def get_key(path:str = CONFIG_PATH) -> str:
         return ""
     
 def save_config(config: DefaultConfig, path: str = CONFIG_PATH) -> None:
+    if os.path.exists(path):
+        with open(path, 'r') as f:
+            existing_data = json.load(f)
+            # Preserve the existing ai_key if the new one is empty
+            if not config.ai_key:
+                config.ai_key = existing_data.get("ai_key", "")
     with open(path, 'w') as f:
         json.dump(asdict(config), f, indent=2)

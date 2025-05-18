@@ -107,3 +107,4 @@ async def check_setup():
     return {
         "initialized": secrets_file_exists()
     }
+
