@@ -19,10 +19,14 @@ templates = Jinja2Templates(directory="static/public")
 # And make the route. 
 # I know, a bit disappointing that you still have to make that much. I'm still working on an easier alternative aight?
 
-@router.get("/", response_class=HTMLResponse)
+@router.get("/")
+async def serve_custom_page():
+    return FileResponse("static/public/index.html")
+
+@router.get("/blog", response_class=HTMLResponse)
 async def home(request: Request):
     pages = list_pages()
-    return templates.TemplateResponse("index.html", {"request": request, "pages": pages})
+    return templates.TemplateResponse("blog.html", {"request": request, "pages": pages})
 
 # Dynamic route to serve blog type pages
 @router.get("/site/{slug}", response_class=HTMLResponse)
@@ -40,3 +44,5 @@ async def render_site(slug: str):
 @router.get("/about")
 async def serve_custom_page():
     return FileResponse("static/public/about.html")
+
+# Example custom route in public_route.py
