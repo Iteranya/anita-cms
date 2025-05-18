@@ -6,19 +6,22 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 import json
 from pathlib import Path
+from dotenv import load_dotenv  # Add this import
+
+# Load environment variables from .env file
+load_dotenv()  # Add this line to load variables from .env
 
 from pydantic import BaseModel
 
 # Security settings
-
-
 SECRETS_FILE = "secret.json"
-SECRET_KEY = os.getenv("JWT_SECRET") 
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
+
 
 class AdminUser(BaseModel):
     username: str
@@ -47,6 +50,9 @@ def authenticate_user(username: str, password: str):
     return True
 
 def create_access_token(data: dict, expires_delta: timedelta = None):
+    SECRET_KEY = os.getenv("JWT_SECRET") 
+    if not SECRET_KEY:
+        raise ValueError("SECRET_KEY environment variable is not set")
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
@@ -57,6 +63,9 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     return encoded_jwt
 
 async def get_current_user(request: Request):
+    SECRET_KEY = os.getenv("JWT_SECRET") 
+    if not SECRET_KEY:
+        raise ValueError("SECRET_KEY environment variable is not set")
     token = request.cookies.get("access_token")
     if not token:
         raise HTTPException(
@@ -76,6 +85,9 @@ async def get_current_user(request: Request):
         )
 
 async def optional_auth(request: Request):
+    SECRET_KEY = os.getenv("JWT_SECRET") 
+    if not SECRET_KEY:
+        raise ValueError("SECRET_KEY environment variable is not set")
     token = request.cookies.get("access_token")
     if not token:
         return None
@@ -117,8 +129,6 @@ def get_admin_user() -> AdminUser:
         data = json.load(f)
         return AdminUser(**data["admin"])
 
-
-# Ah, here,
 def set_admin_password(password: str, username = "Admin"):
     hashed_password = pwd_context.hash(password)
     
@@ -136,4 +146,3 @@ def set_admin_password(password: str, username = "Admin"):
     
     secrets["admin"]["hashed_password"] = hashed_password
     save_secrets(secrets)
-
