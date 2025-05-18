@@ -47,7 +47,7 @@ async def login_for_access_token(
         key="access_token",
         value=access_token,
         httponly=True,
-        secure=True,  # Enable in production with HTTPS
+        secure=True, 
         samesite="lax",
         max_age=expires_in.total_seconds(),
     )
