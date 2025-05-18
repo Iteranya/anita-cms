@@ -13,7 +13,7 @@ from pydantic import BaseModel
 
 
 SECRETS_FILE = "secret.json"
-SECRET_KEY = os.getenv("JWT_SECRET", "your-secret-key-here")  # Change this in production
+SECRET_KEY = os.getenv("JWT_SECRET") 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

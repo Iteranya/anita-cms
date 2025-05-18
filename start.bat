@@ -83,6 +83,41 @@ if exist "requirements.txt" (
 ) else (
     echo Warning: requirements.txt not found.
 )
+REM Check and create .env with JWT_SECRET if needed
+set "NEED_JWT_SECRET=1"
+if exist ".env" (
+    findstr /I /C:"JWT_SECRET=" ".env" >nul
+    if !errorlevel! == 0 (
+        set "NEED_JWT_SECRET=0"
+        echo .env already contains JWT_SECRET
+    )
+)
+
+if !NEED_JWT_SECRET! == 1 (
+    echo Generating JWT_SECRET in .env file...
+    
+    REM Generate a random string for JWT_SECRET using Python
+    (
+        echo import secrets
+        echo print^("JWT_SECRET=" ^+ secrets.token_urlsafe^(32^)^)
+    ) > gen_jwt.py
+    
+    "%PYTHON_EXE%" gen_jwt.py > temp_jwt.txt
+    set /p JWT_SECRET=<temp_jwt.txt
+    
+    REM Clean up temporary files
+    del gen_jwt.py
+    del temp_jwt.txt
+    
+    if exist ".env" (
+        REM Append to existing .env file
+        echo !JWT_SECRET!>>.env
+    ) else (
+        REM Create new .env file
+        echo !JWT_SECRET!>.env
+    )
+    echo Added JWT_SECRET to .env file
+)
 
 REM Run application
 echo Starting Anita-CMS...
