@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <link rel="stylesheet" href="/static/auth/style.css">
+</head>
+<body>
+  <div class="form-container">
+    <h2>Login</h2>
+    <form id="login-form">
+      <label>
+        Username:
+        <input type="text" name="username" required>
+      </label>
+
+      <label>
+        Password:
+        <input type="password" name="password" required>
+      </label>
+
+      <label class="remember-me">
+        <input type="checkbox" name="remember_me">
+        Remember Me
+      </label>
+
+      <button type="submit">Login</button>
+    </form>
+  </div>
+
+  <script src="/static/auth/login.js"></script>
+</body>
+</html>

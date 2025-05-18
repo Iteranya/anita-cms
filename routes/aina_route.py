@@ -1,11 +1,15 @@
-from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse
+from typing import Optional
+from fastapi import APIRouter, Depends, Request
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse, JSONResponse
+from src.auth import optional_auth
 from src.aina import stream_website
 
 router = APIRouter(prefix="/aina", tags=["Aina"])
 
 @router.get("/", response_class=HTMLResponse)
-async def get_html(request: Request):
+async def get_html(request: Request, user: Optional[str] = Depends(optional_auth)):
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
     # Path to template and scripts
     template_path = "static/aina/index.html"
     slug = request.query_params.get("slug", "")

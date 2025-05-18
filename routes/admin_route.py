@@ -1,10 +1,10 @@
-from fastapi import APIRouter, HTTPException
-from typing import List
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Depends, HTTPException, Request
+from typing import List, Optional
+from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel
 from data import db  # Import the db module with standalone functions
 from data.models import Page as PageData
-
+from src.auth import optional_auth
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
 class PageModel(BaseModel):
@@ -19,9 +19,11 @@ class PageModel(BaseModel):
 
 
 @router.get("/", response_class=HTMLResponse)
-async def get_html():
-    template_path = "static/admin/index.html"
+async def get_html(request: Request, user: Optional[str] = Depends(optional_auth)):
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
     
+    template_path = "static/admin/index.html"
     with open(template_path, "r") as f:
         html = f.read()
 
