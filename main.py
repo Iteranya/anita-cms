@@ -1,3 +1,4 @@
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,7 +10,9 @@ from routes import admin_route,asta_route,media_route,aina_route,public_route,au
 
 app = FastAPI()
 db.get_connection()
-app.mount("/static",StaticFiles(directory="static"),name = "static-directory")
+BASE_DIR = Path(__file__).resolve().parent
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static-directory")
+app.mount("/media", StaticFiles(directory=BASE_DIR / "media"), name="media")
 
 # Set up CORS
 app.add_middleware(
