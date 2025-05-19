@@ -12,7 +12,6 @@ app = FastAPI()
 db.get_connection()
 BASE_DIR = Path(__file__).resolve().parent
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static-directory")
-app.mount("/media", StaticFiles(directory=BASE_DIR / "data/media"), name="media")
 
 # Set up CORS
 app.add_middleware(
