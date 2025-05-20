@@ -25,27 +25,27 @@
     <div class="gallery-container container-fluid">
         <div class="row" id="galleryGrid">
             {% for page in pages %}
-            <div class="col-md-6 col-lg-4 col-xl-3 grid-item">
-                <div class="card shadow-sm h-100">
-                    <div class="card-img-wrapper">
-                        {% if page.images and page.images[0].image %}
-                            <img src="{{ page.images[0].image }}" class="card-img-top" alt="{{ page.title }}">
-                        {% elif page.thumb %}
-                            <img src="{{ page.thumb }}" class="card-img-top" alt="{{ page.title }}">
-                        {% else %}
-                            <div class="no-image-placeholder">
-                                <i class="fas fa-image"></i> <!-- Icon for no image -->
-                                <span>No Image Available</span>
-                            </div>
-                        {% endif %}
-                    </div>
-                    <div class="card-body">
+            <div class="col-md-6 col-lg-4 col-xl-3 grid-item" >
+                    <div class="card shadow-sm h-100">
+                        <div class="card-img-wrapper">
+                            {% if page.images and page.images[0].image %}
+                                <img src="{{ page.images[0].image }}" class="card-img-top" alt="{{ page.title }}">
+                            {% elif page.thumb %}
+                                <img src="{{ page.thumb }}" class="card-img-top" alt="{{ page.title }}">
+                            {% else %}
+                                <div class="no-image-placeholder">
+                                    <i class="fas fa-image"></i> <!-- Icon for no image -->
+                                    <span>No Image Available</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
                         <div>
                             <h5 class="card-title">{{ page.title }}</h5>
                             <!-- Optional: Add a short description here if available -->
                             <!-- <p class="card-text text-muted">Short description...</p> -->
                         </div>
-                        <a href="/site/{{ page.slug }}" class="btn-view-gallery mt-auto">
+                        <a href="/blog/{{ page.slug }}" class="btn-view-gallery mt-auto">
                             View Site <i class="fas fa-arrow-right ms-2"></i> <!-- Arrow icon -->
                         </a>
                     </div>

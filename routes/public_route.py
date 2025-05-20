@@ -29,7 +29,7 @@ async def home(request: Request):
     return templates.TemplateResponse("blog.html", {"request": request, "pages": pages})
 
 # Dynamic route to serve blog type pages
-@router.get("/site/{slug}", response_class=HTMLResponse)
+@router.get("/blog/{slug}", response_class=HTMLResponse)
 async def render_site(slug: str):
     page = get_page(slug)
     if not page:

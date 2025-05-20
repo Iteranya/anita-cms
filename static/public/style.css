@@ -4,6 +4,7 @@
             --primary: #0ea5e9;
             --secondary: #10b981;
             --accent: #f59e0b;
+            --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
         }
         
         body {
@@ -186,6 +187,7 @@ h1, h2, h3, h4, h5, h6 {
     position: relative;
     transition: all 0.4s ease;
     border: none;
+    pointer-events: none;
 }
 
 .card::after {
@@ -250,6 +252,9 @@ h1, h2, h3, h4, h5, h6 {
     display: flex;
     flex-direction: column;
     flex: 1;
+    overflow: visible !important; /* Override any hidden overflow */
+    position: relative; /* Ensures z-index works properly */
+    pointer-events: auto; 
 }
 
 .card-title {
@@ -265,29 +270,20 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     padding: 0.5rem 1.25rem;
     border-radius: 50px;
-    background: var(--gradient-primary);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
     color: white;
     text-decoration: none;
     font-weight: 600;
     transition: all 0.3s ease;
     border: none;
     cursor: pointer;
+    width: fit-content; /* Ensures it doesn't stretch full width */
 }
 
 .btn-view-gallery:hover {
     box-shadow: 0 5px 15px rgba(14, 165, 233, 0.4);
     transform: translateY(-2px);
 }
-
-.btn-view-gallery i {
-    margin-left: 0.5rem;
-    transition: transform 0.3s ease;
-}
-
-.btn-view-gallery:hover i {
-    transform: translateX(4px);
-}
-
 /* Footer */
 .footer {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
