@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from src.config import load_or_create_config, save_config
 from data import db  # Import the db module with standalone functions
 from data.models import Page as PageData
-from src.auth import optional_auth
+from src.auth import get_current_user, optional_auth
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
 class PageModel(BaseModel):
@@ -39,18 +39,22 @@ async def get_html(request: Request, user: Optional[str] = Depends(optional_auth
 
 
 @router.post("/", response_model=PageModel)
-def create_page(page: PageModel):
+def create_page(
+    page: PageModel,
+    user: dict = Depends(get_current_user),  # Enforces authentication
+):
     if db.get_page(page.slug):
         raise HTTPException(status_code=400, detail="Page already exists")
+    
     db.add_page(PageData(**page.dict()))
     return page
 
 @router.get("/list", response_model=List[PageModel])
-def list_pages():
+def list_pages(user: dict = Depends(get_current_user)):
     return db.list_pages()
 
 @router.get("/config", response_model=ConfigModel)
-def get_config():
+def get_config(user: dict = Depends(get_current_user)):
     config = load_or_create_config()
     return ConfigModel(
         system_note=config.system_note,
@@ -61,7 +65,7 @@ def get_config():
     )
 
 @router.post("/config", response_model=ConfigModel)
-def update_config(updated: ConfigModel):
+def update_config(updated: ConfigModel,user: dict = Depends(get_current_user)):
     config = load_or_create_config()
     config.system_note = updated.system_note
     config.ai_endpoint = updated.ai_endpoint
@@ -74,10 +78,8 @@ def update_config(updated: ConfigModel):
     save_config(config)
     return updated
 
-# TODO: Change this? Please? Make the slug go... admin/site/{slug} or something
-
 @router.get("/{slug}", response_model=PageModel)
-def read_page(slug: str):
+def read_page(slug: str,user: dict = Depends(get_current_user)):
     page = db.get_page(slug)
     if not page:
         raise HTTPException(status_code=404, detail="Page not found")
@@ -85,7 +87,7 @@ def read_page(slug: str):
 
 
 @router.put("/{slug}", response_model=PageModel)
-def update_page(slug: str, page: PageModel):
+def update_page(slug: str, page: PageModel,user: dict = Depends(get_current_user)):
     print("Received data:", page.dict())
     if not db.get_page(slug):
         raise HTTPException(status_code=404, detail="Page not found")
@@ -94,7 +96,7 @@ def update_page(slug: str, page: PageModel):
 
 
 @router.delete("/{slug}")
-def delete_page(slug: str):
+def delete_page(slug: str,user: dict = Depends(get_current_user)):
     if not db.get_page(slug):
         raise HTTPException(status_code=404, detail="Page not found")
     db.delete_page(slug)

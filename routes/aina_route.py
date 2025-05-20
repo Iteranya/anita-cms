@@ -1,7 +1,7 @@
 from typing import Optional
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse, JSONResponse
-from src.auth import optional_auth
+from src.auth import optional_auth,get_current_user
 from src.aina import stream_website
 
 router = APIRouter(prefix="/aina", tags=["Aina"])
@@ -26,7 +26,7 @@ async def get_html(request: Request, user: Optional[str] = Depends(optional_auth
     return html
 
 @router.post("/generate-website-stream")
-async def generate_website_stream(request: Request):
+async def generate_website_stream(request: Request,user: dict = Depends(get_current_user)):
     try:
         data = await request.json()
         editor = data.get("editor")

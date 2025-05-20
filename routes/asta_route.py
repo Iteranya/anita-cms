@@ -1,7 +1,7 @@
 from typing import Optional
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse, JSONResponse
-from src.auth import optional_auth
+from src.auth import optional_auth,get_current_user
 from src.asta import generate_markdown, edit_with_llm, stream_markdown
 
 router = APIRouter(prefix="/asta", tags=["Asta"])
@@ -27,7 +27,7 @@ async def get_html(request: Request,user: Optional[str] = Depends(optional_auth)
     return html
 
 @router.post("/edit-text")
-async def edit_text(request: Request):
+async def edit_text(request: Request,user: dict = Depends(get_current_user)):
     try:
         task = await request.json()  # Get JSON body from the request
         edited_content = await edit_with_llm(task)  # Call your AI edit function
@@ -37,7 +37,7 @@ async def edit_text(request: Request):
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
 @router.post("/generate-doc")
-async def generate_doc(request: Request):
+async def generate_doc(request: Request,user: dict = Depends(get_current_user)):
     try:
         data = await request.json()
         # Match the parameters sent from frontend
@@ -51,7 +51,7 @@ async def generate_doc(request: Request):
 from fastapi.responses import StreamingResponse
 
 @router.post("/generate-doc-stream")
-async def generate_doc_stream(request: Request):
+async def generate_doc_stream(request: Request,user: dict = Depends(get_current_user)):
     try:
         data = await request.json()
         current_markdown = data.get("current_markdown")

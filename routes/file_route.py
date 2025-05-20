@@ -1,7 +1,9 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
 import os
 import shutil
+
+from src.auth import get_current_user
 
 router = APIRouter(prefix="/file", tags=["File"])
 
@@ -18,7 +20,7 @@ async def get_media(filename: str):
     return FileResponse(path=file_path)
 
 @router.post("/")
-async def upload_media(file: UploadFile = File(...)):
+async def upload_media(file: UploadFile = File(...),user: dict = Depends(get_current_user)):
     file_path = os.path.join(FILE_DIR, file.filename)
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
