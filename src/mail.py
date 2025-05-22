@@ -1,10 +1,11 @@
 # email_utils.py
 import resend
-import os
+from src.config import load_or_create_mail_config
 
-resend.api_key = os.getenv("RESEND_API_KEY", "re_your_key_here")  # Use dotenv or environment variables
 
 def send_contact_email(name: str, company: str, email: str, phone: str, service: str, message: str):
+    mail_config = load_or_create_mail_config()
+    resend.api_key = mail_config.api_key
     html_content = f"""
     <h2>Pesan Baru dari Form Kontak</h2>
     <ul>
@@ -18,8 +19,8 @@ def send_contact_email(name: str, company: str, email: str, phone: str, service:
     """
 
     response = resend.Emails.send({
-        "from": "onboarding@resend.dev",  # Replace with your verified domain email
-        "to": ["yourmail@gmail.com"],
+        "from": mail_config.server_email,  # Replace with your verified domain email
+        "to": [mail_config.target_email],
         "subject": f"[Kontak] {name} - {company}",
         "html": html_content
     })

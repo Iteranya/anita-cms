@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from typing import List, Optional
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from src.config import load_or_create_config, save_config
 from data import db  # Import the db module with standalone functions
 from data.models import Page as PageData
 from src.auth import get_current_user, optional_auth
+
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
 class PageModel(BaseModel):
@@ -25,17 +27,22 @@ class ConfigModel(BaseModel):
     temperature: float
     ai_key: Optional[str] = None  # Accept in POST, but don't expose in GET
 
+templates = Jinja2Templates(directory="static")
 
-@router.get("/", response_class=HTMLResponse)
+@router.get("/old", response_class=HTMLResponse)
 async def get_html(request: Request, user: Optional[str] = Depends(optional_auth)):
     if not user:
         return RedirectResponse(url="/auth/login", status_code=302)
     
-    template_path = "static/admin/index.html"
+    template_path = "static/admin/index_old.html"
     with open(template_path, "r") as f:
         html = f.read()
 
     return html
+
+@router.get("/")
+async def admin_panel(request: Request):
+    return templates.TemplateResponse("admin/index.html", {"request": request})
 
 
 @router.post("/", response_model=PageModel)

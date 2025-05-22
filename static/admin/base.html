@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/admin/styles/style.css">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <div class="container">
+        {% include 'admin/components/sidebar.html' %}
+        {% block content %}{% endblock %}
+    </div>
+    
+    {% include 'admin/components/modals.html' %}
+    {% include 'admin/components/toast.html' %}
+    
+    <script type="module" src="/static/admin/scripts/app.js"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
