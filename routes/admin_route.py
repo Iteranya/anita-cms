@@ -45,7 +45,7 @@ async def admin_panel(request: Request):
     return templates.TemplateResponse("admin/index.html", {"request": request})
 
 
-@router.post("/", response_model=PageModel)
+@router.post("/api", response_model=PageModel)
 def create_page(
     page: PageModel,
     user: dict = Depends(get_current_user),  # Enforces authentication
@@ -85,7 +85,7 @@ def update_config(updated: ConfigModel,user: dict = Depends(get_current_user)):
     save_config(config)
     return updated
 
-@router.get("/{slug}", response_model=PageModel)
+@router.get("/api/{slug}", response_model=PageModel)
 def read_page(slug: str,user: dict = Depends(get_current_user)):
     page = db.get_page(slug)
     if not page:
@@ -93,7 +93,7 @@ def read_page(slug: str,user: dict = Depends(get_current_user)):
     return page
 
 
-@router.put("/{slug}", response_model=PageModel)
+@router.put("/api/{slug}", response_model=PageModel)
 def update_page(slug: str, page: PageModel,user: dict = Depends(get_current_user)):
     print("Received data:", page.dict())
     if not db.get_page(slug):
@@ -102,7 +102,7 @@ def update_page(slug: str, page: PageModel,user: dict = Depends(get_current_user
     return page
 
 
-@router.delete("/{slug}")
+@router.delete("/api/{slug}")
 def delete_page(slug: str,user: dict = Depends(get_current_user)):
     if not db.get_page(slug):
         raise HTTPException(status_code=404, detail="Page not found")

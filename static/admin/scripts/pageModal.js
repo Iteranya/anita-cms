@@ -22,7 +22,7 @@ export async function openPageModal(page = null) {
     if (page) {
         try {
             // Fetch fresh data from the API
-            const response = await fetch(`/admin/${page.slug}`);
+            const response = await fetch(`/admin/api/${page.slug}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch page data');
             }
@@ -110,6 +110,7 @@ export function updateEditorLinks() {
 
 export function savePage() {
     const currentPageId = getCurrentPageId();
+    
     const contentType = document.getElementById('content-type').value;
     
     const pageData = {
@@ -131,7 +132,7 @@ export function savePage() {
         return;
     }
     
-    fetch(currentPageId ? `/admin/${currentPageId}` : '/admin', {
+    fetch(currentPageId ? `/admin/api/${currentPageId}` : '/admin/api', {
         method: currentPageId ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(pageData)

@@ -15,7 +15,7 @@ const aiKeyField = document.getElementById('ai-key');
 /**
  * Fetches current configuration from the server and populates the form
  */
-export async function loadConfig() {
+export async function loadMailConfig() {
     try {
         const response = await fetch('/admin/config');
         
@@ -44,7 +44,7 @@ export async function loadConfig() {
  * Handles form submission to update configuration
  * @param {Event} event - The form submission event
  */
-export async function handleSubmit(event) {
+export async function handleMailSubmit(event) {
     event.preventDefault();
     
     // Basic validation
