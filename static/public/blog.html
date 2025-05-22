@@ -3,741 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog - PT Deltavista Nusantara</title>
+    <title>Blog Home</title>
+    
+    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* Global Styles - Same as landing page */
-        :root {
-            --primary: #0056b3;
-            --secondary: #ff6b00;
-            --dark: #333;
-            --light: #f8f9fa;
-            --gray: #6c757d;
-            --white: #fff;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            line-height: 1.6;
-            color: var(--dark);
-            overflow-x: hidden;
-            background-color: var(--light);
-        }
-        
-        a {
-            text-decoration: none;
-            color: var(--primary);
-        }
-        
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        
-        .btn {
-            display: inline-block;
-            padding: 12px 24px;
-            background: var(--primary);
-            color: var(--white);
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            text-align: center;
-        }
-        
-        .btn:hover {
-            background: #003d7a;
-            transform: translateY(-2px);
-        }
-        
-        .btn-secondary {
-            background: var(--secondary);
-        }
-        
-        .btn-secondary:hover {
-            background: #cc5600;
-        }
-        
-        .section {
-            padding: 80px 0;
-        }
-        
-        .section-title {
-            text-align: center;
-            margin-bottom: 50px;
-            position: relative;
-        }
-        
-        .section-title h2 {
-            font-size: 2.5rem;
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
-        
-        .section-title p {
-            color: var(--gray);
-            max-width: 700px;
-            margin: 0 auto;
-        }
-        
-        .section-title::after {
-            content: '';
-            display: block;
-            width: 80px;
-            height: 4px;
-            background: var(--secondary);
-            margin: 20px auto;
-        }
-        
-        /* Header - Same as landing page */
-        header {
-            background-color: var(--white);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-        }
-        
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-        }
-        
-        .logo img {
-            height: 50px;
-            margin-right: 10px;
-        }
-        
-        .logo h1 {
-            font-size: 1.5rem;
-            color: var(--primary);
-        }
-        
-        .nav-links {
-            display: flex;
-            list-style: none;
-        }
-        
-        .nav-links li {
-            margin-left: 30px;
-        }
-        
-        .nav-links a {
-            color: var(--dark);
-            font-weight: 600;
-            transition: color 0.3s ease;
-        }
-        
-        .nav-links a:hover {
-            color: var(--primary);
-        }
-        
-        .mobile-menu-btn {
-            display: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-        
-        /* Blog Specific Styles */
-        .blog-header {
-            background: linear-gradient(rgba(0, 86, 179, 0.8), rgba(0, 86, 179, 0.8)), 
-                        url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80') no-repeat center center/cover;
-            height: 300px;
-            display: flex;
-            align-items: center;
-            text-align: center;
-            color: var(--white);
-            padding-top: 80px;
-        }
-        
-        .blog-header-content h1 {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-        }
-        
-        .blog-search {
-            max-width: 600px;
-            margin: 0 auto;
-            position: relative;
-        }
-        
-        .blog-search input {
-            width: 100%;
-            padding: 15px 20px;
-            border-radius: 50px;
-            border: none;
-            font-size: 1rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .blog-search button {
-            position: absolute;
-            right: 5px;
-            top: 5px;
-            background: var(--secondary);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 10px 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .blog-search button:hover {
-            background: #cc5600;
-        }
-        
-        .blog-tags {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .tag {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 5px 15px;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-        }
-        
-        .tag:hover {
-            background: var(--secondary);
-        }
-        
-        .blog-posts {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 30px;
-            margin-top: 50px;
-        }
-        
-        .blog-card {
-            background: var(--white);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease;
-        }
-        
-        .blog-card:hover {
-            transform: translateY(-10px);
-        }
-        
-        .blog-thumbnail {
-            height: 200px;
-            overflow: hidden;
-        }
-        
-        .blog-thumbnail img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-        
-        .blog-card:hover .blog-thumbnail img {
-            transform: scale(1.1);
-        }
-        
-        .blog-card-content {
-            padding: 25px;
-        }
-        
-        .blog-card-content h3 {
-            color: var(--primary);
-            margin-bottom: 15px;
-            font-size: 1.3rem;
-        }
-        
-        .blog-card-content p {
-            color: var(--gray);
-            margin-bottom: 20px;
-        }
-        
-        .blog-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: var(--gray);
-            font-size: 0.9rem;
-        }
-        
-        .blog-tag {
-            background: var(--light);
-            color: var(--primary);
-            padding: 3px 10px;
-            border-radius: 50px;
-            font-size: 0.8rem;
-        }
-        
-        .blog-pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 50px;
-            gap: 10px;
-        }
-        
-        .page-link {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--white);
-            color: var(--dark);
-            border-radius: 4px;
-            transition: all 0.3s ease;
-        }
-        
-        .page-link:hover, .page-link.active {
-            background: var(--primary);
-            color: var(--white);
-        }
-        
-        /* Sidebar (for future expansion) */
-        .blog-container {
-            display: flex;
-            gap: 40px;
-        }
-        
-        .blog-main {
-            flex: 2;
-        }
-        
-        .blog-sidebar {
-            flex: 1;
-        }
-        
-        /* Footer - Same as landing page */
-        footer {
-            background-color: var(--dark);
-            color: var(--white);
-            padding: 60px 0 20px;
-        }
-        
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px;
-            margin-bottom: 40px;
-        }
-        
-        .footer-col h3 {
-            color: var(--white);
-            margin-bottom: 20px;
-            font-size: 1.3rem;
-        }
-        
-        .footer-col ul {
-            list-style: none;
-        }
-        
-        .footer-col ul li {
-            margin-bottom: 10px;
-        }
-        
-        .footer-col ul li a {
-            color: #bbb;
-            transition: color 0.3s ease;
-        }
-        
-        .footer-col ul li a:hover {
-            color: var(--secondary);
-        }
-        
-        .social-links {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .social-links a {
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--white);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-        
-        .social-links a:hover {
-            background: var(--secondary);
-            transform: translateY(-3px);
-        }
-        
-        .copyright {
-            text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: #bbb;
-            font-size: 0.9rem;
-        }
-        
-        /* Responsive Styles */
-        @media (max-width: 992px) {
-            .blog-container {
-                flex-direction: column;
-            }
-            
-            .section-title h2 {
-                font-size: 2rem;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .nav-links {
-                position: fixed;
-                top: 80px;
-                left: -100%;
-                width: 100%;
-                height: calc(100vh - 80px);
-                background: var(--white);
-                flex-direction: column;
-                align-items: center;
-                justify-content: flex-start;
-                padding-top: 40px;
-                transition: left 0.3s ease;
-            }
-            
-            .nav-links.active {
-                left: 0;
-            }
-            
-            .nav-links li {
-                margin: 15px 0;
-            }
-            
-            .mobile-menu-btn {
-                display: block;
-            }
-            
-            .blog-header {
-                height: 250px;
-            }
-            
-            .blog-header-content h1 {
-                font-size: 2rem;
-            }
-            
-            .section {
-                padding: 60px 0;
-            }
-            
-            .section-title h2 {
-                font-size: 1.8rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .blog-header {
-                height: 200px;
-            }
-            
-            .blog-header-content h1 {
-                font-size: 1.8rem;
-            }
-            
-            .blog-posts {
-                grid-template-columns: 1fr;
-            }
-            
-            .section-title h2 {
-                font-size: 1.5rem;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="/static/public/style.css">
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="container">
-            <nav class="navbar">
-                <div class="logo">
-                    <img src="/media/deltavista.png" alt="Deltavista Nusantara Logo">
-                    <h1>Deltavista Nusantara</h1>
-                </div>
-                <div class="mobile-menu-btn">
-                    <i class="fas fa-bars"></i>
-                </div>
-                <ul class="nav-links">
-                    <li><a href="/">Beranda</a></li>
-                    <li><a href="/#about">Tentang Kami</a></li>
-                    <li><a href="/#services">Layanan</a></li>
-                    <li><a href="/blog" class="active">Blog</a></li>
-                    <li><a href="/#contact">Kontak</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-
-    <!-- Blog Header -->
-    <section class="blog-header">
-        <div class="container">
-            <div class="blog-header-content">
-                <h1>Blog Deltavista Nusantara</h1>
-                <p>Tips, informasi terbaru, dan panduan praktis seputar manajemen SDM dan ketenagakerjaan</p>
-                <div class="blog-search">
-                    <input type="text" placeholder="Cari artikel...">
-                    <button><i class="fas fa-search"></i></button>
-                </div>
-                <div class="blog-tags">
-                    <a href="#" class="tag">Ketenagakerjaan</a>
-                    <a href="#" class="tag">HRD</a>
-                    <a href="#" class="tag">Manajemen SDM</a>
-                    <a href="#" class="tag">Regulasi</a>
-                    <a href="#" class="tag">Tips Karir</a>
-                </div>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Blog</h1>
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search galleries by title...">
+                <i class="fas fa-search search-icon"></i>
             </div>
         </div>
     </section>
 
-    <!-- Blog Content -->
-    <section class="section">
-        <div class="container">
-            <div class="blog-container">
-                <main class="blog-main">
-                    <div class="blog-posts">
-                        {% for page in pages %}
-                        <article class="blog-card">
-                            <div class="blog-thumbnail">
-                                <img src="{{ page.thumb or 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80' }}" alt="{{ page.title }}">
-                            </div>
-                            <div class="blog-card-content">
-                                <h3>{{ page.title }}</h3>
-                                <p>{{ page.content }}</p>
-                                <div class="blog-meta">
-                                    {% if page.tags %}
-                                    <div class="blog-tag">{{ page.tags[0] }}</div>
-                                    {% endif %}
-                                    <span><i class="far fa-clock"></i> 5 min read</span>
+    <!-- Gallery Grid -->
+    <div class="gallery-container container-fluid">
+        <div class="row" id="galleryGrid">
+            {% for page in pages %}
+            <div class="col-md-6 col-lg-4 col-xl-3 grid-item" >
+                    <div class="card shadow-sm h-100">
+                        <div class="card-img-wrapper">
+                            {% if page.images and page.images[0].image %}
+                                <img src="{{ page.images[0].image }}" class="card-img-top" alt="{{ page.title }}">
+                            {% elif page.thumb %}
+                                <img src="{{ page.thumb }}" class="card-img-top" alt="{{ page.title }}">
+                            {% else %}
+                                <div class="no-image-placeholder">
+                                    <i class="fas fa-image"></i> <!-- Icon for no image -->
+                                    <span>No Image Available</span>
                                 </div>
-                                <a href="/blog/{{ page.slug }}" class="btn" style="margin-top: 15px;">Baca Selengkapnya</a>
-                            </div>
-                        </article>
-                        {% endfor %}
-                    </div>
-
-                    <div class="blog-pagination">
-                        <a href="#" class="page-link"><i class="fas fa-chevron-left"></i></a>
-                        <a href="#" class="page-link active">1</a>
-                        <a href="#" class="page-link">2</a>
-                        <a href="#" class="page-link">3</a>
-                        <a href="#" class="page-link"><i class="fas fa-chevron-right"></i></a>
-                    </div>
-                </main>
-
-                <!-- Sidebar (for future expansion) -->
-                <aside class="blog-sidebar">
-                    <!-- Popular Posts -->
-                    <div class="sidebar-widget" style="background: var(--white); padding: 25px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);">
-                        <h3 style="color: var(--primary); margin-bottom: 20px; font-size: 1.3rem; border-bottom: 2px solid var(--light); padding-bottom: 10px;">Artikel Populer</h3>
-                        <div class="popular-posts">
-                            <div class="popular-post" style="display: flex; gap: 15px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--light);">
-                                <div class="popular-post-thumb" style="width: 80px; height: 60px; overflow: hidden; border-radius: 4px;">
-                                    <img src="https://images.unsplash.com/photo-1581093450021-5cd168e3df76?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Popular Post" style="width: 100%; height: 100%; object-fit: cover;">
-                                </div>
-                                <div class="popular-post-content">
-                                    <h4 style="font-size: 0.9rem; margin-bottom: 5px;"><a href="#" style="color: var(--dark);">Tips Meningkatkan Produktivitas Karyawan</a></h4>
-                                    <span style="font-size: 0.8rem; color: var(--gray);"><i class="far fa-eye"></i> 1.2k views</span>
-                                </div>
-                            </div>
-                            <div class="popular-post" style="display: flex; gap: 15px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--light);">
-                                <div class="popular-post-thumb" style="width: 80px; height: 60px; overflow: hidden; border-radius: 4px;">
-                                    <img src="https://images.unsplash.com/photo-1462899006636-339e08d1844e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Popular Post" style="width: 100%; height: 100%; object-fit: cover;">
-                                </div>
-                                <div class="popular-post-content">
-                                    <h4 style="font-size: 0.9rem; margin-bottom: 5px;"><a href="#" style="color: var(--dark);">Perubahan Regulasi Ketenagakerjaan 2023</a></h4>
-                                    <span style="font-size: 0.8rem; color: var(--gray);"><i class="far fa-eye"></i> 890 views</span>
-                                </div>
-                            </div>
-                            <div class="popular-post" style="display: flex; gap: 15px; margin-bottom: 15px;">
-                                <div class="popular-post-thumb" style="width: 80px; height: 60px; overflow: hidden; border-radius: 4px;">
-                                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80" alt="Popular Post" style="width: 100%; height: 100%; object-fit: cover;">
-                                </div>
-                                <div class="popular-post-content">
-                                    <h4 style="font-size: 0.9rem; margin-bottom: 5px;"><a href="#" style="color: var(--dark);">Strategi Mempertahankan Karyawan Berkualitas</a></h4>
-                                    <span style="font-size: 0.8rem; color: var(--gray);"><i class="far fa-eye"></i> 756 views</span>
-                                </div>
-                            </div>
+                            {% endif %}
                         </div>
-                    </div>
-
-                    <!-- Newsletter -->
-                    <div class="sidebar-widget" style="background: var(--white); padding: 25px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);">
-                        <h3 style="color: var(--primary); margin-bottom: 20px; font-size: 1.3rem; border-bottom: 2px solid var(--light); padding-bottom: 10px;">Newsletter</h3>
-                        <p style="margin-bottom: 15px; color: var(--gray);">Dapatkan artikel terbaru langsung ke email Anda</p>
-                        <form style="margin-top: 20px;">
-                            <div style="margin-bottom: 15px;">
-                                <input type="email" placeholder="Alamat Email Anda" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;">
-                            </div>
-                            <button type="submit" class="btn" style="width: 100%;">Berlangganan</button>
-                        </form>
-                    </div>
-
-                    <!-- Tags -->
-                    <div class="sidebar-widget" style="background: var(--white); padding: 25px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);">
-                        <h3 style="color: var(--primary); margin-bottom: 20px; font-size: 1.3rem; border-bottom: 2px solid var(--light); padding-bottom: 10px;">Kategori</h3>
-                        <div class="tags" style="display: flex; flex-wrap: wrap; gap: 10px;">
-                            <a href="#" style="background: var(--light); color: var(--primary); padding: 5px 15px; border-radius: 50px; font-size: 0.9rem; transition: all 0.3s ease;">Ketenagakerjaan</a>
-                            <a href="#" style="background: var(--light); color: var(--primary); padding: 5px 15px; border-radius: 50px; font-size: 0.9rem; transition: all 0.3s ease;">HRD</a>
-                            <a href="#" style="background: var(--light); color: var(--primary); padding: 5px 15px; border-radius: 50px; font-size: 0.9rem; transition: all 0.3s ease;">Manajemen</a>
-                            <a href="#" style="background: var(--light); color: var(--primary); padding: 5px 15px; border-radius: 50px; font-size: 0.9rem; transition: all 0.3s ease;">Regulasi</a>
-                            <a href="#" style="background: var(--light); color: var(--primary); padding: 5px 15px; border-radius: 50px; font-size: 0.9rem; transition: all 0.3s ease;">Tips Karir</a>
-                            <a href="#" style="background: var(--light); color: var(--primary); padding: 5px 15px; border-radius: 50px; font-size: 0.9rem; transition: all 0.3s ease;">Pengembangan</a>
+                        <div class="card-body">
+                        <div>
+                            <h5 class="card-title">{{ page.title }}</h5>
+                            <!-- Optional: Add a short description here if available -->
+                            <!-- <p class="card-text text-muted">Short description...</p> -->
                         </div>
+                        <a href="/blog/{{ page.slug }}" class="btn-view-gallery mt-auto">
+                            View Site <i class="fas fa-arrow-right ms-2"></i> <!-- Arrow icon -->
+                        </a>
                     </div>
-                </aside>
+                </div>
+            </div>
+            {% endfor %}
+            <!-- Add a message if no results found -->
+             <div id="noResultsMessage" class="col-12 text-center" style="display: none; padding: 40px 0;">
+                <i class="fas fa-search-minus fa-3x mb-3" style="color: #6c757d;"></i>
+                <h4 style="color: #aaaaaa;">No galleries found matching your search.</h4>
             </div>
         </div>
-    </section>
+    </div>
 
     <!-- Footer -->
-    <footer>
+    <footer class="footer">
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-col">
-                    <h3>Tentang Kami</h3>
-                    <p>PT Deltavista Nusantara adalah perusahaan penyedia jasa alih daya tenaga kerja (outsourcing) yang telah beroperasi sejak November 2000.</p>
-                    <div class="social-links">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-                <div class="footer-col">
-                    <h3>Layanan Kami</h3>
-                    <ul>
-                        <li><a href="#">Operasional & Logistik</a></li>
-                        <li><a href="#">Retail & Sales</a></li>
-                        <li><a href="#">Administrasi & Keamanan</a></li>
-                        <li><a href="#">Rekrutmen & Seleksi</a></li>
-                        <li><a href="#">Manajemen Tenaga Kerja</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h3>Link Cepat</h3>
-                    <ul>
-                        <li><a href="/">Beranda</a></li>
-                        <li><a href="/#about">Tentang Kami</a></li>
-                        <li><a href="/#services">Layanan</a></li>
-                        <li><a href="/blog">Blog</a></li>
-                        <li><a href="/#contact">Kontak</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h3>Kontak Kami</h3>
-                    <ul>
-                        <li><i class="fas fa-map-marker-alt"></i> Jl. Ciputat Raya No.6, Jakarta Selatan</li>
-                        <li><i class="fas fa-phone"></i> +62 21 7590 7503</li>
-                        <li><i class="fas fa-envelope"></i> marketing@deltavista.co.id</li>
-                        <li><i class="fas fa-globe"></i> www.deltavista.co.id</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="copyright">
-                <p>&copy; 2023 PT Deltavista Nusantara. All Rights Reserved.</p>
-            </div>
+             <p>&copy; 2025 Anita CMS Hub.</p>
+             <p>Hunyaaaa~</p>
         </div>
     </footer>
 
-    <!-- JavaScript -->
+
+    <!-- Custom JS -->
     <script>
-        // Mobile Menu Toggle
-        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-        const navLinks = document.querySelector('.nav-links');
-        
-        mobileMenuBtn.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-            mobileMenuBtn.innerHTML = navLinks.classList.contains('active') ? 
-                '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
-        });
-        
-        // Smooth Scrolling for Anchor Links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                if(this.getAttribute('href') === '#') return;
-                
-                const target = document.querySelector(this.getAttribute('href'));
-                if(target) {
-                    window.scrollTo({
-                        top: target.offsetTop - 80,
-                        behavior: 'smooth'
-                    });
+        const searchInput = document.getElementById('searchInput');
+        const galleryGrid = document.getElementById('galleryGrid');
+        const cards = galleryGrid.querySelectorAll('.grid-item');
+        const noResultsMessage = document.getElementById('noResultsMessage');
+
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const titleElement = card.querySelector('.card-title');
+                // Check if titleElement exists before accessing textContent
+                if (titleElement) {
+                    const title = titleElement.textContent.toLowerCase();
+                    const isVisible = title.includes(searchTerm);
                     
-                    // Close mobile menu if open
-                    if(navLinks.classList.contains('active')) {
-                        navLinks.classList.remove('active');
-                        mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                    if (isVisible) {
+                        card.style.display = 'block';
+                        card.style.opacity = '1'; // Fade in effect
+                         card.style.transform = 'scale(1)'; 
+                        visibleCount++;
+                    } else {
+                         card.style.opacity = '0'; // Fade out effect
+                         card.style.transform = 'scale(0.95)'; 
+                        // Use setTimeout to hide after the transition completes
+                         setTimeout(() => {
+                             // Check again if it should be hidden, in case the search term changed quickly
+                             if (!titleElement.textContent.toLowerCase().includes(searchInput.value.toLowerCase().trim())) {
+                                card.style.display = 'none';
+                             }
+                         }, 300); // Match transition duration
                     }
                 }
             });
+            
+            // Show or hide the 'no results' message
+             if (visibleCount === 0 && searchTerm !== '') {
+                 noResultsMessage.style.display = 'block';
+             } else {
+                 noResultsMessage.style.display = 'none';
+             }
         });
-        
-        // Blog Search
-        const blogSearchForm = document.querySelector('.blog-search');
-        if(blogSearchForm) {
-            blogSearchForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const searchInput = this.querySelector('input');
-                alert('Anda mencari: ' + searchInput.value);
-                // In a real implementation, you would redirect to search results or filter articles
+
+        // Initial animation for cards on load (optional)
+        document.addEventListener('DOMContentLoaded', () => {
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                     card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                     card.style.opacity = '1';
+                     card.style.transform = 'translateY(0)';
+                }, index * 100); // Staggered animation
             });
-        }
-        
-        // Newsletter Form
-        const newsletterForm = document.querySelector('.sidebar-widget form');
-        if(newsletterForm) {
-            newsletterForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const emailInput = this.querySelector('input[type="email"]');
-                alert('Terima kasih telah berlangganan newsletter dengan email: ' + emailInput.value);
-                emailInput.value = '';
-            });
-        }
-        
-        // Scroll Animation
-        const observerOptions = {
-            threshold: 0.1
-        };
-        
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if(entry.isIntersecting) {
-                    entry.target.classList.add('animate');
-                }
-            });
-        }, observerOptions);
-        
-        document.querySelectorAll('.section').forEach(section => {
-            observer.observe(section);
         });
     </script>
 </body>
