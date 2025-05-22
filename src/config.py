@@ -17,7 +17,7 @@ class DefaultConfig:
 @dataclass
 class MailConfig:
     server_email:str="onboarding@resend.dev"
-    target_email:str="pandudparadox@gmail.com" 
+    target_email:str="" 
     header:str = ""
     footer:str = ""
     api_key:str = ""
