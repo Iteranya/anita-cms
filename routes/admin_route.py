@@ -3,7 +3,7 @@ from typing import List, Optional
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-from src.config import load_or_create_config, save_config
+from src.config import load_or_create_config, save_config, load_or_create_mail_config, save_mail_config
 from data import db  # Import the db module with standalone functions
 from data.models import Page as PageData
 from src.auth import get_current_user, optional_auth
@@ -26,6 +26,13 @@ class ConfigModel(BaseModel):
     base_llm: str
     temperature: float
     ai_key: Optional[str] = None  # Accept in POST, but don't expose in GET
+
+class MailModel(BaseModel):
+    server_email:str
+    target_email:str
+    header:Optional[str] = ""
+    footer:Optional[str] = ""
+    api_key:Optional[str] = None
 
 templates = Jinja2Templates(directory="static")
 
@@ -83,6 +90,32 @@ def update_config(updated: ConfigModel,user: dict = Depends(get_current_user)):
         config.ai_key = updated.ai_key  # Save if provided
 
     save_config(config)
+    return updated
+
+@router.get("/mail", response_model=MailModel)
+def get_config(user: dict = Depends(get_current_user)):
+    config = load_or_create_mail_config()
+    return MailModel(
+    server_email=config.server_email,
+    target_email= config.target_email,
+    header= config.header,
+    footer=config.header,
+    api_key=""
+    )
+
+@router.post("/mail", response_model=MailModel)
+def update_config(updated: MailModel,user: dict = Depends(get_current_user)):
+    config = load_or_create_mail_config()
+    config.server_email = updated.server_email
+    config.header = updated.header
+    config.footer = updated.footer
+    config.api_key = updated.api_key
+    config.target_email = updated.target_email
+
+    if updated.api_key is not None:
+        config.api_key = updated.api_key  # Save if provided
+
+    save_mail_config(config)
     return updated
 
 @router.get("/api/{slug}", response_model=PageModel)

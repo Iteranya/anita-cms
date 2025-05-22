@@ -1405,25 +1405,39 @@
         
         // Form Submission
         const contactForm = document.getElementById('contactForm');
-        if(contactForm) {
-            contactForm.addEventListener('submit', function(e) {
+        if (contactForm) {
+            contactForm.addEventListener('submit', async function(e) { // Make the function async
                 e.preventDefault();
-                
+
                 // Get form data
                 const formData = new FormData(this);
-                const data = {};
-                formData.forEach((value, key) => {
-                    data[key] = value;
-                });
-                
-                // Here you would normally send the data to a server
-                console.log('Form submitted:', data);
-                
-                // Show success message
-                alert('Terima kasih telah menghubungi kami. Tim kami akan segera merespon permintaan Anda.');
-                
-                // Reset form
-                this.reset();
+                // No need to convert to a plain object if sending as FormData,
+                // but if you want to send as JSON, the conversion below is fine.
+                // For FastAPI Form(...), FormData is expected by default.
+
+                // Send the data to the server
+                try {
+                    const response = await fetch('/contact', { // Assuming your FastAPI is served on the same domain/port
+                        method: 'POST',
+                        body: formData // Send formData directly
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok && result.status === 'sent') {
+                        // Show success message
+                        alert('Terima kasih telah menghubungi kami. Tim kami akan segera merespon permintaan Anda.');
+                        // Reset form
+                        this.reset();
+                    } else {
+                        // Show error message from server or a generic one
+                        alert(`Maaf, terjadi kesalahan saat mengirim pesan: ${result.detail || 'Silakan coba lagi.'}`);
+                    }
+                } catch (error) {
+                    // Show network error or other unexpected error
+                    console.error('Error submitting form:', error);
+                    alert('Maaf, terjadi kesalahan jaringan. Silakan periksa koneksi Anda dan coba lagi.');
+                }
             });
         }
         

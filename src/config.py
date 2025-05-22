@@ -67,3 +67,13 @@ def save_config(config: DefaultConfig, path: str = CONFIG_PATH) -> None:
                 config.ai_key = existing_data.get("ai_key", "")
     with open(path, 'w') as f:
         json.dump(asdict(config), f, indent=2)
+
+def save_mail_config(config: MailConfig, path: str = MAIL_CONFIG_PATH) -> None:
+    if os.path.exists(path):
+        with open(path, 'r') as f:
+            existing_data = json.load(f)
+            # Preserve the existing ai_key if the new one is empty
+            if not config.api_key:
+                config.api_key = existing_data.get("api_key", "")
+    with open(path, 'w') as f:
+        json.dump(asdict(config), f, indent=2)

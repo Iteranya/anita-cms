@@ -6,7 +6,7 @@ from data import db
 import uvicorn
 from src.auth import Depends,get_current_user
 # Import routers
-from routes import admin_route,asta_route,media_route,aina_route,public_route,auth_route
+from routes import admin_route,asta_route,media_route,aina_route,public_route,auth_route,mail_route
 
 app = FastAPI()
 db.get_connection()
@@ -29,6 +29,7 @@ app.include_router(media_route.router)
 app.include_router(aina_route.router)
 app.include_router(public_route.router)
 app.include_router(auth_route.router)
+app.include_router(mail_route.router)
 
 # Protected Routers
 app.include_router(
