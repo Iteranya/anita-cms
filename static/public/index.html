@@ -3,332 +3,1446 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Anita CMS - Your Lightweight Website Solution</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="/static/public/style.css">
-</head>
-<body class="min-h-screen">
-    <!-- Floating Tech Dots Background -->
-    
-
-    <div class="container mx-auto px-4 py-12 max-w-6xl">
-        <!-- Header -->
-        <header class="text-center mb-16">
-            <div class="inline-block sci-fi-border rounded-lg px-6 py-4 mb-8 holographic-effect">
-                <h1 class="text-4xl md:text-5xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-emerald-500">
-                    Welcome to <span class="underline decoration-wavy decoration-amber-400">Anita CMS</span>
-                </h1>
-                <p class="text-lg text-slate-600">Your lightweight, AI-powered website solution</p>
-            </div>
-            
-            <div class="flex justify-center mb-10">
-                <div class="sci-fi-border rounded-lg overflow-hidden w-full max-w-2xl">
-                    <img src="/media/anita.png" 
-                         alt="Aina, Amiya, Asta having a selfie" 
-                         class="w-full h-auto">
-                </div>
-            </div>
-            
-            <div class="flex flex-wrap justify-center gap-4 mb-10">
-                <a href="/admin" class="btn-primary text-white font-semibold px-6 py-3 rounded-lg flex items-center">
-                    <i class="fas fa-cog mr-2"></i> Admin Panel
-                </a>
-                <a href="/blog" class="btn-primary text-white font-semibold px-6 py-3 rounded-lg flex items-center">
-                    <i class="fas fa-newspaper mr-2"></i> Blog
-                </a>
-                <a href="/aina" class="btn-primary text-white font-semibold px-6 py-3 rounded-lg flex items-center">
-                    <i class="fas fa-magic mr-2"></i> Aina Generator
-                </a>
-                <a href="/asta" class="btn-primary text-white font-semibold px-6 py-3 rounded-lg flex items-center">
-                    <i class="fas fa-pen-fancy mr-2"></i> Asta Editor
-                </a>
-                <a href="https://github.com/Iteranya/anita-cms" target="_blank" class="btn-primary text-white font-semibold px-6 py-3 rounded-lg flex items-center">
-                    <i class="fab fa-github mr-2"></i> Documentation
-                </a>
-            </div>
-        </header>
-
-        <!-- Main Content -->
-        <main class="grid md:grid-cols-3 gap-8 mb-16">
-            <!-- What is Anita CMS -->
-            <div class="sci-fi-border rounded-xl p-6 holographic-effect">
-                <div class="flex items-center mb-4">
-                    <span class="tech-dot"></span>
-                    <h2 class="text-2xl font-bold ml-2 text-blue-600">Anita CMS</h2>
-                </div>
-                <p class="text-slate-700 mb-4">
-                    Anita CMS is the perfect blend of simplicity and power, combining the best of Amiya's admin interface, 
-                    Aina's AI website generation, and Asta's markdown editing into one lightweight package.
-                </p>
-                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r mb-4">
-                    <p class="text-sm text-blue-800">
-                        <i class="fas fa-lightbulb text-blue-500 mr-2"></i>
-                        No bloated frameworks, no Node.js nonsense - just pure vanilla JS magic with a FastAPI backend.
-                    </p>
-                </div>
-                <h3 class="font-semibold text-lg mt-4 mb-2 text-emerald-600">Why Choose Anita?</h3>
-                <ul class="space-y-2 text-sm text-slate-600">
-                    <li class="flex items-start">
-                        <i class="fas fa-check-circle text-emerald-500 mr-2 mt-1"></i>
-                        <span>Lightweight architecture (smaller than a React component's dependency tree!)</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-check-circle text-emerald-500 mr-2 mt-1"></i>
-                        <span>Hybrid content editing (switch between Markdown and HTML)</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-check-circle text-emerald-500 mr-2 mt-1"></i>
-                        <span>Built-in AI assistance for content creation</span>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Aina Generator -->
-            <div class="sci-fi-border rounded-xl p-6 holographic-effect">
-                <div class="flex items-center mb-4">
-                    <span class="tech-dot"></span>
-                    <h2 class="text-2xl font-bold ml-2 text-emerald-600">Aina Generator</h2>
-                </div>
-                <p class="text-slate-700 mb-4">
-                    Aina is your AI-powered website generator that helps you create beautiful, responsive websites 
-                    without touching a single line of code (unless you want to!).
-                </p>
-                <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r mb-4">
-                    <p class="text-sm text-emerald-800">
-                        <i class="fas fa-robot text-emerald-500 mr-2"></i>
-                        Get layout suggestions, color schemes, and even complete site structures with AI assistance.
-                    </p>
-                </div>
-                <h3 class="font-semibold text-lg mt-4 mb-2 text-blue-600">Better Than WordPress</h3>
-                <ul class="space-y-2 text-sm text-slate-600">
-                    <li class="flex items-start">
-                        <i class="fas fa-bolt text-blue-500 mr-2 mt-1"></i>
-                        <span>No security nightmares from outdated plugins</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-bolt text-blue-500 mr-2 mt-1"></i>
-                        <span>No bloated database slowing down your site</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-bolt text-blue-500 mr-2 mt-1"></i>
-                        <span>Real-time editing with instant previews</span>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Asta Editor -->
-            <div class="sci-fi-border rounded-xl p-6 holographic-effect">
-                <div class="flex items-center mb-4">
-                    <span class="tech-dot"></span>
-                    <h2 class="text-2xl font-bold ml-2 text-amber-600">Asta Editor</h2>
-                </div>
-                <p class="text-slate-700 mb-4">
-                    Asta brings powerful markdown editing with AI assistance to your fingertips. Perfect for blogs, 
-                    documentation, and any content-focused website.
-                </p>
-                <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r mb-4">
-                    <p class="text-sm text-amber-800">
-                        <i class="fas fa-pen-nib text-amber-500 mr-2"></i>
-                        Write in markdown, get beautiful formatted content with real-time preview and AI suggestions.
-                    </p>
-                </div>
-                <h3 class="font-semibold text-lg mt-4 mb-2 text-emerald-600">Blogging Made Simple</h3>
-                <ul class="space-y-2 text-sm text-slate-600">
-                    <li class="flex items-start">
-                        <i class="fas fa-feather-alt text-emerald-500 mr-2 mt-1"></i>
-                        <span>AI-powered writing assistance for better content</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-feather-alt text-emerald-500 mr-2 mt-1"></i>
-                        <span>No more fighting with clunky WYSIWYG editors</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-feather-alt text-emerald-500 mr-2 mt-1"></i>
-                        <span>Switch to HTML mode anytime for advanced customization</span>
-                    </li>
-                </ul>
-            </div>
-        </main>
-
-        <!-- Comparison Section -->
-        <section class="sci-fi-border rounded-xl p-8 mb-16 holographic-effect">
-            <h2 class="text-3xl font-bold mb-6 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-emerald-500">
-                <i class="fas fa-trophy mr-2"></i> Why Anita Beats WordPress
-            </h2>
-            
-            <div class="grid md:grid-cols-2 gap-8">
-                <div>
-                    <h3 class="text-xl font-semibold mb-4 text-blue-600 flex items-center">
-                        <i class="fas fa-shield-alt mr-2"></i> Security
-                    </h3>
-                    <div class="space-y-4">
-                        <div class="flex items-start">
-                            <div class="bg-blue-100 p-3 rounded-full mr-4">
-                                <i class="fas fa-check text-blue-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-medium text-blue-800">No Plugin Vulnerabilities</h4>
-                                <p class="text-sm text-slate-600">Anita has built-in functionality without relying on third-party plugins that need constant updates.</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start">
-                            <div class="bg-blue-100 p-3 rounded-full mr-4">
-                                <i class="fas fa-check text-blue-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-medium text-blue-800">Minimal Attack Surface</h4>
-                                <p class="text-sm text-slate-600">With a lightweight architecture, there's simply less code that could be exploited.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div>
-                    <h3 class="text-xl font-semibold mb-4 text-emerald-600 flex items-center">
-                        <i class="fas fa-bolt mr-2"></i> Performance
-                    </h3>
-                    <div class="space-y-4">
-                        <div class="flex items-start">
-                            <div class="bg-emerald-100 p-3 rounded-full mr-4">
-                                <i class="fas fa-check text-emerald-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-medium text-emerald-800">Lightning Fast</h4>
-                                <p class="text-sm text-slate-600">Average response time under 50ms compared to WordPress's bloated architecture.</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start">
-                            <div class="bg-emerald-100 p-3 rounded-full mr-4">
-                                <i class="fas fa-check text-emerald-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-medium text-emerald-800">No Database Overhead</h4>
-                                <p class="text-sm text-slate-600">SQLite provides all the power you need without MySQL's performance overhead.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div>
-                    <h3 class="text-xl font-semibold mb-4 text-amber-600 flex items-center">
-                        <i class="fas fa-pen-fancy mr-2"></i> Content Creation
-                    </h3>
-                    <div class="space-y-4">
-                        <div class="flex items-start">
-                            <div class="bg-amber-100 p-3 rounded-full mr-4">
-                                <i class="fas fa-check text-amber-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-medium text-amber-800">AI-Assisted Writing</h4>
-                                <p class="text-sm text-slate-600">Get suggestions, improvements, and even full drafts generated by AI.</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start">
-                            <div class="bg-amber-100 p-3 rounded-full mr-4">
-                                <i class="fas fa-check text-amber-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-medium text-amber-800">Hybrid Editing</h4>
-                                <p class="text-sm text-slate-600">Switch seamlessly between Markdown and HTML modes based on your needs.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div>
-                    <h3 class="text-xl font-semibold mb-4 text-purple-600 flex items-center">
-                        <i class="fas fa-cogs mr-2"></i> Maintenance
-                    </h3>
-                    <div class="space-y-4">
-                        <div class="flex items-start">
-                            <div class="bg-purple-100 p-3 rounded-full mr-4">
-                                <i class="fas fa-check text-purple-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-medium text-purple-800">No Constant Updates</h4>
-                                <p class="text-sm text-slate-600">Unlike WordPress, you don't need to update core, plugins, and themes constantly.</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start">
-                            <div class="bg-purple-100 p-3 rounded-full mr-4">
-                                <i class="fas fa-check text-purple-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-medium text-purple-800">Simple Backups</h4>
-                                <p class="text-sm text-slate-600">Your entire site can be backed up by simply copying a few files.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Quick Start Guide -->
-        <section class="sci-fi-border rounded-xl p-8 mb-16 holographic-effect">
-            <h2 class="text-3xl font-bold mb-6 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-emerald-500">
-                <i class="fas fa-rocket mr-2"></i> Quick Start Guide
-            </h2>
-            
-            <div class="grid md:grid-cols-3 gap-6">
+    <title>PT Deltavista Nusantara - Solusi Sumber Daya Manusia Profesional</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Global Styles */
+        :root {
+            --primary: #0056b3;
+            --secondary: #ff6b00;
+            --dark: #333;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --white: #fff;
+        }
         
-                
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-emerald-100">
-                    <div class="text-emerald-500 text-2xl mb-4">
-                        <i class="fas fa-sliders-h"></i>
-                    </div>
-                    <h3 class="font-semibold text-lg mb-2 text-emerald-600">1. Configure Settings</h3>
-                    <p class="text-sm text-slate-600 mb-4">
-                        Visit the Admin Panel to set up your site title, SEO settings, and configure AI options.
-                    </p>
-                    <a href="/admin" class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full">Go to Admin</a>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            line-height: 1.6;
+            color: var(--dark);
+            overflow-x: hidden;
+        }
+        
+        a {
+            text-decoration: none;
+            color: var(--primary);
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .btn:hover {
+            background: #003d7a;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: var(--secondary);
+        }
+        
+        .btn-secondary:hover {
+            background: #cc5600;
+        }
+        
+        .section {
+            padding: 80px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+        
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .section-title p {
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: var(--secondary);
+            margin: 20px auto;
+        }
+        
+        /* Header */
+        header {
+            background-color: var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo img {
+            height: 50px;
+            margin-right: 10px;
+        }
+        
+        .logo h1 {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-left: 30px;
+        }
+        
+        .nav-links a {
+            color: var(--dark);
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(0, 86, 179, 0.8), rgba(0, 86, 179, 0.8)), 
+                        url('https://images.unsplash.com/photo-1521791136064-7986c2920216?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1469&q=80') no-repeat center center/cover;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: var(--white);
+            padding-top: 80px;
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .hero-btns {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        /* About Section */
+        .about {
+            background-color: var(--light);
+        }
+        
+        .about-content {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+        }
+        
+        .about-img {
+            flex: 1;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .about-img img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .about-text {
+            flex: 1;
+        }
+        
+        .about-text h3 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .about-features {
+            margin-top: 30px;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .feature-icon {
+            color: var(--secondary);
+            margin-right: 15px;
+            font-size: 1.2rem;
+            margin-top: 3px;
+        }
+        
+        /* Legal Section */
+        .legal {
+            background-color: var(--white);
+        }
+        
+        .legal-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+        
+        .legal-card {
+            background: var(--light);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        
+        .legal-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .legal-card h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .legal-card ul {
+            list-style: none;
+        }
+        
+        .legal-card li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .legal-card li::before {
+            content: '✓';
+            color: var(--secondary);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+        
+        /* Services Section */
+        .services {
+            background-color: var(--light);
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .service-card {
+            background: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .service-img {
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .service-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .service-card:hover .service-img img {
+            transform: scale(1.1);
+        }
+        
+        .service-content {
+            padding: 25px;
+        }
+        
+        .service-content h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .service-content ul {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+        
+        .service-content li {
+            margin-bottom: 8px;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .service-content li::before {
+            content: '•';
+            color: var(--secondary);
+            position: absolute;
+            left: 10px;
+            font-weight: bold;
+        }
+        
+        /* Recruitment Section */
+        .recruitment {
+            background-color: var(--white);
+        }
+        
+        .recruitment-steps {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 50px;
+        }
+        
+        .step {
+            flex: 1;
+            min-width: 250px;
+            max-width: 300px;
+            text-align: center;
+            padding: 30px 20px;
+            background: var(--light);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+        
+        .step:hover {
+            transform: translateY(-10px);
+        }
+        
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0 auto 20px;
+        }
+        
+        .step h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        /* Management Section */
+        .management {
+            background-color: var(--light);
+        }
+        
+        .management-content {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+        }
+        
+        .management-text {
+            flex: 1;
+        }
+        
+        .management-text h3 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .management-features {
+            margin-top: 30px;
+        }
+        
+        .management-img {
+            flex: 1;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .management-img img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Protection Section */
+        .protection {
+            background-color: var(--white);
+        }
+        
+        .protection-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .protection-card {
+            background: var(--light);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .protection-card h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .protection-card h3 i {
+            margin-right: 10px;
+            color: var(--secondary);
+        }
+        
+        /* Payroll Section */
+        .payroll {
+            background-color: var(--light);
+        }
+        
+        .payroll-content {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+        }
+        
+        .payroll-img {
+            flex: 1;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .payroll-img img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .payroll-text {
+            flex: 1;
+        }
+        
+        .payroll-text h3 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .payroll-features {
+            margin-top: 30px;
+        }
+        
+        /* Special Handling Section */
+        .special-handling {
+            background-color: var(--white);
+        }
+        
+        .handling-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .handling-card {
+            background: var(--light);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        
+        .handling-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .handling-card h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .handling-card h3 i {
+            margin-right: 10px;
+            color: var(--secondary);
+        }
+        
+        /* Contact Section */
+        .contact {
+            background-color: var(--light);
+        }
+        
+        .contact-container {
+            display: flex;
+            gap: 50px;
+        }
+        
+        .contact-info {
+            flex: 1;
+        }
+        
+        .contact-info h3 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .contact-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .contact-branches {
+            margin-top: 30px;
+        }
+        
+        .contact-branches h4 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .contact-form {
+            flex: 1;
+            background: var(--white);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .contact-form h3 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+        
+        /* Blog CTA Section */
+        .blog-cta {
+            background: linear-gradient(rgba(0, 86, 179, 0.9), rgba(0, 86, 179, 0.9)), 
+                        url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80') no-repeat center center/cover;
+            padding: 100px 0;
+            text-align: center;
+            color: var(--white);
+        }
+        
+        .blog-cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .blog-cta p {
+            max-width: 700px;
+            margin: 0 auto 30px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark);
+            color: var(--white);
+            padding: 60px 0 20px;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-col h3 {
+            color: var(--white);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+        
+        .footer-col ul {
+            list-style: none;
+        }
+        
+        .footer-col ul li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-col ul li a {
+            color: #bbb;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-col ul li a:hover {
+            color: var(--secondary);
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            background: var(--secondary);
+            transform: translateY(-3px);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #bbb;
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .about-content,
+            .management-content,
+            .payroll-content,
+            .contact-container {
+                flex-direction: column;
+            }
+            
+            .about-img,
+            .management-img,
+            .payroll-img {
+                width: 100%;
+                max-width: 600px;
+                margin: 0 auto 30px;
+            }
+            
+            .contact-info,
+            .contact-form {
+                width: 100%;
+            }
+            
+            .section-title h2 {
+                font-size: 2rem;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 80px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 80px);
+                background: var(--white);
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-start;
+                padding-top: 40px;
+                transition: left 0.3s ease;
+            }
+            
+            .nav-links.active {
+                left: 0;
+            }
+            
+            .nav-links li {
+                margin: 15px 0;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .hero-btns {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .section {
+                padding: 60px 0;
+            }
+            
+            .section-title h2 {
+                font-size: 1.8rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .section-title h2 {
+                font-size: 1.5rem;
+            }
+            
+            .blog-cta h2 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">
+                    <img src="/media/deltavista.png" alt="Deltavista Nusantara Logo">
+                    <h1>Deltavista Nusantara</h1>
                 </div>
+                <div class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#about">Tentang Kami</a></li>
+                    <li><a href="#legal">Legalitas</a></li>
+                    <li><a href="#services">Layanan</a></li>
+                    <li><a href="#recruitment">Rekrutmen</a></li>
+                    <li><a href="#contact">Kontak</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-blue-100">
-                    <div class="text-blue-500 text-2xl mb-4">
-                        <i class="fas fa-terminal"></i>
-                    </div>
-                    <h3 class="font-semibold text-lg mb-2 text-blue-600">2. Create Content</h3>
-                    <p class="text-sm text-slate-600 mb-4">
-                        Start with either the Asta Editor for markdown content or Aina Generator for visual HTML building.
-                    </p>
-                    <div class="flex space-x-2">
-                        <a href="/asta" class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full">Try Asta</a>
-                        <a href="/aina" class="text-xs bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full">Try Aina</a>
-                    </div>
-                </div>
-                
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-amber-100">
-                    <div class="text-amber-500 text-2xl mb-4">
-                        <i class="fas fa-globe"></i>
-                    </div>
-                    <h3 class="font-semibold text-lg mb-2 text-amber-600">3. Publish & Share</h3>
-                    <p class="text-sm text-slate-600 mb-4">
-                        Your site is live! Share your content with the world or continue refining.
-                    </p>
-                    <a href="/blog" class="text-xs bg-amber-50 text-amber-600 px-3 py-1 rounded-full">View Blog</a>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Solusi Sumber Daya Manusia yang Andal dan Profesional</h1>
+                <p>PT Deltavista Nusantara membantu perusahaan memenuhi kebutuhan SDM secara efisien, legal, dan terkelola dengan baik sejak tahun 2000.</p>
+                <div class="hero-btns">
+                    <a href="#contact" class="btn">Hubungi Kami</a>
+                    <a href="#services" class="btn btn-secondary">Lihat Layanan</a>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- Footer -->
-        <footer class="text-center py-8 text-slate-500 text-sm">
-            <div class="mb-4">
-                <a href="https://github.com/Iteranya/anita-cms" target="_blank" class="inline-flex items-center text-blue-500 hover:text-blue-700">
-                    <i class="fab fa-github mr-2"></i> GitHub Repository
-                </a>
+    <!-- About Section -->
+    <section id="about" class="about section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Tentang Kami</h2>
+                <p>PT Deltavista Nusantara adalah perusahaan penyedia jasa alih daya tenaga kerja (outsourcing) yang telah beroperasi sejak November 2000.</p>
             </div>
-            <p>Anita CMS - The lightweight CMS for developers who value simplicity and power</p>
-            <p class="mt-2">Made with <i class="fas fa-heart text-red-400"></i> by Artes Paradox (And Aina Smiling Smugly In The Corner)</p>
-        </footer>
-    </div>
-    
+            <div class="about-content">
+                <div class="about-img">
+                    <img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80" alt="About Deltavista Nusantara">
+                </div>
+                <div class="about-text">
+                    <h3>Kami Berfokus pada Rekrutmen, Penempatan, dan Manajemen Tenaga Kerja</h3>
+                    <p>Dengan pengalaman lebih dari dua dekade, kami membantu perusahaan memenuhi kebutuhan SDM secara efisien, legal, dan terkelola dengan baik untuk berbagai sektor industri.</p>
+                    
+                    <div class="about-features">
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="fas fa-check-circle"></i></span>
+                            <div>
+                                <h4>Tenaga kerja terlatih & berkualitas</h4>
+                                <p>Melalui proses seleksi ketat untuk memastikan kualitas SDM yang terbaik.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="fas fa-check-circle"></i></span>
+                            <div>
+                                <h4>Pelayanan profesional</h4>
+                                <p>Dengan sistem manajemen terintegrasi yang efisien.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="fas fa-check-circle"></i></span>
+                            <div>
+                                <h4>Proses rekrutmen cepat & efektif</h4>
+                                <p>Didukung database ribuan kandidat siap kerja.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="fas fa-check-circle"></i></span>
+                            <div>
+                                <h4>Fleksibilitas penempatan</h4>
+                                <p>Sesuai kebutuhan bisnis klien dari berbagai sektor industri.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="fas fa-check-circle"></i></span>
+                            <div>
+                                <h4>Biaya kompetitif</h4>
+                                <p>Disesuaikan dengan anggaran perusahaan Anda.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <!-- Floating Action Button -->
-    <div class="fixed bottom-8 right-8">
-        <a href="/admin" class="btn-primary text-white text-lg font-semibold px-5 py-3 rounded-full shadow-lg flex items-center">
-            <i class="fas fa-rocket mr-2"></i> Get Started
-        </a>
-    </div>
+    <!-- Legal Section -->
+    <section id="legal" class="legal section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Dasar Hukum & Legalitas</h2>
+                <p>Kami beroperasi sepenuhnya sesuai regulasi ketenagakerjaan Indonesia dengan legalitas lengkap.</p>
+            </div>
+            <div class="legal-content">
+                <div class="legal-card">
+                    <h3>Regulasi Ketenagakerjaan</h3>
+                    <ul>
+                        <li>UU No. 13 Tahun 2003 tentang Ketenagakerjaan</li>
+                        <li>Permenaker No. 19 Tahun 2012 tentang Penyerahan Pekerjaan ke Perusahaan Lain</li>
+                        <li>Peraturan Perusahaan (PP)</li>
+                        <li>Wajib Lapor Ketenagakerjaan (WLKP)</li>
+                    </ul>
+                </div>
+                <div class="legal-card">
+                    <h3>Dokumen Legal</h3>
+                    <ul>
+                        <li>Izin resmi dari Kementerian Ketenagakerjaan</li>
+                        <li>Nomor Induk Berusaha (NIB)</li>
+                        <li>Akta Pendirian Perusahaan</li>
+                        <li>SIUP, TDP, dan NPWP Perusahaan</li>
+                    </ul>
+                </div>
+                <div class="legal-card">
+                    <h3>Komitmen Kami</h3>
+                    <ul>
+                        <li>Kepatuhan penuh terhadap hukum ketenagakerjaan</li>
+                        <li>Transparansi dalam seluruh proses</li>
+                        <li>Perlindungan hak pekerja sesuai regulasi</li>
+                        <li>Resolusi sengketa sesuai hukum yang berlaku</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Portfolio Layanan</h2>
+                <p>Kami menyediakan tenaga kerja profesional untuk berbagai bidang industri dengan kualitas terbaik.</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-img">
+                        <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Operasional & Logistik">
+                    </div>
+                    <div class="service-content">
+                        <h3>Operasional & Logistik</h3>
+                        <ul>
+                            <li><strong>Driver</strong> (Direksi, Logistik, Distribusi)</li>
+                            <li><strong>Tenaga Produksi</strong> (Manufaktur, Gudang)</li>
+                            <li><strong>Warehouse Support</strong> (Manajemen Inventaris)</li>
+                            <li>Operator Forklift & Peralatan Gudang</li>
+                            <li>Tim Packing & Handling</li>
+                        </ul>
+                        <a href="#contact" class="btn">Konsultasi Kebutuhan</a>
+                    </div>
+                </div>
+                <div class="service-card">
+                    <div class="service-img">
+                        <img src="https://images.unsplash.com/photo-1556740738-b6a63e27c4df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Retail & Sales">
+                    </div>
+                    <div class="service-content">
+                        <h3>Retail & Sales</h3>
+                        <ul>
+                            <li><strong>SPG/SPB</strong> (Sales Promotion)</li>
+                            <li><strong>Merchandiser</strong> (Stock Monitoring)</li>
+                            <li><strong>Host Live Tiktok/Shopee</strong> (Digital Sales Support)</li>
+                            <li>Customer Service</li>
+                            <li>Cashier & Store Staff</li>
+                        </ul>
+                        <a href="#contact" class="btn">Konsultasi Kebutuhan</a>
+                    </div>
+                </div>
+                <div class="service-card">
+                    <div class="service-img">
+                        <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Administrasi & Keamanan">
+                    </div>
+                    <div class="service-content">
+                        <h3>Administrasi & Keamanan</h3>
+                        <ul>
+                            <li><strong>Team Administration</strong> (Staff Kantor)</li>
+                            <li><strong>Security</strong> (Bersertifikat)</li>
+                            <li>Receptionist</li>
+                            <li>Data Entry & Office Support</li>
+                            <li>Cleaning Service</li>
+                        </ul>
+                        <a href="#contact" class="btn">Konsultasi Kebutuhan</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recruitment Section -->
+    <section id="recruitment" class="recruitment section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Sistem Rekrutmen</h2>
+                <p>Proses seleksi karyawan yang transparan dan profesional untuk memastikan kualitas SDM yang terbaik.</p>
+            </div>
+            <div class="recruitment-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Sumber Kandidat</h3>
+                    <p>Database internal (>10.000 pelamar), job portal, media sosial, dan jaringan rekrutmen profesional.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Proses Seleksi</h3>
+                    <p>Verifikasi administrasi, wawancara kompetensi, tes psikologi, dan pemeriksaan kemampuan teknis.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Penempatan</h3>
+                    <p>Penempatan karyawan sesuai kebutuhan klien dengan pelatihan awal dan masa orientasi.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Tanpa Biaya</h3>
+                    <p>Tidak ada pungutan biaya kepada calon karyawan dalam seluruh proses rekrutmen.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Management Section -->
+    <section id="management" class="management section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Manajemen Tenaga Kerja</h2>
+                <p>Sistem pengelolaan SDM yang terintegrasi untuk memastikan kinerja optimal dan kedisiplinan.</p>
+            </div>
+            <div class="management-content">
+                <div class="management-text">
+                    <h3>Pengawasan dan Kepatuhan</h3>
+                    <p>Kami menerapkan sistem manajemen tenaga kerja yang komprehensif untuk memastikan produktivitas dan kedisiplinan karyawan sesuai dengan standar perusahaan klien.</p>
+                    
+                    <div class="management-features">
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="fas fa-fingerprint"></i></span>
+                            <div>
+                                <h4>Sistem Pengawasan</h4>
+                                <p>Fingerprint, mobile app monitoring, dan PIC onsite untuk pengawasan langsung.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="fas fa-id-card"></i></span>
+                            <div>
+                                <h4>Kepatuhan Standar</h4>
+                                <p>Aturan seragam, ID card, serta sanksi untuk pelanggaran sesuai kebijakan perusahaan.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="fas fa-file-contract"></i></span>
+                            <div>
+                                <h4>Jenis Perjanjian Kerja</h4>
+                                <p>PKWT (Waktu Tertentu), PKWTT (Waktu Tidak Tertentu), Harian Lepas/Pemagangan.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="fas fa-chart-line"></i></span>
+                            <div>
+                                <h4>Evaluasi Kinerja</h4>
+                                <p>Penilaian berkala untuk memastikan kualitas kerja sesuai standar.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="management-img">
+                    <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Management Team">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Protection Section -->
+    <section id="protection" class="protection section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Perlindungan & Kesejahteraan</h2>
+                <p>Kami memastikan hak dan kesejahteraan karyawan terlindungi sesuai regulasi ketenagakerjaan.</p>
+            </div>
+            <div class="protection-cards">
+                <div class="protection-card">
+                    <h3><i class="fas fa-shield-alt"></i> Jaminan Sosial</h3>
+                    <p>Kami memastikan seluruh karyawan mendapatkan hak-haknya sesuai dengan peraturan ketenagakerjaan yang berlaku.</p>
+                    <ul>
+                        <li>BPJS Ketenagakerjaan</li>
+                        <li>BPJS Kesehatan</li>
+                        <li>Program Pensiun</li>
+                        <li>Jaminan Kecelakaan Kerja</li>
+                    </ul>
+                </div>
+                <div class="protection-card">
+                    <h3><i class="fas fa-ambulance"></i> Penanganan Kecelakaan Kerja</h3>
+                    <p>Sistem penanganan darurat yang cepat dan terkoordinasi untuk memastikan keselamatan karyawan.</p>
+                    <ul>
+                        <li>RS mitra untuk penanganan darurat</li>
+                        <li>Investigasi kecelakaan kerja</li>
+                        <li>Klaim BPJS Ketenagakerjaan</li>
+                        <li>Pendampingan hukum jika diperlukan</li>
+                    </ul>
+                </div>
+                <div class="protection-card">
+                    <h3><i class="fas fa-gavel"></i> Resolusi Sengketa</h3>
+                    <p>Mekanisme penyelesaian masalah ketenagakerjaan yang adil dan sesuai hukum.</p>
+                    <ul>
+                        <li>Mediasi internal</li>
+                        <li>Penyelesaian sesuai UU Ketenagakerjaan</li>
+                        <li>Kerjasama dengan Disnaker setempat</li>
+                        <li>Pendampingan hukum profesional</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Payroll Section -->
+    <section id="payroll" class="payroll section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Sistem Pengupahan</h2>
+                <p>Pengelolaan gaji yang transparan dan tepat waktu sesuai peraturan ketenagakerjaan.</p>
+            </div>
+            <div class="payroll-content">
+                <div class="payroll-img">
+                    <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1511&q=80" alt="Payroll System">
+                </div>
+                <div class="payroll-text">
+                    <h3>Transparansi dan Ketepatan Waktu</h3>
+                    <p>Sistem penggajian yang terintegrasi dengan perhitungan yang akurat dan pembayaran tepat waktu sesuai peraturan perusahaan.</p>
+                    
+                    <div class="payroll-features">
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="fas fa-money-bill-wave"></i></span>
+                            <div>
+                                <h4>Gaji Bulanan</h4>
+                                <p>Pembayaran gaji dengan cut-off jelas setiap bulannya.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="fas fa-file-invoice-dollar"></i></span>
+                            <div>
+                                <h4>Payroll Terintegrasi</h4>
+                                <p>Slip gaji digital/fisik dengan rincian lengkap.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="fas fa-gift"></i></span>
+                            <div>
+                                <h4>Kompensasi</h4>
+                                <p>Lembur, tunjangan hari raya (THR), dan benefit lain sesuai PP No. 35/2021.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="fas fa-lock"></i></span>
+                            <div>
+                                <h4>Keamanan Data</h4>
+                                <p>Sistem payroll yang aman dan terenkripsi.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Special Handling Section -->
+    <section id="special-handling" class="special-handling section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Penanganan Khusus</h2>
+                <p>Prosedur khusus untuk situasi darurat dan penanganan kasus khusus sesuai regulasi.</p>
+            </div>
+            <div class="handling-cards">
+                <div class="handling-card">
+                    <h3><i class="fas fa-car-crash"></i> Kecelakaan Kerja/Lalu Lintas</h3>
+                    <p>Protokol penanganan kecelakaan kerja yang cepat dan terkoordinasi untuk memastikan keselamatan karyawan.</p>
+                    <ul>
+                        <li>Evakuasi ke rumah sakit mitra</li>
+                        <li>Proses klaim BPJS Ketenagakerjaan</li>
+                        <li>Investigasi penyebab kecelakaan</li>
+                        <li>Pendampingan keluarga korban</li>
+                        <li>Koordinasi dengan pihak berwajib jika diperlukan</li>
+                    </ul>
+                </div>
+                <div class="handling-card">
+                    <h3><i class="fas fa-user-shield"></i> Fraud/Tindak Pidana</h3>
+                    <p>Penanganan kasus pelanggaran dan tindak pidana sesuai dengan hukum yang berlaku.</p>
+                    <ul>
+                        <li>Investigasi internal</li>
+                        <li>Kerjasama dengan kepolisian</li>
+                        <li>Proses hukum sesuai regulasi</li>
+                        <li>Pendampingan hukum profesional</li>
+                        <li>Pencegahan melalui sistem pengawasan</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Kantor Kami</h2>
+                <p>Hubungi kami untuk konsultasi kebutuhan SDM perusahaan Anda.</p>
+            </div>
+            <div class="contact-container">
+                <div class="contact-info">
+                    <h3>Head Office</h3>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div>
+                            <p>Jl. Ciputat Raya No.6, Kebayoran Lama, Jakarta Selatan 12310</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div>
+                            <p>+62 21 7590 7503</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div>
+                            <p>marketing@deltavista.co.id</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <div>
+                            <p>www.deltavista.co.id</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-branches">
+                        <h4>Cabang Kami:</h4>
+                        <p>Medan, Lampung, Bandung, Semarang, Yogyakarta, Surabaya</p>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <h3>Tanya Jawab</h3>
+                    <p>Konsultasikan kebutuhan SDM Anda dengan tim kami!</p>
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label for="name">Nama Lengkap</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="company">Perusahaan</label>
+                            <input type="text" id="company" name="company" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Telepon/WhatsApp</label>
+                            <input type="tel" id="phone" name="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="service">Jenis Layanan yang Dibutuhkan</label>
+                            <select id="service" name="service">
+                                <option value="operasional">Operasional & Logistik</option>
+                                <option value="retail">Retail & Sales</option>
+                                <option value="admin">Administrasi & Keamanan</option>
+                                <option value="other">Lainnya</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Pesan</label>
+                            <textarea id="message" name="message" required></textarea>
+                        </div>
+                        <button type="submit" class="btn">Kirim Pesan</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog CTA Section -->
+    <section class="blog-cta section">
+        <div class="container">
+            <h2>Artikel Terbaru Tentang Ketenagakerjaan</h2>
+            <p>Temukan tips, informasi terbaru, dan panduan praktis seputar manajemen SDM dan ketenagakerjaan di blog kami.</p>
+            <a href="/blog" class="btn" target="_blank">Kunjungi Blog Kami</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <h3>Tentang Kami</h3>
+                    <p>PT Deltavista Nusantara adalah perusahaan penyedia jasa alih daya tenaga kerja (outsourcing) yang telah beroperasi sejak November 2000.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h3>Layanan Kami</h3>
+                    <ul>
+                        <li><a href="#">Operasional & Logistik</a></li>
+                        <li><a href="#">Retail & Sales</a></li>
+                        <li><a href="#">Administrasi & Keamanan</a></li>
+                        <li><a href="#">Rekrutmen & Seleksi</a></li>
+                        <li><a href="#">Manajemen Tenaga Kerja</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Link Cepat</h3>
+                    <ul>
+                        <li><a href="#about">Tentang Kami</a></li>
+                        <li><a href="#legal">Legalitas</a></li>
+                        <li><a href="#services">Layanan</a></li>
+                        <li><a href="#recruitment">Rekrutmen</a></li>
+                        <li><a href="#contact">Kontak</a></li>
+                        <li><a href="https://www.deltavista.co.id/blog" target="_blank">Blog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Kontak Kami</h3>
+                    <ul>
+                        <li><i class="fas fa-map-marker-alt"></i> Jl. Ciputat Raya No.6, Jakarta Selatan</li>
+                        <li><i class="fas fa-phone"></i> +62 21 7590 7503</li>
+                        <li><i class="fas fa-envelope"></i> marketing@deltavista.co.id</li>
+                        <li><i class="fas fa-globe"></i> www.deltavista.co.id</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 PT Deltavista Nusantara. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const navLinks = document.querySelector('.nav-links');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            mobileMenuBtn.innerHTML = navLinks.classList.contains('active') ? 
+                '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
+        });
+        
+        // Smooth Scrolling for Anchor Links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                if(this.getAttribute('href') === '#') return;
+                
+                const target = document.querySelector(this.getAttribute('href'));
+                if(target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Close mobile menu if open
+                    if(navLinks.classList.contains('active')) {
+                        navLinks.classList.remove('active');
+                        mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                    }
+                }
+            });
+        });
+        
+        // Form Submission
+        const contactForm = document.getElementById('contactForm');
+        if(contactForm) {
+            contactForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get form data
+                const formData = new FormData(this);
+                const data = {};
+                formData.forEach((value, key) => {
+                    data[key] = value;
+                });
+                
+                // Here you would normally send the data to a server
+                console.log('Form submitted:', data);
+                
+                // Show success message
+                alert('Terima kasih telah menghubungi kami. Tim kami akan segera merespon permintaan Anda.');
+                
+                // Reset form
+                this.reset();
+            });
+        }
+        
+        // Scroll Animation
+        const observerOptions = {
+            threshold: 0.1
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.classList.add('animate');
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.section').forEach(section => {
+            observer.observe(section);
+        });
+    </script>
 </body>
 </html>
