@@ -36,19 +36,21 @@ class MailModel(BaseModel):
 
 templates = Jinja2Templates(directory="static")
 
-@router.get("/old", response_class=HTMLResponse)
-async def get_html(request: Request, user: Optional[str] = Depends(optional_auth)):
-    if not user:
-        return RedirectResponse(url="/auth/login", status_code=302)
+# @router.get("/old", response_class=HTMLResponse)
+# async def get_html(request: Request, user: Optional[str] = Depends(optional_auth)):
+#     if not user:
+#         return RedirectResponse(url="/auth/login", status_code=302)
     
-    template_path = "static/admin/index_old.html"
-    with open(template_path, "r") as f:
-        html = f.read()
+#     template_path = "static/admin/index_old.html"
+#     with open(template_path, "r") as f:
+#         html = f.read()
 
-    return html
+#     return html
 
 @router.get("/")
-async def admin_panel(request: Request):
+async def admin_panel(request: Request, user: Optional[str] = Depends(optional_auth)):
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
     return templates.TemplateResponse("admin/index.html", {"request": request})
 
 
