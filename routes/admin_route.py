@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from typing import List, Optional
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-from src.config import load_or_create_config, save_config
+from src.config import load_or_create_config, save_config, load_or_create_mail_config, save_mail_config
 from data import db  # Import the db module with standalone functions
 from data.models import Page as PageData
 from src.auth import get_current_user, optional_auth
+
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
 class PageModel(BaseModel):
@@ -25,20 +27,32 @@ class ConfigModel(BaseModel):
     temperature: float
     ai_key: Optional[str] = None  # Accept in POST, but don't expose in GET
 
+class MailModel(BaseModel):
+    server_email:str
+    target_email:str
+    header:Optional[str] = ""
+    footer:Optional[str] = ""
+    api_key:Optional[str] = None
 
-@router.get("/", response_class=HTMLResponse)
+templates = Jinja2Templates(directory="static")
+
+@router.get("/old", response_class=HTMLResponse)
 async def get_html(request: Request, user: Optional[str] = Depends(optional_auth)):
     if not user:
         return RedirectResponse(url="/auth/login", status_code=302)
     
-    template_path = "static/admin/index.html"
+    template_path = "static/admin/index_old.html"
     with open(template_path, "r") as f:
         html = f.read()
 
     return html
 
+@router.get("/")
+async def admin_panel(request: Request):
+    return templates.TemplateResponse("admin/index.html", {"request": request})
 
-@router.post("/", response_model=PageModel)
+
+@router.post("/api", response_model=PageModel)
 def create_page(
     page: PageModel,
     user: dict = Depends(get_current_user),  # Enforces authentication
@@ -78,7 +92,33 @@ def update_config(updated: ConfigModel,user: dict = Depends(get_current_user)):
     save_config(config)
     return updated
 
-@router.get("/{slug}", response_model=PageModel)
+@router.get("/mail", response_model=MailModel)
+def get_config(user: dict = Depends(get_current_user)):
+    config = load_or_create_mail_config()
+    return MailModel(
+    server_email=config.server_email,
+    target_email= config.target_email,
+    header= config.header,
+    footer=config.header,
+    api_key=""
+    )
+
+@router.post("/mail", response_model=MailModel)
+def update_config(updated: MailModel,user: dict = Depends(get_current_user)):
+    config = load_or_create_mail_config()
+    config.server_email = updated.server_email
+    config.header = updated.header
+    config.footer = updated.footer
+    config.api_key = updated.api_key
+    config.target_email = updated.target_email
+
+    if updated.api_key is not None:
+        config.api_key = updated.api_key  # Save if provided
+
+    save_mail_config(config)
+    return updated
+
+@router.get("/api/{slug}", response_model=PageModel)
 def read_page(slug: str,user: dict = Depends(get_current_user)):
     page = db.get_page(slug)
     if not page:
@@ -86,7 +126,7 @@ def read_page(slug: str,user: dict = Depends(get_current_user)):
     return page
 
 
-@router.put("/{slug}", response_model=PageModel)
+@router.put("/api/{slug}", response_model=PageModel)
 def update_page(slug: str, page: PageModel,user: dict = Depends(get_current_user)):
     print("Received data:", page.dict())
     if not db.get_page(slug):
@@ -95,7 +135,7 @@ def update_page(slug: str, page: PageModel,user: dict = Depends(get_current_user
     return page
 
 
-@router.delete("/{slug}")
+@router.delete("/api/{slug}")
 def delete_page(slug: str,user: dict = Depends(get_current_user)):
     if not db.get_page(slug):
         raise HTTPException(status_code=404, detail="Page not found")

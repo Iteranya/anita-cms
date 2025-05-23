@@ -1,5 +1,3 @@
-
-
 import { showToast } from './toastService.js';
 // Get form references
 

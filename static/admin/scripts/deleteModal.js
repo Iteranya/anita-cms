@@ -17,7 +17,7 @@ export function closeDeleteModal() {
 export function deletePage() {
     const currentPageId = getCurrentPageId();
     
-    fetch(`/admin/${currentPageId}`, {
+    fetch(`/admin/api/${currentPageId}`, {
         method: 'DELETE'
     })
     .then(response => {

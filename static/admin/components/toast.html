@@ -1,0 +1,2 @@
+<!-- Toast Notification -->
+<div class="toast" id="toast"></div>

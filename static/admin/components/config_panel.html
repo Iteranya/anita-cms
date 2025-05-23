@@ -1,0 +1,37 @@
+<main class="main-config" id="config-panel">
+    <div class="header">
+        <h1>System Configuration</h1>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h3>AI Settings</h3>
+        </div>
+        <div class="card-body">
+            <form id="config-form">
+                <div class="form-group">
+                    <label for="system-note">System Note</label>
+                    <textarea id="system-note" class="form-control" rows="2" placeholder="Describe the AI behavior..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="ai-endpoint">AI Endpoint</label>
+                    <input type="text" id="ai-endpoint" class="form-control" placeholder="https://api.example.com/v1/chat">
+                </div>
+                <div class="form-group">
+                    <label for="base-llm">Base LLM</label>
+                    <input type="text" id="base-llm" class="form-control" placeholder="e.g., gpt-4, llama2">
+                </div>
+                <div class="form-group">
+                    <label for="temperature">Temperature</label>
+                    <input type="number" step="0.01" id="temperature" class="form-control" min="0" max="2" placeholder="0.7">
+                </div>
+                <div class="form-group">
+                    <label for="ai-key">API Key (Optional)</label>
+                    <input type="password" id="ai-key" class="form-control" placeholder="Enter to update key">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Configuration</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
