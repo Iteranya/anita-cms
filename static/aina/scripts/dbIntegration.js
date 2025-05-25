@@ -1,4 +1,4 @@
-const API_BASE_URL = '/admin';
+const API_BASE_URL = '/admin/api';
 
 /**
  * Fetch all projects
