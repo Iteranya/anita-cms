@@ -13,7 +13,10 @@ class Page:
     content_length: Optional[int] = None
     tags: Optional[List[str]] = None
     thumb: Optional[str] = None
-    type:str = "markdown"
+    type: str = "markdown"
+    created: Optional[str] = None
+    updated: Optional[str] = None
+    author: Optional[str] = None
 
 @dataclass
 class Prompt:

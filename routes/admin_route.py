@@ -7,6 +7,7 @@ from src.config import load_or_create_config, save_config, load_or_create_mail_c
 from data import db  # Import the db module with standalone functions
 from data.models import Page as PageData
 from src.auth import get_current_user, optional_auth
+from datetime import datetime
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
@@ -19,6 +20,9 @@ class PageModel(BaseModel):
     tags: List[str] | None = None  # List of keywords
     thumb: str | None = None  # Thumbnail link
     type:str = "markdown"
+    created: str | None = None
+    updated: str | None = None
+    author: str | None = None
 
 class ConfigModel(BaseModel):
     system_note: str
@@ -36,23 +40,22 @@ class MailModel(BaseModel):
 
 templates = Jinja2Templates(directory="static")
 
-# @router.get("/old", response_class=HTMLResponse)
-# async def get_html(request: Request, user: Optional[str] = Depends(optional_auth)):
-#     if not user:
-#         return RedirectResponse(url="/auth/login", status_code=302)
+@router.get("/old", response_class=HTMLResponse)
+async def get_html(request: Request, user: Optional[str] = Depends(optional_auth)):
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
     
-#     template_path = "static/admin/index_old.html"
-#     with open(template_path, "r") as f:
-#         html = f.read()
+    template_path = "static/admin/index_old.html"
+    with open(template_path, "r") as f:
+        html = f.read()
 
-#     return html
+    return html
 
 @router.get("/")
-async def admin_panel(request: Request, user: Optional[str] = Depends(optional_auth)):
+async def admin_panel(request: Request,  user: Optional[str] = Depends(optional_auth)):
     if not user:
         return RedirectResponse(url="/auth/login", status_code=302)
     return templates.TemplateResponse("admin/index.html", {"request": request})
-
 
 @router.post("/api", response_model=PageModel)
 def create_page(
@@ -61,9 +64,46 @@ def create_page(
 ):
     if db.get_page(page.slug):
         raise HTTPException(status_code=400, detail="Page already exists")
+   
+    # Add timestamps and author
+    page_data = page.dict()
+    now = datetime.now().isoformat()
+    page_data['created'] = now
+    page_data['updated'] = now
+    page_data['author'] = user.get('username')  # Use whatever user identifier you have
     
-    db.add_page(PageData(**page.dict()))
+    db.add_page(PageData(**page_data))
+    return PageModel(**page_data)
+
+@router.get("/api/{slug}", response_model=PageModel)
+def read_page(slug: str, user: dict = Depends(get_current_user)):
+    page = db.get_page(slug)
+    if not page:
+        raise HTTPException(status_code=404, detail="Page not found")
     return page
+
+@router.put("/api/{slug}", response_model=PageModel)
+def update_page(slug: str, page: PageModel, user: dict = Depends(get_current_user)):
+    print("Received data:", page.dict())
+    existing_page = db.get_page(slug)
+    if not existing_page:
+        raise HTTPException(status_code=404, detail="Page not found")
+    
+    # Update timestamp and preserve original author/created
+    page_data = page.dict()
+    page_data['updated'] = datetime.now().isoformat()
+    page_data['created'] = existing_page.created  # Preserve original creation time
+    page_data['author'] = existing_page.author    # Preserve original author
+    
+    db.update_page(PageData(**page_data))
+    return PageModel(**page_data)
+
+@router.delete("/api/{slug}")
+def delete_page(slug: str,user: dict = Depends(get_current_user)):
+    if not db.get_page(slug):
+        raise HTTPException(status_code=404, detail="Page not found")
+    db.delete_page(slug)
+    return {"message": "Page deleted successfully"}
 
 @router.get("/list", response_model=List[PageModel])
 def list_pages(user: dict = Depends(get_current_user)):
@@ -119,27 +159,3 @@ def update_config(updated: MailModel,user: dict = Depends(get_current_user)):
 
     save_mail_config(config)
     return updated
-
-@router.get("/api/{slug}", response_model=PageModel)
-def read_page(slug: str,user: dict = Depends(get_current_user)):
-    page = db.get_page(slug)
-    if not page:
-        raise HTTPException(status_code=404, detail="Page not found")
-    return page
-
-
-@router.put("/api/{slug}", response_model=PageModel)
-def update_page(slug: str, page: PageModel,user: dict = Depends(get_current_user)):
-    print("Received data:", page.dict())
-    if not db.get_page(slug):
-        raise HTTPException(status_code=404, detail="Page not found")
-    db.update_page(PageData(**page.dict()))
-    return page
-
-
-@router.delete("/api/{slug}")
-def delete_page(slug: str,user: dict = Depends(get_current_user)):
-    if not db.get_page(slug):
-        raise HTTPException(status_code=404, detail="Page not found")
-    db.delete_page(slug)
-    return {"message": "Page deleted successfully"}
