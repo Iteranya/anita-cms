@@ -33,10 +33,10 @@ If someone (including Future Me) **completely rewrites** this project from scrat
 
 This pledge does **not** apply to rewrites where someone just slaps a new UI on top or adds a few API endpoints. Nice try.
 
-## ☁️ SaaS Hosting? Be My Guest
+## ☁️ SaaS Hosting? Be My Guest (Follows AGPL-3 License)
 
 You are explicitly permitted to:
-- Run this project as a hosted service
+- Run this project as a paid hosted service
 - Offer paid hosting or managed deployments
 - Modify and enhance it (as long as your changes also follow the AGPL-3.0-only license and are made publicly available)
 
