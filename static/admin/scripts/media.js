@@ -3,31 +3,35 @@ import { showToast } from './toastService.js';
 
 const API = '/media';
 
-let grid, empty, fileIn, filterInput, uploadBtn, emptyUploadBtn, modal, modalImg, modalCaption, modalOpenLink;
+let panel, grid, empty, fileIn, filterInput, uploadBtn, emptyUploadBtn, modal, modalImg, modalCaption, modalOpenLink;
 let lastImages = [];
 let initialized = false;
-
-function $(id) { return document.getElementById(id); }
 
 function initOnce() {
   if (initialized) return;
 
-  grid           = $('gallery-grid');
-  empty          = $('empty-state');
-  fileIn         = $('file-picker');
-  filterInput    = $('filter-input');
-  uploadBtn      = $('upload-btn');
-  emptyUploadBtn = $('empty-upload-btn');
-  modal          = $('media-modal');
-  modalImg       = $('media-modal-img');
-  modalCaption   = $('media-modal-caption');
-  modalOpenLink  = $('media-modal-open');
+  panel = document.getElementById('media-panel');
+  if (!panel) return; // panel not in DOM yet
 
-  if (!grid) return; // panel not in DOM
+  // Scope to the media panel to avoid ID collisions elsewhere
+  grid           = panel.querySelector('#gallery-grid');
+  empty          = panel.querySelector('#empty-state');       // scoped!
+  fileIn         = panel.querySelector('#file-picker');
+  filterInput    = panel.querySelector('#filter-input');
+  uploadBtn      = panel.querySelector('#upload-btn');
+  emptyUploadBtn = panel.querySelector('#empty-upload-btn');
+
+  // Modal might be inside the panel; fallback to document if you mounted it globally
+  modal          = panel.querySelector('#media-modal') || document.getElementById('media-modal');
+  modalImg       = panel.querySelector('#media-modal-img') || document.getElementById('media-modal-img');
+  modalCaption   = panel.querySelector('#media-modal-caption') || document.getElementById('media-modal-caption');
+  modalOpenLink  = panel.querySelector('#media-modal-open') || document.getElementById('media-modal-open');
+
+  if (!grid) return;
 
   // Grid actions: open, delete, copy
   grid.addEventListener('click', async (e) => {
-    const del = e.target.closest('.btn-delete');
+    const del  = e.target.closest('.btn-delete');
     const copy = e.target.closest('.btn-copy');
     const img  = e.target.closest('img');
 
@@ -73,20 +77,19 @@ function initOnce() {
 
   // Upload
   function openPicker() { fileIn?.click(); }
-  uploadBtn?.addEventListener('click', openPicker);
+  uploadBtn     ?.addEventListener('click', openPicker);
   emptyUploadBtn?.addEventListener('click', openPicker);
 
   fileIn?.addEventListener('change', async () => {
     if (!fileIn.files[0]) return;
-    const file = fileIn.files[0];
     const fd = new FormData();
-    fd.append('file', file);
+    fd.append('file', fileIn.files[0]);
     try {
       const res = await fetch(API, { method: 'POST', body: fd });
       if (!res.ok) throw new Error(await res.text());
       showToast('Upload successful', 'success');
       fileIn.value = '';
-      await refreshMediaPage();
+      await refreshMediaPage(); // ensure immediate refresh
     } catch {
       showToast('Upload failed', 'error');
     }
@@ -125,6 +128,7 @@ async function fetchImages() {
 function render(images) {
   if (!grid || !empty) return;
   grid.innerHTML = '';
+
   if (!images.length) {
     empty.style.display = 'block';
     return;
@@ -138,15 +142,15 @@ function render(images) {
     div.className = 'gallery-item';
     div.innerHTML = `
       <div class="thumb">
-        <img src="${url}" alt="${name}" data-name="${name}">
         <button class="icon-btn btn-copy" title="Copy URL" data-name="${name}">
-          <i class="fas fa-copy"></i>
+          <i class="fas fa-link"></i>
         </button>
         <button class="icon-btn btn-delete" title="Delete" data-name="${name}">
           <i class="fas fa-trash"></i>
         </button>
+        <img src="${url}" alt="${name}" data-name="${name}">
       </div>
-      <div class="caption" title="${name}">${name}</div>
+      <div class="caption">${name}</div>
     `;
     frag.appendChild(div);
   });
@@ -157,8 +161,8 @@ function openModal(src, name) {
   if (!modal) return;
   modalImg.src = src;
   modalImg.alt = name;
-  modalCaption.textContent = name;
-  modalOpenLink.href = src;
+  if (modalCaption) modalCaption.textContent = name;
+  if (modalOpenLink) modalOpenLink.href = src;
   modal.classList.add('open');
 }
 
@@ -171,6 +175,7 @@ function closeModal() {
 
 export async function refreshMediaPage() {
   initOnce();
+  if (!panel) return;
   const images = await fetchImages();
   lastImages = images;
   const q = (filterInput?.value || '').toLowerCase();
