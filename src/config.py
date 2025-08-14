@@ -13,6 +13,7 @@ class DefaultConfig:
     base_llm:str= "gemini-2.5-pro-exp-03-25"
     temperature:float = 0.5
     ai_key:str = ""
+    theme:str = "default"
 
 @dataclass
 class MailConfig:
@@ -21,6 +22,7 @@ class MailConfig:
     header:str = ""
     footer:str = ""
     api_key:str = ""
+    
 
 def load_or_create_config(path: str = CONFIG_PATH) -> DefaultConfig:
     if os.path.exists(path):
@@ -55,6 +57,15 @@ def get_key(path:str = CONFIG_PATH) -> str:
             data = json.load(f)
             current_config = DefaultConfig(**data)
             return current_config.ai_key 
+    else:
+        return ""
+    
+def get_theme(path:str = CONFIG_PATH) ->str:
+    if os.path.exists(path):
+        with open(path, 'r') as f:
+            data = json.load(f)
+            current_config = DefaultConfig(**data)
+            return current_config.theme 
     else:
         return ""
     

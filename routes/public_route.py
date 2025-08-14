@@ -3,10 +3,12 @@ from fastapi.responses import FileResponse, HTMLResponse
 from data.db import list_pages, get_page
 from fastapi.templating import Jinja2Templates
 from src.generator import generate_markdown_page
+from src.config import get_theme
 
 
 router = APIRouter(tags=["Public"])
-templates = Jinja2Templates(directory="static/public")
+template_path = f"static/public/{get_theme()}"
+templates = Jinja2Templates(directory=template_path)
 
 # Hey! Hey over here!!!
 
@@ -21,7 +23,8 @@ templates = Jinja2Templates(directory="static/public")
 
 @router.get("/")
 async def serve_custom_page():
-    return FileResponse("static/public/index.html")
+    path = f"{template_path}/index.html"
+    return FileResponse(path)
 
 @router.get("/blog", response_class=HTMLResponse)
 async def home(request: Request):
@@ -43,6 +46,6 @@ async def render_site(slug: str):
 # Example custom route in public_route.py
 @router.get("/about")
 async def serve_custom_page():
-    return FileResponse("static/public/about.html")
+    return FileResponse(f"{template_path}/about.html")
 
 # Example custom route in public_route.py

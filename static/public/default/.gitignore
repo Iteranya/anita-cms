@@ -1,0 +1,10 @@
+/__pycache__
+/.venv
+*.json
+*.db
+*
+!index.html
+!.gitignore
+!about.html
+!blog.html
+!style.css
