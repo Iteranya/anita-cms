@@ -1,123 +1,63 @@
 // main.js
 import { openPageModal } from './pageModal.js';
 import { filterPages } from './pageService.js';
-import { switchTab } from './tabService.js';
-import {loadConfig,handleSubmit} from './config.js'
-import {loadMailConfig,handleMailSubmit} from './mail.js'
+import { loadConfig, handleSubmit } from './config.js';
+import { loadMailConfig, handleMailSubmit } from './mail.js';
+import { refreshMediaPage } from './media.js';
 
-document.addEventListener('DOMContentLoaded', function() {
-    // DOM Elements
-    const addPageBtn = document.getElementById('add-page-btn');
-    const emptyAddBtn = document.getElementById('empty-add-btn');
-    const searchInput = document.getElementById('search-input');
-    const contentTypeSelect = document.getElementById('content-type');
-    const markdownGroup = document.getElementById('markdown-group');
-    const htmlGroup = document.getElementById('html-group');
-    const editWithAsta = document.getElementById('edit-with-asta');
-    const editWithAina = document.getElementById('edit-with-aina');
-    const slugInput = document.getElementById('page-slug');
-    const pagesPanel = document.getElementById('pages-panel');
-    const configPanel = document.getElementById('config-panel');
-    const mailPanel = document.getElementById('mail-panel');
-    const pagesLink = document.getElementById('pages-link');
-    const configLink = document.getElementById('config-link');
-    const configForm = document.getElementById('config-form');
-    const mailLink = document.getElementById('mail-link');
-    const mailForm = document.getElementById('mail-form');
+document.addEventListener('DOMContentLoaded', () => {
+  const $  = sel => document.querySelector(sel);
+  const $$ = sel => [...document.querySelectorAll(sel)];
 
-    // Event Listeners
-    addPageBtn?.addEventListener('click', () => openPageModal());
-    emptyAddBtn?.addEventListener('click', () => openPageModal());
-    searchInput?.addEventListener('input', () => filterPages());
-    configForm.addEventListener('submit', handleSubmit);
-    mailForm.addEventListener('submit', handleMailSubmit);
+  const panels = $$('.main-content');
+  const links  = $$('.sidebar-nav a');
 
-    // Content type switching
-    contentTypeSelect?.addEventListener('change', () => {
-        const contentType = contentTypeSelect.value;
-        if (contentType === 'markdown') {
-            markdownGroup.style.display = 'block';
-            htmlGroup.style.display = 'none';
-        } else {
-            markdownGroup.style.display = 'none';
-            htmlGroup.style.display = 'block';
-        }
-    });
+  function showPanel(panelId) {
+    // Toggle panels
+    panels.forEach(p => p.classList.toggle('active-panel', p.id === panelId));
+    // Toggle active link (map -panel -> -link)
+    const linkId = panelId.replace('-panel', '-link');
+    links.forEach(l => l.classList.toggle('active', l.id === linkId));
 
-    // Setup tabs
-    const tabs = document.querySelectorAll('.tab');
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const tabName = tab.getAttribute('data-tab');
-            switchTab(tabName);
-        });
-    });
+    // Lazy refresh media when entering media panel
+    if (panelId === 'media-panel') refreshMediaPage();
+  }
 
-     // Get panel elements
+  // Nav links
+  $('#pages-link') ?.addEventListener('click', e => { e.preventDefault(); showPanel('pages-panel'); });
+  $('#config-link')?.addEventListener('click', e => { e.preventDefault(); showPanel('config-panel'); });
+  $('#mail-link')  ?.addEventListener('click', e => { e.preventDefault(); showPanel('mail-panel'); });
+  $('#media-link') ?.addEventListener('click', e => { e.preventDefault(); showPanel('media-panel'); });
 
-    // Handle panel switching
-    pagesLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        // Update active link
-        pagesLink.classList.add('active');
-        configLink.classList.remove('active');
-        mailLink.classList.remove('active');
-        
-        // Show pages panel, hide config panel
-        pagesPanel.classList.add('active-panel');
-        configPanel.classList.remove('active-panel');
-        mailPanel.classList.remove('active-panel');
-    });
-    
-    configLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        // Update active link
-        configLink.classList.add('active');
-        pagesLink.classList.remove('active');
-        mailLink.classList.remove('active');
-        
-        // Show config panel, hide pages panel
-        configPanel.classList.add('active-panel');
-        pagesPanel.classList.remove('active-panel');
-        mailPanel.classList.remove('active-panel');
-    });
+  // Pages
+  $('#add-page-btn')   ?.addEventListener('click', openPageModal);
+  $('#empty-add-btn')  ?.addEventListener('click', openPageModal);
+  $('#search-input')   ?.addEventListener('input', filterPages);
 
-    mailLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        // Update active link
-        configLink.classList.remove('active');
-        pagesLink.classList.remove('active');
-        mailLink.classList.add('active');
-        
-        // Show config panel, hide pages panel
-        configPanel.classList.remove('active-panel');
-        pagesPanel.classList.remove('active-panel');
-        mailPanel.classList.add('active-panel');
-    });
-    
-    // Initialize - show pages panel by default
-    pagesPanel.classList.add('active-panel');
-    configPanel.classList.remove('active-panel');
-    mailPanel.classList.remove('active-panel');
+  // Config + Mail forms
+  $('#config-form')?.addEventListener('submit', handleSubmit);
+  $('#mail-form')  ?.addEventListener('submit', handleMailSubmit);
 
-     // Function to update button links with the current slug value
-    function updateEditLinks() {
-        const currentSlug = slugInput.value || '';
-        editWithAsta.href = `/asta?slug=${currentSlug}`;
-        editWithAina.href = `/aina?slug=${currentSlug}`;
-    }
-    
-    // Update links when slug changes
-    slugInput.addEventListener('input', updateEditLinks);
-    
-    // Update links when form loads or modal opens
-    function initialLinkSetup() {
-        updateEditLinks();
-    }
-    loadConfig();
-    loadMailConfig();
-    initialLinkSetup();
+  // Content type toggle
+  $('#content-type')?.addEventListener('change', e => {
+    const isMd = e.target.value === 'markdown';
+    $('#markdown-group') && ($('#markdown-group').style.display = isMd ? 'block' : 'none');
+    $('#html-group')     && ($('#html-group').style.display     = isMd ? 'none'  : 'block');
+  });
+
+  // Slug → external editor links
+  const updateEditLinks = () => {
+    const slug = ($('#page-slug')?.value || '').trim();
+    $('#edit-with-asta') && ($('#edit-with-asta').href = `/asta?slug=${slug}`);
+    $('#edit-with-aina') && ($('#edit-with-aina').href = `/aina?slug=${slug}`);
+  };
+  $('#page-slug')?.addEventListener('input', updateEditLinks);
+
+  // Initialize data
+  loadConfig();
+  loadMailConfig();
+  updateEditLinks();
+
+  // Default panel
+  showPanel('pages-panel');
 });
