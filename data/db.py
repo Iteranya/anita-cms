@@ -123,7 +123,7 @@ def delete_page(slug: str):
     conn.execute('DELETE FROM pages WHERE slug = ?', (slug,))
     conn.commit()
 
-#TODO: Refactor this later, no need to fetch html and markdown everytime to save client memory
+
 def list_pages() -> List[Page]: 
     """List all pages in the database."""
     conn = get_connection()

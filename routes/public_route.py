@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from data.db import list_pages, get_page
 from fastapi.templating import Jinja2Templates
 from src.generator import generate_markdown_page
@@ -48,4 +48,46 @@ async def render_site(slug: str):
 async def serve_custom_page():
     return FileResponse(f"{template_path}/about.html")
 
-# Example custom route in public_route.py
+# API ROUTES!!!
+
+# API route to list all blog pages
+@router.get("/api/blog")
+async def api_list_pages():
+    pages = list_pages()
+    return JSONResponse(content=[
+        {
+            "slug": page.slug,
+            "title": page.title,
+            "content": page.content,
+            "markdown": page.markdown,
+            "html": page.html,
+            "tags": page.tags,
+            "thumb": page.thumb,
+            "type": page.type,
+            "created": page.created,
+            "updated": page.updated,
+            "author": page.author
+        }
+        for page in pages
+    ])
+
+# API route to get a single blog page by slug
+@router.get("/api/blog/{slug}")
+async def api_get_page(slug: str):
+    page = get_page(slug)
+    if not page:
+        raise HTTPException(status_code=404, detail="Page not found")
+
+    return JSONResponse(content={
+        "slug": page.slug,
+        "title": page.title,
+        "content": page.content,
+        "markdown": page.markdown,
+        "html": page.html,
+        "tags": page.tags,
+        "thumb": page.thumb,
+        "type": page.type,
+        "created": page.created,
+        "updated": page.updated,
+        "author": page.author
+    })
