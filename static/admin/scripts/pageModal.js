@@ -19,7 +19,7 @@ export async function openPageModal(page = null) {
     
     setCurrentPageId(page?.slug ?? null);
     
-    if (page) {
+    if (page !== null && page !== undefined && page.slug){
         try {
             // Fetch fresh data from the API
             const response = await fetch(`/admin/api/${page.slug}`);
@@ -75,6 +75,7 @@ export async function openPageModal(page = null) {
         }
     } else {
         // Setup modal for new page
+        console.log("CREATING NEW PAGE")
         document.getElementById('modal-title').textContent = 'Add New Page';
         document.getElementById('page-form').reset();
         slugInput.readOnly = false;
