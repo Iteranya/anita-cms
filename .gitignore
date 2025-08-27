@@ -1,6 +1,3 @@
 /__pycache__
 /.venv
-*.json
-*.db
 venv
-.env
