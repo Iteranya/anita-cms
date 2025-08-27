@@ -67,7 +67,7 @@ def get_theme(path:str = CONFIG_PATH) ->str:
             current_config = DefaultConfig(**data)
             return current_config.theme 
     else:
-        return ""
+        return "default"
     
 def save_config(config: DefaultConfig, path: str = CONFIG_PATH) -> None:
     if os.path.exists(path):
