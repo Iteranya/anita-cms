@@ -19,7 +19,7 @@ export async function openPageModal(page = null) {
     
     setCurrentPageId(page?.slug ?? null);
     
-    if (page) {
+    if (page && page.slug){
         try {
             // Fetch fresh data from the API
             const response = await fetch(`/admin/api/${page.slug}`);
@@ -52,6 +52,7 @@ export async function openPageModal(page = null) {
             editWithAina.href = `/aina?slug=${freshPageData.slug}`;
             
             setTags(freshPageData.tags || []);
+            renderCustomFields(freshPageData.custom || {});
         } catch (error) {
             console.error('Error fetching page data:', error);
             showToast('Failed to load page data', 'error');
@@ -71,6 +72,7 @@ export async function openPageModal(page = null) {
                 editWithAsta.href = `/asta?slug=${page.slug}`;
                 editWithAina.href = `/aina?slug=${page.slug}`;
                 setTags(page.tags || []);
+                renderCustomFields({});
             }
         }
     } else {
@@ -79,7 +81,7 @@ export async function openPageModal(page = null) {
         document.getElementById('page-form').reset();
         slugInput.readOnly = false;
         setTags([]);
-        
+        setCurrentPageId(null);
         // Disable edit buttons for new pages
         editWithAsta.href = '#';
         editWithAina.href = '#';
@@ -122,7 +124,8 @@ export function savePage() {
         type: contentType,
         // Always include both content types, but only one will be "active"
         markdown: document.getElementById('page-markdown').value,
-        html: document.getElementById('page-html').value
+        html: document.getElementById('page-html').value,
+        custom: collectCustomFields()
     };
 
     console.log(pageData)
@@ -165,9 +168,58 @@ export function setupPageModalListeners() {
     document.getElementById('cancel-btn').addEventListener('click', closePageModal);
     document.getElementById('save-btn').addEventListener('click', savePage);
     
+    
     document.getElementById('content-type').addEventListener('change', (e) => {
         updateContentVisibility(e.target.value);
     });
     
     document.getElementById('page-slug').addEventListener('input', updateEditorLinks);
+    setupCustomFieldListeners();
+}
+
+// ----- Custom Fields Handling -----
+
+function renderCustomFields(customFields = {}) {
+    const container = document.getElementById('custom-fields-container');
+    container.innerHTML = ''; // Clear existing
+
+    Object.entries(customFields).forEach(([key, value]) => {
+        const fieldRow = document.createElement('div');
+        fieldRow.classList.add('custom-field-row');
+        fieldRow.innerHTML = `
+            <input type="text" class="custom-field-key form-control" value="${key}" placeholder="Field name">
+            <input type="text" class="custom-field-value form-control" value="${value}" placeholder="Field value">
+            <button type="button" class="btn btn-danger remove-field-btn">&times;</button>
+        `;
+        fieldRow.querySelector('.remove-field-btn').addEventListener('click', () => fieldRow.remove());
+        container.appendChild(fieldRow);
+    });
+}
+
+function collectCustomFields() {
+    const container = document.getElementById('custom-fields-container');
+    const rows = container.querySelectorAll('.custom-field-row');
+    const fields = {};
+    rows.forEach(row => {
+        const key = row.querySelector('.custom-field-key').value.trim();
+        const value = row.querySelector('.custom-field-value').value.trim();
+        if (key) fields[key] = value;
+    });
+    return fields;
+}
+
+function setupCustomFieldListeners() {
+    const addBtn = document.getElementById('add-custom-field-btn');
+    addBtn.addEventListener('click', () => {
+        const container = document.getElementById('custom-fields-container');
+        const fieldRow = document.createElement('div');
+        fieldRow.classList.add('custom-field-row');
+        fieldRow.innerHTML = `
+            <input type="text" class="custom-field-key form-control" placeholder="Field name">
+            <input type="text" class="custom-field-value form-control" placeholder="Field value">
+            <button type="button" class="btn btn-danger remove-field-btn">&times;</button>
+        `;
+        fieldRow.querySelector('.remove-field-btn').addEventListener('click', () => fieldRow.remove());
+        container.appendChild(fieldRow);
+    });
 }

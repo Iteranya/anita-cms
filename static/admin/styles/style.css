@@ -586,3 +586,17 @@ body {
         flex-direction: column;
     }
 }
+
+.custom-field-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    align-items: center;
+}
+.custom-field-row input {
+    flex: 1;
+}
+.custom-field-row .btn-danger {
+    flex-shrink: 0;
+    padding: 0.4rem 0.6rem;
+}

@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import List, Optional
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -17,6 +17,7 @@ class Page:
     created: Optional[str] = None
     updated: Optional[str] = None
     author: Optional[str] = None
+    custom: Dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class Prompt:
