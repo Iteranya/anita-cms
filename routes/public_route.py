@@ -31,6 +31,16 @@ async def home(request: Request):
     pages = list_pages()
     return templates.TemplateResponse("blog.html", {"request": request, "pages": pages})
 
+@router.get("/menu", response_class=HTMLResponse)
+async def home(request: Request):
+    pages = list_pages()
+    menu = []
+    for page in pages:
+        if page.tags and "menu" in page.tags:
+            menu.append(page)
+    print(page)
+    return templates.TemplateResponse("menu.html", {"request": request, "pages": menu})
+
 # Dynamic route to serve blog type pages
 @router.get("/blog/{slug}", response_class=HTMLResponse)
 async def render_site(slug: str):

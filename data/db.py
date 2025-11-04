@@ -25,40 +25,40 @@ def create_table():
         content TEXT,
         markdown TEXT,
         html TEXT,
-        tags TEXT, -- Stored as JSON string
+        tags TEXT, 
         thumb TEXT,
         type TEXT,
         created TEXT,
         updated TEXT,
-        author TEXT
+        author TEXT,
+        custom TEXT
     )
     ''')
-    
-    # Add new columns if they don't exist (for existing databases)
-    try:
-        conn.execute('ALTER TABLE pages ADD COLUMN created TEXT')
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    try:
-        conn.execute('ALTER TABLE pages ADD COLUMN updated TEXT')
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
-    try:
-        conn.execute('ALTER TABLE pages ADD COLUMN author TEXT')
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    
+
+    # Add missing columns for older databases
+    for col, col_type in [
+        ("created", "TEXT"),
+        ("updated", "TEXT"),
+        ("author", "TEXT"),
+        ("custom", "TEXT"), 
+    ]:
+        try:
+            conn.execute(f'ALTER TABLE pages ADD COLUMN {col} {col_type}')
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+
     conn.commit()
+
 
 def add_page(page: Page):
     """Add a new page to the database."""
     conn = get_connection()
     now = datetime.now().isoformat()
     conn.execute('''
-    INSERT INTO pages (slug, title, content, markdown, html, tags, thumb, type, created, updated, author)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO pages (
+        slug, title, content, markdown, html, tags, thumb, type, created, updated, author, custom
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
         page.slug,
         page.title,
@@ -70,9 +70,11 @@ def add_page(page: Page):
         page.type,
         page.created if hasattr(page, 'created') and page.created else now,
         page.updated if hasattr(page, 'updated') and page.updated else now,
-        page.author if hasattr(page, 'author') else None
+        page.author if hasattr(page, 'author') else None,
+        json.dumps(page.custom) if hasattr(page, 'custom') and page.custom else None  
     ))
     conn.commit()
+
 
 def get_page(slug: str) -> Optional[Page]:
     """Get a page by its slug."""
@@ -80,6 +82,7 @@ def get_page(slug: str) -> Optional[Page]:
     cursor = conn.execute('SELECT * FROM pages WHERE slug = ?', (slug,))
     row = cursor.fetchone()
     if row:
+        # Note: Adjust indices if you add more columns later
         return Page(
             slug=row[0],
             title=row[1],
@@ -89,11 +92,13 @@ def get_page(slug: str) -> Optional[Page]:
             tags=json.loads(row[5]) if row[5] else None,
             thumb=row[6],
             type=row[7],
-            created=row[8] if len(row) > 8 else None,
-            updated=row[9] if len(row) > 9 else None,
-            author=row[10] if len(row) > 10 else None
+            created=row[8],
+            updated=row[9],
+            author=row[10],
+            custom=json.loads(row[11]) if len(row) > 11 and row[11] else {}  # 👈 NEW
         )
     return None
+
 
 def update_page(page: Page):
     """Update an existing page."""
@@ -101,7 +106,7 @@ def update_page(page: Page):
     now = datetime.now().isoformat()
     conn.execute('''
     UPDATE pages
-    SET title = ?, content = ?, markdown = ?, html = ?, tags = ?, thumb = ?, type = ?, updated = ?, author = ?
+    SET title = ?, content = ?, markdown = ?, html = ?, tags = ?, thumb = ?, type = ?, updated = ?, author = ?, custom = ?
     WHERE slug = ?
     ''', (
         page.title,
@@ -113,9 +118,11 @@ def update_page(page: Page):
         page.type,
         page.updated if hasattr(page, 'updated') and page.updated else now,
         page.author if hasattr(page, 'author') else None,
+        json.dumps(page.custom) if hasattr(page, 'custom') and page.custom else None,  # 👈 NEW
         page.slug
     ))
     conn.commit()
+
 
 def delete_page(slug: str):
     """Delete a page by its slug."""
@@ -124,10 +131,13 @@ def delete_page(slug: str):
     conn.commit()
 
 
-def list_pages() -> List[Page]: 
+def list_pages() -> List[Page]:
     """List all pages in the database."""
     conn = get_connection()
-    cursor = conn.execute('SELECT slug, title, content, markdown, html, tags, thumb, type, created, updated, author FROM pages')
+    cursor = conn.execute('''
+        SELECT slug, title, content, markdown, html, tags, thumb, type, created, updated, author, custom
+        FROM pages
+    ''')
     rows = cursor.fetchall()
     return [
         Page(
@@ -139,12 +149,14 @@ def list_pages() -> List[Page]:
             tags=json.loads(row[5]) if row[5] else None,
             thumb=row[6],
             type=row[7],
-            created=row[8] if len(row) > 8 else None,
-            updated=row[9] if len(row) > 9 else None,
-            author=row[10] if len(row) > 10 else None
+            created=row[8],
+            updated=row[9],
+            author=row[10],
+            custom=json.loads(row[11]) if len(row) > 11 and row[11] else {}  # 👈 NEW
         )
         for row in rows
     ]
+
 
 def close_connection():
     """Close the database connection."""

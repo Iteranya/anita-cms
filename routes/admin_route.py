@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -14,15 +14,16 @@ router = APIRouter(prefix="/admin", tags=["Admin"])
 class PageModel(BaseModel):
     title: str
     slug: str
-    content: str | None = None  # Contains stuff content summary for admin panel, like description
-    markdown: str | None = None  # Markdown to render if html don't exist
-    html: str | None = None  # HTML to render if markdown don't exist
-    tags: List[str] | None = None  # List of keywords
-    thumb: str | None = None  # Thumbnail link
-    type:str = "markdown"
-    created: str | None = None
-    updated: str | None = None
-    author: str | None = None
+    content: Optional[str] = None
+    markdown: Optional[str] = None
+    html: Optional[str] = None
+    tags: Optional[List[str]] = None
+    thumb: Optional[str] = None
+    type: str = "markdown"
+    created: Optional[str] = None
+    updated: Optional[str] = None
+    author: Optional[str] = None
+    custom: Optional[Dict[str, Any]] = {}
 
 class ConfigModel(BaseModel):
     system_note: str
@@ -71,6 +72,7 @@ def create_page(
     page_data['created'] = now
     page_data['updated'] = now
     page_data['author'] = user.get('username')  # Use whatever user identifier you have
+    page_data["custom"] = page_data.get("custom", {})
     
     db.add_page(PageData(**page_data))
     return PageModel(**page_data)
@@ -94,6 +96,8 @@ def update_page(slug: str, page: PageModel, user: dict = Depends(get_current_use
     page_data['updated'] = datetime.now().isoformat()
     page_data['created'] = existing_page.created  # Preserve original creation time
     page_data['author'] = existing_page.author    # Preserve original author
+    page_data["custom"] = page_data.get("custom", existing_page.custom or {})
+
     
     db.update_page(PageData(**page_data))
     return PageModel(**page_data)
