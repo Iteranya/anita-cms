@@ -22,43 +22,43 @@
     </section>
 
     <!-- Gallery Grid -->
-<div class="gallery-container container-fluid">
-    <div class="row" id="galleryGrid">
-        {% for page in pages %}
-        {% if not ('hidden' in page.tags) %}
-        <div class="col-md-6 col-lg-4 col-xl-3 grid-item">
-            <div class="card shadow-sm h-100">
-                <div class="card-img-wrapper">
-                    {% if page.images and page.images[0].image %}
-                        <img src="{{ page.images[0].image }}" class="card-img-top" alt="{{ page.title }}">
-                    {% elif page.thumb %}
-                        <img src="{{ page.thumb }}" class="card-img-top" alt="{{ page.title }}">
-                    {% else %}
-                        <div class="no-image-placeholder">
-                            <i class="fas fa-image"></i>
-                            <span>No Image Available</span>
+        <div class="gallery-container container-fluid">
+            <div class="row" id="galleryGrid">
+                {% for page in pages %}
+                    {% if not page.tags or 'hidden' not in page.tags %}
+                    <div class="col-md-6 col-lg-4 col-xl-3 grid-item">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-img-wrapper">
+                                {% if page.images and page.images[0].image %}
+                                    <img src="{{ page.images[0].image }}" class="card-img-top" alt="{{ page.title }}">
+                                {% elif page.thumb %}
+                                    <img src="{{ page.thumb }}" class="card-img-top" alt="{{ page.title }}">
+                                {% else %}
+                                    <div class="no-image-placeholder">
+                                        <i class="fas fa-image"></i>
+                                        <span>No Image Available</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <div>
+                                    <h5 class="card-title">{{ page.title }}</h5>
+                                </div>
+                                <a href="/blog/{{ page.slug }}" class="btn-view-gallery mt-auto">
+                                    View Site <i class="fas fa-arrow-right ms-2"></i>
+                                </a>
+                            </div>
                         </div>
-                    {% endif %}
-                </div>
-                <div class="card-body">
-                    <div>
-                        <h5 class="card-title">{{ page.title }}</h5>
                     </div>
-                    <a href="/blog/{{ page.slug }}" class="btn-view-gallery mt-auto">
-                        View Site <i class="fas fa-arrow-right ms-2"></i>
-                    </a>
+                    {% endif %}
+                    {% endfor %}
+                <!-- Add a message if no results found -->
+                <div id="noResultsMessage" class="col-12 text-center" style="display: none; padding: 40px 0;">
+                    <i class="fas fa-search-minus fa-3x mb-3" style="color: #6c757d;"></i>
+                    <h4 style="color: #aaaaaa;">No galleries found matching your search.</h4>
                 </div>
             </div>
         </div>
-        {% endif %}
-        {% endfor %}
-        <!-- Add a message if no results found -->
-        <div id="noResultsMessage" class="col-12 text-center" style="display: none; padding: 40px 0;">
-            <i class="fas fa-search-minus fa-3x mb-3" style="color: #6c757d;"></i>
-            <h4 style="color: #aaaaaa;">No galleries found matching your search.</h4>
-        </div>
-    </div>
-</div>
 
 
     <!-- Footer -->
