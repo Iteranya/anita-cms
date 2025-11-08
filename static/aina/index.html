@@ -8,15 +8,15 @@
     <link rel="stylesheet" href="/static/aina/style.css">
 </head>
 <body>
+    <!-- ✨ Floating Characters -->
     <div class="floating-characters">
         <div class="character" style="top: 10%; left: 5%; font-size: 30px;">(>^.^)></div>
         <div class="character" style="top: 30%; left: 80%; font-size: 40px;">(◕‿◕✿)</div>
         <div class="character" style="top: 70%; left: 15%; font-size: 25px;">(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧</div>
         <div class="character" style="top: 50%; left: 70%; font-size: 35px;">(づ｡◕‿‿◕｡)づ</div>
     </div>
-    
-    <!-- <h1 class="logo-text">Aina's HTML Playground</h1> -->
-    
+
+    <!-- ✨ Top Buttons -->
     <div class="btn-group">
         <button class="btn" id="deploy-btn">
             <i class="fas fa-rocket"></i> Deploy
@@ -28,9 +28,11 @@
             <i class="fas fa-file-import"></i> Import
         </button>
     </div>
-    
+
+    <!-- ✨ Main Container -->
     <div class="container">
         <div class="panes-container">
+            <!-- 🧩 Editor Pane -->
             <div class="editor-pane">
                 <div class="pane-header">
                     <i class="fas fa-code"></i>
@@ -40,7 +42,8 @@
                     <textarea id="html-code" placeholder="Write your HTML here, senpai~ (◕‿◕✿)"></textarea>
                 </div>
             </div>
-            
+
+            <!-- 👀 Preview Pane -->
             <div class="preview-pane">
                 <div class="pane-header">
                     <i class="fas fa-eye"></i>
@@ -51,7 +54,8 @@
                 </div>
             </div>
         </div>
-        
+
+        <!-- 🪄 Website Generator Form -->
         <div class="generate-form">
             <div class="form-header">
                 <i class="fas fa-magic"></i>
@@ -68,12 +72,56 @@
             </form>
         </div>
     </div>
-    
+
+    <!-- 💌 Footer -->
     <footer class="footer">
         <p>Made with ♥ by Aina-chan</p>
     </footer>
-    
+
+    <!-- 🐾 Slug Container -->
     <div id="slug-container" style="display: none;" data-slug=""></div>
+
+    <!-- 🗒️ Collapsible Notes Sidebar -->
+    <aside id="notes-sidebar">
+        <div class="sidebar-header">
+            <h3><i class="fas fa-sticky-note"></i> Notes</h3>
+        </div>
+
+        <!-- 🔧 Form Settings Section -->
+        <div class="sidebar-section">
+            <h4><i class="fas fa-clipboard-list"></i> Form Settings</h4>
+
+            <div class="form-control">
+                <label for="form-select">Select Existing Form:</label>
+                <select id="form-select">
+                    <option value="">-- Select a form --</option>
+                </select>
+            </div>
+
+            <button id="load-form-btn" class="btn small-btn">
+                <i class="fas fa-download"></i> Load Schema
+            </button>
+        </div>
+
+        <!-- 📝 Notes Text Area -->
+        <div class="sidebar-section">
+            <label for="notes-textarea">Notes Area:</label>
+            <textarea id="notes-textarea" placeholder="Form schema and info will appear here, senpai~"></textarea>
+        </div>
+    </aside>
+
+    <!-- 🧭 Sidebar Toggle Arrow -->
+    <button id="sidebar-toggle"><i class="fas fa-chevron-right"></i></button>
     <script type="module" src="/static/aina/scripts/main.js"></script>
+
+    <script>
+        const sidebar = document.getElementById('notes-sidebar');
+        const toggleBtn = document.getElementById('sidebar-toggle');
+
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            document.body.classList.toggle('sidebar-open');
+        });
+    </script>
 </body>
 </html>

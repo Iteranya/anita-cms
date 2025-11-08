@@ -128,8 +128,9 @@ def submit_form(slug: str, submission: FormSubmissionModel, user=Depends(optiona
     """Submit a response to a form."""
     form = forms_db.get_form(slug)
     if not form:
+        print("Form Not Found")
         raise HTTPException(status_code=404, detail="Form not found.")
-
+    print("NYOOOOOM~")
     now = datetime.now().isoformat()
     submission.form_slug = slug
     submission.created = now

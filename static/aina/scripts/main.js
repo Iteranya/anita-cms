@@ -1,20 +1,36 @@
 // main.js - Entry point
-import { initPreview } from './previewManager.js';
+import { initPreview, updatePreview } from './previewManager.js';
 import { initAiGeneration } from './aiIntegration.js';
 import { setupFileHandlers } from './fileHandler.js';
 import { setupDeployment } from './deploymentService.js';
-import { initSettingsManager } from './settingsManager.js';
-import { getProject } from './dbIntegration.js';
 import { setupEffects } from './effects.js';
+import { initFormGeneration } from './formIntegration.js';
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize the HTML editor and preview
+// --------------------------------------------------
+// 🚀 DOM LOADED HANDLER
+// --------------------------------------------------
+document.addEventListener('DOMContentLoaded', async () => {
+    // --- Grab key DOM elements safely ---
     const htmlCode = document.getElementById('html-code');
     const preview = document.getElementById('preview');
-    const slug = document.getElementById('slug-container').textContent;
+    const slugContainer = document.getElementById('slug-container');
+    const slug = slugContainer ? slugContainer.textContent.trim() : "";
     
-    // Initialize welcome message
-    const welcomeHTML = `
+    // Sidebar + form UI elements
+    const sidebar = document.getElementById('notes-sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const formSelect = document.getElementById('form-select');
+    const loadBtn = document.getElementById('load-form-btn');
+    const notesArea = document.getElementById('notes-textarea');
+
+    // --- Sanity check ---
+    if (!htmlCode || !preview) {
+        console.error("Critical elements missing: html-code or preview.");
+        return;
+    }
+
+    // --- Load the welcome template into the editor ---
+    htmlCode.value = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -60,24 +76,32 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </body>
 </html>
-    `;
-    
-    htmlCode.value = welcomeHTML;
-    
-    
-    (async function() {
-        await initPreview(htmlCode, preview,slug);
-        initAiGeneration(htmlCode, updatePreview);
+    `.trim();
+
+    // --------------------------------------------------
+    // ⚙️ Initialize Features
+    // --------------------------------------------------
+    try {
+        // Initialize preview system
+        await initPreview(htmlCode, preview, slug);
+
+        // AI-assisted generation
+        initAiGeneration(htmlCode, updatePreview,notesArea);
+
+        // File management (save/load)
         setupFileHandlers(htmlCode, updatePreview);
-        setupDeployment(htmlCode,slug);
-        //initSettingsManager();
+
+        // Deployment hooks
+        setupDeployment(htmlCode, slug);
+
+        // Form integration (the settings sidebar)
+        await initFormGeneration(sidebar, toggleBtn, formSelect, loadBtn, notesArea);
+
+        // Visual/UX effects
         setupEffects();
 
-    })();
-    // Initialize all modules
-    
+        console.log("✅ All systems initialized successfully!");
+    } catch (err) {
+        console.error("Initialization error:", err);
+    }
 });
-
-// Import and expose updatePreview for modules that need it
-import { updatePreview } from './previewManager.js';
-export { updatePreview };

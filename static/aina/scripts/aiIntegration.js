@@ -1,72 +1,65 @@
-// aiIntegration.js - Simplified AI generation functionality
-import { updatePreview } from './main.js';
+// aiIntegration.js - AI generation integration
 import { showNotification } from './notifications.js';
 
 /**
  * Initialize the AI generation functionality
- * @param {HTMLTextAreaElement} htmlCode - The HTML editor element
- * @param {Function} updatePreviewCallback - Callback to update the preview
+ * @param {HTMLTextAreaElement} htmlCode - The HTML editor
+ * @param {Function} updatePreviewCallback - Function to refresh the preview
+ * @param {HTMLTextAreaElement} [notesArea] - Optional notes textarea (for extra context)
  */
-export function initAiGeneration(htmlCode, updatePreviewCallback) {
+export function initAiGeneration(htmlCode, updatePreviewCallback, notesArea) {
     const form = document.querySelector('form');
-   
-    form.addEventListener('submit', async function(e) {
+    if (!form) {
+        console.warn("⚠️ No form element found for AI generation.");
+        return;
+    }
+
+    form.addEventListener('submit', async function (e) {
         e.preventDefault();
-       
+
         const button = form.querySelector('button');
         const originalButtonText = button.innerHTML;
-       
-        // Show loading state
+
+        // Loading state
         button.disabled = true;
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
-       
-        const prompt = form.querySelector('[name="content"]').value;
+
+        const promptInput = form.querySelector('[name="content"]');
+        const promptText = promptInput ? promptInput.value : "";
+        const notesText = notesArea ? notesArea.value : ""; // ✅ Safe access
+        const fullPrompt = notesText + "\n\n" + promptText;
+
         const editor = htmlCode.value;
-       
+
         try {
             const response = await fetch('/aina/generate-website-stream', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    editor,
-                    prompt
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ editor, prompt: fullPrompt })
             });
 
-            if (!response.ok) {
+            if (!response.ok)
                 throw new Error(`Server returned ${response.status}: ${response.statusText}`);
-            }
 
             const reader = response.body.getReader();
             let generatedHtml = '';
-            
-            // Process the stream
+
             while (true) {
                 const { done, value } = await reader.read();
-                
-                if (done) {
-                    break;
-                }
-                
-                // Convert the chunk to text
+                if (done) break;
+
                 const chunkText = new TextDecoder().decode(value);
                 generatedHtml += chunkText;
-                
-                // Update the editor and preview with each chunk
+
                 htmlCode.value = generatedHtml;
                 updatePreviewCallback(htmlCode, document.getElementById('preview'));
             }
-            
-            // Show completion effect
+
             showCompletionEffect();
-            
         } catch (error) {
             console.error('Error:', error);
             showNotification('Yabai! Something went wrong (╥﹏╥)', 'error');
         } finally {
-            // Reset button state
             button.disabled = false;
             button.innerHTML = originalButtonText;
         }
@@ -74,11 +67,11 @@ export function initAiGeneration(htmlCode, updatePreviewCallback) {
 }
 
 /**
- * Shows a completion effect animation
+ * Shows a cute completion animation when generation finishes 💫
  */
 function showCompletionEffect() {
     const completionEffect = document.createElement('div');
-    completionEffect.innerHTML = '✧･ﾟ: *✧･ﾟ:* Generation Complete! *:･ﾟ✧*:･ﾟ✧';
+    completionEffect.textContent = '✧･ﾟ: *✧･ﾟ:* Generation Complete! *:･ﾟ✧*:･ﾟ✧';
     completionEffect.style.position = 'fixed';
     completionEffect.style.bottom = '20px';
     completionEffect.style.left = '50%';
@@ -90,11 +83,7 @@ function showCompletionEffect() {
     completionEffect.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
     completionEffect.style.animation = 'fadeInOut 3s ease-out';
     completionEffect.style.zIndex = '1000';
-    
+
     document.body.appendChild(completionEffect);
-    
-    setTimeout(() => {
-        completionEffect.style.animation = 'fadeOut 0.5s ease-out';
-        setTimeout(() => completionEffect.remove(), 500);
-    }, 2500);
+    setTimeout(() => completionEffect.remove(), 3000);
 }
