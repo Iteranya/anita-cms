@@ -23,6 +23,7 @@ export async function loadForms() {
         const response = await fetch('/forms/list/');
         if (!response.ok) throw new Error('Failed to load forms');
         const forms = await response.json();
+        console.log(forms)
 
         formsList.innerHTML = '';
         if (forms.length === 0) {
@@ -37,7 +38,9 @@ export async function loadForms() {
                 <td>${form.title}</td>
                 <td>${form.description || '-'}</td>
                 <td>${form.author || '-'}</td>
+                <td>${form.updated || '-'}</td>
                 <td>
+                    <a href="/forms?slug=${form.slug}" class="btn btn-sm btn-primary view-btn">View</a>
                     <button class="btn btn-sm btn-secondary edit-btn" data-slug="${form.slug}">Edit</button>
                     <button class="btn btn-sm btn-danger delete-btn" data-slug="${form.slug}">Delete</button>
                 </td>
