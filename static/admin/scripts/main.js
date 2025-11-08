@@ -4,6 +4,7 @@ import { filterPages } from './pageService.js';
 import { loadConfig, handleSubmit } from './config.js';
 import { loadMailConfig, handleMailSubmit } from './mail.js';
 import { refreshMediaPage } from './media.js';
+import { loadForms } from './forms.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const $  = sel => document.querySelector(sel);
@@ -24,6 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#config-link')?.addEventListener('click', e => { e.preventDefault(); showPanel('config-panel'); });
   $('#mail-link')  ?.addEventListener('click', e => { e.preventDefault(); showPanel('mail-panel'); });
   $('#media-link') ?.addEventListener('click', e => { e.preventDefault(); showPanel('media-panel'); });
+  $('#forms-link') ?.addEventListener('click', e => { e.preventDefault(); showPanel('forms-panel'); });
+  
 
   // Pages panel
   $('#add-page-btn')  ?.addEventListener('click', openPageModal);
@@ -79,6 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadMailConfig();
   updateEditLinks();
   initModalTabs();
+  loadForms();
 
   // Default panel
   showPanel('pages-panel');

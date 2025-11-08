@@ -2,14 +2,15 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from data import db
+from data import db,forms_db
 import uvicorn
 from src.auth import Depends,get_current_user
 # Import routers
-from routes import admin_route,asta_route,media_route,aina_route,public_route,auth_route,mail_route
+from routes import admin_route,asta_route,media_route,aina_route,public_route,auth_route,mail_route,forms_route
 
 app = FastAPI()
 db.get_connection()
+forms_db.get_connection()
 BASE_DIR = Path(__file__).resolve().parent
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static-directory")
 
@@ -30,6 +31,7 @@ app.include_router(aina_route.router)
 app.include_router(public_route.router)
 app.include_router(auth_route.router)
 app.include_router(mail_route.router)
+app.include_router(forms_route.router)
 
 # Protected Routers
 app.include_router(

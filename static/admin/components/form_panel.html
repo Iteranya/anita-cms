@@ -1,0 +1,63 @@
+<main class="main-content" id="forms-panel">
+    <div class="header">
+        <h1>Custom Forms</h1>
+        <button id="new-form-btn" class="btn btn-primary">+ New Form</button>
+    </div>
+
+    <!-- Form list -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Existing Forms</h3>
+        </div>
+        <div class="card-body">
+            <table class="table" id="forms-table">
+                <thead>
+                    <tr>
+                        <th>Slug</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Updated</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="forms-list"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Editor -->
+    <div class="card" id="form-editor-card" style="display:none;">
+        <div class="card-header">
+            <h3 id="form-editor-title">Create Form</h3>
+        </div>
+        <div class="card-body">
+            <form id="form-editor">
+                <div class="form-group">
+                    <label for="form-slug">Slug</label>
+                    <input type="text" id="form-slug" class="form-control" placeholder="Unique slug (e.g. contact-form)">
+                </div>
+
+                <div class="form-group">
+                    <label for="form-title">Title</label>
+                    <input type="text" id="form-title" class="form-control" placeholder="Form title">
+                </div>
+
+                <div class="form-group">
+                    <label for="form-description">Description</label>
+                    <textarea id="form-description" class="form-control" rows="2" placeholder="Brief description..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Fields</label>
+                    <div id="fields-container"></div>
+                    <button type="button" id="add-field-btn" class="btn btn-sm btn-outline-primary mt-2">+ Add Field</button>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="save-form-btn">Save Form</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-edit-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>

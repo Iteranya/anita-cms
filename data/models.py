@@ -38,6 +38,7 @@ class FormSubmission:
     form_slug: str = ""
     data: Dict[str, Any] = field(default_factory=dict)
     created: Optional[str] = None
+    updated: Optional[str] = None
     author: Optional[str] = None
     custom: Dict[str, Any] = field(default_factory=dict)
 

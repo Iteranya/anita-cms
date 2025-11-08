@@ -1,38 +1,64 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from typing import Any, Dict, List, Optional
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-from src.config import load_or_create_config, save_config, load_or_create_mail_config, save_mail_config
-from data import db, forms_db  # Import the db module with standalone functions
-from data.models import Page as PageData
-from src.auth import get_current_user, optional_auth
 from datetime import datetime
 
+from src.config import load_or_create_config, save_config, load_or_create_mail_config, save_mail_config
+from data import forms_db  # Your database helper module
+from src.auth import get_current_user, optional_auth
+
 router = APIRouter(prefix="/forms", tags=["Form"])
+
+# ----------------------------------------------------
+# 🧱 MODELS
+# ----------------------------------------------------
 
 class FormModel(BaseModel):
     """Represents a custom form definition."""
     slug: str
     title: str
-    schema: Dict[str, Any]  # e.g. {"fields": [{"name": "email", "type": "text"}]}
+    schema: Dict[str, Any]
     description: Optional[str] = None
     created: Optional[str] = None
     updated: Optional[str] = None
     author: Optional[str] = None
     custom: Optional[Dict[str, Any]] = {}
 
+
 class FormSubmissionModel(BaseModel):
     """Represents a single submission to a form."""
     id: Optional[int] = None
     form_slug: str
-    data: Dict[str, Any]  # user responses
+    data: Dict[str, Any]
     created: Optional[str] = None
+    updated: Optional[str] = None
     author: Optional[str] = None
     custom: Optional[Dict[str, Any]] = {}
 
 # ----------------------------------------------------
-# 🧱 FORMS CRUD
+# 🖼️ FORM HTML VIEW
+# ----------------------------------------------------
+
+@router.get("/", response_class=HTMLResponse)
+async def get_html(request: Request, user: Optional[str] = Depends(optional_auth)):
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
+
+    template_path = "static/form/index.html"
+    slug = request.query_params.get("slug", "")
+
+    with open(template_path, "r") as f:
+        html = f.read()
+
+    html = html.replace(
+        '<div id="slug-container" style="display: none;" data-slug=""></div>',
+        f'<div id="slug-container" style="display: none;" data-slug="{slug}">{slug}</div>'
+    )
+    return html
+
+# ----------------------------------------------------
+# 🧩 FORMS CRUD
 # ----------------------------------------------------
 
 @router.post("/", response_model=FormModel)
@@ -41,15 +67,23 @@ def create_form(form: FormModel, user=Depends(get_current_user)):
     existing = forms_db.get_form(form.slug)
     if existing:
         raise HTTPException(status_code=400, detail="Form slug already exists.")
+
     now = datetime.now().isoformat()
     form.created = now
     form.updated = now
-    form.author = user.username if user else None
-    forms_db.add_form(form.slug, form.title, form.schema)
+    form.author = getattr(user, "username", "Admin")
+
+    forms_db.add_form(
+        form.slug,
+        form.title,
+        form.schema,
+        author=form.author,
+        custom=form.custom
+    )
     return form
 
 
-@router.get("/", response_model=List[FormModel])
+@router.get("/list", response_model=List[FormModel])
 def list_forms(user=Depends(optional_auth)):
     """List all available forms."""
     return forms_db.list_forms()
@@ -70,8 +104,9 @@ def update_form(slug: str, form: FormModel, user=Depends(get_current_user)):
     existing = forms_db.get_form(slug)
     if not existing:
         raise HTTPException(status_code=404, detail="Form not found.")
+
     form.updated = datetime.now().isoformat()
-    forms_db.update_form(form)  # We'll add this in forms_db
+    forms_db.update_form(form)
     return form
 
 
@@ -84,7 +119,6 @@ def delete_form(slug: str, user=Depends(get_current_user)):
     forms_db.delete_form(slug)
     return {"detail": f"Form '{slug}' deleted successfully."}
 
-
 # ----------------------------------------------------
 # 📨 FORM SUBMISSIONS
 # ----------------------------------------------------
@@ -95,10 +129,19 @@ def submit_form(slug: str, submission: FormSubmissionModel, user=Depends(optiona
     form = forms_db.get_form(slug)
     if not form:
         raise HTTPException(status_code=404, detail="Form not found.")
+
+    now = datetime.now().isoformat()
     submission.form_slug = slug
-    submission.created = datetime.now().isoformat()
+    submission.created = now
+    submission.updated = now
     submission.author = getattr(user, "username", None) if user else None
-    forms_db.add_submission(slug, submission.data)
+
+    forms_db.add_submission(
+        form_slug=slug,
+        data=submission.data,
+        author=submission.author,
+        custom=submission.custom
+    )
     return submission
 
 
@@ -108,8 +151,8 @@ def list_submissions(slug: str, user=Depends(get_current_user)):
     form = forms_db.get_form(slug)
     if not form:
         raise HTTPException(status_code=404, detail="Form not found.")
-    submissions = forms_db.list_submissions(slug)
-    return submissions
+    return forms_db.list_submissions(slug)
+
 
 @router.put("/{slug}/submissions/{submission_id}", response_model=FormSubmissionModel)
 def update_submission(
@@ -119,17 +162,14 @@ def update_submission(
     user=Depends(get_current_user)
 ):
     """Update a specific submission for a form."""
-    # Make sure the form exists
     form = forms_db.get_form(slug)
     if not form:
         raise HTTPException(status_code=404, detail="Form not found.")
 
-    # Check if submission exists
     existing = forms_db.get_submission(submission_id)
     if not existing or existing["form_slug"] != slug:
         raise HTTPException(status_code=404, detail="Submission not found.")
 
-    # Update metadata
     updated_submission.id = submission_id
     updated_submission.form_slug = slug
     updated_submission.updated = datetime.now().isoformat()
@@ -138,15 +178,14 @@ def update_submission(
     forms_db.update_submission(updated_submission)
     return updated_submission
 
+
 @router.delete("/{slug}/submissions/{submission_id}")
 def delete_submission(slug: str, submission_id: int, user=Depends(get_current_user)):
     """Delete a specific submission from a form."""
-    # Verify the form exists
     form = forms_db.get_form(slug)
     if not form:
         raise HTTPException(status_code=404, detail="Form not found.")
 
-    # Verify the submission exists
     submission = forms_db.get_submission(submission_id)
     if not submission or submission["form_slug"] != slug:
         raise HTTPException(status_code=404, detail="Submission not found.")

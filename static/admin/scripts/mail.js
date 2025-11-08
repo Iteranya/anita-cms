@@ -7,11 +7,6 @@ const headerField = document.getElementById('header');
 const footerField = document.getElementById('footer');
 const apiKeyField = document.getElementById('api-key'); // Matches the HTML id="api-key"
 
-// Load initial config when the script loads or when the relevant part of the page is shown.
-// It's good practice to call this when the DOM is ready, or when the mail panel becomes visible.
-// For now, I'll assume it's called appropriately elsewhere, e.g., document.addEventListener('DOMContentLoaded', loadMailConfig);
-// or if this is part of a single-page application, when the mail configuration view is loaded.
-
 /**
  * Fetches current mail configuration from the server and populates the form.
  */

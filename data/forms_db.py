@@ -23,28 +23,34 @@ def create_tables():
         title TEXT NOT NULL,
         schema_json TEXT NOT NULL,
         created TEXT,
-        updated TEXT
+        updated TEXT,
+        author TEXT,
+        custom TEXT
     )
     ''')
+
     conn.execute('''
     CREATE TABLE IF NOT EXISTS submissions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         form_slug TEXT NOT NULL,
         submission_json TEXT NOT NULL,
         created TEXT,
+        updated TEXT,
+        author TEXT,
+        custom TEXT,
         FOREIGN KEY(form_slug) REFERENCES forms(slug)
     )
     ''')
     conn.commit()
 
 # ----- Forms -----
-def add_form(slug: str, title: str, schema: dict):
+def add_form(slug: str, title: str, schema: dict, author: Optional[str] = None, custom: Optional[dict] = None):
     conn = get_connection()
     now = datetime.now().isoformat()
     conn.execute('''
-    INSERT INTO forms (slug, title, schema_json, created, updated)
-    VALUES (?, ?, ?, ?, ?)
-    ''', (slug, title, json.dumps(schema), now, now))
+        INSERT INTO forms (slug, title, schema_json, created, updated, author, custom)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    ''', (slug, title, json.dumps(schema), now, now, author, json.dumps(custom or {})))
     conn.commit()
 
 def get_form(slug: str) -> Optional[dict]:
@@ -81,15 +87,15 @@ def add_submission(form_slug: str, data: dict):
     conn = get_connection()
     now = datetime.now().isoformat()
     conn.execute('''
-    INSERT INTO submissions (form_slug, submission_json, created)
-    VALUES (?, ?, ?)
+    INSERT INTO submissions (form_slug, submission_json, created, updated, author)
+    VALUES (?, ?, ?, ?, ?)
     ''', (form_slug, json.dumps(data), now))
     conn.commit()
 
 def list_submissions(form_slug: str) -> List[dict]:
     conn = get_connection()
     rows = conn.execute('''
-        SELECT id, form_slug, submission_json, created
+        SELECT id, form_slug, submission_json, created, updated, author
         FROM submissions WHERE form_slug = ?
     ''', (form_slug,)).fetchall()
     return [
@@ -97,7 +103,9 @@ def list_submissions(form_slug: str) -> List[dict]:
             "id": r[0],
             "form_slug": r[1],
             "data": json.loads(r[2]),
-            "created": r[3]
+            "created": r[3],
+            "updated": r[4],
+            "author": r[5]
         }
         for r in rows
     ]
@@ -125,11 +133,51 @@ def delete_form(slug: str):
     conn.execute('DELETE FROM forms WHERE slug = ?', (slug,))
     conn.commit()
 
+# ----- Submissions -----
+def add_submission(form_slug: str, data: dict, author: Optional[str] = None, custom: Optional[dict] = None):
+    """Add a new form submission."""
+    conn = get_connection()
+    now = datetime.now().isoformat()
+    conn.execute('''
+        INSERT INTO submissions (form_slug, submission_json, created, updated, author, custom)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (
+        form_slug,
+        json.dumps(data),
+        now,
+        now,
+        author,
+        json.dumps(custom or {})
+    ))
+    conn.commit()
+
+
+def list_submissions(form_slug: str) -> List[dict]:
+    """List all submissions for a given form slug."""
+    conn = get_connection()
+    rows = conn.execute('''
+        SELECT id, form_slug, submission_json, created, updated, author, custom
+        FROM submissions WHERE form_slug = ?
+    ''', (form_slug,)).fetchall()
+    return [
+        {
+            "id": r[0],
+            "form_slug": r[1],
+            "data": json.loads(r[2]),
+            "created": r[3],
+            "updated": r[4],
+            "author": r[5],
+            "custom": json.loads(r[6]) if r[6] else {}
+        }
+        for r in rows
+    ]
+
+
 def get_submission(submission_id: int) -> Optional[dict]:
     """Fetch a single submission by ID."""
     conn = get_connection()
     row = conn.execute('''
-        SELECT id, form_slug, submission_json, created
+        SELECT id, form_slug, submission_json, created, updated, author, custom
         FROM submissions WHERE id = ?
     ''', (submission_id,)).fetchone()
     if not row:
@@ -138,7 +186,10 @@ def get_submission(submission_id: int) -> Optional[dict]:
         "id": row[0],
         "form_slug": row[1],
         "data": json.loads(row[2]),
-        "created": row[3]
+        "created": row[3],
+        "updated": row[4],
+        "author": row[5],
+        "custom": json.loads(row[6]) if row[6] else {}
     }
 
 
@@ -148,7 +199,7 @@ def update_submission(submission):
     now = datetime.now().isoformat()
     conn.execute('''
         UPDATE submissions
-        SET submission_json = ?, created = ?, author = ?, custom = ?
+        SET submission_json = ?, updated = ?, author = ?, custom = ?
         WHERE id = ?
     ''', (
         json.dumps(submission.data),
@@ -159,11 +210,13 @@ def update_submission(submission):
     ))
     conn.commit()
 
+
 def delete_submission(submission_id: int):
     """Delete a submission by its ID."""
     conn = get_connection()
     conn.execute('DELETE FROM submissions WHERE id = ?', (submission_id,))
     conn.commit()
+
 
 
 def close_connection():
