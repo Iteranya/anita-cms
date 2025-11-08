@@ -77,6 +77,7 @@ def create_form(form: FormModel, user=Depends(get_current_user)):
         form.slug,
         form.title,
         form.schema,
+        form.description,
         author=form.author,
         custom=form.custom
     )

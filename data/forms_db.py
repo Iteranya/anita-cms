@@ -22,6 +22,7 @@ def create_tables():
         slug TEXT UNIQUE NOT NULL,
         title TEXT NOT NULL,
         schema_json TEXT NOT NULL,
+        description TEXT,
         created TEXT,
         updated TEXT,
         author TEXT,
@@ -44,13 +45,13 @@ def create_tables():
     conn.commit()
 
 # ----- Forms -----
-def add_form(slug: str, title: str, schema: dict, author: Optional[str] = None, custom: Optional[dict] = None):
+def add_form(slug: str, title: str, schema: dict, description: Optional[str], author: Optional[str] = None, custom: Optional[dict] = None):
     conn = get_connection()
     now = datetime.now().isoformat()
     conn.execute('''
-        INSERT INTO forms (slug, title, schema_json, created, updated, author, custom)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    ''', (slug, title, json.dumps(schema), now, now, author, json.dumps(custom or {})))
+        INSERT INTO forms (slug, title, schema_json, description, created, updated, author, custom)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (slug, title, json.dumps(schema), description, now, now, author, json.dumps(custom or {})))
     conn.commit()
 
 def get_form(slug: str) -> Optional[dict]:
@@ -63,8 +64,9 @@ def get_form(slug: str) -> Optional[dict]:
         "slug": row[1],
         "title": row[2],
         "schema": json.loads(row[3]),
-        "created": row[4],
-        "updated": row[5]
+        "description":row[4],
+        "created": row[5],
+        "updated": row[6]
     }
 
 def list_forms() -> List[dict]:
@@ -76,8 +78,9 @@ def list_forms() -> List[dict]:
             "slug": r[1],
             "title": r[2],
             "schema": json.loads(r[3]),
-            "created": r[4],
-            "updated": r[5]
+            "description":r[4],
+            "created": r[5],
+            "updated": r[6]
         }
         for r in rows
     ]

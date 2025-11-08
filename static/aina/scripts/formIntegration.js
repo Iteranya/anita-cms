@@ -110,7 +110,7 @@ export async function initFormGeneration(
 
                 # Schema
                 ${JSON.stringify(form.schema, null, 2)}
-                # Important Note: Use label for the data key value.
+                #Important Note: Use name for the data key value, not label.
                 # Important Note: Yes this is REAL application. Not Simulation, Not Demonstration, MAKE REAL IMPLEMENTATION
                 `.trim();
             notesArea.value += formInfo;
