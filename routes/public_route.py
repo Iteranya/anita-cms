@@ -21,25 +21,60 @@ templates = Jinja2Templates(directory=template_path)
 # And make the route. 
 # I know, a bit disappointing that you still have to make that much. I'm still working on an easier alternative aight?
 
-@router.get("/")
-async def serve_custom_page():
+@router.get("/", response_class=HTMLResponse)
+async def serve_custom_page(request: Request):
+    # Get all pages
+    pages = list_pages()
+
+    # Try to find the first page with 'home' tag
+    home_page = next((page for page in pages if 'home' in page.tags), None)
+
+    if home_page:
+        # If page is HTML, serve it directly
+        if home_page.type == 'html':
+            return HTMLResponse(content=home_page.html, status_code=200)
+        else:
+            # Otherwise, generate HTML from Markdown
+            generated = generate_markdown_page(home_page.title, home_page.markdown)
+            return HTMLResponse(content=generated, status_code=200)
+    
+    # Fallback to static index.html if no 'home' page found
     path = f"{template_path}/index.html"
     return FileResponse(path)
+
 
 @router.get("/blog", response_class=HTMLResponse)
 async def home(request: Request):
     pages = list_pages()
+    blog_home = next((page for page in pages if 'blog-home' in page.tags), None)
+
+    if blog_home:
+        if blog_home.type == 'html':
+            return HTMLResponse(content=blog_home.html, status_code=200)
+        else:
+            generated = generate_markdown_page(blog_home.title, blog_home.markdown)
+            return HTMLResponse(content=generated, status_code=200)
+
+    # Fallback to blog.html template with list of pages
     return templates.TemplateResponse("blog.html", {"request": request, "pages": pages})
 
-@router.get("/menu", response_class=HTMLResponse)
-async def home(request: Request):
+
+# Dynamic about page
+@router.get("/about", response_class=HTMLResponse)
+async def serve_about_page(request: Request):
     pages = list_pages()
-    menu = []
-    for page in pages:
-        if page.tags and "menu" in page.tags:
-            menu.append(page)
-    print(page)
-    return templates.TemplateResponse("menu.html", {"request": request, "pages": menu})
+    about_page = next((page for page in pages if 'about' in page.tags), None)
+
+    if about_page:
+        if about_page.type == 'html':
+            return HTMLResponse(content=about_page.html, status_code=200)
+        else:
+            generated = generate_markdown_page(about_page.title, about_page.markdown)
+            return HTMLResponse(content=generated, status_code=200)
+
+    # Fallback to static about.html
+    path = f"{template_path}/about.html"
+    return FileResponse(path)
 
 # Dynamic route to serve blog type pages
 @router.get("/blog/{slug}", response_class=HTMLResponse)
@@ -52,11 +87,6 @@ async def render_site(slug: str):
     else:
         generated = generate_markdown_page(page.title,page.markdown)
         return HTMLResponse(content=generated, status_code=200)
-
-# Example custom route in public_route.py
-@router.get("/about")
-async def serve_custom_page():
-    return FileResponse(f"{template_path}/about.html")
 
 # API ROUTES!!!
 
