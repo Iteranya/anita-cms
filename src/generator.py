@@ -1,10 +1,11 @@
 import markdown as md_lib
+from jinja2 import Template
 
-def generate_markdown_page(title:str,md: str, css = "static/markdown/styles.css", js = "static/markdown/script.js"):
-
-    custom_css = load_from_file(css)
-    custom_js = load_from_file(js)
-    # Convert markdown to HTML
+def generate_markdown_page(title: str, md: str, template_content: str = None):
+    
+    if template_content == None:
+        template_content = load_from_file("static/markdown/index.html")
+    
     html_content = md_lib.markdown(
         md,
         extensions=[
@@ -15,26 +16,11 @@ def generate_markdown_page(title:str,md: str, css = "static/markdown/styles.css"
         ]
     )
     
-    # Create a basic HTML document structure with embedded CSS
-    html = f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{title}</title>
-<style>
-{custom_css}
-</style>
-</head>
-<body>
-<div class="markdown-content">
-    {html_content}
-</div>
-<script>
-{custom_js}
-</script>
-</body>
-</html>"""
+    template = Template(template_content)
+    html = template.render(
+        title=title,
+        content=html_content
+    )
     
     return html
 

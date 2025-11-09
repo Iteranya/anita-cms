@@ -80,10 +80,15 @@ async def serve_about_page(request: Request):
 @router.get("/blog/{slug}", response_class=HTMLResponse)
 async def render_site(slug: str):
     page = get_page(slug)
+    pages = list_pages()
+    template = next((page for page in pages if page.tags and 'blog-template' in page.tags), None)
     if not page:
         raise HTTPException(status_code=404, detail="Page not found")
     if page.type == 'html':
         return HTMLResponse(content=page.html, status_code=200)
+    elif template:
+        generated = generate_markdown_page(page.title,page.markdown,template.html)
+        return HTMLResponse(content=generated, status_code=200)
     else:
         generated = generate_markdown_page(page.title,page.markdown)
         return HTMLResponse(content=generated, status_code=200)
