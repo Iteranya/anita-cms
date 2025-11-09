@@ -27,7 +27,7 @@ async def serve_custom_page(request: Request):
     pages = list_pages()
 
     # Try to find the first page with 'home' tag
-    home_page = next((page for page in pages if 'home' in page.tags), None)
+    home_page = next((page for page in pages if page.tags and 'home' in page.tags), None)
 
     if home_page:
         # If page is HTML, serve it directly
@@ -46,7 +46,7 @@ async def serve_custom_page(request: Request):
 @router.get("/blog", response_class=HTMLResponse)
 async def home(request: Request):
     pages = list_pages()
-    blog_home = next((page for page in pages if 'blog-home' in page.tags), None)
+    blog_home = next((page for page in pages if page.tags and 'blog-home' in page.tags), None)
 
     if blog_home:
         if blog_home.type == 'html':
@@ -63,7 +63,7 @@ async def home(request: Request):
 @router.get("/about", response_class=HTMLResponse)
 async def serve_about_page(request: Request):
     pages = list_pages()
-    about_page = next((page for page in pages if 'about' in page.tags), None)
+    about_page = next((page for page in pages if page.tags and 'about' in page.tags), None)
 
     if about_page:
         if about_page.type == 'html':
