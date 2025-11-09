@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import List, Optional
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -17,6 +17,30 @@ class Page:
     created: Optional[str] = None
     updated: Optional[str] = None
     author: Optional[str] = None
+    custom: Dict[str, Any] = field(default_factory=dict)
+
+@dataclass
+class Form:
+    """Represents a custom form definition in the CMS."""
+    slug: str
+    title: str
+    schema: Dict[str, Any]  # The form fields and settings
+    description: Optional[str] = None
+    created: Optional[str] = None
+    updated: Optional[str] = None
+    author: Optional[str] = None
+    custom: Dict[str, Any] = field(default_factory=dict)
+
+@dataclass
+class FormSubmission:
+    """Represents a single user submission to a form."""
+    id: Optional[int] = None
+    form_slug: str = ""
+    data: Dict[str, Any] = field(default_factory=dict)
+    created: Optional[str] = None
+    updated: Optional[str] = None
+    author: Optional[str] = None
+    custom: Dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class Prompt:

@@ -23,6 +23,21 @@ async def generate_response(task: Prompt):
     task.result = result
     return task.result
 
+async def generate_chat(message:list):
+    ai_config: DefaultConfig = load_or_create_config()
+    client = AsyncOpenAI(  # Changed to AsyncOpenAI
+        ai_config.ai_endpoint,
+        get_key(),
+    )
+    
+    completion = await client.chat.completions.create(  # Added await
+        ai_config.base_llm,
+        ai_config.temperature,
+        messages=message
+    )
+    result = completion.choices[0].message.content
+    return result
+
 async def stream_response(task: Prompt):
     ai_config: DefaultConfig = load_or_create_config()
     client = AsyncOpenAI(  # Changed to AsyncOpenAI

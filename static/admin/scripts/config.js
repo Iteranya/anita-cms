@@ -7,11 +7,6 @@ const baseLlmField = document.getElementById('base-llm');
 const temperatureField = document.getElementById('temperature');
 const aiKeyField = document.getElementById('ai-key');
 
-// // Load initial config
-// loadConfig();
-
-// Handle form submission
-
 /**
  * Fetches current configuration from the server and populates the form
  */
