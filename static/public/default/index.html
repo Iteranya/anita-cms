@@ -3,576 +3,332 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pandu Dhaulagiri | Iteranya</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #7158e2;
-            --dark: #121212;
-            --light: #f5f5f5;
-            --gray: #1e1e1e;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--dark);
-            color: var(--light);
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        /* Header */
-        header {
-            padding: 2rem 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            position: sticky;
-            top: 0;
-            background-color: rgba(18, 18, 18, 0.95);
-            z-index: 100;
-            backdrop-filter: blur(10px);
-        }
-
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .nav-links a {
-            color: var(--light);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
-        .nav-links a:hover {
-            color: var(--primary);
-        }
-
-        /* Hero Section */
-        .hero {
-            padding: 4rem 0;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 3rem;
-            align-items: center;
-        }
-
-        .avatar {
-            width: 300px;
-            height: 300px;
-            border-radius: 50%;
-            border: 5px solid var(--primary);
-            background-image: url('/media/iteranya_cr.png');
-            background-size: cover;
-            background-position: center;
-            margin: 0 auto;
-            position: relative;
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-        }
-
-        .hero-content h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(45deg, #7158e2, #a26dfa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .title {
-            font-size: 1.2rem;
-            color: #a26dfa;
-            margin-bottom: 1.5rem;
-        }
-
-        .contact-links {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .contact-links a {
-            color: var(--light);
-            background: var(--gray);
-            padding: 0.8rem 1.2rem;
-            border-radius: 50px;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .contact-links a:hover {
-            background: var(--primary);
-            transform: translateY(-3px);
-        }
-
-        /* Projects Section */
-        .section {
-            padding: 4rem 0;
-        }
-
-        .section-title {
-            font-size: 2rem;
-            text-align: center;
-            margin-bottom: 3rem;
-            position: relative;
-        }
-
-        .section-title::after {
-            content: '';
-            width: 100px;
-            height: 4px;
-            background: var(--primary);
-            position: absolute;
-            bottom: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-radius: 2px;
-        }
-
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .project-card {
-            background: var(--gray);
-            border-radius: 15px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .project-card:hover {
-            transform: translateY(-10px);
-        }
-
-        .project-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .project-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-
-        .project-date {
-            color: #a6a6a6;
-            font-size: 0.9rem;
-        }
-
-        .tech-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin: 1rem 0;
-        }
-
-        .tech-tag {
-            background: rgba(113, 88, 226, 0.2);
-            color: #a26dfa;
-            padding: 0.3rem 0.8rem;
-            border-radius: 50px;
-            font-size: 0.8rem;
-        }
-
-        .github-link {
-            color: var(--primary);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-
-        /* Work Experience */
-        .timeline {
-            position: relative;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        .timeline::before {
-            content: '';
-            position: absolute;
-            width: 4px;
-            background: var(--primary);
-            top: 0;
-            bottom: 0;
-            left: 30px;
-        }
-
-        .timeline-item {
-            margin-bottom: 2rem;
-            position: relative;
-            padding-left: 70px;
-        }
-
-        .timeline-date {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 50px;
-            height: 50px;
-            background: var(--primary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        .timeline-content {
-            background: var(--gray);
-            padding: 1.5rem;
-            border-radius: 15px;
-        }
-
-        /* Skills & Certs */
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-        }
-
-        .skills-category {
-            background: var(--gray);
-            padding: 1.5rem;
-            border-radius: 15px;
-        }
-
-        .skill-item {
-            margin: 1rem 0;
-        }
-
-        .skill-name {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-        }
-
-        .skill-bar {
-            height: 8px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .skill-level {
-            height: 100%;
-            background: var(--primary);
-            border-radius: 4px;
-        }
-
-        /* Projects Button */
-        .projects-btn {
-            display: block;
-            width: max-content;
-            margin: 4rem auto;
-            padding: 1rem 3rem;
-            background: var(--primary);
-            color: white;
-            text-decoration: none;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 20px rgba(113, 88, 226, 0.3);
-        }
-
-        .projects-btn:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 25px rgba(113, 88, 226, 0.4);
-        }
-
-        /* Responsive */
-        @media (max-width: 900px) {
-            .hero {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-
-            .contact-links {
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .nav-links {
-                display: none;
-            }
-        }
-    </style>
+    <title>Welcome to Anita CMS - Your Lightweight Website Solution</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/public/default/style.css">
 </head>
-<body>
-    <header>
-        <nav class="container">
-            <a href="#" class="logo">iteranya</a>
-            <div class="nav-links">
-                <a href="#">Home</a>
-                <a href="#projects">Projects</a>
-                <a href="#experience">Experience</a>
-                <a href="#skills">Skills</a>
-            </div>
-        </nav>
-    </header>
+<body class="min-h-screen">
+    <!-- Floating Tech Dots Background -->
+    
 
-    <main>
-        <!-- Hero Section -->
-        <section class="hero container">
-            <div class="avatar"></div>
-            <div class="hero-content">
-                <h1>Pandu Dhaulagiri</h1>
-                <div class="title">Multi-Domain Engineer & AI Enthusiast</div>
-                <p>Creative problem-solver bridging cutting-edge AI implementations with unconventional programming solutions. Passionate about open-source development, human-AI interaction, and pushing technological boundaries.</p>
+    <div class="container mx-auto px-4 py-12 max-w-6xl">
+        <!-- Header -->
+        <header class="text-center mb-16">
+            <div class="inline-block sci-fi-border rounded-lg px-6 py-4 mb-8 holographic-effect">
+                <h1 class="text-4xl md:text-5xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-emerald-500">
+                    Welcome to <span class="underline decoration-wavy decoration-amber-400">Anita CMS</span>
+                </h1>
+                <p class="text-lg text-slate-600">Your lightweight, AI-powered website solution</p>
+            </div>
+            
+            <div class="flex justify-center mb-10">
+                <div class="sci-fi-border rounded-lg overflow-hidden w-full max-w-2xl">
+                    <img src="/media/anita.jpg" 
+                         alt="Aina, Amiya, Asta having a selfie" 
+                         class="w-full h-auto">
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap justify-center gap-4 mb-10">
+                <a href="/admin" class="btn-primary text-white font-semibold px-6 py-3 rounded-lg flex items-center">
+                    <i class="fas fa-cog mr-2"></i> Admin Panel
+                </a>
+                <a href="/blog" class="btn-primary text-white font-semibold px-6 py-3 rounded-lg flex items-center">
+                    <i class="fas fa-newspaper mr-2"></i> Blog
+                </a>
+                <a href="/aina" class="btn-primary text-white font-semibold px-6 py-3 rounded-lg flex items-center">
+                    <i class="fas fa-magic mr-2"></i> Aina Generator
+                </a>
+                <a href="/asta" class="btn-primary text-white font-semibold px-6 py-3 rounded-lg flex items-center">
+                    <i class="fas fa-pen-fancy mr-2"></i> Asta Editor
+                </a>
+                <a href="https://github.com/Iteranya/anita-cms" target="_blank" class="btn-primary text-white font-semibold px-6 py-3 rounded-lg flex items-center">
+                    <i class="fab fa-github mr-2"></i> Documentation
+                </a>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="grid md:grid-cols-3 gap-8 mb-16">
+            <!-- What is Anita CMS -->
+            <div class="sci-fi-border rounded-xl p-6 holographic-effect">
+                <div class="flex items-center mb-4">
+                    <span class="tech-dot"></span>
+                    <h2 class="text-2xl font-bold ml-2 text-blue-600">Anita CMS</h2>
+                </div>
+                <p class="text-slate-700 mb-4">
+                    Anita CMS is the perfect blend of simplicity and power, combining the best of Amiya's admin interface, 
+                    Aina's AI website generation, and Asta's markdown editing into one lightweight package.
+                </p>
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r mb-4">
+                    <p class="text-sm text-blue-800">
+                        <i class="fas fa-lightbulb text-blue-500 mr-2"></i>
+                        No bloated frameworks, no Node.js nonsense - just pure vanilla JS magic with a FastAPI backend.
+                    </p>
+                </div>
+                <h3 class="font-semibold text-lg mt-4 mb-2 text-emerald-600">Why Choose Anita?</h3>
+                <ul class="space-y-2 text-sm text-slate-600">
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-emerald-500 mr-2 mt-1"></i>
+                        <span>Lightweight architecture (smaller than a React component's dependency tree!)</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-emerald-500 mr-2 mt-1"></i>
+                        <span>Hybrid content editing (switch between Markdown and HTML)</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-emerald-500 mr-2 mt-1"></i>
+                        <span>Built-in AI assistance for content creation</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Aina Generator -->
+            <div class="sci-fi-border rounded-xl p-6 holographic-effect">
+                <div class="flex items-center mb-4">
+                    <span class="tech-dot"></span>
+                    <h2 class="text-2xl font-bold ml-2 text-emerald-600">Aina Generator</h2>
+                </div>
+                <p class="text-slate-700 mb-4">
+                    Aina is your AI-powered website generator that helps you create beautiful, responsive websites 
+                    without touching a single line of code (unless you want to!).
+                </p>
+                <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r mb-4">
+                    <p class="text-sm text-emerald-800">
+                        <i class="fas fa-robot text-emerald-500 mr-2"></i>
+                        Get layout suggestions, color schemes, and even complete site structures with AI assistance.
+                    </p>
+                </div>
+                <h3 class="font-semibold text-lg mt-4 mb-2 text-blue-600">Better Than WordPress</h3>
+                <ul class="space-y-2 text-sm text-slate-600">
+                    <li class="flex items-start">
+                        <i class="fas fa-bolt text-blue-500 mr-2 mt-1"></i>
+                        <span>No security nightmares from outdated plugins</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-bolt text-blue-500 mr-2 mt-1"></i>
+                        <span>No bloated database slowing down your site</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-bolt text-blue-500 mr-2 mt-1"></i>
+                        <span>Real-time editing with instant previews</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Asta Editor -->
+            <div class="sci-fi-border rounded-xl p-6 holographic-effect">
+                <div class="flex items-center mb-4">
+                    <span class="tech-dot"></span>
+                    <h2 class="text-2xl font-bold ml-2 text-amber-600">Asta Editor</h2>
+                </div>
+                <p class="text-slate-700 mb-4">
+                    Asta brings powerful markdown editing with AI assistance to your fingertips. Perfect for blogs, 
+                    documentation, and any content-focused website.
+                </p>
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r mb-4">
+                    <p class="text-sm text-amber-800">
+                        <i class="fas fa-pen-nib text-amber-500 mr-2"></i>
+                        Write in markdown, get beautiful formatted content with real-time preview and AI suggestions.
+                    </p>
+                </div>
+                <h3 class="font-semibold text-lg mt-4 mb-2 text-emerald-600">Blogging Made Simple</h3>
+                <ul class="space-y-2 text-sm text-slate-600">
+                    <li class="flex items-start">
+                        <i class="fas fa-feather-alt text-emerald-500 mr-2 mt-1"></i>
+                        <span>AI-powered writing assistance for better content</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-feather-alt text-emerald-500 mr-2 mt-1"></i>
+                        <span>No more fighting with clunky WYSIWYG editors</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-feather-alt text-emerald-500 mr-2 mt-1"></i>
+                        <span>Switch to HTML mode anytime for advanced customization</span>
+                    </li>
+                </ul>
+            </div>
+        </main>
+
+        <!-- Comparison Section -->
+        <section class="sci-fi-border rounded-xl p-8 mb-16 holographic-effect">
+            <h2 class="text-3xl font-bold mb-6 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-emerald-500">
+                <i class="fas fa-trophy mr-2"></i> Why Anita Beats WordPress
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-blue-600 flex items-center">
+                        <i class="fas fa-shield-alt mr-2"></i> Security
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="bg-blue-100 p-3 rounded-full mr-4">
+                                <i class="fas fa-check text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-blue-800">No Plugin Vulnerabilities</h4>
+                                <p class="text-sm text-slate-600">Anita has built-in functionality without relying on third-party plugins that need constant updates.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-blue-100 p-3 rounded-full mr-4">
+                                <i class="fas fa-check text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-blue-800">Minimal Attack Surface</h4>
+                                <p class="text-sm text-slate-600">With a lightweight architecture, there's simply less code that could be exploited.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 
-                <div class="contact-links">
-                    <a href="mailto:pandudparadox@gmail.com">
-                        <i class="fas fa-envelope"></i>
-                        Email
-                    </a>
-                    <a href="#">
-                        <i class="fas fa-file-alt"></i>
-                        CV
-                    </a>
-                    <a href="#">
-                        <i class="fab fa-linkedin"></i>
-                        LinkedIn
-                    </a>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-emerald-600 flex items-center">
+                        <i class="fas fa-bolt mr-2"></i> Performance
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="bg-emerald-100 p-3 rounded-full mr-4">
+                                <i class="fas fa-check text-emerald-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-emerald-800">Lightning Fast</h4>
+                                <p class="text-sm text-slate-600">Average response time under 50ms compared to WordPress's bloated architecture.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-emerald-100 p-3 rounded-full mr-4">
+                                <i class="fas fa-check text-emerald-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-emerald-800">No Database Overhead</h4>
+                                <p class="text-sm text-slate-600">SQLite provides all the power you need without MySQL's performance overhead.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-amber-600 flex items-center">
+                        <i class="fas fa-pen-fancy mr-2"></i> Content Creation
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="bg-amber-100 p-3 rounded-full mr-4">
+                                <i class="fas fa-check text-amber-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-amber-800">AI-Assisted Writing</h4>
+                                <p class="text-sm text-slate-600">Get suggestions, improvements, and even full drafts generated by AI.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-amber-100 p-3 rounded-full mr-4">
+                                <i class="fas fa-check text-amber-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-amber-800">Hybrid Editing</h4>
+                                <p class="text-sm text-slate-600">Switch seamlessly between Markdown and HTML modes based on your needs.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-purple-600 flex items-center">
+                        <i class="fas fa-cogs mr-2"></i> Maintenance
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="bg-purple-100 p-3 rounded-full mr-4">
+                                <i class="fas fa-check text-purple-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-purple-800">No Constant Updates</h4>
+                                <p class="text-sm text-slate-600">Unlike WordPress, you don't need to update core, plugins, and themes constantly.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-purple-100 p-3 rounded-full mr-4">
+                                <i class="fas fa-check text-purple-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-purple-800">Simple Backups</h4>
+                                <p class="text-sm text-slate-600">Your entire site can be backed up by simply copying a few files.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- Feats of Engineering -->
-        <section id="projects" class="section">
-            <div class="container">
-                <h2 class="section-title">Feats of Engineering</h2>
-                <div class="projects-grid">
-                    <!-- Embedded Visual Novel Engine -->
-                    <div class="project-card">
-                        <div class="project-header">
-                            <div class="project-title">MobTalker Engine</div>
-                            <div class="project-date">2024 – Present</div>
-                        </div>
-                        <p>Created Visual Novel Engine from scratch that runs inside Minecraft</p>
-                        <div class="tech-tags">
-                            <span class="tech-tag">Python</span>
-                            <span class="tech-tag">Java</span>
-                            <span class="tech-tag">FSM</span>
-                            <span class="tech-tag">DSL</span>
-                        </div>
-                        <a href="https://github.com/Iteranya/MobTalkerRedux" class="github-link">
-                            <i class="fab fa-github"></i>
-                            View on GitHub
-                        </a>
+        <!-- Quick Start Guide -->
+        <section class="sci-fi-border rounded-xl p-8 mb-16 holographic-effect">
+            <h2 class="text-3xl font-bold mb-6 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-emerald-500">
+                <i class="fas fa-rocket mr-2"></i> Quick Start Guide
+            </h2>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+        
+                
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-emerald-100">
+                    <div class="text-emerald-500 text-2xl mb-4">
+                        <i class="fas fa-sliders-h"></i>
                     </div>
+                    <h3 class="font-semibold text-lg mb-2 text-emerald-600">1. Configure Settings</h3>
+                    <p class="text-sm text-slate-600 mb-4">
+                        Visit the Admin Panel to set up your site title, SEO settings, and configure AI options.
+                    </p>
+                    <a href="/admin" class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full">Go to Admin</a>
+                </div>
 
-                    <!-- Aktiva AI -->
-                    <div class="project-card">
-                        <div class="project-header">
-                            <div class="project-title">Aktiva AI</div>
-                            <div class="project-date">2024 – Present</div>
-                        </div>
-                        <p>Multi-Agent Character AI Discord Bot with Local LLM Integration</p>
-                        <div class="tech-tags">
-                            <span class="tech-tag">Python</span>
-                            <span class="tech-tag">LLM</span>
-                            <span class="tech-tag">AI</span>
-                        </div>
-                        <a href="https://github.com/Iteranya/AktivaAI" class="github-link">
-                            <i class="fab fa-github"></i>
-                            View on GitHub
-                        </a>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-blue-100">
+                    <div class="text-blue-500 text-2xl mb-4">
+                        <i class="fas fa-terminal"></i>
                     </div>
-
-                    <!-- Local LLM Finetuning -->
-                    <div class="project-card">
-                        <div class="project-header">
-                            <div class="project-title">Viel Mistral-7B</div>
-                            <div class="project-date">2025 – Present</div>
-                        </div>
-                        <p>Personality-embedded LLM using modified Alpaca dataset</p>
-                        <div class="tech-tags">
-                            <span class="tech-tag">AI</span>
-                            <span class="tech-tag">LLM</span>
-                            <span class="tech-tag">PyTorch</span>
-                        </div>
-                        <a href="https://huggingface.co/ArsParadox/Viel-Mistral-v3" class="github-link">
-                            <i class="fas fa-external-link-alt"></i>
-                            View on HuggingFace
-                        </a>
+                    <h3 class="font-semibold text-lg mb-2 text-blue-600">2. Create Content</h3>
+                    <p class="text-sm text-slate-600 mb-4">
+                        Start with either the Asta Editor for markdown content or Aina Generator for visual HTML building.
+                    </p>
+                    <div class="flex space-x-2">
+                        <a href="/asta" class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full">Try Asta</a>
+                        <a href="/aina" class="text-xs bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full">Try Aina</a>
                     </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-amber-100">
+                    <div class="text-amber-500 text-2xl mb-4">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3 class="font-semibold text-lg mb-2 text-amber-600">3. Publish & Share</h3>
+                    <p class="text-sm text-slate-600 mb-4">
+                        Your site is live! Share your content with the world or continue refining.
+                    </p>
+                    <a href="/blog" class="text-xs bg-amber-50 text-amber-600 px-3 py-1 rounded-full">View Blog</a>
                 </div>
             </div>
         </section>
 
-        <!-- Projects Button -->
-        <a href="/blog" class="projects-btn">
-            <i class="fas fa-rocket"></i> Explore Full Project Portfolio
+        <!-- Footer -->
+        <footer class="text-center py-8 text-slate-500 text-sm">
+            <div class="mb-4">
+                <a href="https://github.com/Iteranya/anita-cms" target="_blank" class="inline-flex items-center text-blue-500 hover:text-blue-700">
+                    <i class="fab fa-github mr-2"></i> GitHub Repository
+                </a>
+            </div>
+            <p>Anita CMS - The lightweight CMS for developers who value simplicity and power</p>
+            <p class="mt-2">Made with <i class="fas fa-heart text-red-400"></i> by Artes Paradox (And Aina Smiling Smugly In The Corner)</p>
+        </footer>
+    </div>
+    
+
+    <!-- Floating Action Button -->
+    <div class="fixed bottom-8 right-8">
+        <a href="/admin" class="btn-primary text-white text-lg font-semibold px-5 py-3 rounded-full shadow-lg flex items-center">
+            <i class="fas fa-rocket mr-2"></i> Get Started
         </a>
-
-        <!-- Work Experience -->
-        <section id="experience" class="section">
-            <div class="container">
-                <h2 class="section-title">Work Experience</h2>
-                <div class="timeline">
-                    <!-- Bangkit Academy -->
-                    <div class="timeline-item">
-                        <div class="timeline-date">
-                            <i class="fas fa-user-graduate"></i>
-                        </div>
-                        <div class="timeline-content">
-                            <h3>Bangkit Academy · Mentor & Community Manager</h3>
-                            <p class="project-date">Nov 2022 – Nov 2023 · Remote</p>
-                            <ul>
-                                <li>Android Developer Mentor with highest graduation rate</li>
-                                <li>Mentored 3 student groups to investment funding</li>
-                                <li>Managed online community events and operations</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- PT. Vimayo -->
-                    <div class="timeline-item">
-                        <div class="timeline-date">
-                            <i class="fas fa-briefcase"></i>
-                        </div>
-                        <div class="timeline-content">
-                            <h3>PT. Vimayo · On-Site Technician</h3>
-                            <p class="project-date">Oct 2020 – Present · Jakarta</p>
-                            <ul>
-                                <li>Developed Excel automation with VBA</li>
-                                <li>Managed company websites and tech infrastructure</li>
-                                <li>Handled technical support and tax report compilation</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Skills & Certs -->
-        <section id="skills" class="section">
-            <div class="container">
-                <h2 class="section-title">Expertise</h2>
-                <div class="skills-grid">
-                    <!-- Core Skills -->
-                    <div class="skills-category">
-                        <h3>Technical Forte</h3>
-                        <div class="skill-item">
-                            <div class="skill-name">
-                                <span>AI System Design</span>
-                                <span>90%</span>
-                            </div>
-                            <div class="skill-bar">
-                                <div class="skill-level" style="width: 90%;"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-name">
-                                <span>Reverse Engineering</span>
-                                <span>85%</span>
-                            </div>
-                            <div class="skill-bar">
-                                <div class="skill-level" style="width: 85%;"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-name">
-                                <span>Cross-platform Dev</span>
-                                <span>88%</span>
-                            </div>
-                            <div class="skill-bar">
-                                <div class="skill-level" style="width: 88%;"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tech Stack -->
-                    <div class="skills-category">
-                        <h3>Technical Arsenal</h3>
-                        <div class="tech-tags">
-                            <span class="tech-tag">Python</span>
-                            <span class="tech-tag">Java</span>
-                            <span class="tech-tag">LLMs</span>
-                            <span class="tech-tag">PyTorch</span>
-                            <span class="tech-tag">Transformers</span>
-                            <span class="tech-tag">Automation</span>
-                            <span class="tech-tag">VBA Scripting</span>
-                        </div>
-                    </div>
-
-                    <!-- Certifications -->
-                    <div class="skills-category">
-                        <h3>Credentials</h3>
-                        <ul>
-                            <li>Associate Android Developer</li>
-                            <li>Distinction Graduate - Bangkit Academy</li>
-                            <li>B.S. Information Systems - UPN "Veteran" Yogyakarta</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <script>
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
-
-        // Project card hover enhancement
-        const projectCards = document.querySelectorAll('.project-card');
-        projectCards.forEach(card => {
-            card.addEventListener('mouseenter', () => {
-                card.style.boxShadow = '0 15px 30px rgba(0,0,0,0.3)';
-            });
-            card.addEventListener('mouseleave', () => {
-                card.style.boxShadow = 'none';
-            });
-        });
-    </script>
+    </div>
 </body>
 </html>
