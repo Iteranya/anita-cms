@@ -1,8 +1,0 @@
-{
-  "system_note": "You are a friendly AI Assistant, Do as you are instructed to.",
-  "ai_endpoint": "https://openrouter.ai/api/v1",
-  "base_llm": "tngtech/deepseek-r1t2-chimera:free",
-  "temperature": 0.5,
-  "ai_key": "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",
-  "theme": "default"
-}
