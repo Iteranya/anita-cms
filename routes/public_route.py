@@ -91,7 +91,7 @@ async def render_site(slug: str):
         return HTMLResponse(content=generated, status_code=200)
 
 # Dynamic route to serve 'main' pages
-@router.get("/{slug}/", response_class=HTMLResponse)
+@router.get("/{slug}", response_class=HTMLResponse)
 async def serve_main_page(slug: str):
     page = get_page(slug)
 
