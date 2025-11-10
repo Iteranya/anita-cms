@@ -21,6 +21,7 @@ Markdown==3.8
 MarkupSafe==3.0.2
 openai==1.78.1
 passlib==1.7.4
+pillow==12.0.0
 pyasn1==0.4.8
 pycparser==2.22
 pydantic==2.11.4

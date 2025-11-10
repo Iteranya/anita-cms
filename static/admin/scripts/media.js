@@ -80,20 +80,26 @@ function initOnce() {
   uploadBtn     ?.addEventListener('click', openPicker);
   emptyUploadBtn?.addEventListener('click', openPicker);
 
-  fileIn?.addEventListener('change', async () => {
-    if (!fileIn.files[0]) return;
+fileIn?.addEventListener('change', async () => {
+    if (!fileIn.files.length) return; // Changed from files[0] to files.length
+    
     const fd = new FormData();
-    fd.append('file', fileIn.files[0]);
+    
+    // Append ALL selected files with the same key name
+    for (let i = 0; i < fileIn.files.length; i++) {
+      fd.append('files', fileIn.files[i]); // Changed 'file' to 'files'
+    }
+    
     try {
       const res = await fetch(API, { method: 'POST', body: fd });
       if (!res.ok) throw new Error(await res.text());
-      showToast('Upload successful', 'success');
+      showToast(`${fileIn.files.length} image(s) uploaded`, 'success'); // Better feedback
       fileIn.value = '';
-      await refreshMediaPage(); // ensure immediate refresh
+      await refreshMediaPage();
     } catch {
       showToast('Upload failed', 'error');
     }
-  });
+});
 
   // Filter (client-side)
   filterInput?.addEventListener('input', () => {
