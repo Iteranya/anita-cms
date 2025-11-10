@@ -25,14 +25,14 @@ export function setupImagePasteHandler() {
           const filename = `${sanitizedName}-${timestamp}.png`;
           
           // Build final filename with slug if exists
-          const finalFilename = slug ? `${slug}/${filename}` : filename;
+          const finalFilename = slug ? `${filename}` : filename;
           const uploadEndpoint = '/media';
 
           try {
             // showNotification('Uploading image...', 'info');
             
             const formData = new FormData();
-            formData.append('file', new File([file], finalFilename, { type: file.type }));
+            formData.append('files', new File([file], finalFilename, { type: file.type }));
             
             const response = await fetch(uploadEndpoint, {
               method: 'POST',
@@ -46,7 +46,11 @@ export function setupImagePasteHandler() {
             const data = await response.json();
             
             const cursorPos = markdownInput.selectionStart;
-            const imageMarkdown = `![${sanitizedName}](${uploadEndpoint}/${data.filename})`;
+            const uploadedFile = data.files?.[0];
+            if (!uploadedFile) throw new Error('No file info returned');
+
+            const imageUrl = `${uploadEndpoint}/${uploadedFile.saved_as}`;
+            const imageMarkdown = `![${sanitizedName}](${imageUrl})`;
             
             const textBefore = markdownInput.value.substring(0, cursorPos);
             const textAfter = markdownInput.value.substring(cursorPos);
@@ -91,7 +95,7 @@ function sanitizeFilename(filename) {
     baseName = 'image';
   }
   
-  return baseName + extension;
+  return baseName;
 }
 
 
