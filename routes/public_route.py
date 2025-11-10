@@ -51,9 +51,6 @@ async def home(request: Request):
     if blog_home:
         if blog_home.type == 'html':
             return HTMLResponse(content=blog_home.html, status_code=200)
-        else:
-            generated = generate_markdown_page(blog_home.title, blog_home.markdown)
-            return HTMLResponse(content=generated, status_code=200)
 
     # Fallback to blog.html template with list of pages
     return templates.TemplateResponse("blog.html", {"request": request, "pages": pages})
@@ -92,6 +89,23 @@ async def render_site(slug: str):
     else:
         generated = generate_markdown_page(page.title,page.markdown)
         return HTMLResponse(content=generated, status_code=200)
+
+# Dynamic route to serve 'main' pages
+@router.get("/{slug}/", response_class=HTMLResponse)
+async def serve_main_page(slug: str):
+    page = get_page(slug)
+
+    # Check if page exists and has the 'main' tag
+    if not page or not (page.tags and 'main' in page.tags):
+        raise HTTPException(status_code=404, detail="Main page not found")
+
+    # If it's pure HTML, return as is
+    if page.type == 'html':
+        return HTMLResponse(content=page.html, status_code=200)
+
+    # Otherwise, generate HTML from Markdown
+    generated = generate_markdown_page(page.title, page.markdown)
+    return HTMLResponse(content=generated, status_code=200)
 
 # API ROUTES!!!
 

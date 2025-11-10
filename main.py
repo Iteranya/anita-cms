@@ -8,7 +8,7 @@ from src.auth import Depends,get_current_user
 # Import routers
 from routes import admin_route,asta_route,media_route,aina_route,public_route,auth_route,mail_route,forms_route
 
-app = FastAPI()
+app = FastAPI(redirect_slashes=True)
 db.get_connection()
 forms_db.get_connection()
 BASE_DIR = Path(__file__).resolve().parent
@@ -28,7 +28,6 @@ app.include_router(admin_route.router)
 app.include_router(asta_route.router)
 app.include_router(media_route.router)
 app.include_router(aina_route.router)
-app.include_router(public_route.router)
 app.include_router(auth_route.router)
 app.include_router(mail_route.router)
 app.include_router(forms_route.router)
@@ -46,7 +45,7 @@ app.include_router(
     aina_route.router,
     dependencies=[Depends(get_current_user)]
 )
-
+app.include_router(public_route.router)
 
 # Run the application with: uvicorn main:app --reload
 if __name__ == "__main__":
