@@ -43,7 +43,7 @@ async def serve_custom_page(request: Request):
     return FileResponse(path)
 
 
-@router.get("/blog", response_class=HTMLResponse)
+@router.get("/blog/", response_class=HTMLResponse)
 async def home(request: Request):
     pages = list_pages()
     blog_home = next((page for page in pages if page.tags and 'blog-home' in page.tags), None)
@@ -57,7 +57,7 @@ async def home(request: Request):
 
 
 # Dynamic about page
-@router.get("/about", response_class=HTMLResponse)
+@router.get("/about/", response_class=HTMLResponse)
 async def serve_about_page(request: Request):
     pages = list_pages()
     about_page = next((page for page in pages if page.tags and 'about' in page.tags), None)
@@ -91,7 +91,7 @@ async def render_site(slug: str):
         return HTMLResponse(content=generated, status_code=200)
 
 # Dynamic route to serve 'main' pages
-@router.get("/{slug}", response_class=HTMLResponse)
+@router.get("/{slug}/", response_class=HTMLResponse)
 async def serve_main_page(slug: str):
     page = get_page(slug)
 
