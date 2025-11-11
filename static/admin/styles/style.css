@@ -418,6 +418,12 @@ body {
     display: block;
 }
 
+.tab.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none; 
+}
+
 .empty-state {
     text-align: center;
     padding: 3rem 1rem;
@@ -531,6 +537,49 @@ body {
   color: #fff;
   border: none;
   cursor: pointer;
+}
+
+/* --- Alternative Style: Bold & Colorful --- */
+
+/* 1. Use the overlay positioning from the first example */
+.editor-controls {
+    position: relative;
+}
+
+/* 2. Style the button */
+.edit-btn {
+    position: absolute;
+    bottom: 10px; /* Place it at the bottom */
+    right: 10px;
+    z-index: 5;
+
+    /* Icon */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23ffffff'%3E%3Cpath d='M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z' /%3E%3Cpath fill-rule='evenodd' d='M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z' clip-rule='evenodd' /%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: 16px 16px;
+    background-position: 10px center;
+    padding-left: 32px;
+
+    /* Aesthetics - Assuming a blue primary color */
+    background-color: #3b82f6;
+    color: white;
+    font-weight: bold;
+    border-radius: 20px; /* Pill shape */
+    padding-top: 8px;
+    padding-bottom: 8px;
+    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+
+    /* Transitions */
+    transition: all 0.2s ease;
+}
+
+/* 3. Hover/focus effect */
+.edit-btn:hover,
+.edit-btn:focus {
+    background-color: #2563eb;
+    box-shadow: 0 7px 10px rgba(59, 130, 246, 0.3);
+    transform: translateY(-1px);
+    color: white;
 }
 
 

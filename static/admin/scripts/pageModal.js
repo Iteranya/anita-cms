@@ -16,18 +16,20 @@ export async function openPageModal(page = null) {
     const slugInput = document.getElementById('page-slug');
     const editWithAsta = document.getElementById('edit-with-asta');
     const editWithAina = document.getElementById('edit-with-aina');
-    
+    const contentTab = document.querySelector('.tab[data-tab="content"]');
+
     setCurrentPageId(page?.slug ?? null);
-    
-    if (page && page.slug){
+
+    if (page && page.slug) {
         try {
             // Fetch fresh data from the API
             const response = await fetch(`/admin/api/${page.slug}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch page data');
             }
+            contentTab.classList.remove('disabled');
             const freshPageData = await response.json();
-            
+
             // Setup modal with fresh data
             document.getElementById('modal-title').textContent = 'Edit Page';
             document.getElementById('page-title').value = freshPageData.title;
@@ -35,22 +37,22 @@ export async function openPageModal(page = null) {
             slugInput.readOnly = true;
             document.getElementById('page-description').value = freshPageData.content || '';
             document.getElementById('page-thumbnail').value = freshPageData.thumb || '';
-            
+
             // Populate content fields
             document.getElementById('page-markdown').value = freshPageData.markdown || '';
             document.getElementById('page-html').value = freshPageData.html || '';
-            
+
             // Set content type (default to markdown if not specified)
             const contentType = freshPageData.type || CONTENT_TYPES.MARKDOWN;
             document.getElementById('content-type').value = contentType;
-            
+
             // Update editor visibility based on content type
             updateContentVisibility(contentType);
-            
+
             // Update editor links
             editWithAsta.href = `/asta?slug=${freshPageData.slug}`;
             editWithAina.href = `/aina?slug=${freshPageData.slug}`;
-            
+
             setTags(freshPageData.tags || []);
             renderCustomFields(freshPageData.custom || {});
         } catch (error) {
@@ -58,6 +60,7 @@ export async function openPageModal(page = null) {
             showToast('Failed to load page data', 'error');
             // Fall back to the original page data if available
             if (page) {
+                contentTab.classList.remove('disabled');
                 document.getElementById('modal-title').textContent = 'Edit Page';
                 document.getElementById('page-title').value = page.title;
                 slugInput.value = page.slug;
@@ -78,25 +81,28 @@ export async function openPageModal(page = null) {
     } else {
         // Setup modal for new page
         console.log("CREATING NEW PAGE")
+        contentTab.classList.add('disabled');
         document.getElementById('modal-title').textContent = 'Add New Page';
         document.getElementById('page-form').reset();
         slugInput.readOnly = false;
         setTags([]);
         setCurrentPageId(null);
+        renderCustomFields({}); // Clear custom fields for new page
         // Disable edit buttons for new pages
         editWithAsta.href = '#';
         editWithAina.href = '#';
     }
-    
+
     renderTags();
-    switchTab('content');
+    // CHANGED: Switch to the 'details' tab by default instead of 'content'
+    switchTab('details');
     pageModal.classList.add('active');
 }
 
 function updateContentVisibility(contentType) {
     const markdownGroup = document.getElementById('markdown-group');
     const htmlGroup = document.getElementById('html-group');
-    
+
     markdownGroup.style.display = contentType === CONTENT_TYPES.MARKDOWN ? 'block' : 'none';
     htmlGroup.style.display = contentType === CONTENT_TYPES.HTML ? 'block' : 'none';
 }
@@ -113,9 +119,9 @@ export function updateEditorLinks() {
 
 export function savePage() {
     const currentPageId = getCurrentPageId();
-    
+
     const contentType = document.getElementById('content-type').value;
-    
+
     const pageData = {
         title: document.getElementById('page-title').value,
         slug: document.getElementById('page-slug').value,
@@ -130,12 +136,12 @@ export function savePage() {
     };
 
     console.log(pageData)
-    
+
     if (!pageData.title || !pageData.slug) {
         showToast('Title and slug are required', 'error');
         return;
     }
-    
+
     fetch(currentPageId ? `/admin/api/${currentPageId}` : '/admin/api', {
         method: currentPageId ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -169,12 +175,40 @@ export function setupPageModalListeners() {
     document.getElementById('cancel-btn').addEventListener('click', closePageModal);
     document.getElementById('save-btn').addEventListener('click', savePage);
     
-    
     document.getElementById('content-type').addEventListener('change', (e) => {
         updateContentVisibility(e.target.value);
     });
     
     document.getElementById('page-slug').addEventListener('input', updateEditorLinks);
+
+    // --- NEW BEHAVIOR FOR EDIT BUTTONS ---
+    const handleEditRedirect = (event) => {
+        // 1. Stop the link from navigating immediately
+        event.preventDefault();
+
+        const destinationUrl = event.currentTarget.href;
+
+        // 2. Do nothing if the link is disabled (e.g., for a new page)
+        if (!destinationUrl || destinationUrl.endsWith('#')) {
+            showToast('Please save the page first to enable the editor.', 'info');
+            return;
+        }
+
+        // 3. Manually close the modal
+        closePageModal();
+
+        // 4. Navigate to the editor page after a short delay.
+        // This ensures the modal is visually gone and the history state is clean.
+        setTimeout(() => {
+            window.location.href = destinationUrl;
+        }, 150); // 150ms is enough for the modal fade-out to feel smooth
+    };
+
+    // Attach the new handler to both edit buttons
+    document.getElementById('edit-with-asta').addEventListener('click', handleEditRedirect);
+    document.getElementById('edit-with-aina').addEventListener('click', handleEditRedirect);
+    // --- END OF NEW BEHAVIOR ---
+    
     setupCustomFieldListeners();
 }
 

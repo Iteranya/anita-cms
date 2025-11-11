@@ -9,12 +9,12 @@
             <form id="page-form">
                 <input type="hidden" id="page-id">
                 <div class="tabs">
-                    <div class="tab active" data-tab="content">Content</div>
-                    <div class="tab" data-tab="seo">SEO</div>
-                    <div class="tab" data-tab="preview">Preview</div>
+                    <div class="tab active" data-tab="details">Details</div>
+                    <div class="tab" data-tab="content">Content</div>
                 </div>
-                
-                <div class="tab-content active" data-tab-content="content">
+
+                <!-- Tab 1: Page Details -->
+                <div class="tab-content active" data-tab-content="details">
                     <div class="form-group">
                         <label for="page-title">Title *</label>
                         <input type="text" class="form-control" id="page-title" required>
@@ -23,6 +23,33 @@
                         <label for="page-slug">Slug *</label>
                         <input type="text" class="form-control" id="page-slug" required>
                     </div>
+                    <div class="form-group">
+                        <label for="page-description">Description</label>
+                        <textarea class="form-control" id="page-description" rows="3"></textarea>
+                    </div>
+                    <!-- 
+                        NOTE: Re-added this field as the JavaScript depends on it for saving. 
+                        It was present in the original "SEO" tab.
+                    -->
+                    <div class="form-group">
+                        <label for="page-thumbnail">Thumbnail URL</label>
+                        <input type="text" class="form-control" id="page-thumbnail">
+                    </div>
+                    <div class="form-group">
+                        <label for="page-tags">Tags</label>
+                        <div class="tags-input" id="tags-container">
+                            <input type="text" id="page-tags-input" placeholder="Add a tag and press Enter">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Custom Fields</label>
+                        <div id="custom-fields-container"></div>
+                        <button type="button" class="btn btn-secondary" id="add-custom-field-btn">+ Add Custom Field</button>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Page Content Editors -->
+                <div class="tab-content" data-tab-content="content">
                     <div class="form-group">
                         <label for="content-type">Content Type *</label>
                         <select class="form-control form-select" id="content-type">
@@ -45,37 +72,7 @@
                         </div>
                     </div>
                 </div>
-                
-                <div class="tab-content" data-tab-content="seo">
-                    <div class="form-group">
-                        <label for="page-description">Description</label>
-                        <textarea class="form-control" id="page-description" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="page-thumbnail">Thumbnail URL</label>
-                        <input type="text" class="form-control" id="page-thumbnail">
-                    </div>
-                    <div class="form-group">
-                        <label for="page-tags">Tags</label>
-                        <div class="tags-input" id="tags-container">
-                            <input type="text" id="page-tags-input" placeholder="Add a tag and press Enter">
-                        </div>
-                    </div>
 
-                    <!-- 🧩 Custom Fields Section -->
-                    <div class="form-group">
-                        <label>Custom Fields</label>
-                        <div id="custom-fields-container"></div>
-                        <button type="button" class="btn btn-secondary" id="add-custom-field-btn">+ Add Custom Field</button>
-                    </div>
-                </div>
-
-                
-                <div class="tab-content" data-tab-content="preview">
-                    <div class="preview-container" id="preview-content">
-                        Preview will be shown here
-                    </div>
-                </div>
             </form>
         </div>
         <div class="modal-footer">
@@ -85,7 +82,7 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
+<!-- Delete Confirmation Modal (Unchanged) -->
 <div class="modal" id="delete-modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -97,7 +94,7 @@
         </div>
         <div class="modal-footer">
             <button class="btn btn-outline" id="cancel-delete-btn">Cancel</button>
-            <button class="btn btn-danger" id="confirm-delete-btn">Delete Page</button>
+            <button class="btn btn-danger" id="confirm-delete-btn">Delete</button>
         </div>
     </div>
 </div>
