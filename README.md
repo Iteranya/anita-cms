@@ -27,7 +27,7 @@ Manage everything from one cozy dashboard:
 * Access forms and submissions
 * Configure AI settings
 * Update mail and site settings
-* Tag any page as your **Home** page — no IDE required!
+* Tag any page as your **Home, Blog, Contact, and more** page — no IDE required!
 
 ---
 
