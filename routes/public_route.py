@@ -47,7 +47,7 @@ async def serve_custom_page(request: Request):
 async def home(request: Request):
     pages = list_pages()
     pages = list_pages()
-    blog_pages = [page for page in pages if 'blog' in page.tags]
+    blog_pages = [page for page in pages if page.tags and 'blog' in page.tags]
     blog_home = next((page for page in pages if page.tags and 'blog-home' in page.tags), None)
 
     if blog_home:
