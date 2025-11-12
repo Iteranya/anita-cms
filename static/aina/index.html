@@ -106,7 +106,49 @@
         <!-- 📝 Notes Text Area -->
         <div class="sidebar-section">
             <label for="notes-textarea">Notes Area:</label>
-            <textarea id="notes-textarea" placeholder="Form schema and info will appear here, senpai~"></textarea>
+            <textarea id="notes-textarea" value="Form schema and info will appear here, senpai~">
+# API ROUTES!!!
+
+# API route to list all blog pages
+@router.get("/api/blog")
+async def api_list_pages():
+    pages = list_pages()
+    return JSONResponse(content=[
+        {
+            "slug": page.slug,
+            "title": page.title,
+            "content": page.content,
+            "tags": page.tags,
+            "thumb": page.thumb,
+            "type": page.type,
+            "created": page.created,
+            "updated": page.updated,
+            "author": page.author
+        }
+        for page in pages
+    ])
+
+# API route to get a single blog page by slug
+@router.get("/api/blog/{slug}")
+async def api_get_page(slug: str):
+    page = get_page(slug)
+    if not page:
+        raise HTTPException(status_code=404, detail="Page not found")
+
+    return JSONResponse(content={
+        "slug": page.slug,
+        "title": page.title,
+        "content": page.content,
+        "markdown": page.markdown,
+        "html": page.html,
+        "tags": page.tags,
+        "thumb": page.thumb,
+        "type": page.type,
+        "created": page.created,
+        "updated": page.updated,
+        "author": page.author
+    })
+</textarea>
         </div>
     </aside>
 
