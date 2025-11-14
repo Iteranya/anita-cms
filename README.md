@@ -95,6 +95,37 @@ Anita may be cute, but she’s serious about protection.
 
 ---
 
+## 🏷️ Important Tags
+
+Anita can tag any page… but a few tags are extra-spicy 🌶️ and unlock special routing magic. Use them wisely, young page-smith:
+
+### **`home`**
+
+The chosen one.
+Whichever page holds this tag becomes your site’s landing page at `/`.
+
+### **`blog`**
+
+Pages with this tag get displayed automatically on the built-in blog listing.
+Perfect for articles, rants, lore dumps, or your cat’s daily newsletter.
+
+### **`blog-home`**
+
+Marks a page as the official blog homepage, served at `/blog`.
+Aina will gently bow as she hands it the spotlight.
+
+### **`blog-template`**
+
+Acts as the layout used for individual blog posts.
+Rendered at `/blog/{slug}` — the `{slug}` bit being whatever your post is named (preferably something cooler than "post-1").
+
+### **`main`**
+
+Any page with this tag gets served at `/{slug}`.
+This is your go-to for simple standalone pages like `/about`, `/pricing`, or `/please-hire-me`.
+
+---
+
 ## ⚙️ Tech Stack
 
 | Component       | Technology        |
