@@ -3,7 +3,7 @@
 *"Amiya, Aina, and Asta walk into a codebase..."*
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/988871b4-9726-46e5-a72b-ebe551ad70f3" alt="Anita" width="450" style="border: 2px solid #f0f0f0; border-radius: 8px; padding: 5px;" />
+  <img src="https://github.com/user-attachments/assets/30fd931a-eaa9-4d87-91d8-7e027cd401c9" alt="Anita" width="450" style="border: 2px solid #f0f0f0; border-radius: 8px; padding: 5px;" />
 </div>
 
 **Anita CMS** is a lightweight, AI-assisted, hybrid content management system that combines:
