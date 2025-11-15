@@ -55,24 +55,6 @@ async def home(request: Request):
     # Fallback to blog.html template with list of pages
     return templates.TemplateResponse("blog.html", {"request": request, "pages": pages})
 
-
-# Dynamic about page
-@router.get("/about/", response_class=HTMLResponse)
-async def serve_about_page(request: Request):
-    pages = list_pages()
-    about_page = next((page for page in pages if page.tags and 'about' in page.tags), None)
-
-    if about_page:
-        if about_page.type == 'html':
-            return HTMLResponse(content=about_page.html, status_code=200)
-        else:
-            generated = generate_markdown_page(about_page.title, about_page.markdown)
-            return HTMLResponse(content=generated, status_code=200)
-
-    # Fallback to static about.html
-    path = f"{template_path}/about.html"
-    return FileResponse(path)
-
 # Dynamic route to serve blog type pages
 @router.get("/blog/{slug}", response_class=HTMLResponse)
 async def render_site(slug: str):
