@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -49,5 +50,5 @@ app.include_router(public_route.router)
 
 # Run the application with: uvicorn main:app --reload
 if __name__ == "__main__":
-    
-    uvicorn.run("main:app", host="127.0.0.1", port=5469) 
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else 5469
+    uvicorn.run("main:app", host="127.0.0.1", port=port)

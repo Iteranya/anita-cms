@@ -3,7 +3,7 @@
 *"Amiya, Aina, and Asta walk into a codebase..."*
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/988871b4-9726-46e5-a72b-ebe551ad70f3" alt="Anita" width="450" style="border: 2px solid #f0f0f0; border-radius: 8px; padding: 5px;" />
+  <img src="https://github.com/user-attachments/assets/f3ab4ac9-853b-4be9-be92-560f0948caaf" alt="Anita" width="557" height="557" style="border: 2px solid #f0f0f0; border-radius: 8px; padding: 5px;" />
 </div>
 
 **Anita CMS** is a lightweight, AI-assisted, hybrid content management system that combines:
@@ -27,7 +27,7 @@ Manage everything from one cozy dashboard:
 * Access forms and submissions
 * Configure AI settings
 * Update mail and site settings
-* Tag any page as your **Home** page — no IDE required!
+* Tag any page as your **Home, Blog, Contact, and more** page — no IDE required!
 
 ---
 
@@ -92,6 +92,37 @@ Anita may be cute, but she’s serious about protection.
 * **JWT + Cookies + Admin authentication**
 * Single-role for simplicity
 * Secure defaults baked in — green lights all around 🟢
+
+---
+
+## 🏷️ Important Tags
+
+Anita can tag any page… but a few tags are extra-spicy 🌶️ and unlock special routing magic. Use them wisely, young page-smith:
+
+### **`home`**
+
+The chosen one.
+Whichever page holds this tag becomes your site’s landing page at `/`.
+
+### **`blog`**
+
+Pages with this tag get displayed automatically on the built-in blog listing.
+Perfect for articles, rants, lore dumps, or your cat’s daily newsletter.
+
+### **`blog-home`**
+
+Marks a page as the official blog homepage, served at `/blog`.
+Aina will gently bow as she hands it the spotlight.
+
+### **`blog-template`**
+
+Acts as the layout used for individual blog posts.
+Rendered at `/blog/{slug}` — the `{slug}` bit being whatever your post is named (preferably something cooler than "post-1").
+
+### **`main`**
+
+Any page with this tag gets served at `/{slug}`.
+This is your go-to for simple standalone pages like `/about`, `/pricing`, or `/please-hire-me`.
 
 ---
 

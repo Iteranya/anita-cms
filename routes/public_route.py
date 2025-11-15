@@ -46,6 +46,8 @@ async def serve_custom_page(request: Request):
 @router.get("/blog/", response_class=HTMLResponse)
 async def home(request: Request):
     pages = list_pages()
+    pages = list_pages()
+    blog_pages = [page for page in pages if page.tags and 'blog' in page.tags]
     blog_home = next((page for page in pages if page.tags and 'blog-home' in page.tags), None)
 
     if blog_home:
@@ -53,7 +55,7 @@ async def home(request: Request):
             return HTMLResponse(content=blog_home.html, status_code=200)
 
     # Fallback to blog.html template with list of pages
-    return templates.TemplateResponse("blog.html", {"request": request, "pages": pages})
+    return templates.TemplateResponse("blog.html", {"request": request, "pages": blog_pages})
 
 # Dynamic route to serve blog type pages
 @router.get("/blog/{slug}", response_class=HTMLResponse)
@@ -100,9 +102,7 @@ async def api_list_pages():
             "slug": page.slug,
             "title": page.title,
             "content": page.content,
-            "markdown": page.markdown,
-            "html": page.html,
-            "tags": page.tags,
+            "tags": page.tags or [],
             "thumb": page.thumb,
             "type": page.type,
             "created": page.created,
@@ -125,7 +125,7 @@ async def api_get_page(slug: str):
         "content": page.content,
         "markdown": page.markdown,
         "html": page.html,
-        "tags": page.tags,
+        "tags": page.tags or [],
         "thumb": page.thumb,
         "type": page.type,
         "created": page.created,
