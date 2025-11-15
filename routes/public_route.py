@@ -10,17 +10,6 @@ router = APIRouter(tags=["Public"])
 template_path = f"static/public/{get_theme()}"
 templates = Jinja2Templates(directory=template_path)
 
-# Hey! Hey over here!!!
-
-# Yes, here, this is where you make the main changes to the code!
-    
-# Sorry, sorry, I want to add something like... an AI Buildscript that lets you make the 'landing' and 'home' page with AI 
-# But unfortunately, still under experimentation
-# So yeah, go to /aina and ask her to make static site
-# And just put it somewhere in static/public
-# And make the route. 
-# I know, a bit disappointing that you still have to make that much. I'm still working on an easier alternative aight?
-
 @router.get("/", response_class=HTMLResponse)
 async def serve_custom_page(request: Request):
     # Get all pages
