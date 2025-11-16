@@ -50,6 +50,8 @@ async def home(request: Request):
 @router.get("/blog/{slug}", response_class=HTMLResponse)
 async def render_site(slug: str):
     page = get_page(slug)
+    if not page or not (page.tags and 'blog' in page.tags):
+        raise HTTPException(status_code=404, detail="Main page not found")
     pages = list_pages()
     template = next((page for page in pages if page.tags and 'blog-template' in page.tags), None)
     if not page:

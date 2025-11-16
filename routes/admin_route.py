@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
+from src.generator import generate_markdown_page
 from src.config import load_or_create_config, save_config, load_or_create_mail_config, save_mail_config
 from data import db  # Import the db module with standalone functions
 from data.models import Page as PageData
@@ -58,7 +59,7 @@ async def admin_panel(request: Request,  user: Optional[str] = Depends(optional_
         return RedirectResponse(url="/auth/login", status_code=302)
     return templates.TemplateResponse("admin/index.html", {"request": request})
 
-@router.post("/api", response_model=PageModel)
+@router.post("/api/", response_model=PageModel)
 def create_page(
     page: PageModel,
     user: dict = Depends(get_current_user),  # Enforces authentication
@@ -77,14 +78,14 @@ def create_page(
     db.add_page(PageData(**page_data))
     return PageModel(**page_data)
 
-@router.get("/api/{slug}", response_model=PageModel)
+@router.get("/api/{slug}/", response_model=PageModel)
 def read_page(slug: str, user: dict = Depends(get_current_user)):
     page = db.get_page(slug)
     if not page:
         raise HTTPException(status_code=404, detail="Page not found")
     return page
 
-@router.put("/api/{slug}", response_model=PageModel)
+@router.put("/api/{slug}/", response_model=PageModel)
 def update_page(slug: str, page: PageModel, user: dict = Depends(get_current_user)):
     print("Received data:", page.dict())
     existing_page = db.get_page(slug)
@@ -102,18 +103,18 @@ def update_page(slug: str, page: PageModel, user: dict = Depends(get_current_use
     db.update_page(PageData(**page_data))
     return PageModel(**page_data)
 
-@router.delete("/api/{slug}")
+@router.delete("/api/{slug}/")
 def delete_page(slug: str,user: dict = Depends(get_current_user)):
     if not db.get_page(slug):
         raise HTTPException(status_code=404, detail="Page not found")
     db.delete_page(slug)
     return {"message": "Page deleted successfully"}
 
-@router.get("/list", response_model=List[PageModel])
+@router.get("/list/", response_model=List[PageModel])
 def list_pages(user: dict = Depends(get_current_user)):
     return db.list_pages()
 
-@router.get("/config", response_model=ConfigModel)
+@router.get("/config/", response_model=ConfigModel)
 def get_config(user: dict = Depends(get_current_user)):
     config = load_or_create_config()
     return ConfigModel(
@@ -124,7 +125,7 @@ def get_config(user: dict = Depends(get_current_user)):
         # Do not include ai_key
     )
 
-@router.post("/config", response_model=ConfigModel)
+@router.post("/config/", response_model=ConfigModel)
 def update_config(updated: ConfigModel,user: dict = Depends(get_current_user)):
     config = load_or_create_config()
     config.system_note = updated.system_note
@@ -138,7 +139,7 @@ def update_config(updated: ConfigModel,user: dict = Depends(get_current_user)):
     save_config(config)
     return updated
 
-@router.get("/mail", response_model=MailModel)
+@router.get("/mail/", response_model=MailModel)
 def get_config(user: dict = Depends(get_current_user)):
     config = load_or_create_mail_config()
     return MailModel(
@@ -149,7 +150,7 @@ def get_config(user: dict = Depends(get_current_user)):
     api_key=""
     )
 
-@router.post("/mail", response_model=MailModel)
+@router.post("/mail/", response_model=MailModel)
 def update_config(updated: MailModel,user: dict = Depends(get_current_user)):
     config = load_or_create_mail_config()
     config.server_email = updated.server_email
@@ -163,3 +164,22 @@ def update_config(updated: MailModel,user: dict = Depends(get_current_user)):
 
     save_mail_config(config)
     return updated
+
+# Dynamic route to serve 'main' pages
+@router.get("/{slug}/", response_class=HTMLResponse)
+async def serve_custom_admin_page(slug: str, user: Optional[str] = Depends(optional_auth)):
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    page = db.get_page(slug)
+
+    # Check if page exists and has the 'main' tag
+    if not page or not (page.tags and 'admin' in page.tags):
+        raise HTTPException(status_code=404, detail="Main page not found")
+
+    # If it's pure HTML, return as is
+    if page.type == 'html':
+        return HTMLResponse(content=page.html, status_code=200)
+
+    # Otherwise, generate HTML from Markdown
+    generated = generate_markdown_page(page.title, page.markdown)
+    return HTMLResponse(content=generated, status_code=200)
