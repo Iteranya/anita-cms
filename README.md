@@ -48,8 +48,6 @@ Hybrid content management that adapts to your needs. Create, design, and publish
 
 *Switch freely between Markdown and HTML — no reloads, no fuss.*
 
-> **The Power Trio**: Use the **Admin Panel** to create a custom form, prompt **Aina** to design a contact page and include that form, then switch to **Asta** to write the perfect welcoming text in Markdown. All done in minutes, zero coding required.
-
 ---
 
 ### 🧠 AI Integration (Aina + Asta)
