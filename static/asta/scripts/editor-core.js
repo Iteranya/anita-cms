@@ -2,46 +2,16 @@
 // Core editor functionality
 
 import { configureMarked, initialMarkdown } from './markdown-config.js';
-import {getProject} from './db-integration.js';
 
 export class MarkdownEditor {
-    constructor() {
+     constructor(projectData) {
         this.markdownInput = document.getElementById('markdown-input');
         this.markdownOutput = document.getElementById('markdown-output');
-        this.side_panel =  document.getElementById('sidebar-textarea');
-        this.slug = document.getElementById('slug-container').textContent;
-        // Initialize with placeholder content
-        console.log(this.slug)
-        if (this.slug !== "" && this.slug !== null) {
-            // Use await or then() since getProject returns a Promise
-            getProject(this.slug)
-                .then(project_data => {
-                    
-                    // Handle ai_notes - put in side panel if not null
-                    console.log(project_data.ai_notes)
-                    if (project_data.ai_notes) {
-                        
-                        this.side_panel.innerHTML = project_data.ai_notes;
-                    }
-                    
-                    // Handle markdown - put in markdownInput if not null
-                    console.log(project_data)
-                    if (project_data.markdown) {
-                        
-                        this.markdownInput.value = project_data.markdown;
-                    }
-                    this.updatePreview();
-                })
-                .catch(error => {
-                    console.error("Error fetching project:", error);
-                    // Display error message to the user
-                    this.showErrorMessage(`Failed to load project: ${error.message}`);
-                });
-        } else {
-            this.markdownInput.value = initialMarkdown;
-        }
+        this.side_panel = document.getElementById('sidebar-textarea');
         
         
+        this.side_panel.value = projectData.ai_notes || '';
+        this.markdownInput.value = projectData.markdown || initialMarkdown;
         // Configure marked
         configureMarked();
         

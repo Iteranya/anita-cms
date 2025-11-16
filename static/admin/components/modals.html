@@ -27,14 +27,33 @@
                         <label for="page-description">Description</label>
                         <textarea class="form-control" id="page-description" rows="3"></textarea>
                     </div>
-                    <!-- 
-                        NOTE: Re-added this field as the JavaScript depends on it for saving. 
-                        It was present in the original "SEO" tab.
-                    -->
+                    
+                    <!-- START: MODIFIED THUMBNAIL SECTION -->
                     <div class="form-group">
                         <label for="page-thumbnail">Thumbnail URL</label>
-                        <input type="text" class="form-control" id="page-thumbnail">
+                        <div class="thumbnail-upload-group">
+                            <input type="text" class="form-control" id="page-thumbnail" placeholder="/media/image.webp">
+                            <input type="file" id="thumbnail-file-input" style="display: none;" accept="image/*">
+                            <button type="button" class="btn btn-secondary" id="upload-thumbnail-btn">Upload</button>
+                        </div>
+                        <small id="upload-status" class="form-text" style="margin-top: 5px; display: block;"></small>
                     </div>
+                    <!-- To make this look good, add this style to your CSS file or a <style> tag -->
+                    <style>
+                        .thumbnail-upload-group {
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                        }
+                        .thumbnail-upload-group .form-control {
+                            flex-grow: 1; /* Make the text input take up available space */
+                        }
+                        .thumbnail-upload-group .btn {
+                            flex-shrink: 0; /* Prevent the button from shrinking */
+                        }
+                    </style>
+                    <!-- END: MODIFIED THUMBNAIL SECTION -->
+
                     <div class="form-group">
                         <label for="page-tags">Tags</label>
                         <div class="tags-input" id="tags-container">
@@ -48,8 +67,9 @@
                     </div>
                 </div>
 
-                <!-- Tab 2: Page Content Editors -->
+                <!-- Tab 2: Page Content Editors (Unchanged) -->
                 <div class="tab-content" data-tab-content="content">
+                    <!-- ... rest of your tab 2 content is unchanged ... -->
                     <div class="form-group">
                         <label for="content-type">Content Type *</label>
                         <select class="form-control form-select" id="content-type">
@@ -72,7 +92,6 @@
                         </div>
                     </div>
                 </div>
-
             </form>
         </div>
         <div class="modal-footer">

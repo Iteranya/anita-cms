@@ -27,6 +27,17 @@
             </div>
             <div class="sidebar-content">
                 <textarea id="sidebar-textarea" placeholder="Use this space for quick notes, drafts, or other text..."></textarea>
+                
+                <!-- START: New Toggle Button -->
+                <div class="toggle-container">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="blog-toggle-checkbox">
+                        <span class="slider"></span>
+                    </label>
+                    <span class="toggle-label">Publish as Blog Post</span>
+                </div>
+                <!-- END: New Toggle Button -->
+
                 <!-- You can add more tools or content here later -->
                  <p style="color: var(--text-secondary); font-size: 0.9em; margin-top: 20px;">This is a collapsible sidebar panel.</p>
             </div>
@@ -72,6 +83,7 @@
     <div id="notification-container" class="notification-container"></div>
 
     <div id="slug-container" style="display: none;" data-slug=""></div>
+    <div id="project-data" style="display: none;"></div>
     <script type="module" src="/static/asta/scripts/main.js"></script>
 </body>
 
