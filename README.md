@@ -148,6 +148,11 @@ source venv/bin/activate  # or .\venv\Scripts\activate on Windows
 # Install dependencies
 uv pip install -r requirements.txt
 
+# Configure environment
+cp example.env .env
+# Open .env and update JWT_SECRET with a secure random string
+# You can generate one with: python -c "import secrets; print(secrets.token_hex(32))"
+
 # Run the app
 python main.py
 ```
