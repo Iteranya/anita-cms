@@ -3,11 +3,23 @@ import sys
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from data import db,forms_db
+from data import db, forms_db
 import uvicorn
-from src.auth import Depends,get_current_user
+from src.auth import Depends, get_current_user
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
 # Import routers
-from routes import admin_route,asta_route,media_route,aina_route,public_route,auth_route,mail_route,forms_route
+from routes import admin_route, asta_route, media_route, aina_route, public_route, auth_route, mail_route, forms_route
+
+# Check if JWT_SECRET exists
+if not os.getenv("JWT_SECRET"):
+    print("❌ ERROR: JWT_SECRET not found in .env file!")
+    print("Please add JWT_SECRET to your .env file before running the application.")
+    sys.exit(1)
 
 app = FastAPI(redirect_slashes=True)
 db.get_connection()
