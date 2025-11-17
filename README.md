@@ -119,6 +119,10 @@ The layout for individual blog posts, rendered at `/blog/{slug}`. Aina can gener
 
 Any page with this tag gets served at `/{slug}`. Ideal for standalone pages like `/about`, `/projects`, or `/pricing`.
 
+### **`admin`**
+
+Any page with this tag gets served at `/{slug}`. Ideal for standalone pages like `/about`, `/projects`, or `/pricing`. But they are also protected just like the admin page~
+
 ---
 
 ## ⚙️ Tech Stack
