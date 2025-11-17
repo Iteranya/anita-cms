@@ -1,6 +1,10 @@
 // aiIntegration.js - AI generation integration
 import { showNotification } from './notifications.js';
 
+// Track current stream state
+let currentReader = null;
+let isGenerating = false;
+
 /**
  * Initialize the AI generation functionality
  * @param {HTMLTextAreaElement} htmlCode - The HTML editor
@@ -18,16 +22,24 @@ export function initAiGeneration(htmlCode, updatePreviewCallback, notesArea) {
         e.preventDefault();
 
         const button = form.querySelector('button');
+        
+        // If already generating, stop it
+        if (isGenerating) {
+            stopGeneration(button);
+            return;
+        }
+
         const originalButtonText = button.innerHTML;
 
         // Loading state
-        button.disabled = true;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+        button.disabled = false; // Keep enabled so user can click to stop
+        button.innerHTML = '<i class="fas fa-stop-circle"></i> Stop';
+        isGenerating = true;
 
         const promptInput = form.querySelector('[name="content"]');
         const promptText = promptInput ? promptInput.value : "";
-        const notesText = notesArea ? notesArea.value : ""; // ✅ Safe access
-        const fullPrompt = notesText + "\n\n" + promptText ;
+        const notesText = notesArea ? notesArea.value : "";
+        const fullPrompt = notesText + "\n\n" + promptText;
 
         const editor = htmlCode.value;
 
@@ -41,11 +53,11 @@ export function initAiGeneration(htmlCode, updatePreviewCallback, notesArea) {
             if (!response.ok)
                 throw new Error(`Server returned ${response.status}: ${response.statusText}`);
 
-            const reader = response.body.getReader();
+            currentReader = response.body.getReader();
             let generatedHtml = '';
 
             while (true) {
-                const { done, value } = await reader.read();
+                const { done, value } = await currentReader.read();
                 if (done) break;
 
                 const chunkText = new TextDecoder().decode(value);
@@ -57,13 +69,43 @@ export function initAiGeneration(htmlCode, updatePreviewCallback, notesArea) {
 
             showCompletionEffect();
         } catch (error) {
-            console.error('Error:', error);
-            showNotification('Yabai! Something went wrong (╥﹏╥)', 'error');
+            if (error.name === 'AbortError') {
+                showNotification('Generation stopped! (｡•́︿•̀｡)', 'info');
+            } else {
+                console.error('Error:', error);
+                showNotification('Yabai! Something went wrong (╥﹏╥)', 'error');
+            }
         } finally {
+            isGenerating = false;
+            currentReader = null;
             button.disabled = false;
             button.innerHTML = originalButtonText;
         }
     });
+}
+
+/**
+ * Stop the current generation
+ */
+async function stopGeneration(button) {
+    if (currentReader) {
+        try {
+            await currentReader.cancel(); // Cancel the stream reader
+            
+            // Also notify backend to stop
+            await fetch('/aina/stop-website-stream', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            
+            showNotification('Stopped generation ヾ(•ω•`)o', 'info');
+        } catch (error) {
+            console.error('Error stopping generation:', error);
+        }
+    }
+    
+    isGenerating = false;
+    currentReader = null;
 }
 
 /**

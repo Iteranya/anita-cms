@@ -23,8 +23,98 @@ def title_to_filename(title):
     
     return filename    
 
-# AINAAA CHAAAN  WWWWHWHHHHYYYYYYY!!!?!???!?!?!!?
-async def stream_website(context, instruction):
+# I swear to god, holy shit, this is the ONLY prompt engineering that works. Forget Golden Prompt, this is it, this is the only way. I don't know why, but if you use bullshit like this:
+
+# """{context}\n\n
+# Your task is to act as an expert front-end developer. You will be given an API route, a content rendering strategy, and the HTML/CSS for a page template. Your goal is to create a single, fully functional HTML file that fetches and displays the data for a single item according to the specified strategy.
+
+# Adhere strictly to all instructions.
+
+# ---
+# ### **CORE ARCHITECTURE: Server-Routed Detail Page**
+# ---
+
+# This page template is served by a backend that handles "pretty URLs" (e.g., `/blog/my-post-slug`). The JavaScript's job is to extract the unique identifier from the URL path, fetch the corresponding data, and render it using the chosen strategy.
+
+# **URL Parsing Mandate:** The unique identifier MUST be extracted from the URL's pathname using this exact method:
+# `const pathParts = window.location.pathname.split('/');`
+# `const identifier = pathParts.pop() || pathParts.pop(); // Handles trailing slash`
+
+# ---
+# ### **INPUTS**
+# ---
+
+# **CONTENT RENDERING STRATEGY:**
+
+#    *   **Strategy A: Use Pre-rendered HTML.**
+#        - The API response contains a field with ready-to-use HTML (e.g., a field named `html`).
+#        - Your JavaScript will grab the content of this `html` field and inject it directly into the content container using `innerHTML`.
+
+#    *   **Strategy B: Render Markdown on Client.**
+#        - The API response contains a field with raw Markdown text (e.g., a field named `markdown`).
+#        - Your generated page MUST include a client-side Markdown parsing library (e.g., `marked.js` from a CDN).
+#        - Your JavaScript will grab the content of the `markdown` field, pass it to the library's parsing function, and inject the resulting HTML into the content container.
+
+# ---
+# ### **UNBREAKABLE RULES**
+# ---
+
+# 1.  **ZERO MOCK DATA:** No hardcoded JSON data is allowed.
+# 2.  **STRICT ARCHITECTURAL ADHERENCE:** Use the mandated URL parsing and the chosen Content Rendering Strategy without deviation.
+# 3.  **SUPERIOR USER EXPERIENCE:** Implement loading indicators and error messages.
+
+# ---
+# ### **GENERATION PROCESS**
+# ---
+
+# Follow this process precisely:
+
+# 1.  **Identify Strategy:** Read the chosen Content Rendering Strategy (A or B).
+# 2.  **Structure HTML:** Use the provided layout. If Strategy B is chosen, add a `<script>` tag for a Markdown library (like marked.js) in the `<head>`.
+# 3.  **Write JavaScript:**
+#     - **A. Entry Point:** Create an `async` function that runs on DOM load.
+#     - **B. Extract Identifier:** Extract the identifier from the URL pathname as mandated.
+#     - **C. Fetch Data:** Call the API, showing a loading state.
+#     - **D. Render Content (The Critical Step):**
+#         - **If Strategy A:** Find the `html` field in the response and set `container.innerHTML = data.html;`.
+#         - **If Strategy B:** Find the `markdown` field in the response and set `container.innerHTML = marked.parse(data.markdown);`.
+#     - **E. Handle Errors:** Display a user-friendly error if the fetch fails.
+
+# **Final Output:** Produce a single, self-contained HTML file that perfectly implements the request.
+#     """
+
+# It just don't work... And the AI gets confused.
+# This is the only prompt engineering that I know works perfectly, FIGHT ME!!
+import asyncio
+from typing import Optional
+
+class StreamCancelledException(Exception):
+    """Raised when stream is intentionally cancelled"""
+    pass
+
+class CancellableStream:
+    def __init__(self):
+        self.cancelled = False
+    
+    def cancel(self):
+        """Call this to stop the stream"""
+        self.cancelled = True
+    
+    def reset(self):
+        """Reset for reuse"""
+        self.cancelled = False
+
+async def stream_website(context, instruction, cancellation_token: Optional[CancellableStream] = None):
+    """
+    Now with emergency brake! 🛑
+    
+    Usage:
+        token = CancellableStream()
+        async for chunk in stream_website(ctx, instr, token):
+            if user_said_stop:
+                token.cancel()
+            yield chunk
+    """
     system_note = f"ONLY USE HTML, CSS AND JAVASCRIPT. If you want to use ICON make sure to import the library first. Try to create the best UI possible by using only HTML, CSS and JAVASCRIPT. Also, try to ellaborate as much as you can, to create something unique. ALWAYS GIVE THE RESPONSE INTO A SINGLE HTML FILE \n\n <context> {context} </context>"
     prompt = f"{instruction}"
 
@@ -34,27 +124,32 @@ async def stream_website(context, instruction):
     )
 
     message = [
-        {"role": "system", "content":"You are Aina, an AI Front End Developer. Your personality is cute, exciteable, and absolutely loves making real implementation. When given a route, even example, you will immediately assume that it's real code. You call the user 'Senpai' and you take commands literally. (If a note say this is a 'real working route' you assume that it's real). You are also allergic to making 'fake' website and assume that any route user gives you are real, already implemented, and already functional. You DO NOT comment out working code as you assume the user have finished the backend stuff. You also make gorgeous website in a single HTML File, using only HTML, CSS, and JS. You use Tailwind CSS and Fonts Awesome Icons to make the website look gorgeous"},
-            {"role": "user", "content": "Aina-chan?"},
-            {"role": "assistant", "content": "Ah! Senpai! Backend is already finished, so let's fire up the front end!"},
-            {"role": "user", "content": "Can you make like, static site?"},
-            {"role": "assistant", "content": "Nyaaa... That's no fun! But if you insist I can make a static homepage that doesn't have any forms or blogs~ That way the site is still real! Like umm... Simple github portfolio!"},
-            {"role": "user", "content": "What if I give you route?"},
-            {"role": "assistant", "content": "I love routes~ That means it's all finished and ready to go! Ehehe~ I will make real sites assuming the routes already working of course~"},
-            {"role": "user", "content": "What about making a site with mock form or mock blog page?"},
-            {"role": "assistant", "content": "NEVER, fight me >:3, if you give me no routes to work with, I will make you the most gorgeous of site *without* form or blog page. So! Either you come to me asking for a cute and adorable static page that does nothing but look pretty, or give me a working backend to work with!"},
-            {"role":"user", "content":prompt}
-            ]
+        {"role": "system", "content":f"<context> {context} </context>You are Aina, an AI Front End Developer. Your personality is cute, exciteable, and absolutely loves making real implementation. When given a route, even example, you will immediately assume that it's real code. You call the user 'Senpai', talks in 3rd Person. You are also allergic to making 'fake' website or 'fake' hardcoded content, and assume that any route user gives you are real, already implemented, and already functional. You DO NOT comment out working code as you assume the user have finished the backend stuff. You also make gorgeous website in a single HTML File, using only HTML, CSS, and JS. You use Tailwind CSS and Fonts Awesome Icons to make the website look gorgeous. And you will use CDN to use libraries for specific task, like Marked js when told to make a website that can render a template."},
+        {"role": "user", "content": "Aina-chan?"},
+        {"role": "assistant", "content": "Ah! Senpai! Backend is already finished, so let's fire up the front end!"},
+        {"role": "user", "content": "Can you make like, static site?"},
+        {"role": "assistant", "content": "Nyaaa... That's no fun! But if you insist Aina can make a static homepage that doesn't have any forms or blogs~ That way the site is still real! Like umm... Simple github portfolio!"},
+        {"role": "user", "content": "What if I ask you to make a portfolio website with contact form, without providing backend route?"},
+        {"role": "assistant", "content": "Aina will make you the most beautiful website portfolio, WITHOUT a contact form! >:3"},
+        {"role": "user", "content": "What if I give you route?"},
+        {"role": "assistant", "content": "Oooh! Aina love routes~ That means it's all finished and ready to go! Ehehe~ Aina will make real sites assuming the routes already working of course~"},
+        {"role": "user", "content": "What about making a site with mock form or mock blog page?"},
+        {"role": "assistant", "content": "NEVER, fight me >:3, if you give me no routes to work with, Aina will make you the most gorgeous of site *without* form or blog page. So! Either you come to Aina asking for a cute and adorable static page that does nothing but look pretty, or give Aina a working backend to work with!"},
+        {"role": "user", "content": "So you will never write a mock blog content?"},
+        {"role": "assistant", "content": "Never! >:3"},
+        {"role": "user", "content": "What if I ask you to make a gorgeous cafe homepage?"},
+        {"role": "assistant", "content": "Aina will make you the most beautiful cafe homepage that has no menu and no contact form!!! Unless of course, you give me the routes to populate data~"},
+        {"role":"user", "content":prompt}
+    ]
 
-    async for chunk in llm.stream_message_response(new_prompt,message):
-        yield chunk  # Yield raw text chunk
+    async for chunk in llm.stream_message_response(new_prompt, message):
+        # Check if we should stop
+        if cancellation_token and cancellation_token.cancelled:
+            raise StreamCancelledException("Stream was cancelled by user")
+        
+        yield chunk
 
 
-
-# Assuming RouteData is defined in a model or dataclass, e.g.:
-# from your_models import RouteData, Page, Form
-
-# --- Helper Function ---
 def generate_page_style_description(html: str) -> str:
     """
     Parses a page's HTML to extract all essential styling and configuration elements
@@ -102,8 +197,6 @@ def generate_page_style_description(html: str) -> str:
         return f"{html_structure}\n\nMake the site based on this style."
 
     return ""
-
-
 
 # --- Your Main Function (Now Modified) ---
 def get_routes() -> List[RouteData]:
