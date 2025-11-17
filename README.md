@@ -193,8 +193,30 @@ python main.py
 ### For the **Vanilla JS Enjoyers**
 
 *   No `node_modules/` nightmares.
-*   Clean, easily themeable CSS variables.
 *   A truly hackable and transparent core.
+
+## 🎨 Theming Made Stupid Simple (Coming Soon™)
+
+Anita's theming system? **It's literally just importing a `.anita` file.**
+
+### 🎭 How It Works
+
+1.  **Drop the `.anita` file** into Anita
+2.  **Boom.** All the theme's pages and assets appear right in your admin panel
+3.  **Mix, match, and mashup** — Use Aina to combine elements from different themes or customize them to your heart's content
+
+No build steps. No configuration hell. Just pure, unadulterated theme goodness delivered straight to your CMS.
+
+### 🧩 What's Inside a `.anita` File?
+
+*   **Complete page layouts** — Ready-to-use designs for home, about, contact, blog templates, you name it
+*   **Assets** — Images, fonts, custom CSS, all bundled together
+*   **Instant preview** — See everything in your admin panel before you commit
+*   **Aina-friendly** — Ask Aina to help you adapt, combine, or extend any imported theme elements
+
+Think of it as a theme capsule. Pop it open, and all the goodies spill into your workspace.
+
+---
 
 ## But I Need Custom Features!!
 
