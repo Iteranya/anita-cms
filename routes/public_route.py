@@ -114,6 +114,8 @@ async def api_list_pages():
 @router.get("/api/blog/{slug}")
 async def api_get_page(slug: str):
     page = get_page(slug)
+    if not "blog" in page.tags:
+        raise HTTPException(status_code=404, detail="Page not found")
     if not page:
         raise HTTPException(status_code=404, detail="Page not found")
 
