@@ -2,6 +2,7 @@ from __future__ import annotations
 import asyncio
 import os
 import json
+import shutil
 from dataclasses import dataclass, asdict
 from typing import Dict, Any, Optional, List
 from data.models import RouteData
@@ -39,6 +40,7 @@ class MailConfig:
 # -----------------------
 
 CONFIG_PATH = "config.json"
+DEFAULT_CONFIG_PATH = "default_config.json"
 MAIL_CONFIG_PATH = "mail_config.json"
 
 
@@ -61,10 +63,18 @@ def load_or_create_config(path: str = CONFIG_PATH) -> DefaultConfig:
         config.ai_key = ""
         return config
 
-    # Create default if missing
+    # Try to copy from default_config.json if it exists
+    if os.path.exists(DEFAULT_CONFIG_PATH):
+        print(f"Config not found. Copying from {DEFAULT_CONFIG_PATH} to {path}.")
+        shutil.copy2(DEFAULT_CONFIG_PATH, path)
+        
+        # Now load it (recursive call, but will only happen once)
+        return load_or_create_config(path)
+    
+    # Last resort: create from scratch
     default_config = DefaultConfig()
     save_config(default_config, path)
-    print(f"No config found. Created default at {path}.")
+    print(f"No config or default_config found. Created fresh config at {path}.")
     return default_config
 
 
