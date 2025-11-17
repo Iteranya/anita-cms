@@ -196,6 +196,18 @@ python main.py
 *   Clean, easily themeable CSS variables.
 *   A truly hackable and transparent core.
 
+## But I Need Custom Features!!
+
+### I'm All About Abstraction~
+
+*  Use Aina-chan integrated form api to create a dashboard to edit cafe menu
+*  Make another form API to create a beautiful art portfolio
+*  Make a custom form API to create an event planner
+
+### How to?
+
+*  Demo coming up soon!
+*  Check out Artes Paradox's channel for tutorials, coming up!
 ---
 
 ## 🗺️ Roadmap
