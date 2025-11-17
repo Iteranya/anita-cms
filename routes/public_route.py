@@ -88,6 +88,12 @@ async def serve_main_page(slug: str):
 @router.get("/api/blog")
 async def api_list_pages():
     pages = list_pages()
+    
+    blog_pages = [
+        page for page in pages
+        if page.tags and "blog" in page.tags
+    ]
+    
     return JSONResponse(content=[
         {
             "slug": page.slug,
@@ -100,8 +106,9 @@ async def api_list_pages():
             "updated": page.updated,
             "author": page.author
         }
-        for page in pages
+        for page in blog_pages
     ])
+
 
 # API route to get a single blog page by slug
 @router.get("/api/blog/{slug}")
