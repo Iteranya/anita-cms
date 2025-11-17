@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HTML Playground | Aina's Coding Dojo</title>
+    <!-- These links should be correct -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/static/aina/style.css">
 </head>
 <body>
-    <!-- ✨ Floating Characters -->
+    <!-- ✨ Floating Characters (No changes here) -->
     <div class="floating-characters">
         <div class="character" style="top: 10%; left: 5%; font-size: 30px;">(>^.^)></div>
         <div class="character" style="top: 30%; left: 80%; font-size: 40px;">(◕‿◕✿)</div>
@@ -16,7 +17,7 @@
         <div class="character" style="top: 50%; left: 70%; font-size: 35px;">(づ｡◕‿‿◕｡)づ</div>
     </div>
 
-    <!-- ✨ Top Buttons -->
+    <!-- ✨ Top Buttons (No changes here) -->
     <div class="btn-group">
         <button class="btn" id="deploy-btn">
             <i class="fas fa-rocket"></i> Deploy
@@ -29,10 +30,9 @@
         </button>
     </div>
 
-    <!-- ✨ Main Container -->
+    <!-- ✨ Main Container (No changes here) -->
     <div class="container">
         <div class="panes-container">
-            <!-- 🧩 Editor Pane -->
             <div class="editor-pane">
                 <div class="pane-header">
                     <i class="fas fa-code"></i>
@@ -42,8 +42,6 @@
                     <textarea id="html-code" placeholder="Write your HTML here, senpai~ (◕‿◕✿)"></textarea>
                 </div>
             </div>
-
-            <!-- 👀 Preview Pane -->
             <div class="preview-pane">
                 <div class="pane-header">
                     <i class="fas fa-eye"></i>
@@ -54,8 +52,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- 🪄 Website Generator Form -->
         <div class="generate-form">
             <div class="form-header">
                 <i class="fas fa-magic"></i>
@@ -73,97 +69,71 @@
         </div>
     </div>
 
-    <!-- 💌 Footer -->
+    <!-- 💌 Footer (No changes here) -->
     <footer class="footer">
         <p>Made with ♥ by Aina-chan</p>
     </footer>
 
-    <!-- 🐾 Slug Container -->
+    <!-- 🐾 Slug Container (No changes here) -->
     <div id="slug-container" style="display: none;" data-slug=""></div>
 
-    <!-- 🗒️ Collapsible Notes Sidebar -->
+    <!-- 
+        =====================================================================
+        ✨ 🗒️ NEW AND IMPROVED Collapsible Sidebar ✨
+        This is the most important change! We have new IDs and a new structure.
+        =====================================================================
+    -->
     <aside id="notes-sidebar">
         <div class="sidebar-header">
-            <h3><i class="fas fa-sticky-note"></i> Notes</h3>
+            <h3><i class="fas fa-route"></i> API Helper</h3>
         </div>
 
-        <!-- 🔧 Form Settings Section -->
+        <!-- 🔧 Route Inspector Section -->
         <div class="sidebar-section">
-            <h4><i class="fas fa-clipboard-list"></i> Form Settings</h4>
+            <h4><i class="fas fa-sitemap"></i> Route Inspector</h4>
+            <p class="sidebar-description" style="font-size: 0.8em; margin-top: -5px; color: #ccc;">Load schema & info for any API route.</p>
 
             <div class="form-control">
-                <label for="form-select">Select Existing Form:</label>
-                <select id="form-select">
-                    <option value="">-- Select a form --</option>
+                <label for="route-type-select">1. Select Route Type:</label>
+                <select id="route-type-select">
+                    <!-- This will be populated by JavaScript! -->
+                    <option value="">-- Loading types... --</option>
                 </select>
             </div>
 
-            <button id="load-form-btn" class="btn small-btn">
-                <i class="fas fa-download"></i> Load Schema
+            <div class="form-control">
+                <label for="route-item-select">2. Select Item:</label>
+                <select id="route-item-select" disabled>
+                    <!-- This will be populated by JavaScript too! -->
+                    <option value="">-- Select a type first --</option>
+                </select>
+            </div>
+
+            <button id="load-route-btn" class="btn small-btn" disabled>
+                <i class="fas fa-download"></i> Load Info
             </button>
         </div>
 
         <!-- 📝 Notes Text Area -->
         <div class="sidebar-section">
             <label for="notes-textarea">Notes Area:</label>
-            <textarea id="notes-textarea" value="Form schema and info will appear here, senpai~">
-# API ROUTES!!!
+            <textarea id="notes-textarea" placeholder="Route info will appear here, senpai~">
 
-# API route to list all blog pages
-@router.get("/api/blog")
-async def api_list_pages():
-    pages = list_pages()
-    return JSONResponse(content=[
-        {
-            "slug": page.slug,
-            "title": page.title,
-            "content": page.content,
-            "tags": page.tags,
-            "thumb": page.thumb,
-            "type": page.type,
-            "created": page.created,
-            "updated": page.updated,
-            "author": page.author
-        }
-        for page in pages
-    ])
-
-# API route to get a single blog page by slug
-@router.get("/api/blog/{slug}")
-async def api_get_page(slug: str):
-    page = get_page(slug)
-    if not page:
-        raise HTTPException(status_code=404, detail="Page not found")
-
-    return JSONResponse(content={
-        "slug": page.slug,
-        "title": page.title,
-        "content": page.content,
-        "markdown": page.markdown,
-        "html": page.html,
-        "tags": page.tags,
-        "thumb": page.thumb,
-        "type": page.type,
-        "created": page.created,
-        "updated": page.updated,
-        "author": page.author
-    })
 </textarea>
         </div>
     </aside>
 
     <!-- 🧭 Sidebar Toggle Arrow -->
     <button id="sidebar-toggle"><i class="fas fa-chevron-right"></i></button>
+
+    <!-- 
+        =====================================================================
+        ✨ SCRIPT LOADING ✨
+        We removed the old inline script. Now we only load the main module.
+        This main.js will then import and run our routeHelper.js script.
+        =====================================================================
+    -->
     <script type="module" src="/static/aina/scripts/main.js"></script>
 
-    <script>
-        const sidebar = document.getElementById('notes-sidebar');
-        const toggleBtn = document.getElementById('sidebar-toggle');
-
-        toggleBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('open');
-            document.body.classList.toggle('sidebar-open');
-        });
-    </script>
 </body>
 </html>

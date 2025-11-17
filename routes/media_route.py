@@ -37,9 +37,6 @@ async def get_media(filename: str):
         raise HTTPException(status_code=404, detail="File not found")
     return FileResponse(path=file_path)
 
-
-
-
 @router.post("/")
 async def upload_media(
     files: List[UploadFile] = File(...),

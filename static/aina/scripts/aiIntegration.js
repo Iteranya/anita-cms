@@ -27,7 +27,7 @@ export function initAiGeneration(htmlCode, updatePreviewCallback, notesArea) {
         const promptInput = form.querySelector('[name="content"]');
         const promptText = promptInput ? promptInput.value : "";
         const notesText = notesArea ? notesArea.value : ""; // ✅ Safe access
-        const fullPrompt = promptText + "\n\n" + notesText;
+        const fullPrompt = notesText + "\n\n" + promptText ;
 
         const editor = htmlCode.value;
 

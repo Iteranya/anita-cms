@@ -1,8 +1,9 @@
-from typing import Optional
+from typing import List, Optional
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse, JSONResponse
+from data.models import RouteData
 from src.auth import optional_auth,get_current_user
-from src.aina import stream_website
+from src.aina import get_routes, stream_website
 
 router = APIRouter(prefix="/aina", tags=["Aina"])
 
@@ -40,3 +41,13 @@ async def generate_website_stream(request: Request,user: dict = Depends(get_curr
 
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
+
+@router.get("/routes", response_model=List[RouteData])
+async def api_get_all_routes():
+    """
+    Provides a comprehensive list of all discoverable routes 
+    (forms, pages, etc.) for the frontend helper.
+    """
+    all_routes = get_routes()
+    # The `response_model` will handle converting dataclasses to dicts
+    return all_routes

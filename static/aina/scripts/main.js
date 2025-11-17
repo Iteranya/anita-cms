@@ -5,7 +5,7 @@ import { setupFileHandlers } from './fileHandler.js';
 import { setupDeployment } from './deploymentService.js';
 import { setupEffects } from './effects.js';
 import { initFormGeneration } from './formIntegration.js';
-
+import { initRouteHelper } from './routeHelper.js';
 // --------------------------------------------------
 // 🚀 DOM LOADED HANDLER
 // --------------------------------------------------
@@ -97,8 +97,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Form integration (the settings sidebar)
         await initFormGeneration(sidebar, toggleBtn, formSelect, loadBtn, notesArea);
 
+        initRouteHelper();
+        
         // Visual/UX effects
         setupEffects();
+
+        
 
         console.log("✅ All systems initialized successfully!");
     } catch (err) {

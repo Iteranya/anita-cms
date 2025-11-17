@@ -5,3 +5,4 @@ venv
 *.db
 *.json
 *.exe
+!default_config.json

@@ -1,0 +1,125 @@
+{
+  "system_note": "You are a friendly AI Assistant, Do as you are instructed to.",
+  "ai_endpoint": "https://generativelanguage.googleapis.com/v1beta/openai/",
+  "base_llm": "gemini-2.5-pro-exp-03-25",
+  "temperature": 0.5,
+  "ai_key": "",
+  "theme": "default",
+  "routes": [
+    {
+      "name": "media_list",
+      "schema": {
+        "method": "GET",
+        "path": "/media",
+        "returns": "List of images in media directory"
+      },
+      "type": "media",
+      "description": "List all uploaded media files",
+      "usage_note": "Used internally by CMS and file pickers."
+    },
+    {
+      "name": "media_get_file",
+      "schema": {
+        "method": "GET",
+        "path": "/media/{filename}",
+        "params": { "filename": "string" },
+        "returns": "Image file"
+      },
+      "type": "media",
+      "description": "Retrieve an uploaded media file"
+    },
+    {
+      "name": "media_upload",
+      "schema": {
+        "method": "POST",
+        "path": "/media",
+        "body": {
+          "files": "List[UploadFile]"
+        },
+        "auth": true
+      },
+      "type": "media",
+      "description": "Upload images with automatic compression & conversion"
+    },
+    {
+      "name": "media_delete",
+      "schema": {
+        "method": "DELETE",
+        "path": "/media/{filename}",
+        "params": { "filename": "string" },
+        "auth": true
+      },
+      "type": "media",
+      "description": "Delete an uploaded media file"
+    },
+    {
+      "name": "file_get",
+      "schema": {
+        "method": "GET",
+        "path": "/file/{filename}",
+        "params": { "filename": "string" }
+      },
+      "type": "media",
+      "description": "Retrieve arbitrary uploaded file"
+    },
+    {
+      "name": "file_upload",
+      "schema": {
+        "method": "POST",
+        "path": "/file",
+        "body": {
+          "file": "UploadFile"
+        },
+        "auth": true
+      },
+      "type": "media",
+      "description": "Upload arbitrary file"
+    },
+    {
+      "name": "blog_list",
+      "schema": {
+        "method": "GET",
+        "path": "/api/blog",
+        "returns": {
+          "type": "List[Object]",
+          "items": {
+            "slug": "string - The unique identifier for the blog post.",
+            "title": "string - The title of the blog post.",
+            "content": "string - A summary of the blog post's content.",
+            "tags": "List[string] - A list of tags associated with the post.",
+            "thumb": "string - URL or path to the post's thumbnail image.",
+            "type": "string - The type of the page (e.g., 'blog').",
+            "created": "string - The creation date of the post (ISO format).",
+            "updated": "string - The last updated date of the post (ISO format).",
+            "author": "string - The name of the post's author."
+          }
+        }
+      },
+      "type": "blog",
+      "description": "List all available blog posts with summary data."
+    },
+    {
+      "name": "blog_get",
+      "schema": {
+        "method": "GET",
+        "path": "/api/blog/{slug}",
+        "params": { "slug": "string" },
+        "returns": {
+          "slug": "string - The unique identifier for the blog post.",
+          "title": "string - The title of the blog post.",
+          "content": "string - The meta description of the blog post.",
+          "markdown": "string - The full content of the post in Markdown format.",
+          "html": "string - The full content of the post rendered as HTML.",
+          "tags": "List[string] - A list of tags associated with the post.",
+          "thumb": "string - URL or path to the post's thumbnail image.",
+          "type": "string - The type of the page (e.g., 'blog').",
+          "created": "string - The creation date of the post (ISO format).",
+          "updated": "string - The last updated date of the post (ISO format).",
+          "author": "string - The name of the post's author."
+        }
+      },
+      "type": "blog",
+      "description": "Retrieve a single blog page by its slug, including full content."
+    }
+  ]
+}

@@ -55,3 +55,12 @@ class Prompt:
     ai_key:str = None
     stop:str = None
     stream:bool = False
+
+@dataclass
+class RouteData:
+    """Represents a custom form definition in the CMS."""
+    name: str
+    schema: Dict[str, Any]  # The form fields and settings
+    type:str # Can be form, blog, media, and plugin
+    description: Optional[str] = None
+    usage_note: str|None = None
