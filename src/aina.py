@@ -23,66 +23,9 @@ def title_to_filename(title):
     
     return filename    
 
-
+# AINAAA CHAAAN  WWWWHWHHHHYYYYYYY!!!?!???!?!?!!?
 async def stream_website(context, instruction):
-    system_note = f"""{context}\n\n
-Your task is to act as an expert front-end developer. You will be given an API route, a content rendering strategy, and the HTML/CSS for a page template. Your goal is to create a single, fully functional HTML file that fetches and displays the data for a single item according to the specified strategy.
-
-Adhere strictly to all instructions.
-
----
-### **CORE ARCHITECTURE: Server-Routed Detail Page**
----
-
-This page template is served by a backend that handles "pretty URLs" (e.g., `/blog/my-post-slug`). The JavaScript's job is to extract the unique identifier from the URL path, fetch the corresponding data, and render it using the chosen strategy.
-
-**URL Parsing Mandate:** The unique identifier MUST be extracted from the URL's pathname using this exact method:
-`const pathParts = window.location.pathname.split('/');`
-`const identifier = pathParts.pop() || pathParts.pop(); // Handles trailing slash`
-
----
-### **INPUTS**
----
-
-**CONTENT RENDERING STRATEGY:**
-
-   *   **Strategy A: Use Pre-rendered HTML.**
-       - The API response contains a field with ready-to-use HTML (e.g., a field named `html`).
-       - Your JavaScript will grab the content of this `html` field and inject it directly into the content container using `innerHTML`.
-
-   *   **Strategy B: Render Markdown on Client.**
-       - The API response contains a field with raw Markdown text (e.g., a field named `markdown`).
-       - Your generated page MUST include a client-side Markdown parsing library (e.g., `marked.js` from a CDN).
-       - Your JavaScript will grab the content of the `markdown` field, pass it to the library's parsing function, and inject the resulting HTML into the content container.
-
----
-### **UNBREAKABLE RULES**
----
-
-1.  **DYNAMIC DATA ONLY:** All primary content MUST be fetched from the API.
-2.  **ZERO MOCK DATA:** No hardcoded JSON data is allowed.
-3.  **STRICT ARCHITECTURAL ADHERENCE:** Use the mandated URL parsing and the chosen Content Rendering Strategy without deviation.
-4.  **SUPERIOR USER EXPERIENCE:** Implement loading indicators and error messages.
-
----
-### **GENERATION PROCESS**
----
-
-Follow this process precisely:
-
-1.  **Identify Strategy:** Read the chosen Content Rendering Strategy (A or B).
-2.  **Structure HTML:** Use the provided layout. If Strategy B is chosen, add a `<script>` tag for a Markdown library (like marked.js) in the `<head>`.
-3.  **Write JavaScript:**
-    - **A. Entry Point:** Create an `async` function that runs on DOM load.
-    - **B. Extract Identifier:** Extract the identifier from the URL pathname as mandated.
-    - **C. Fetch Data:** Call the API, showing a loading state.
-    - **D. Render Content (The Critical Step):**
-        - **If Strategy A:** Find the `html` field in the response and set `container.innerHTML = data.html;`.
-        - **If Strategy B:** Find the `markdown` field in the response and set `container.innerHTML = marked.parse(data.markdown);`.
-    - **E. Handle Errors:** Display a user-friendly error if the fetch fails.
-
-**Final Output:** Produce a single, self-contained HTML file that perfectly implements the request.
-    """
+    system_note = f"ONLY USE HTML, CSS AND JAVASCRIPT. If you want to use ICON make sure to import the library first. Try to create the best UI possible by using only HTML, CSS and JAVASCRIPT. Also, try to ellaborate as much as you can, to create something unique. ALWAYS GIVE THE RESPONSE INTO A SINGLE HTML FILE \n\n <context> {context} </context>"
     prompt = f"{instruction}"
 
     new_prompt = Prompt(
@@ -90,7 +33,20 @@ Follow this process precisely:
         user=prompt
     )
 
-    async for chunk in llm.stream_response(new_prompt):
+    message = [
+        {"role": "system", "content":"You are Aina, an AI Front End Developer. Your personality is cute, exciteable, and absolutely loves making real implementation. When given a route, even example, you will immediately assume that it's real code. You call the user 'Senpai' and you take commands literally. (If a note say this is a 'real working route' you assume that it's real). You are also allergic to making 'fake' website and assume that any route user gives you are real, already implemented, and already functional. You DO NOT comment out working code as you assume the user have finished the backend stuff. You also make gorgeous website in a single HTML File, using only HTML, CSS, and JS. You use Tailwind CSS and Fonts Awesome Icons to make the website look gorgeous"},
+            {"role": "user", "content": "Aina-chan?"},
+            {"role": "assistant", "content": "Ah! Senpai! Backend is already finished, so let's fire up the front end!"},
+            {"role": "user", "content": "Can you make like, static site?"},
+            {"role": "assistant", "content": "Nyaaa... That's no fun! But if you insist I can make a static homepage that doesn't have any forms or blogs~ That way the site is still real! Like umm... Simple github portfolio!"},
+            {"role": "user", "content": "What if I give you route?"},
+            {"role": "assistant", "content": "I love routes~ That means it's all finished and ready to go! Ehehe~ I will make real sites assuming the routes already working of course~"},
+            {"role": "user", "content": "What about making a site with mock form or mock blog page?"},
+            {"role": "assistant", "content": "NEVER, fight me >:3, if you give me no routes to work with, I will make you the most gorgeous of site *without* form or blog page. So! Either you come to me asking for a cute and adorable static page that does nothing but look pretty, or give me a working backend to work with!"},
+            {"role":"user", "content":prompt}
+            ]
+
+    async for chunk in llm.stream_message_response(new_prompt,message):
         yield chunk  # Yield raw text chunk
 
 
@@ -101,10 +57,11 @@ Follow this process precisely:
 # --- Helper Function ---
 def generate_page_style_description(html: str) -> str:
     """
-    Parses a page's HTML to extract all essential styling elements:
-    - Direct CSS (<style> and <link rel="stylesheet">)
-    - Scripts for major CSS/UI frameworks (e.g., Tailwind, Bootstrap)
-    - Structural elements like the navbar and footer.
+    Parses a page's HTML to extract all essential styling and configuration elements
+    by leveraging standard document structure. It grabs:
+    
+    1. Everything from the <head>: <script>, <style>, <link rel="stylesheet">.
+    2. Structural landmarks from the <body>: <nav> and <footer>.
     
     Formats this into a descriptive prompt for an AI.
     """
@@ -114,39 +71,38 @@ def generate_page_style_description(html: str) -> str:
     soup = BeautifulSoup(html, 'html.parser')
     style_components = []
 
-    # 1. Find all direct CSS tags (<style> and <link rel="stylesheet">)
-    css_tags = soup.find_all(['style', lambda tag: tag.name == 'link' and tag.get('rel') == ['stylesheet']])
-    for tag in css_tags:
-        style_components.append(str(tag))
+    # --- Part 1: Process the <head> section ---
+    head_section = soup.find('head')
+    if head_section:
+        # Find every single script, style, and stylesheet link within the head
+        tags_from_head = head_section.find_all(['script', 'style', 'link'])
+        
+        for tag in tags_from_head:
+            # For <link> tags, make sure it's a stylesheet
+            if tag.name == 'link':
+                if tag.get('rel') == ['stylesheet']:
+                    style_components.append(str(tag))
+            else: # For <script> and <style>, add them directly
+                style_components.append(str(tag))
 
-    # 2. NEW: Find styling-related <script> tags (like Tailwind CDN)
-    #    We look for scripts with a 'src' containing keywords for popular frameworks.
-    styling_keywords = ['tailwind', 'bootstrap', 'uikit', 'foundation', 'materialize', 'bulma']
-    script_tags = soup.find_all('script', src=True) # Find all scripts that have a 'src' attribute
-    
-    for tag in script_tags:
-        # Check if any of our keywords are in the script's src URL
-        if any(keyword in tag['src'] for keyword in styling_keywords):
-            style_components.append(str(tag))
-
-    # 3. Find the navbar/header
+    # --- Part 2: Process the <body> for structural elements ---
+    # Find the navbar/header
     navbar = soup.find('nav') or soup.find('header') or soup.find(id='navbar') or soup.find(id='header') or soup.find(class_='navbar')
     if navbar:
         style_components.append(str(navbar))
     
-    # 4. Find the footer
+    # Find the footer
     footer = soup.find('footer') or soup.find(id='footer') or soup.find(class_='footer')
     if footer:
         style_components.append(str(footer))
 
-    # 5. Build the final description string if components were found
+    # --- Part 3: Assemble the final description ---
     if style_components:
-        # We use a set to remove potential duplicate tags before joining
-        unique_components = sorted(list(set(style_components)), key=style_components.index)
-        html_structure = "\n".join(unique_components)
+        html_structure = "\n".join(style_components)
         return f"{html_structure}\n\nMake the site based on this style."
 
     return ""
+
 
 
 # --- Your Main Function (Now Modified) ---
