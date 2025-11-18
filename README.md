@@ -163,24 +163,46 @@ python main.py
 
 ---
 
+
+---
+
 ## 💡 Why Choose Anita?
+
+Anita is for those who value simplicity, speed, and creative freedom. If you're looking for a CMS that stays out of your way and lets you build dynamic websites without a complex backend or expensive subscriptions, you've come to the right place.
+
+**Important Note:** Anita is deliberately *not* designed for enterprise-level scalability or handling massive data volumes. If SQLite reaches its limits, so does Anita. We're focusing on simplicity, not massive scale.
 
 ### For the **Practical Dreamers**
 
 *   Build dynamic websites and blogs without writing a single line of backend code.
 *   Let Aina handle the API interactions while you focus on the vision.
 *   Stay lightweight, fast, and completely understandable.
+*   **No more overkill:** Ditch the complex enterprise CMS when all you need is a simple, powerful website.
 
 ### For the **Overworked and Underpaid**
 
 *   Create stunning, interactive client sites at lightning speed.
 *   One-click publishing and editing from a simple admin panel.
 *   "It just works" — even when the deadline is tomorrow.
+*   **Free yourself from subscription hell:** Stop paying $20 a month just to change the color of your headers. Anita gives you full control without the recurring fees.
 
 ### For the **Vanilla JS Enjoyers**
 
 *   No `node_modules/` nightmares.
 *   A truly hackable and transparent core.
+*   Embrace the simplicity and power of vanilla JavaScript for a streamlined development experience.
+
+### For the **Artists, Small Businesses, and Freelancers**
+
+*   Anita is your go-to CMS for building portfolios, showcasing products, and connecting with your audience.
+*   Create beautiful, API-driven websites that reflect your brand without the complexities of enterprise solutions.
+
+### **Zero Lock-In Data**
+
+*   Your content and forms are stored in simple `pages.db` and `forms.db` files.
+*   Migrating from Anita is a breeze – no vendor lock-in, no proprietary formats. Your data is always accessible and portable.
+
+---
 
 ## 🎨 Theming Made Stupid Simple (Coming Soon™)
 
@@ -223,10 +245,9 @@ Think of it as a theme capsule. Pop it open, and all the goodies spill into your
 
 ### ✨ Upcoming Features
 
-*   [ ] Full AI-powered site scaffolding
-*   [ ] Sitemap & SEO auto-generation
-*   [ ] Theme builder + component playground
-*   [ ] “Blog-ify” mode for instant writing platforms
+*   [ ] Indie Web Standard Integration
+*   [ ] Working Theme And Official Theme Marketplace
+*   [ ] Plugin System~
 *   [ ] Improved role management
 
 ### 🐞 Always Improving
