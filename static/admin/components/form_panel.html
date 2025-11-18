@@ -9,13 +9,18 @@
         <div class="card-header">
             <h3>Existing Forms</h3>
         </div>
+        <!-- 🏷️ NEW: Tag filter section -->
+        <div id="tags-filter-container" class="card-body border-bottom">
+            <!-- Tag filter buttons will be dynamically inserted here -->
+        </div>
         <div class="card-body">
             <table class="table" id="forms-table">
                 <thead>
                     <tr>
-                        <th>Slug</th>
                         <th>Title</th>
                         <th>Description</th>
+                        <!-- 🏷️ NEW: Tags column -->
+                        <th>Tags</th>
                         <th>Author</th>
                         <th>Updated</th>
                         <th>Actions</th>
@@ -46,6 +51,12 @@
                 <div class="form-group">
                     <label for="form-description">Description</label>
                     <textarea id="form-description" class="form-control" rows="2" placeholder="Brief description..."></textarea>
+                </div>
+
+                <!-- 🏷️ NEW: Tags input -->
+                <div class="form-group">
+                    <label for="form-tags">Tags</label>
+                    <input type="text" id="form-tags" class="form-control" placeholder="Comma-separated tags (e.g. marketing, internal)">
                 </div>
 
                 <div class="form-group">

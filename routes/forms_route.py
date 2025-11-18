@@ -23,6 +23,7 @@ class FormModel(BaseModel):
     created: Optional[str] = None
     updated: Optional[str] = None
     author: Optional[str] = None
+    tags: Optional[List[str]] = []  # 🏷️ NEW!
     custom: Optional[Dict[str, Any]] = {}
 
 
@@ -79,15 +80,22 @@ def create_form(form: FormModel, user=Depends(get_current_user)):
         form.schema,
         form.description,
         author=form.author,
+        tags=form.tags,  # 🏷️ NEW!
         custom=form.custom
     )
     return form
 
 
 @router.get("/list", response_model=List[FormModel])
-def list_forms(user=Depends(optional_auth)):
-    """List all available forms."""
-    return forms_db.list_forms()
+def list_forms(user=Depends(optional_auth), tag: Optional[str] = None):
+    """List all available forms, optionally filtered by tag."""
+    all_forms = forms_db.list_forms()
+    
+    # 🏷️ NEW: Filter by tag if provided
+    if tag:
+        all_forms = [f for f in all_forms if tag in f.get("tags", [])]
+    
+    return all_forms
 
 
 @router.get("/{slug}", response_model=FormModel)
@@ -119,6 +127,19 @@ def delete_form(slug: str, user=Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="Form not found.")
     forms_db.delete_form(slug)
     return {"detail": f"Form '{slug}' deleted successfully."}
+
+# ----------------------------------------------------
+# 🏷️ TAG UTILITIES (BONUS!)
+# ----------------------------------------------------
+
+@router.get("/tags/all", response_model=List[str])
+def get_all_tags(user=Depends(optional_auth)):
+    """Get a list of all unique tags across all forms."""
+    forms = forms_db.list_forms()
+    tags = set()
+    for form in forms:
+        tags.update(form.get("tags", []))
+    return sorted(list(tags))
 
 # ----------------------------------------------------
 # 📨 FORM SUBMISSIONS

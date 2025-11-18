@@ -8,6 +8,8 @@ from src.aina import CancellableStream, StreamCancelledException, get_routes, st
 
 router = APIRouter(prefix="/aina", tags=["Aina"])
 current_stream_token: Optional[CancellableStream] = None
+
+
 @router.get("/", response_class=HTMLResponse)
 async def get_html(request: Request, user: Optional[str] = Depends(optional_auth)):
     if not user:

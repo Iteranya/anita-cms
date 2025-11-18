@@ -1,4 +1,5 @@
 # Add these imports at the top of your file
+import json
 from bs4 import BeautifulSoup
 from typing import List 
 from typing import List
@@ -215,13 +216,47 @@ def get_routes() -> List[RouteData]:
 
     # 1️⃣ Add FORM routes
     for f in forms:
+        # Generate comprehensive API documentation for AI agents
+        form_slug = f['slug']
+        form_schema = f['schema']
+        tags_info = f"Tags: {', '.join(f.get('tags', []))}" if f.get('tags') else "No tags"
+        
+        usage_note = f"""The REAL and WORKING route for '{f.get('title', form_slug)}'.
+{tags_info}
+
+📋 FORM SCHEMA:
+{json.dumps(form_schema, indent=2)}
+
+📋 AVAILABLE API ENDPOINTS:
+
+1. GET /forms/{form_slug}
+   - Fetch form definition and schema
+   - Returns: Form details including all field definitions
+
+2. POST /forms/{form_slug}/submit
+   - Submit data to this form
+   - Body: {{"data": {{"field_name": "field_value"}}, "custom": {{}}}}
+   - Returns: Submission confirmation with ID and timestamp
+
+3. GET /forms/{form_slug}/submissions
+   - List all submissions for this form
+   - Returns: Array of all form submissions
+
+4. PUT /forms/{form_slug}/submissions/{{submission_id}}
+   - Update an existing submission
+   - Body: {{"data": {{"field_name": "field_value"}}}}
+
+5. DELETE /forms/{form_slug}/submissions/{{submission_id}}
+   - Delete a specific submission
+"""
+        
         collected.append(
             RouteData(
-                name=f"{f['slug']}_form",
+                name=f"{form_slug}_form",
                 type="form",
                 description=f.get("description"),
                 schema=f["schema"],
-                usage_note="Auto-generated form route"
+                usage_note=usage_note
             )
         )
 

@@ -26,6 +26,7 @@ def create_tables():
         created TEXT,
         updated TEXT,
         author TEXT,
+        tags TEXT,
         custom TEXT
     )
     ''')
@@ -45,13 +46,16 @@ def create_tables():
     conn.commit()
 
 # ----- Forms -----
-def add_form(slug: str, title: str, schema: dict, description: Optional[str], author: Optional[str] = None, custom: Optional[dict] = None):
+def add_form(slug: str, title: str, schema: dict, description: Optional[str], 
+             author: Optional[str] = None, tags: Optional[List[str]] = None, 
+             custom: Optional[dict] = None):
     conn = get_connection()
     now = datetime.now().isoformat()
     conn.execute('''
-        INSERT INTO forms (slug, title, schema_json, description, created, updated, author, custom)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (slug, title, json.dumps(schema), description, now, now, author, json.dumps(custom or {})))
+        INSERT INTO forms (slug, title, schema_json, description, created, updated, author, tags, custom)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (slug, title, json.dumps(schema), description, now, now, author, 
+          json.dumps(tags or []), json.dumps(custom or {})))
     conn.commit()
 
 def get_form(slug: str) -> Optional[dict]:
@@ -64,9 +68,12 @@ def get_form(slug: str) -> Optional[dict]:
         "slug": row[1],
         "title": row[2],
         "schema": json.loads(row[3]),
-        "description":row[4],
+        "description": row[4],
         "created": row[5],
-        "updated": row[6]
+        "updated": row[6],
+        "author": row[7],
+        "tags": json.loads(row[8]) if row[8] else [],
+        "custom": json.loads(row[9]) if row[9] else {}
     }
 
 def list_forms() -> List[dict]:
@@ -78,37 +85,12 @@ def list_forms() -> List[dict]:
             "slug": r[1],
             "title": r[2],
             "schema": json.loads(r[3]),
-            "description":r[4],
+            "description": r[4],
             "created": r[5],
-            "updated": r[6]
-        }
-        for r in rows
-    ]
-
-# ----- Submissions -----
-def add_submission(form_slug: str, data: dict):
-    conn = get_connection()
-    now = datetime.now().isoformat()
-    conn.execute('''
-    INSERT INTO submissions (form_slug, submission_json, created, updated, author)
-    VALUES (?, ?, ?, ?, ?)
-    ''', (form_slug, json.dumps(data), now))
-    conn.commit()
-
-def list_submissions(form_slug: str) -> List[dict]:
-    conn = get_connection()
-    rows = conn.execute('''
-        SELECT id, form_slug, submission_json, created, updated, author
-        FROM submissions WHERE form_slug = ?
-    ''', (form_slug,)).fetchall()
-    return [
-        {
-            "id": r[0],
-            "form_slug": r[1],
-            "data": json.loads(r[2]),
-            "created": r[3],
-            "updated": r[4],
-            "author": r[5]
+            "updated": r[6],
+            "author": r[7],
+            "tags": json.loads(r[8]) if r[8] else [],
+            "custom": json.loads(r[9]) if r[9] else {}
         }
         for r in rows
     ]
@@ -118,7 +100,7 @@ def update_form(form: Form):
     now = datetime.now().isoformat()
     conn.execute('''
         UPDATE forms
-        SET title = ?, schema_json = ?, description = ?, updated = ?, author = ?, custom = ?
+        SET title = ?, schema_json = ?, description = ?, updated = ?, author = ?, tags = ?, custom = ?
         WHERE slug = ?
     ''', (
         form.title,
@@ -126,6 +108,7 @@ def update_form(form: Form):
         getattr(form, "description", None),
         now,
         getattr(form, "author", None),
+        json.dumps(getattr(form, "tags", [])),
         json.dumps(getattr(form, "custom", {})),
         form.slug
     ))
@@ -227,3 +210,17 @@ def close_connection():
     if _connection:
         _connection.close()
         _connection = None
+
+
+def migrate_add_tags():
+    """Run this once to add tags column to existing database"""
+    conn = get_connection()
+    try:
+        conn.execute('ALTER TABLE forms ADD COLUMN tags TEXT')
+        conn.commit()
+        print("✓ Tags column added successfully!")
+    except sqlite3.OperationalError as e:
+        if "duplicate column" in str(e).lower():
+            print("Tags column already exists!")
+        else:
+            raise

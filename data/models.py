@@ -29,6 +29,7 @@ class Form:
     created: Optional[str] = None
     updated: Optional[str] = None
     author: Optional[str] = None
+    tags :Optional[List[str]] = None
     custom: Dict[str, Any] = field(default_factory=dict)
 
 @dataclass
