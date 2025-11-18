@@ -19,48 +19,31 @@ All running on **FastAPI + SQLite**, with **zero Node.js dependency** and pure *
 
 ## 🌟 What’s Inside Anita?
 
-### 🏰 Admin Panel (Amiya)
+Anita isn't just a CMS; it's a creative suite powered by two distinct AI personalities, Asta and Aina, who handle the writing and the building, so you can focus on the vision.
 
-Manage everything from one cozy dashboard:
+### 🖋️ **Asta: The AI-Powered Markdown Editor**
 
-*   View, edit, and delete pages
-*   Build and manage custom forms
-*   Access form submissions and export to CSV
-*   Configure AI, mail, and global site settings
-*   Tag any page as your **Home, Blog, Contact, or any other custom page** — no IDE required!
+Asta is your dedicated writing assistant, perfect for crafting content-rich pages like blogs, documentation, or articles. She lives inside a clean, real-time Markdown editor designed to keep you in the flow.
 
----
+*   **Effortless Content Creation**: Write and publish beautiful Markdown pages with a live preview. Tag your work as a `blog` post or save it as a draft with a single click.
+*   **AI-Assisted Writing**: Asta's AI is deeply integrated into the editor to supercharge your writing process:
+    *   **Continue Writing**: If you hit a block, simply ask Asta to continue your train of thought, and she'll generate the next paragraph for you.
+    *   **Contextual Editing**: Highlight any sentence or paragraph, right-click, and open the "Edit with AI" modal. From there, you can ask the AI to rewrite it, expand on the idea, change the tone, or even make it funnier.
+    *   **AI Notes**: A dedicated 'notes' section is always visible to the AI. Use it to provide specific instructions, tone guidelines, or context that Asta should consider while assisting you, ensuring her output is always on-brand.
+*   **OpenAI Compatibility**: You're not locked into a single AI provider. Configure Anita to work with OpenAI or any other compatible service, including local models for maximum privacy.
 
-### 📝 Pages (Asta & Aina)
+### 🎨 **Aina: The API-Aware AI Website Builder**
 
-Hybrid content management that adapts to your needs. Create, design, and publish everything without ever touching the backend code.
+Aina is the architect and visual designer of your website. Unlike other AI builders that just fill in templates, Aina is fully aware of your site's backend, routes, and APIs, allowing her to generate pages that are not only beautiful but also fully functional.
 
-*   **Markdown Mode (Asta Editor)**
-    *   Perfect for blogs, documentation, and content-rich articles.
-    *   Real-time preview and syntax highlighting.
-    *   AI-assisted writing to draft, rewrite, and refine your text.
+*   **True API-Aware Generation**: Aina's standout feature is her intelligence. She understands how your Anita-powered site works.
+    *   Tell her, "Create a homepage that lists the three most recent blog posts," and she will generate the necessary HTML and vanilla JavaScript to fetch data from the correct `/api/posts` endpoint and display it correctly.
+    *   Need a template for individual blog posts? Aina will design a page that dynamically loads the post's title, content, and metadata based on the URL.
+*   **Intelligent Form Integration**: Any custom form you create in the admin panel can be seamlessly "attached" by Aina. Just ask her to "add the contact form to this page," and she will generate the code to render the form and ensure it's wired up to the forms API for submissions.
+*   **Visual Control Through Conversation**: From a complex landing page to a unique `/about-us` section, you can direct Aina with conversational prompts. Aina's sidebar panel gives you granular control, allowing you to embed specific routes or reuse styles from other pages you've created, ensuring a consistent and interactive final result.
+*   **OpenAI Compatibility**: Just like Asta, Aina's creative power can be fueled by your preferred OpenAI-compatible AI provider. This gives you the flexibility to choose the model that best suits your creative and budgetary needs.
 
-*   **HTML Mode (Aina Generator)**
-    *   An AI powerhouse for visual creation. Aina is fully aware of your site's backend routes and APIs.
-    *   **API-Aware Generation**: Tell Aina to create a blog homepage, and she'll generate the HTML and JavaScript needed to fetch and display posts from the correct API endpoint. The same goes for blog templates or any custom page interacting with the backend.
-    *   **Form Attachment**: Need a contact form you just built in the admin panel? Aina can seamlessly "attach" and render it on any page, already wired up to the forms API.
-    *   **Total Visual Control**: Generate entire landing pages, "About Us" sections, or a unique `/best_cat` page, all through conversational prompts.
-
-*Switch freely between Markdown and HTML — no reloads, no fuss.*
-
----
-
-### 🧠 AI Integration (Aina + Asta)
-
-Anita bakes AI right into your workflow, with full **OpenAI compatibility** (and others via config):
-
-*   **Aina Builds**: Generate complex, API-driven pages like a blog home or post templates. She understands your site's structure and can create interactive experiences.
-*   **Asta Writes**: Generate articles, expand on ideas, or change the tone of your content with a simple command.
-*   **Context-Aware Editing**: Highlight text and ask the AI to "rewrite," "expand," or "make it funnier."
-*   **Local Model Support**: Configure a local AI model for maximum privacy and control.
-*   **Fine-Tune Your AI**: Select your provider, temperature, tone, and creativity levels to match your brand's voice.
-
-> Aina builds the house, interacting with the foundation (API). Asta writes the story inside. Anita approves. 💅
+> Aina builds the house, interacting with the foundation (API). Asta writes the story inside. Anita approves.
 
 ---
 
