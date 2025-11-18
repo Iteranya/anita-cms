@@ -106,7 +106,7 @@ def get_form(slug: str, user=Depends(optional_auth)):
         raise HTTPException(status_code=404, detail="Form not found.")
     
     # Allow if form has 'read' tag OR if user is authenticated
-    if "read" not in form.tags and not user:
+    if "read" not in form["tags"] and not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
     
     return form
@@ -159,7 +159,7 @@ def submit_form(slug: str, submission: FormSubmissionModel, user=Depends(optiona
         raise HTTPException(status_code=404, detail="Form not found.")
     
     # Allow if form has 'create' tag OR if user is authenticated
-    if "create" not in form.tags and not user:
+    if "create" not in form["tags"] and not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
     
     print("NYOOOOOM~")
@@ -176,7 +176,6 @@ def submit_form(slug: str, submission: FormSubmissionModel, user=Depends(optiona
     )
     return submission
 
-
 @router.get("/{slug}/submissions", response_model=List[FormSubmissionModel])
 def list_submissions(slug: str, user=Depends(optional_auth)):
     """List all submissions for a form."""
@@ -185,10 +184,27 @@ def list_submissions(slug: str, user=Depends(optional_auth)):
         raise HTTPException(status_code=404, detail="Form not found.")
     
     # Allow if form has 'read' tag OR if user is authenticated
-    if "read" not in form.tags and not user:
+    if "read" not in form["tags"] and not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
     
     return forms_db.list_submissions(slug)
+
+@router.get("/{slug}/submissions/{submission_id}", response_model=FormSubmissionModel)
+def get_submission(slug: str, submission_id: int, user=Depends(optional_auth)):
+    """Get a specific submission from a form."""
+    form = forms_db.get_form(slug)
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found.")
+    
+    # Allow if form has 'read' tag OR if user is authenticated
+    if "read" not in form["tags"] and not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    submission = forms_db.get_submission(submission_id)
+    if not submission or submission["form_slug"] != slug:
+        raise HTTPException(status_code=404, detail="Submission not found.")
+    
+    return submission
 
 @router.put("/{slug}/submissions/{submission_id}", response_model=FormSubmissionModel)
 def update_submission(
@@ -203,7 +219,7 @@ def update_submission(
         raise HTTPException(status_code=404, detail="Form not found.")
     
     # Allow if form has 'update' tag OR if user is authenticated
-    if "update" not in form.tags and not user:
+    if "update" not in form["tags"] and not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
     
     existing = forms_db.get_submission(submission_id)
@@ -226,7 +242,7 @@ def delete_submission(slug: str, submission_id: int, user=Depends(optional_auth)
         raise HTTPException(status_code=404, detail="Form not found.")
     
     # Allow if form has 'delete' tag OR if user is authenticated
-    if "delete" not in form.tags and not user:
+    if "delete" not in form["tags"] and not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
     
     submission = forms_db.get_submission(submission_id)

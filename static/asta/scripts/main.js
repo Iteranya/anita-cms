@@ -7,7 +7,7 @@ import { getProject } from './db-integration.js'; // Make sure this is imported
 import { initialMarkdown } from './markdown-config.js'; // Import the default text
 import { setupImagePasteHandler } from './media-handler.js';
 import { ButtonHandlers } from './button-handler.js';
-
+import { AiGenerator } from './ai-integration.js'; 
 // Use an async function to allow 'await' for data fetching
 document.addEventListener('DOMContentLoaded', async () => {
     // --- 1. GET UI ELEMENTS AND SLUG ---
@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeButtons(slug, inputElement, sidePanel, projectData);
 
     // Initialize AI generation (if it needs data, pass it here too)
-    // const aiGenerator = new AiGenerator(editor); 
+    const aiGenerator = new AiGenerator(editor); 
     
     sidebarToggle.addEventListener('click', toggleSidebar);
     

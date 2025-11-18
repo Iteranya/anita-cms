@@ -51,8 +51,7 @@ async def stream_response(task: Prompt):
         temperature=task.temp or ai_config.temperature,
         messages=[
             {"role": "system", "content": task.system},
-            {"role": "user", "content": task.user},
-            {"role": "assistant", "content": task.assistant}
+            {"role": "user", "content": task.user}
         ],
         stream=True,
     )
