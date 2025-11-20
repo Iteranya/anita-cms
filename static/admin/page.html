@@ -327,21 +327,74 @@
                 document.getElementById('thumbnail-file-input').click();
             });
 
-            // Thumbnail File Change (Mock Upload)
-            document.getElementById('thumbnail-file-input').addEventListener('change', (e) => {
+            // Thumbnail File Change
+            document.getElementById('thumbnail-file-input').addEventListener('change', async (e) => {
                 if(e.target.files.length > 0) {
+                    const file = e.target.files[0];
                     const status = document.getElementById('upload-status');
-                    status.classList.remove('hidden');
+                    const inputField = document.getElementById('page-thumbnail');
+                    
+                    // UI Updates
+                    status.classList.remove('hidden', 'text-red-500', 'text-green-500');
+                    status.classList.add('text-anita-600');
                     status.innerText = "Uploading...";
                     
-                    // Simulate API Upload
+                    // Prepare Data
+                    const formData = new FormData();
+                    // IMPORTANT: Your python route expects 'files' (plural), not 'file'
+                    formData.append('files', file); 
+
+                    try {
+                        const res = await fetch('/media/', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (!res.ok) throw new Error("Upload failed");
+
+                        const data = await res.json();
+                        
+                        // The router returns: { files: [ { saved_as: "..." } ] }
+                        if(data.files && data.files.length > 0) {
+                            const finalName = data.files[0].saved_as;
+                            
+                            // Set the input value
+                            inputField.value = `/media/${finalName}`;
+                            
+                            // Success UI
+                            status.classList.remove('text-anita-600');
+                            status.classList.add('text-green-500');
+                            status.innerText = "Done!";
+                            
+                            // (Optional) Register metadata silently so it has a nice title in Media Manager
+                            // We don't await this to keep UI snappy
+                            const metaPayload = {
+                                data: {
+                                    friendly_name: file.name.split('.')[0], // Simple name
+                                    description: "Uploaded via Page Editor",
+                                    saved_filename: finalName,
+                                    public_link: `/media/${finalName}`
+                                }
+                            };
+                            fetch('/forms/media-data/submit', {
+                                method: 'POST', 
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify(metaPayload)
+                            }).catch(err => console.log("Meta register skipped (form might not exist yet)"));
+
+                        } else {
+                            throw new Error("Server returned no file data");
+                        }
+                    } catch(err) {
+                        console.error(err);
+                        status.classList.add('text-red-500');
+                        status.innerText = "Error!";
+                    }
+
+                    // Cleanup UI after 3 seconds
                     setTimeout(() => {
-                        const fileName = e.target.files[0].name;
-                        // In real app: Upload FormData to /admin/media/upload, get URL back
-                        document.getElementById('page-thumbnail').value = `/media/${fileName}`;
-                        status.innerText = "Done!";
-                        setTimeout(() => status.classList.add('hidden'), 2000);
-                    }, 1000);
+                        if(status.innerText === 'Done!') status.classList.add('hidden');
+                    }, 3000);
                 }
             });
         }
@@ -367,49 +420,52 @@
             const container = document.getElementById('pages-container');
             container.innerHTML = '';
             
-            allPages.forEach(page => {
+allPages.forEach(page => {
                 const div = document.createElement('div');
                 div.className = 'bg-white p-4 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition flex items-center justify-between';
                 
                 // Determine styles based on type
                 const isMd = page.type === 'markdown';
-                
-                // 1. Icon colors
                 const iconBg = isMd ? 'bg-purple-100 text-purple-600' : 'bg-pink-100 text-pink-600';
                 const iconClass = isMd ? 'fa-pen-nib' : 'fa-code';
-                
-                // 2. Badge styles (The new hint you wanted)
                 const badgeText = isMd ? 'Markdown (Asta)' : 'HTML (Aina)';
                 const badgeStyle = isMd 
                     ? 'bg-purple-50 text-purple-700 border-purple-200' 
                     : 'bg-pink-50 text-pink-700 border-pink-200';
 
+                // 🏷️ Generate Tags HTML
+                const tagsHtml = (page.tags || []).map(t => 
+                    `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200">#${t}</span>`
+                ).join('');
+
                 div.innerHTML = `
-                    <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-4 overflow-hidden">
                         <!-- Type Icon -->
                         <div class="w-10 h-10 rounded-lg ${iconBg} flex items-center justify-center flex-shrink-0">
                             <i class="fas ${iconClass}"></i>
                         </div>
                         
                         <!-- Text Info -->
-                        <div>
+                        <div class="min-w-0">
                             <div class="flex items-center gap-2">
-                                <h4 class="font-bold text-slate-800 leading-none">${page.title}</h4>
-                                
-                                <!-- NEW: Explicit Type Badge -->
-                                <span class="text-[10px] uppercase font-extrabold px-1.5 py-0.5 rounded border ${badgeStyle}">
+                                <h4 class="font-bold text-slate-800 leading-none truncate">${page.title}</h4>
+                                <span class="text-[10px] uppercase font-extrabold px-1.5 py-0.5 rounded border ${badgeStyle} flex-shrink-0">
                                     ${badgeText}
                                 </span>
                             </div>
-                            <p class="text-xs text-slate-400 font-mono mt-1">/${page.slug}</p>
+                            
+                            <!-- Slug & Tags Container -->
+                            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
+                                <p class="text-xs text-slate-400 font-mono">/${page.slug}</p>
+                                ${tagsHtml ? `<div class="flex flex-wrap gap-1">${tagsHtml}</div>` : ''}
+                            </div>
                         </div>
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 ml-4 flex-shrink-0">
                         <button onclick="openModal('edit', '${page.slug}')" class="w-8 h-8 rounded-full bg-slate-50 hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition flex items-center justify-center" title="Edit Settings"><i class="fas fa-cog text-xs"></i></button>
-                        <!-- Added a specific Edit Content button for clarity -->
-                        <a href="/admin/editor/${isMd ? 'asta' : 'aina'}/${page.slug}" class="w-8 h-8 rounded-full bg-slate-50 hover:bg-anita-50 text-slate-400 hover:text-anita-600 transition flex items-center justify-center" title="Edit Content"><i class="fas fa-edit text-xs"></i></a>
+                        <a href="/${isMd ? 'asta' : 'aina'}/?slug=${page.slug}" class="w-8 h-8 rounded-full bg-slate-50 hover:bg-anita-50 text-slate-400 hover:text-anita-600 transition flex items-center justify-center" title="Edit Content"><i class="fas fa-edit text-xs"></i></a>
                         <button onclick="confirmDelete('${page.slug}')" class="w-8 h-8 rounded-full bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-600 transition flex items-center justify-center" title="Delete"><i class="fas fa-trash text-xs"></i></button>
                     </div>
                 `;
@@ -564,7 +620,7 @@
             };
 
             const method = isEditing ? 'PUT' : 'POST';
-            const url = isEditing ? `/admin/api/page/${currentSlug}/` : '/admin/page/';
+            const url = isEditing ? `/admin/api/page/${currentSlug}/` : '/admin/api/page/';
 
             try {
                 const res = await fetch(url, {
