@@ -4,8 +4,9 @@ import { initAiGeneration } from './aiIntegration.js';
 import { setupFileHandlers } from './fileHandler.js';
 import { setupDeployment } from './deploymentService.js';
 import { setupEffects } from './effects.js';
-import { initFormGeneration } from './formIntegration.js';
-import { initRouteHelper } from './routeHelper.js';
+import { initFormGeneration } from './formIntegration.js'; // Legacy support
+import { initRouteHelper } from './routeHelper.js'; // New Route Helper
+
 // --------------------------------------------------
 // 🚀 DOM LOADED HANDLER
 // --------------------------------------------------
@@ -15,13 +16,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const preview = document.getElementById('preview');
     const slugContainer = document.getElementById('slug-container');
     const slug = slugContainer ? slugContainer.textContent.trim() : "";
-    
-    // Sidebar + form UI elements
-    const sidebar = document.getElementById('notes-sidebar');
-    const toggleBtn = document.getElementById('sidebar-toggle');
-    const formSelect = document.getElementById('form-select');
-    const loadBtn = document.getElementById('load-form-btn');
     const notesArea = document.getElementById('notes-textarea');
+
+    // Sidebar / Legacy Form Elements (For backward compatibility)
+    // Note: In the new UI, these might be hidden dummy elements
+    const sidebar = document.getElementById('notes-sidebar'); 
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const formSelect = document.getElementById('form-select'); // This might be null in new UI
+    const loadBtn = document.getElementById('load-form-btn');  // This might be null in new UI
 
     // --- Sanity check ---
     if (!htmlCode || !preview) {
@@ -30,7 +32,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- Load the welcome template into the editor ---
-    htmlCode.value = `
+    if (!htmlCode.value.trim()) { // Only load if empty
+        htmlCode.value = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -75,37 +78,154 @@ document.addEventListener('DOMContentLoaded', async () => {
         <p>Or describe your dream website below and let me generate it for you~</p>
     </div>
 </body>
-</html>
-    `.trim();
+</html>`.trim();
+    }
 
     // --------------------------------------------------
     // ⚙️ Initialize Features
     // --------------------------------------------------
     try {
-        // Initialize preview system
+        // 1. Initialize UI (Tabs, Resizer, Maximize)
+        // We run this first so the layout is interactive immediately
+
+        // 2. Preview System
         await initPreview(htmlCode, preview, slug);
 
-        // AI-assisted generation
-        initAiGeneration(htmlCode, updatePreview,notesArea);
-
-        // File management (save/load)
+        // 4. File Handlers
         setupFileHandlers(htmlCode, updatePreview);
 
-        // Deployment hooks
+        // 5. Deployment
         setupDeployment(htmlCode, slug);
 
-        // Form integration (the settings sidebar)
-        await initFormGeneration(sidebar, toggleBtn, formSelect, loadBtn, notesArea);
-
+        // 6. Route Helper (The new API tool)
+        // This looks for #route-type-select and #route-item-select
         initRouteHelper();
-        
-        // Visual/UX effects
+
+        // 8. Visual Effects
         setupEffects();
 
-        
+        setupDojoUI(); 
 
         console.log("✅ All systems initialized successfully!");
     } catch (err) {
         console.error("Initialization error:", err);
     }
 });
+
+// --------------------------------------------------
+// 🎨 UI LOGIC (Tabs, Resizer, Maximize)
+// --------------------------------------------------
+function setupDojoUI() {
+    console.log("🎨 Setting up Dojo UI...");
+
+    // --- A. TAB LOGIC ---
+    const tabs = document.querySelectorAll('.tab-btn');
+    const panes = document.querySelectorAll('.tab-pane');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            panes.forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            const targetId = tab.getAttribute('data-tab');
+            const targetPane = document.getElementById(targetId);
+            if (targetPane) targetPane.classList.add('active');
+        });
+    });
+
+    // --- B. RESIZER LOGIC ---
+    const container = document.getElementById('panes-container');
+    const leftPane = document.getElementById('editor-pane');
+    const rightPane = document.getElementById('preview-pane');
+    const gutter = document.getElementById('resizer-gutter');
+    
+    if (container && leftPane && rightPane && gutter) {
+        let isDragging = false;
+
+        // Start Drag
+        gutter.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            e.preventDefault(); // Stop text selection
+            container.classList.add('is-dragging');
+            gutter.classList.add('active');
+        });
+
+        // End Drag
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                container.classList.remove('is-dragging');
+                gutter.classList.remove('active');
+            }
+        });
+
+        // Move Drag
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            const containerRect = container.getBoundingClientRect();
+            // Calculate % position relative to container
+            let newLeftWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+
+            // Clamp between 10% and 90%
+            if (newLeftWidth < 10) newLeftWidth = 10;
+            if (newLeftWidth > 90) newLeftWidth = 90;
+
+            leftPane.style.width = `${newLeftWidth}%`;
+            rightPane.style.width = `${100 - newLeftWidth}%`;
+        });
+
+        // Double Click Gutter -> Reset
+        gutter.addEventListener('dblclick', () => {
+            leftPane.style.width = '50%';
+            rightPane.style.width = '50%';
+            resetIcons();
+        });
+    }
+
+    // --- C. MAXIMIZE BUTTON LOGIC ---
+    const btnEditor = document.getElementById('btn-max-editor');
+    const btnPreview = document.getElementById('btn-max-preview');
+
+    // Helper to reset all icons to "expand"
+    const resetIcons = () => {
+        if(btnEditor) btnEditor.querySelector('i').className = 'fas fa-expand';
+        if(btnPreview) btnPreview.querySelector('i').className = 'fas fa-expand';
+    };
+
+    // Maximize Editor Click
+    if (btnEditor) {
+        btnEditor.addEventListener('click', () => {
+            if (leftPane.style.width === '100%') {
+                // Restore 50/50
+                leftPane.style.width = '50%';
+                rightPane.style.width = '50%';
+                resetIcons();
+            } else {
+                // Maximize Editor
+                leftPane.style.width = '100%';
+                rightPane.style.width = '0%';
+                resetIcons();
+                btnEditor.querySelector('i').className = 'fas fa-compress';
+            }
+        });
+    }
+
+    // Maximize Preview Click
+    if (btnPreview) {
+        btnPreview.addEventListener('click', () => {
+            if (rightPane.style.width === '100%') {
+                // Restore 50/50
+                leftPane.style.width = '50%';
+                rightPane.style.width = '50%';
+                resetIcons();
+            } else {
+                // Maximize Preview
+                rightPane.style.width = '100%';
+                leftPane.style.width = '0%';
+                resetIcons();
+                btnPreview.querySelector('i').className = 'fas fa-compress';
+            }
+        });
+    }
+}
