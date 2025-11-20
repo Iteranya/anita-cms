@@ -1,4 +1,4 @@
-const API_BASE_URL = '/admin';
+const API_BASE_URL = '/admin/api/page';
 
 /**
  * Fetch all projects
@@ -20,7 +20,7 @@ export async function listProjects() {
  * @returns {Promise<Object>} Project data
  */
 export async function getProject(slug) {
-  const response = await fetch(`${API_BASE_URL}/api/${slug}`);
+  const response = await fetch(`${API_BASE_URL}/${slug}`);
   
   if (!response.ok) {
     if (response.status === 404) {
@@ -39,7 +39,7 @@ export async function getProject(slug) {
  * @returns {Promise<Object>} Updated project data
  */
 export async function updateProject(slug, projectData) {
-  const response = await fetch(`${API_BASE_URL}/api/${slug}`, {
+  const response = await fetch(`${API_BASE_URL}/${slug}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ export async function updateProject(slug, projectData) {
  * @returns {Promise<Object>} Deletion confirmation
  */
 export async function deleteProject(slug) {
-  const response = await fetch(`${API_BASE_URL}/api/${slug}`, {
+  const response = await fetch(`${API_BASE_URL}/${slug}`, {
     method: 'DELETE',
   });
   

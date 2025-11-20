@@ -37,6 +37,14 @@ class FormSubmissionModel(BaseModel):
     author: Optional[str] = None
     custom: Optional[Dict[str, Any]] = {}
 
+class SubmissionInput(BaseModel):
+    """
+    This model represents exactly what comes from the JavaScript:
+    Just data and custom fields. No slug, no ID, no timestamps.
+    """
+    data: Dict[str, Any]
+    custom: Optional[Dict[str, Any]] = {}
+
 # ----------------------------------------------------
 # 🖼️ FORM HTML VIEW
 # ----------------------------------------------------
@@ -151,7 +159,11 @@ def get_all_tags(user=Depends(optional_auth)):
 # ----------------------------------------------------
 
 @router.post("/{slug}/submit", response_model=FormSubmissionModel)
-def submit_form(slug: str, submission: FormSubmissionModel, user=Depends(optional_auth)):
+def submit_form(
+    slug: str, 
+    submission_req: SubmissionInput,  # 👈 Change this type hint!
+    user=Depends(optional_auth)
+):
     """Submit a response to a form."""
     form = forms_db.get_form(slug)
     if not form:
@@ -164,17 +176,29 @@ def submit_form(slug: str, submission: FormSubmissionModel, user=Depends(optiona
     
     print("NYOOOOOM~")
     now = datetime.now().isoformat()
-    submission.form_slug = slug
-    submission.created = now
-    submission.updated = now
-    submission.author = getattr(user, "username", None) if user else None
-    forms_db.add_submission(
+    
+    # Prepare the author
+    author_name = getattr(user, "username", None) if user else None
+
+    # Add to Database
+    # Note: Assuming add_submission returns the ID or the full dict
+    new_id = forms_db.add_submission(
         form_slug=slug,
-        data=submission.data,
-        author=submission.author,
-        custom=submission.custom
+        data=submission_req.data,
+        author=author_name,
+        custom=submission_req.custom
     )
-    return submission
+    
+    # Construct the Response Model manually combining URL slug + Input Body + Server Context
+    return FormSubmissionModel(
+        id=new_id if isinstance(new_id, int) else None, # Handle if DB returns ID
+        form_slug=slug,          # 👈 Taken from URL
+        data=submission_req.data, # 👈 Taken from Body
+        custom=submission_req.custom,
+        created=now,
+        updated=now,
+        author=author_name
+    )
 
 @router.get("/{slug}/submissions", response_model=List[FormSubmissionModel])
 def list_submissions(slug: str, user=Depends(optional_auth)):

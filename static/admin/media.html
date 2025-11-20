@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anita Admin | Media Library</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Nunito', 'sans-serif'] },
+                    colors: {
+                        anita: {
+                            50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd', 300: '#7dd3fc',
+                            400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        
+        .animate-float-up { animation: floatUp 0.4s ease-out forwards; }
+        @keyframes floatUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .image-card:hover .overlay { opacity: 1; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans h-screen overflow-hidden flex">
+
+    <!-- 1. LEFT SIDEBAR -->
+    <aside class="w-64 bg-slate-900 text-white flex flex-col flex-shrink-0 transition-all duration-300 z-20">
+        <!-- Logo Area -->
+        <div class="h-16 flex items-center px-6 border-b border-slate-800 bg-slate-950">
+            <img src="/media/anita.jpg" class="h-8 w-8 rounded-full border border-anita-500 mr-3" alt="Logo">
+            <span class="font-bold text-lg tracking-wide">Anita CMS</span>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-4 space-y-1 px-3">
+            
+            <a href="/admin/page/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors group">
+                <i class="fas fa-layer-group w-6 text-center text-lg group-hover:text-blue-400"></i>
+                <span class="ml-3 font-medium">Pages</span>
+            </a>
+
+            <a href="/admin/forms/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors group">
+                <i class="fas fa-inbox w-6 text-center text-lg group-hover:text-anita-400"></i>
+                <span class="ml-3 font-medium">Forms</span>
+            </a>
+
+            <!-- ACTIVE: Images -->
+            <a href="/admin/media/" class="flex items-center px-3 py-2.5 bg-anita-600 text-white rounded-lg shadow-lg shadow-anita-900/20 transition-colors group">
+                <i class="fas fa-images w-6 text-center text-lg"></i>
+                <span class="ml-3 font-semibold">Images</span>
+            </a>
+
+            <a href="/admin/files/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
+                <i class="fas fa-folder-open w-6 text-center text-lg"></i>
+                <span class="ml-3 font-medium">Files</span>
+            </a>
+
+            <div class="pt-4 pb-2">
+                <p class="px-3 text-xs font-bold text-slate-500 uppercase tracking-wider">System</p>
+            </div>
+
+            <a href="/admin/config/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors group">
+                <i class="fas fa-cog w-6 text-center text-lg group-hover:text-gray-300"></i>
+                <span class="ml-3 font-medium">Config</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- 2. MAIN CONTENT -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        <!-- Header -->
+        <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-8 shadow-sm z-10">
+            <div>
+                <h1 class="text-xl font-bold text-slate-800">Media Library</h1>
+                <p class="text-xs text-slate-500" id="header-subtitle">Initializing Metadata System...</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="openUploadModal()" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg transition-all transform hover:-translate-y-0.5 font-bold text-sm flex items-center">
+                    <i class="fas fa-cloud-upload-alt mr-2"></i> Upload Media
+                </button>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="flex-1 overflow-y-auto p-8">
+            
+            <!-- Loader -->
+            <div id="media-loader" class="flex justify-center items-center h-64">
+                <i class="fas fa-circle-notch fa-spin text-4xl text-anita-400"></i>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden text-center py-20">
+                <div class="w-20 h-20 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
+                    <i class="fas fa-images text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-600">No Media Found</h3>
+                <p class="text-sm text-slate-400">Upload images to populate your library.</p>
+            </div>
+
+            <!-- Grid -->
+            <div id="media-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 hidden">
+                <!-- Images injected here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- 3. UPLOAD MODAL -->
+    <div id="upload-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+        
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg animate-float-up border border-slate-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 class="text-lg font-bold text-slate-800">Upload Media</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-red-500"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <form id="upload-form" class="p-6 space-y-4">
+                
+                <!-- File Input Area -->
+                <div class="w-full">
+                    <label class="flex justify-center w-full h-32 px-4 transition bg-white border-2 border-slate-300 border-dashed rounded-xl appearance-none cursor-pointer hover:border-anita-500 hover:bg-anita-50 focus:outline-none" id="drop-zone">
+                        <div class="flex flex-col items-center justify-center">
+                            <i class="fas fa-cloud-upload-alt text-3xl text-slate-400 mb-2"></i>
+                            <span class="font-bold text-slate-500 text-sm" id="file-label">Click to select file</span>
+                        </div>
+                        <input type="file" name="file" id="file-input" class="hidden" accept="image/*" required>
+                    </label>
+                </div>
+
+                <!-- Metadata Fields (Forms API Integration) -->
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2 text-xs text-anita-600 font-bold uppercase">
+                        <i class="fas fa-database"></i> stored in 'media-data'
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Friendly Name</label>
+                        <input type="text" id="meta-title" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none" placeholder="e.g. Hero Banner">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Description</label>
+                        <textarea id="meta-desc" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none" placeholder="Alt text or details..."></textarea>
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" id="upload-btn" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold shadow-lg transition flex justify-center items-center">
+                        Upload & Save Data
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 4. IMAGE DETAILS MODAL -->
+    <div id="details-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center">
+        <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" onclick="closeDetails()"></div>
+        <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[80vh] flex overflow-hidden animate-float-up">
+            
+            <!-- Image Side -->
+            <div class="w-2/3 bg-slate-900 flex items-center justify-center relative">
+                <img id="detail-img" src="" class="max-h-full max-w-full object-contain">
+            </div>
+            
+            <!-- Info Side -->
+            <div class="w-1/3 p-6 bg-white flex flex-col">
+                <div class="flex justify-between items-start mb-6">
+                    <h3 class="text-xl font-bold text-slate-800 break-words" id="detail-title">Title</h3>
+                    <button onclick="closeDetails()" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times text-xl"></i></button>
+                </div>
+                
+                <div class="flex-1 space-y-4 overflow-y-auto">
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase">Filename</label>
+                        <p class="text-sm font-mono text-slate-600 break-all" id="detail-filename">...</p>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase">Description</label>
+                        <p class="text-sm text-slate-700 leading-relaxed" id="detail-desc">No description available.</p>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase">Public Link</label>
+                        <div class="flex gap-2 mt-1">
+                            <input type="text" id="detail-link" readonly class="w-full bg-slate-50 border border-slate-200 text-xs p-2 rounded text-slate-500">
+                            <button onclick="copyLink()" class="bg-anita-100 text-anita-600 px-3 rounded font-bold hover:bg-anita-200"><i class="fas fa-copy"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-6 border-t border-slate-100">
+                    <button onclick="deleteCurrentImage()" class="w-full py-2 text-red-500 hover:bg-red-50 rounded-lg font-bold text-sm transition">
+                        <i class="fas fa-trash-alt mr-2"></i> Delete Permanently
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 translate-y-20 opacity-0 transition-all duration-300 z-[60]">
+        <div class="bg-slate-800 text-white px-4 py-3 rounded-lg shadow-xl flex items-center gap-3">
+            <i class="fas fa-check-circle text-green-400"></i>
+            <span class="font-bold text-sm" id="toast-msg">Success</span>
+        </div>
+    </div>
+
+    <script>
+        // --- Global State ---
+        let mediaFiles = []; // The raw file list
+        let mediaMeta = {};  // The dictionary of metadata { filename: {title, desc} }
+        let currentDetailFilename = '';
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            await ensureMediaFormExists();
+            await fetchLibrary();
+            
+            // File Input Listener
+            const fileInput = document.getElementById('file-input');
+            fileInput.addEventListener('change', (e) => {
+                if(e.target.files.length > 0) {
+                    document.getElementById('file-label').innerText = e.target.files[0].name;
+                    // Auto-fill title if empty
+                    const titleInput = document.getElementById('meta-title');
+                    if(!titleInput.value) {
+                        titleInput.value = e.target.files[0].name.split('.')[0];
+                    }
+                }
+            });
+            
+            // Form Submit
+            document.getElementById('upload-form').addEventListener('submit', handleUpload);
+        });
+
+        // --- 1. Smart Form Check ---
+        async function ensureMediaFormExists() {
+            const subTitle = document.getElementById('header-subtitle');
+            try {
+                // Check if form exists
+                let res = await fetch('/forms/media-data');
+                
+                if (res.status === 404) {
+                    subTitle.innerText = "Creating Metadata Schema...";
+                    // Create it
+                    const payload = {
+                        slug: "media-data",
+                        title: "Media Data",
+                        description: "System form for storing image metadata.",
+                        tags: ["system", "read"], // 'read' allows public access to fetch details
+                        schema: {
+                            fields: [
+                                { name: "friendly_name", label: "Title", type: "text", required: true },
+                                { name: "description", label: "Description", type: "textarea", required: false },
+                                { name: "saved_filename", label: "Filename", type: "text", required: true },
+                                { name: "public_link", label: "Link", type: "text", required: true }
+                            ]
+                        }
+                    };
+                    
+                    await fetch('/forms/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    subTitle.innerText = "Metadata System Initialized.";
+                } else {
+                    subTitle.innerText = "Metadata System Ready.";
+                }
+            } catch (e) {
+                console.error("Form Init Error", e);
+                subTitle.innerText = "Metadata System Offline.";
+            }
+        }
+
+        // --- 2. Fetch & Merge Data ---
+        async function fetchLibrary() {
+            const loader = document.getElementById('media-loader');
+            const grid = document.getElementById('media-grid');
+            const empty = document.getElementById('empty-state');
+            
+            try {
+                // A. Fetch Files
+                const fileRes = await fetch('/media/');
+                if(fileRes.status === 401) window.location.href = '/auth/login';
+                const fileData = await fileRes.json();
+                mediaFiles = fileData.images || [];
+
+                // B. Fetch Metadata
+                const metaRes = await fetch('/forms/media-data/submissions');
+                if (metaRes.ok) {
+                    const submissions = await metaRes.json();
+                    // Map submissions by 'saved_filename'
+                    submissions.forEach(sub => {
+                        if(sub.data && sub.data.saved_filename) {
+                            mediaMeta[sub.data.saved_filename] = {
+                                title: sub.data.friendly_name,
+                                description: sub.data.description,
+                                id: sub.id // Store submission ID if needed later for deep cleanup
+                            };
+                        }
+                    });
+                }
+
+                // C. Render
+                loader.classList.add('hidden');
+                grid.innerHTML = '';
+
+                if (mediaFiles.length === 0) {
+                    empty.classList.remove('hidden');
+                    grid.classList.add('hidden');
+                    return;
+                }
+
+                empty.classList.add('hidden');
+                grid.classList.remove('hidden');
+
+                mediaFiles.forEach(filename => {
+                    const meta = mediaMeta[filename] || {};
+                    const displayName = meta.title || filename;
+                    const isOptimized = filename.includes('_temp') ? 'opacity-50' : ''; // Just in case
+
+                    const card = document.createElement('div');
+                    card.className = `image-card relative group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden aspect-square cursor-pointer ${isOptimized}`;
+                    card.onclick = () => openDetails(filename);
+
+                    card.innerHTML = `
+                        <img src="/media/${filename}" class="w-full h-full object-cover transition duration-500 group-hover:scale-110" loading="lazy">
+                        
+                        <!-- Hover Overlay -->
+                        <div class="overlay absolute inset-0 bg-slate-900/60 opacity-0 transition duration-300 flex flex-col justify-end p-3">
+                            <p class="text-white font-bold text-sm truncate">${displayName}</p>
+                            <p class="text-slate-300 text-xs truncate font-mono mb-2">${filename}</p>
+                        </div>
+                        
+                        <!-- Type Badge -->
+                        <div class="absolute top-2 right-2 bg-white/90 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase text-slate-600 shadow">
+                            ${filename.split('.').pop()}
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // --- 3. Upload Logic ---
+        async function handleUpload(e) {
+            e.preventDefault();
+            const btn = document.getElementById('upload-btn');
+            const origText = btn.innerText;
+            btn.innerHTML = `<i class="fas fa-circle-notch fa-spin mr-2"></i> Processing...`;
+            btn.disabled = true;
+
+            const fileInput = document.getElementById('file-input');
+            const title = document.getElementById('meta-title').value;
+            const desc = document.getElementById('meta-desc').value;
+
+            if(fileInput.files.length === 0) return;
+
+            const formData = new FormData();
+            formData.append('files', fileInput.files[0]);
+
+            try {
+                // Step 1: Upload File
+                const uploadRes = await fetch('/media/', {
+                    method: 'POST',
+                    body: formData
+                });
+                const uploadData = await uploadRes.json();
+
+                if (uploadData.files && uploadData.files.length > 0) {
+                    const savedFile = uploadData.files[0];
+                    const finalFilename = savedFile.saved_as; // The backend optimizes and renames it
+
+                    // Step 2: Save Metadata to Form
+                    const metaPayload = {
+                        data: {
+                            friendly_name: title || finalFilename,
+                            description: desc,
+                            saved_filename: finalFilename,
+                            public_link: `/media/${finalFilename}`
+                        }
+                    };
+
+                    await fetch('/forms/media-data/submit', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(metaPayload)
+                    });
+
+                    showToast('Media uploaded & metadata saved!');
+                    closeModal();
+                    fetchLibrary(); // Refresh grid
+                } else {
+                    alert('Upload failed');
+                }
+
+            } catch (e) {
+                alert('Network error');
+                console.error(e);
+            } finally {
+                btn.innerHTML = origText;
+                btn.disabled = false;
+            }
+        }
+
+        // --- 4. Delete Logic ---
+        async function deleteCurrentImage() {
+            if(!confirm("Delete this image? (This cannot be undone)")) return;
+
+            try {
+                // 1. Delete physical file
+                await fetch(`/media/${currentDetailFilename}`, { method: 'DELETE' });
+                
+                // 2. (Optional) We could search and delete the form submission here too, 
+                // but for simplicity/safety we'll just hide it from view on refresh.
+                
+                closeDetails();
+                showToast('Image deleted.');
+                fetchLibrary();
+            } catch(e) {
+                alert('Error deleting image');
+            }
+        }
+
+        // --- UI Helpers ---
+        function openUploadModal() {
+            document.getElementById('upload-form').reset();
+            document.getElementById('file-label').innerText = "Click to select file";
+            document.getElementById('upload-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('upload-modal').classList.add('hidden');
+        }
+
+        function openDetails(filename) {
+            currentDetailFilename = filename;
+            const meta = mediaMeta[filename] || {};
+            
+            document.getElementById('detail-img').src = `/media/${filename}`;
+            document.getElementById('detail-title').innerText = meta.title || filename;
+            document.getElementById('detail-filename').innerText = filename;
+            document.getElementById('detail-desc').innerText = meta.description || "No description provided.";
+            document.getElementById('detail-link').value = `/media/${filename}`;
+            
+            document.getElementById('details-modal').classList.remove('hidden');
+        }
+
+        function closeDetails() {
+            document.getElementById('details-modal').classList.add('hidden');
+        }
+
+        function copyLink() {
+            const input = document.getElementById('detail-link');
+            input.select();
+            document.execCommand('copy');
+            showToast('Link copied!');
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            t.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 3000);
+        }
+
+    </script>
+</body>
+</html>

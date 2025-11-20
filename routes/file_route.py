@@ -25,3 +25,13 @@ async def upload_media(file: UploadFile = File(...),user: dict = Depends(get_cur
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     return {"status": "success", "filename": file.filename}
+
+@router.delete("/{filename}")
+async def delete_media(filename: str, user: dict = Depends(get_current_user)):
+    if any(sep in filename for sep in ("..", "/", "\\")):
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    file_path = os.path.join(FILE_DIR, filename)
+    if not os.path.isfile(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    os.remove(file_path)
+    return {"status": "deleted", "filename": filename}

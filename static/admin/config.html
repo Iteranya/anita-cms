@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anita Admin | Configuration</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Nunito', 'sans-serif'] },
+                    colors: {
+                        anita: {
+                            50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd', 300: '#7dd3fc',
+                            400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        
+        /* Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none; 
+            background: transparent; 
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px; width: 20px;
+            border-radius: 50%;
+            background: #0ea5e9;
+            cursor: pointer;
+            margin-top: -8px; 
+            box-shadow: 0 2px 6px rgba(14, 165, 233, 0.4);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans h-screen overflow-hidden flex">
+
+    <!-- 1. LEFT SIDEBAR -->
+    <aside class="w-64 bg-slate-900 text-white flex flex-col flex-shrink-0 transition-all duration-300 z-20">
+        <!-- Logo Area -->
+        <div class="h-16 flex items-center px-6 border-b border-slate-800 bg-slate-950">
+            <img src="/media/anita.jpg" class="h-8 w-8 rounded-full border border-anita-500 mr-3" alt="Logo">
+            <span class="font-bold text-lg tracking-wide">Anita CMS</span>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-4 space-y-1 px-3">
+            
+            <a href="/admin/page/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors group">
+                <i class="fas fa-layer-group w-6 text-center text-lg group-hover:text-blue-400"></i>
+                <span class="ml-3 font-medium">Pages</span>
+            </a>
+
+            <a href="/admin/forms/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors group">
+                <i class="fas fa-inbox w-6 text-center text-lg group-hover:text-anita-400"></i>
+                <span class="ml-3 font-medium">Forms</span>
+            </a>
+
+            <a href="/admin/media/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors group">
+                <i class="fas fa-images w-6 text-center text-lg group-hover:text-purple-400"></i>
+                <span class="ml-3 font-medium">Images</span>
+            </a>
+
+            <a href="/admin/files/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
+                <i class="fas fa-folder-open w-6 text-center text-lg"></i>
+                <span class="ml-3 font-medium">Files</span>
+            </a>
+
+            <div class="pt-4 pb-2">
+                <p class="px-3 text-xs font-bold text-slate-500 uppercase tracking-wider">System</p>
+            </div>
+
+            <!-- ACTIVE: Config -->
+            <a href="/admin/config/" class="flex items-center px-3 py-2.5 bg-anita-600 text-white rounded-lg shadow-lg shadow-anita-900/20 transition-colors group">
+                <i class="fas fa-cog w-6 text-center text-lg"></i>
+                <span class="ml-3 font-semibold">Config</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- 2. MAIN CONTENT -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        
+        <!-- Header -->
+        <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-8 shadow-sm z-10">
+            <div>
+                <h1 class="text-xl font-bold text-slate-800">System Configuration</h1>
+                <p class="text-xs text-slate-500">Manage AI settings and core behaviors</p>
+            </div>
+            <!-- Save Button (Top Right access) -->
+            <button onclick="submitConfig()" id="save-btn-top" class="bg-slate-900 hover:bg-slate-800 text-white px-6 py-2 rounded-lg shadow-lg transition-all transform hover:-translate-y-0.5 font-bold text-sm flex items-center">
+                <i class="fas fa-save mr-2"></i> Save Changes
+            </button>
+        </header>
+
+        <!-- Content Scroll Area -->
+        <div class="flex-1 overflow-y-auto p-8">
+            <div class="max-w-3xl mx-auto">
+
+                <!-- Loading State -->
+                <div id="loader" class="flex justify-center items-center h-64">
+                    <i class="fas fa-circle-notch fa-spin text-4xl text-anita-400"></i>
+                </div>
+
+                <!-- Config Form -->
+                <form id="config-form" class="hidden space-y-6 animate-float-up">
+                    
+                    <!-- AI Settings Card -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center gap-2">
+                            <i class="fas fa-robot text-purple-500"></i>
+                            <h3 class="font-bold text-slate-700">AI Provider Settings</h3>
+                        </div>
+                        
+                        <div class="p-6 space-y-6">
+                            <!-- Endpoint & Model Row -->
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">AI Endpoint URL</label>
+                                    <div class="relative">
+                                        <i class="fas fa-link absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                        <input type="text" id="ai_endpoint" required
+                                            class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-anita-500 focus:outline-none text-sm font-mono text-slate-600"
+                                            placeholder="https://api.openai.com/v1">
+                                    </div>
+                                    <p class="text-[10px] text-slate-400 mt-1 ml-1">Compatible with OpenAI, Ollama, or vLLM.</p>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Base Model Name</label>
+                                    <div class="relative">
+                                        <i class="fas fa-microchip absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                        <input type="text" id="base_llm" required
+                                            class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-anita-500 focus:outline-none text-sm font-mono text-slate-600"
+                                            placeholder="gpt-4o-mini">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- API Key (Sensitive) -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">AI Secret Key</label>
+                                <div class="relative">
+                                    <i class="fas fa-key absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <input type="password" id="ai_key"
+                                        class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-anita-500 focus:outline-none text-sm font-mono text-slate-600 bg-slate-50"
+                                        placeholder="••••••••••••••••••••••••" autocomplete="new-password">
+                                </div>
+                                <p class="text-[10px] text-orange-500 mt-1 ml-1 font-bold">
+                                    <i class="fas fa-shield-alt mr-1"></i> Leave blank to keep current key.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Behavior Card -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center gap-2">
+                            <i class="fas fa-brain text-pink-500"></i>
+                            <h3 class="font-bold text-slate-700">Personality & Behavior</h3>
+                        </div>
+
+                        <div class="p-6 space-y-6">
+                            <!-- Temperature Slider -->
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase">Temperature (Creativity)</label>
+                                    <span id="temp-display" class="bg-anita-100 text-anita-700 text-xs font-bold px-2 py-1 rounded">0.7</span>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <span class="text-xs text-slate-400 font-bold">Precise</span>
+                                    <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.7" class="w-full">
+                                    <span class="text-xs text-slate-400 font-bold">Creative</span>
+                                </div>
+                            </div>
+
+                            <!-- System Note -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">System Note (Personality)</label>
+                                <textarea id="system_note" rows="6"
+                                    class="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-anita-500 focus:outline-none text-sm leading-relaxed text-slate-700"
+                                    placeholder="You are Anita, a helpful assistant..."></textarea>
+                                <p class="text-[10px] text-slate-400 mt-1 ml-1">This defines how Asta and Aina interact with you.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Save (Mobile/Access) -->
+                    <div class="flex justify-end">
+                        <button type="button" onclick="submitConfig()" class="bg-slate-900 hover:bg-slate-800 text-white px-8 py-3 rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 font-bold text-sm flex items-center">
+                            Save Configuration
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <div class="bg-slate-800 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-3">
+            <i class="fas fa-check-circle text-green-400 text-xl"></i>
+            <div>
+                <h4 class="font-bold text-sm">Success</h4>
+                <p class="text-xs text-slate-300">Configuration updated.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Init ---
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchConfig();
+            
+            // Live Temp Slider Update
+            const range = document.getElementById('temperature');
+            const display = document.getElementById('temp-display');
+            range.addEventListener('input', (e) => display.innerText = e.target.value);
+        });
+
+        // --- Fetch Data ---
+        async function fetchConfig() {
+            const form = document.getElementById('config-form');
+            const loader = document.getElementById('loader');
+
+            try {
+                const res = await fetch('/admin/api/config/');
+                
+                if (res.status === 401) {
+                    window.location.href = '/auth/login';
+                    return;
+                }
+                
+                const data = await res.json();
+
+                // Populate Fields
+                document.getElementById('ai_endpoint').value = data.ai_endpoint || '';
+                document.getElementById('base_llm').value = data.base_llm || '';
+                document.getElementById('system_note').value = data.system_note || '';
+                
+                // Slider
+                const temp = data.temperature || 0.7;
+                document.getElementById('temperature').value = temp;
+                document.getElementById('temp-display').innerText = temp;
+
+                // Reveal
+                loader.classList.add('hidden');
+                form.classList.remove('hidden');
+
+            } catch (err) {
+                console.error("Failed to load config", err);
+                loader.innerHTML = `<p class="text-red-500 font-bold">Failed to load configuration.</p>`;
+            }
+        }
+
+        // --- Submit Data ---
+        async function submitConfig() {
+            const btn = document.getElementById('save-btn-top');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<i class="fas fa-circle-notch fa-spin mr-2"></i> Saving...`;
+            btn.disabled = true;
+
+            // Gather Data
+            const payload = {
+                ai_endpoint: document.getElementById('ai_endpoint').value,
+                base_llm: document.getElementById('base_llm').value,
+                temperature: parseFloat(document.getElementById('temperature').value),
+                system_note: document.getElementById('system_note').value,
+                ai_key: null // Default null
+            };
+
+            // Handle Key (Only send if not empty)
+            const keyInput = document.getElementById('ai_key').value.trim();
+            if (keyInput.length > 0) {
+                payload.ai_key = keyInput;
+            }
+
+            try {
+                const res = await fetch('/admin/api/config/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    showToast();
+                    document.getElementById('ai_key').value = ''; // Clear key field for security
+                } else {
+                    alert('Failed to save settings.');
+                }
+
+            } catch (err) {
+                alert('Network error occurred.');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // --- Toast Logic ---
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
