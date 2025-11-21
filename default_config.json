@@ -7,26 +7,15 @@
   "theme": "default",
   "routes": [
     {
-      "name": "media_list",
-      "schema": {
-        "method": "GET",
-        "path": "/media",
-        "returns": "List of images in media directory"
-      },
-      "type": "media",
-      "description": "List all uploaded media files",
-      "usage_note": "Used internally by CMS and file pickers."
-    },
-    {
       "name": "media_get_file",
       "schema": {
         "method": "GET",
         "path": "/media/{filename}",
         "params": { "filename": "string" },
-        "returns": "Image file"
+        "returns": "Binary Image File (Blob)"
       },
       "type": "media",
-      "description": "Retrieve an uploaded media file"
+      "description": "Retrieve an uploaded media file directly."
     },
     {
       "name": "media_upload",
@@ -36,10 +25,15 @@
         "body": {
           "files": "List[UploadFile]"
         },
-        "auth": true
+        "auth": true,
+        "returns": {
+          "status": "string",
+          "total": "int",
+          "files": "List[{ 'original': string, 'saved_as': string, 'size': int, 'format_chosen': string }]"
+        }
       },
       "type": "media",
-      "description": "Upload images with automatic compression & conversion"
+      "description": "Upload images. Returns a JSON list containing the 'saved_as' filenames which must be used for future retrieval."
     },
     {
       "name": "media_delete",
@@ -47,10 +41,27 @@
         "method": "DELETE",
         "path": "/media/{filename}",
         "params": { "filename": "string" },
-        "auth": true
+        "auth": true,
+        "returns": {
+          "status": "string",
+          "filename": "string"
+        }
       },
       "type": "media",
-      "description": "Delete an uploaded media file"
+      "description": "Delete an uploaded media file."
+    },
+    {
+      "name": "media_list",
+      "schema": {
+        "method": "GET",
+        "path": "/media",
+        "params": {},
+        "returns": {
+          "images": "List[string]"
+        }
+      },
+      "type": "media",
+      "description": "List all available image filenames on the server."
     },
     {
       "name": "file_get",

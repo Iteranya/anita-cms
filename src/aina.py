@@ -250,7 +250,7 @@ def get_routes() -> List[RouteData]:
         
         collected.append(
             RouteData(
-                name=f"{form_slug}_form",
+                name=f"{form_slug}",
                 type="form",
                 description=f.get("description"),
                 schema=f["schema"],
