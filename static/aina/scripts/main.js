@@ -4,7 +4,7 @@ import { initAiGeneration } from './aiIntegration.js';
 import { setupFileHandlers } from './fileHandler.js';
 import { setupDeployment } from './deploymentService.js';
 import { setupEffects } from './effects.js';
-import { initRouteHelper } from './routeHelper.js'; // New Route Helper
+import { initContextManager } from './contextManager.js';
 
 // --------------------------------------------------
 // 🚀 DOM LOADED HANDLER
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 6. Route Helper (The new API tool)
         // This looks for #route-type-select and #route-item-select
-        initRouteHelper();
+        initContextManager();
 
         // 7. Initialize the AI
         initAiGeneration(htmlCode,updatePreview,notesArea);
