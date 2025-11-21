@@ -147,7 +147,6 @@ ${route.description || 'No description provided.'}
 
 ## Usage Note
 ${route.usage_note || 'No specific usage notes.'}
-${route.type === 'form' ? formSubmissionGuide : ''}
 ## Schema / Metadata
 \`\`\`json
 ${JSON.stringify(route.schema, null, 2)}
