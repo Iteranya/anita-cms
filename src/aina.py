@@ -7,7 +7,7 @@ from src import llm,config
 from data.models import Form, Page, Prompt,RouteData
 from concurrent.futures import ThreadPoolExecutor
 from data.forms_db import list_forms
-from data.db import list_pages
+from data.db import get_pages_by_tag, list_pages
 # Create a thread pool for CPU-bound tasks
 executor = ThreadPoolExecutor()
 
@@ -199,14 +199,12 @@ def generate_page_style_description(html: str) -> str:
 
     return ""
 
-# --- Your Main Function (Now Modified) ---
+# --- Your Main Function ---
 def get_routes() -> List[RouteData]:
-    print("Nyaaaa~")
-    print("Mitochondrian~")
 
     # Load DB forms + pages
     forms = list_forms()
-    pages = list_pages()
+    pages = get_pages_by_tag('theme')
 
     # Load config routes (media, blog, file routes etc.)
     config_file = config.load_or_create_config()

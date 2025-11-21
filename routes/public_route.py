@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
-from data.db import list_pages, get_page
+from data.db import get_first_page_by_tag, get_pages_by_tag, get_page
 from fastapi.templating import Jinja2Templates
 from src.generator import generate_markdown_page
 from src.config import get_theme
@@ -12,11 +12,9 @@ templates = Jinja2Templates(directory=template_path)
 
 @router.get("/", response_class=HTMLResponse)
 async def serve_custom_page(request: Request):
-    # Get all pages
-    pages = list_pages()
 
     # Try to find the first page with 'home' tag
-    home_page = next((page for page in pages if page.tags and 'home' in page.tags), None)
+    home_page = get_first_page_by_tag('home')
 
     if home_page:
         # If page is HTML, serve it directly
@@ -34,16 +32,12 @@ async def serve_custom_page(request: Request):
 
 @router.get("/blog/", response_class=HTMLResponse)
 async def home(request: Request):
-    pages = list_pages()
-    pages = list_pages()
-    blog_pages = [page for page in pages if page.tags and 'blog' in page.tags]
-    blog_home = next((page for page in pages if page.tags and 'blog-home' in page.tags), None)
+    blog_home = get_first_page_by_tag('blog-home')
+    blog_pages = get_pages_by_tag("blog")
 
-    if blog_home:
-        if blog_home.type == 'html':
-            return HTMLResponse(content=blog_home.html, status_code=200)
+    if blog_home and blog_home.type == 'html':
+        return HTMLResponse(content=blog_home.html, status_code=200)
 
-    # Fallback to blog.html template with list of pages
     return templates.TemplateResponse("blog.html", {"request": request, "pages": blog_pages})
 
 # Dynamic route to serve blog type pages
@@ -52,8 +46,8 @@ async def render_site(slug: str):
     page = get_page(slug)
     if not page or not (page.tags and 'blog' in page.tags):
         raise HTTPException(status_code=404, detail="Main page not found")
-    pages = list_pages()
-    template = next((page for page in pages if page.tags and 'blog-template' in page.tags), None)
+    
+    template = get_first_page_by_tag("blog-template")
     if not page:
         raise HTTPException(status_code=404, detail="Page not found")
     if page.type == 'html':
@@ -87,13 +81,8 @@ async def serve_main_page(slug: str):
 # API route to list all blog pages
 @router.get("/api/blog")
 async def api_list_pages():
-    pages = list_pages()
-    
-    blog_pages = [
-        page for page in pages
-        if page.tags and "blog" in page.tags
-    ]
-    
+    blog_pages = get_pages_by_tag("blog")
+
     return JSONResponse(content=[
         {
             "slug": page.slug,

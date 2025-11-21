@@ -46,7 +46,7 @@ templates = Jinja2Templates(directory="static")
 async def admin_panel(request: Request,  user: Optional[str] = Depends(optional_auth)):
     if not user:
         return RedirectResponse(url="/auth/login", status_code=302)
-    return templates.TemplateResponse("admin/index.html", {"request": request})
+    return templates.TemplateResponse("admin/page.html", {"request": request})
 
 @router.get("/page/")
 async def admin_panel(request: Request,  user: Optional[str] = Depends(optional_auth)):

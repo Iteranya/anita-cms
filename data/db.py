@@ -157,6 +157,66 @@ def list_pages() -> List[Page]:
         for row in rows
     ]
 
+def get_pages_by_tag(tag: str) -> List[Page]:
+    """
+    Fetches ONLY pages containing a specific tag.
+    Uses SQL LIKE to search inside the JSON string.
+    """
+    conn = get_connection()
+    
+    # We search for the tag wrapped in quotes (e.g. "blog") 
+    # to avoid matching partial words (like matching 'cat' inside 'catering')
+    search_pattern = f'%"{tag}"%'
+    
+    cursor = conn.execute('''
+        SELECT slug, title, content, markdown, html, tags, thumb, type, created, updated, author, custom
+        FROM pages
+        WHERE tags LIKE ?
+        ORDER BY created DESC
+    ''', (search_pattern,))
+    
+    rows = cursor.fetchall()
+    return _rows_to_pages(rows)
+
+def get_first_page_by_tag(tag: str) -> Optional[Page]:
+    """
+    Super lightweight: Fetches only ONE row.
+    Perfect for your Homepage logic.
+    """
+    conn = get_connection()
+    search_pattern = f'%"{tag}"%'
+    
+    cursor = conn.execute('''
+        SELECT slug, title, content, markdown, html, tags, thumb, type, created, updated, author, custom
+        FROM pages
+        WHERE tags LIKE ?
+        LIMIT 1
+    ''', (search_pattern,))
+    
+    row = cursor.fetchone()
+    if not row:
+        return None
+        
+    # Convert single row to Page object
+    return Page(
+        slug=row[0], title=row[1], content=row[2], markdown=row[3], html=row[4],
+        tags=json.loads(row[5]) if row[5] else None,
+        thumb=row[6], type=row[7], created=row[8], updated=row[9], author=row[10],
+        custom=json.loads(row[11]) if len(row) > 11 and row[11] else {}
+    )
+
+def _rows_to_pages(rows) -> List[Page]:
+    """Helper to keep code clean"""
+    return [
+        Page(
+            slug=row[0], title=row[1], content=row[2], markdown=row[3], html=row[4],
+            tags=json.loads(row[5]) if row[5] else None,
+            thumb=row[6], type=row[7], created=row[8], updated=row[9], author=row[10],
+            custom=json.loads(row[11]) if len(row) > 11 and row[11] else {}
+        )
+        for row in rows
+    ]
+
 
 def close_connection():
     """Close the database connection."""

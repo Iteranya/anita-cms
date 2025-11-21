@@ -101,6 +101,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         // This looks for #route-type-select and #route-item-select
         initRouteHelper();
 
+        // 7. Initialize the AI
+        initAiGeneration();
+
         // 8. Visual Effects
         setupEffects();
 
