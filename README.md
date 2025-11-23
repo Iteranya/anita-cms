@@ -8,16 +8,16 @@
 
 **Anita CMS** is a lightweight, AI-assisted, hybrid content management system that combines:
 
-*   **Amiya’s** clean admin power 💼
-*   **Aina’s** visual, API-aware web generation 🎨
-*   **Asta’s** markdown mastery 🖋️
+*   **Amiya's** clean admin power 💼
+*   **Aina's** visual, API-aware web generation 🎨
+*   **Asta's** markdown mastery 🖋️
 
 All running on **FastAPI + SQLite**, with **zero Node.js dependency** and pure **vanilla JS** magic.
-*(Yes, it’s actually fast. Like, under-50ms fast.)*
+*(Yes, it's actually fast. Like, under-50ms fast.)*
 
 ---
 
-## 🌟 What’s Inside Anita?
+## 🌟 What's Inside Anita?
 
 Anita isn't just a CMS; it's a creative suite powered by two distinct AI personalities, Asta and Aina, who handle the writing and the building, so you can focus on the vision.
 
@@ -26,11 +26,12 @@ Anita isn't just a CMS; it's a creative suite powered by two distinct AI persona
 Asta is your dedicated writing assistant, perfect for crafting content-rich pages like blogs, documentation, or articles. She lives inside a clean, real-time Markdown editor designed to keep you in the flow.
 
 *   **Effortless Content Creation**: Write and publish beautiful Markdown pages with a live preview. Tag your work as a `blog` post or save it as a draft with a single click.
-*   **AI-Assisted Writing**: Asta's AI is deeply integrated into the editor to supercharge your writing process:
-    *   **Continue Writing**: If you hit a block, simply ask Asta to continue your train of thought, and she'll generate the next paragraph for you.
-    *   **Contextual Editing**: Highlight any sentence or paragraph, right-click, and open the "Edit with AI" modal. From there, you can ask the AI to rewrite it, expand on the idea, change the tone, or even make it funnier.
-    *   **AI Notes**: A dedicated 'notes' section is always visible to the AI. Use it to provide specific instructions, tone guidelines, or context that Asta should consider while assisting you, ensuring her output is always on-brand.
-*   **OpenAI Compatibility**: You're not locked into a single AI provider. Configure Anita to work with OpenAI or any other compatible service, including local models for maximum privacy.
+*   **One-Shot AI Assistance**: Asta's AI integration is designed for maximum flexibility and speed:
+    *   **Perfect Prompt Engineering**: Click the magic button to copy expertly crafted prompts that you can feed into any AI service—ChatGPT, Claude, local models, whatever works for you.
+    *   **Media-Aware Prompts**: Use the media panel to inject images directly into your prompt. Asta will include them in the generated prompt engineering text, so the AI can reference your visuals when writing.
+    *   **One-Shot Workflow**: No back-and-forth conversation needed. Generate your prompt, get your content, paste it back. Clean, fast, and distraction-free.
+    *   **AI Notes**: A dedicated 'notes' section helps you provide specific instructions, tone guidelines, or context that you want included in the generated prompt.
+*   **Bring Your Own AI**: No API keys required unless you want them. Use web-based AI services, local models, or configure an OpenAI-compatible endpoint if you prefer automation. The choice is always yours.
 
 ### 🎨 **Aina: The API-Aware AI Website Builder**
 
@@ -39,9 +40,10 @@ Aina is the architect and visual designer of your website. Unlike other AI build
 *   **True API-Aware Generation**: Aina's standout feature is her intelligence. She understands how your Anita-powered site works.
     *   Tell her, "Create a homepage that lists the three most recent blog posts," and she will generate the necessary HTML and vanilla JavaScript to fetch data from the correct `/api/posts` endpoint and display it correctly.
     *   Need a template for individual blog posts? Aina will design a page that dynamically loads the post's title, content, and metadata based on the URL.
-*   **Intelligent Form Integration**: Any custom form you create in the admin panel can be seamlessly "attached" by Aina. Just ask her to "add the contact form to this page," and she will generate the code to render the form and ensure it's wired up to the forms API for submissions.
-*   **Visual Control Through Conversation**: From a complex landing page to a unique `/about-us` section, you can direct Aina with conversational prompts. Aina's sidebar panel gives you granular control, allowing you to embed specific routes or reuse styles from other pages you've created, ensuring a consistent and interactive final result.
-*   **OpenAI Compatibility**: Just like Asta, Aina's creative power can be fueled by your preferred OpenAI-compatible AI provider. This gives you the flexibility to choose the model that best suits your creative and budgetary needs.
+*   **Intelligent Form Integration**: Any custom form you create in the admin panel automatically creates a new API route. Aina knows about these routes and can generate the code to render forms, fetch data from them, or wire up submissions.
+*   **One-Shot Creation**: Like Asta, Aina works in a single generation pass. Click to generate your perfectly engineered prompt, complete with media references from the media panel, then feed it to your AI of choice. The result? Production-ready HTML and JavaScript that just works.
+*   **Superior UI**: Aina's prompt engineering panel makes it ridiculously easy to specify exactly what you want. Attach images, reference existing routes, set the tone—all in a clean interface that respects your workflow.
+*   **Bring Your Own AI**: No forced subscriptions. Copy the prompt and use any AI service you prefer, or configure an OpenAI-compatible endpoint for direct integration. Freedom is the point.
 
 > Aina builds the house, interacting with the foundation (API). Asta writes the story inside. Anita approves.
 
@@ -57,14 +59,43 @@ A modern CMS needs a reliable way to communicate.
 
 ---
 
-### 🧾 Forms (NEW!)
+### 🧾 Forms: Your Secret Weapon for Custom Functionality
 
-Anita's form-building capabilities are now a core feature.
+Anita's form system isn't just about contact pages—it's a backdoor to building custom databases and admin panels without touching a line of backend code.
 
-*   Build **custom forms** with various field types directly from the admin panel.
-*   Aina can intelligently insert your forms into the websites she generates.
-*   View all submissions in one place or **export them as a CSV** for use in other tools.
-*   Perfect for contact pages, surveys, lead capture, or user feedback.
+#### **How It Works**
+
+When you create a custom form in the admin panel, Anita automatically:
+
+*   **Generates a new API route** for that form (e.g., `/api/forms/cafe-menu`)
+*   **Creates a dedicated database table** to store submissions
+*   **Exposes full CRUD operations** (Create, Read, Update, Delete) via the API
+
+#### **Granular Security Control**
+
+Each form has separate permission settings for admin and guest users:
+
+*   **Admin permissions**: Full control (CRUD) from the admin panel
+*   **Guest permissions**: What public visitors can do
+    *   `READ` only: Perfect for displaying data (like a cafe menu carousel)
+    *   `WRITE` only: Perfect for accepting submissions (like a contact form)
+    *   Mix and match as needed
+
+#### **Real-World Magic**
+
+*   **Cafe Menu**: Create a "Menu Items" form with fields like `name`, `price`, `description`, `image`. Set guest permissions to `READ` only. Now Aina can generate a beautiful menu page that fetches from `/api/forms/menu-items`.
+*   **Contact Form**: Standard contact form with `WRITE` permissions for guests. Submissions go straight to your admin panel.
+*   **Event Planner**: Create an "Events" form with date, location, and description fields. Build a public events calendar that reads from the API and an admin panel where you manage entries.
+
+#### **Build Custom Admin Panels**
+
+Tag a page with `admin` and have Aina generate a "Menu Management Panel" that lets you edit your cafe's offerings through a beautiful interface—all powered by your custom form's API. No backend coding required.
+
+*   View all submissions in one place
+*   **Export as CSV** for use in spreadsheets or other tools
+*   Create, edit, and delete entries with a few clicks
+
+**The genius**: Forms are secretly custom databases with instant API access. Your imagination is the only limit.
 
 ---
 
@@ -73,7 +104,7 @@ Anita's form-building capabilities are now a core feature.
 Simple, robust, and secure by default.
 
 *   **JWT + Cookies + Admin authentication** ensures your management panel is protected.
-*   A straightforward, single-role system for simplicity.
+*   **Granular form permissions** let you control exactly who can do what with your custom databases.
 *   Secure defaults are baked in, so you can focus on creating.
 
 ---
@@ -84,7 +115,7 @@ Anita uses tags to assign special roles to pages, unlocking automatic routing an
 
 ### **`home`**
 
-The chosen one. The page with this tag becomes your site’s landing page at `/`.
+The chosen one. The page with this tag becomes your site's landing page at `/`.
 
 ### **`blog`**
 
@@ -104,7 +135,7 @@ Any page with this tag gets served at `/{slug}`. Ideal for standalone pages like
 
 ### **`admin`**
 
-Any page with this tag gets served at `/{slug}`. Ideal for standalone pages like `/about`, `/projects`, or `/pricing`. But they are also protected just like the admin page~
+Pages with this tag get served at `/{slug}` but are protected behind authentication. Perfect for custom admin panels like your "Menu Management Dashboard."
 
 ---
 
@@ -116,7 +147,7 @@ Any page with this tag gets served at `/{slug}`. Ideal for standalone pages like
 | Frontend | Vanilla JS |
 | Markdown Editor | Asta Editor |
 | HTML Generator | Aina System |
-| AI Layer | OpenAI-compatible |
+| AI Layer | Bring Your Own (or OpenAI-compatible) |
 | Mail Service | Resend |
 
 ---
@@ -157,12 +188,9 @@ python main.py
 
 1.  Visit `/admin`.
 2.  Create pages using Markdown or let Aina generate them with HTML.
-3.  Add forms or AI-assisted sections as needed.
+3.  Build custom forms to create instant APIs and databases for your specific needs.
 4.  Tag your homepage, blog pages, and other main pages.
 5.  Publish and brag about building a fully functional, API-driven site in under an hour.
-
----
-
 
 ---
 
@@ -231,14 +259,15 @@ Think of it as a theme capsule. Pop it open, and all the goodies spill into your
 
 ### I'm All About Abstraction~
 
-*  Use Aina-chan integrated form api to create a dashboard to edit cafe menu
-*  Make another form API to create a beautiful art portfolio
-*  Make a custom form API to create an event planner
+*  Use Aina-chan's integrated form API to create a dashboard to edit your cafe menu
+*  Build a form-powered portfolio system with filterable projects and categories
+*  Create a custom event management system with booking capabilities
 
 ### How to?
 
 *  Demo coming up soon!
 *  Check out Artes Paradox's channel for tutorials, coming up!
+
 ---
 
 ## 🗺️ Roadmap
@@ -254,7 +283,7 @@ Think of it as a theme capsule. Pop it open, and all the goodies spill into your
 
 *   [ ] Stability fixes & bug bounties (emotional or caffeine-based)
 *   [ ] Performance tuning
-*   [ ] “That’s not a bug, it’s a feature” mode
+*   [ ] "That's not a bug, it's a feature" mode
 
 ---
 
@@ -272,7 +301,7 @@ Think of it as a theme capsule. Pop it open, and all the goodies spill into your
 *   Open issues (even just to say hi 👋)
 *   Submit PRs (or cursed memes)
 *   Star the repo (for serotonin)
-*   Tell Anita she’s doing great (she thrives on validation)
+*   Tell Anita she's doing great (she thrives on validation)
 
 ---
 
