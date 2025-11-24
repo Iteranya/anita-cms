@@ -45,65 +45,117 @@
     <!-- 🟢 Main Application Wrapper -->
     <main class="app-wrapper">
         
-        <div class="tabs-content">
-
-                        <!-- ✨ TAB 1: Generator -->
-            <div id="tab-generator" class="tab-pane active">
-                <div class="generator-container">
-                    
-                    <!-- Context Panel -->
-                    <div class="panel-card">
-                        <div class="panel-header">
-                            <h3><i class="fas fa-brain"></i> AI Context Control</h3>
-                            <p>Feed the AI knowledge before generating.</p>
-                        </div>
-                        
-                        <div class="context-control-panel">
-                            <div class="panel-section">
-                                <label><i class="fas fa-network-wired"></i> API Routes</label>
-                                <div class="custom-select-wrapper">
-                                    <select id="route-multi-select" class="modern-select">
-                                        <option value="" disabled selected>+ Add Route Context</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="panel-section">
-                                <label><i class="fas fa-images"></i> Visual Assets</label>
-                                <!-- This button stays here to trigger the sidebar -->
-                                <button id="btn-open-media-picker" class="btn secondary-btn full-width">
-                                    <i class="fas fa-folder-open"></i> Open Media Library
-                                </button>
-                            </div>
-                        </div>
-
-                        <div id="active-context-container" class="context-chips-area">
-                            <span class="placeholder-text"><i class="fas fa-info-circle"></i> No context selected. The AI is flying blind! (O_O;)</span>
-                        </div>
-                    </div>
-
-                    <!-- ❌ REMOVED MEDIA DRAWER FROM HERE ❌ -->
-
-                    <!-- Prompt Area -->
-                    <div class="panel-card prompt-card">
-                        <div class="panel-header">
-                            <h3><i class="fas fa-pen-nib"></i> Design Prompt</h3>
-                        </div>
-                        <form action="#" method="post" id="generator-form">
-                            <div class="input-group">
-                                <textarea name="content" id="content" 
-                                    class="modern-textarea"
-                                    rows="3"
-                                    placeholder="Describe the website... e.g. 'A kawaii portfolio using the selected images with a pink and white color scheme.'" 
-                                    spellcheck="false"></textarea>
-                                <button type="submit" class="btn primary-btn glow" id="generate-btn">
-                                    <i class="fas fa-magic"></i> <br> Generate
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+<!-- ✨ TAB 1: Generator -->
+<div id="tab-generator" class="tab-pane active">
+    
+    <!-- Flex Wrapper -->
+    <div class="generator-layout">
+        
+        <!-- 📂 LEFT: Media Drawer -->
+        <div id="media-picker-drawer" class="media-sidebar hidden">
+            <div class="sidebar-header">
+                <h4><i class="fas fa-photo-video"></i> Media Library</h4>
+                <button id="btn-close-media" class="icon-btn close-sidebar-btn">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            <div class="sidebar-content">
+                <p class="sidebar-hint">Select images for context.</p>
+                <div id="media-grid" class="media-grid-layout">
+                    <div class="loading-spinner">Loading...</div>
                 </div>
             </div>
+        </div>
+
+        <!-- 👉 CENTER: Controls -->
+        <div class="generator-container">
+            
+            <!-- Context Panel -->
+            <div class="panel-card">
+                <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3><i class="fas fa-brain"></i> AI Context Control</h3>
+                    
+                    <!-- Toggle for Right Sidebar (Terminal Icon) -->
+                    <button id="btn-toggle-debug" class="btn secondary-btn" style="padding: 4px 10px; font-size: 0.8rem;">
+                        <i class="fas fa-terminal"></i> View Prompt
+                    </button>
+                </div>
+                
+                <div class="context-control-panel">
+                    <div class="panel-section">
+                        <label><i class="fas fa-network-wired"></i> API Routes</label>
+                        <div class="custom-select-wrapper">
+                            <select id="route-multi-select" class="modern-select">
+                                <option value="" disabled selected>+ Add Route Context</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="panel-section">
+                        <label><i class="fas fa-images"></i> Visual Assets</label>
+                        <!-- THE MEDIA BUTTON IS HERE -->
+                        <button id="btn-open-media-picker" class="btn secondary-btn full-width">
+                            <i class="fas fa-images"></i> Open Media Library
+                        </button>
+                    </div>
+                </div>
+
+                <div id="active-context-container" class="context-chips-area">
+                    <span class="placeholder-text"><i class="fas fa-info-circle"></i> No context selected.</span>
+                </div>
+            </div>
+
+            <!-- Prompt Area -->
+            <div class="panel-card prompt-card">
+                <div class="panel-header">
+                    <h3><i class="fas fa-pen-nib"></i> Design Prompt</h3>
+                </div>
+                <form action="#" method="post" id="generator-form">
+                    <div class="input-group">
+                        <textarea name="content" id="content" 
+                            class="modern-textarea"
+                            rows="3"
+                            placeholder="Describe the website..." 
+                            spellcheck="false"></textarea>
+                        <button type="submit" class="btn primary-btn glow" id="generate-btn">
+                            <i class="fas fa-magic"></i> <br> Generate
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div> 
+
+        <!-- 🧐 RIGHT: Prompt Inspector -->
+        <!-- Added 'hidden' class by default so it starts closed -->
+        <div id="prompt-inspector-drawer" class="prompt-sidebar hidden">
+            <div class="sidebar-header">
+                <!-- Close Button -->
+                <button id="btn-close-debug" class="icon-btn" style="margin-right: 10px;">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <h4>Live Prompt View</h4>
+                <div style="flex:1"></div>
+                <button id="btn-copy-prompt" class="icon-btn" title="Copy to Clipboard">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+            
+            <!-- This content area will be scrollable -->
+            <div class="sidebar-content code-view">
+                <div class="prompt-debug-wrapper">
+                    <div class="debug-label">System Context</div>
+                    <pre id="debug-context-view" class="debug-pre">...</pre>
+                    
+                    <div class="debug-label">User Request</div>
+                    <pre id="debug-user-view" class="debug-pre">...</pre>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+  
 
             <!-- ✨ TAB 2: HTML Editor & Preview (UNCHANGED LOGIC) -->
             <div id="tab-editor" class="tab-pane">
@@ -143,23 +195,6 @@
     <footer class="footer">
         <p>Made with ♥ by Aina-chan</p>
     </footer>
-
-    <div id="media-picker-drawer" class="media-sidebar hidden">
-        <div class="sidebar-header">
-            <h4><i class="fas fa-photo-video"></i> Media Library</h4>
-            <!-- ID kept intact so existing JS closes it -->
-            <button id="btn-close-media" class="icon-btn close-sidebar-btn">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        
-        <div class="sidebar-content">
-            <p class="sidebar-hint">Select images to include in the AI context.</p>
-            <div id="media-grid" class="media-grid-layout">
-                <div class="loading-spinner">Loading assets...</div>
-            </div>
-        </div>
-    </div>
     <!-- Hidden Logic Containers (Keep these!) -->
     <div id="slug-container" style="display: none;" data-slug=""></div>
     <div id="notes-sidebar" style="display:none;"></div> 

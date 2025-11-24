@@ -213,50 +213,71 @@ def get_routes() -> List[RouteData]:
     collected: List[RouteData] = []
 
     # 1️⃣ Add FORM routes
+        # 1️⃣ Add FORM routes
     for f in forms:
         # Generate comprehensive API documentation for AI agents
         form_slug = f['slug']
         form_schema = f['schema']
         tags_info = f"Tags: {', '.join(f.get('tags', []))}" if f.get('tags') else "No tags"
-        
+
+        # NEW: Construct a predictable submission schema for API docs
+        submission_schema = {
+            "id": "int (auto-assigned)",
+            "form_slug": form_slug,
+            "data": form_schema,        # ← mirror the form schema
+            "created": "ISO timestamp",
+            "updated": "ISO timestamp",
+            "author": "string | null",
+            "custom": "object"
+        }
+
         usage_note = f"""The REAL and WORKING route for '{f.get('title', form_slug)}'.
-{tags_info}
+        {tags_info}
 
-📋 FORM SCHEMA:
-{json.dumps(form_schema, indent=2)}
+        📋 FORM SCHEMA:
+        {json.dumps(form_schema, indent=2)}
 
-📋 AVAILABLE API ENDPOINTS:
+        📦 SUBMISSION SCHEMA (server-side stored structure):
+        {json.dumps(submission_schema, indent=2)}
 
-1. GET /forms/{form_slug}
-   - Fetch form definition and schema
-   - Returns: Form details including all field definitions
+        📋 AVAILABLE API ENDPOINTS:
 
-2. POST /forms/{form_slug}/submit
-   - Submit data to this form
-   - Body: {{"data": {{"field_name": "field_value"}}, "custom": {{}}}}
-   - Returns: Submission confirmation with ID and timestamp
+        1. GET /forms/{form_slug}
+        - Fetch form definition and schema
+        - Returns: Form details including all field definitions
 
-3. GET /forms/{form_slug}/submissions
-   - List all submissions for this form
-   - Returns: Array of all form submissions
+        2. POST /forms/{form_slug}/submit
+        - Submit data to this form
+        - Body: {{"data": {{"field_name": "value"}}, "custom": {{}}}}
+        - Returns: Newly created submission with ID + timestamps
 
-4. PUT /forms/{form_slug}/submissions/{{submission_id}}
-   - Update an existing submission
-   - Body: {{"data": {{"field_name": "field_value"}}}}
+        3. GET /forms/{form_slug}/submissions
+        - List all submissions for this form
+        - Returns: Array following the Submission Schema
 
-5. DELETE /forms/{form_slug}/submissions/{{submission_id}}
-   - Delete a specific submission
-"""
-        
+        4. GET /forms/{form_slug}/submissions/{{submission_id}}
+        - Fetch a single submission
+        - Returns: One item of the Submission Schema
+
+        5. PUT /forms/{form_slug}/submissions/{{submission_id}}
+        - Update an existing submission
+        - Body: {{ "data": {{...}} }}
+        - Returns: Updated submission
+
+        6. DELETE /forms/{form_slug}/submissions/{{submission_id}}
+        - Delete a specific submission
+        - Returns: Confirmation
+        """
         collected.append(
             RouteData(
-                name=f"{form_slug}",
+                name=form_slug,
                 type="form",
                 description=f.get("description"),
-                schema=f["schema"],
+                schema=form_schema,
                 usage_note=usage_note
             )
         )
+
 
     # 2️⃣ Add PAGE routes (Now with BeautifulSoup!)
     for p in pages:

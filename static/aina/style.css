@@ -221,138 +221,138 @@ body {
 .context-chip i.remove { color: #ccc; cursor: pointer; margin-left: 5px; }
 .context-chip i.remove:hover { color: #ff5252; }
 
-/* --- 📂 Media Sidebar (Replaces Drawer) --- */
-
+/* --- 📂 Media Sidebar (Embedded Left Panel) --- */
 .media-sidebar {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 350px; /* Nice wide sidebar */
-    height: 100vh;
-    background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(10px);
-    z-index: 2000; /* Above everything */
-    box-shadow: -5px 0 30px rgba(0,0,0,0.15);
-    border-left: 1px solid var(--border);
+    /* Position & Layout */
+    position: relative; /* Part of the flow, not fixed */
+    width: 320px;
+    height: 100%;
+    background: #fff;
+    border-right: 1px solid var(--border); /* Border on right now */
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
+    flex-shrink: 0; /* Prevent it from squishing */
     
-    /* Animation Magic: Overriding display:none with transform */
-    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    transform: translateX(0); /* Visible State */
+    /* Animation: Animate Width and Opacity */
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    opacity: 1;
+    margin-right: 0;
+    overflow: hidden; /* Hide content when width is 0 */
 }
 
-/* The JavaScript toggles this class. We redefine it to Slide instead of Hide */
+/* Hidden State: Collapse to 0 width */
 .media-sidebar.hidden {
-    display: flex !important; /* Force it to exist in DOM */
-    transform: translateX(100%); /* Push it off-screen */
-    box-shadow: none;
+    display: flex !important; /* Keep in DOM for animation */
+    width: 0;
+    opacity: 0;
+    border-right: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* --- 🛠️ Right Side Container Adjustment --- */
+.generator-container {
+    flex: 1; /* Take remaining width */
+    height: 100%;
+    overflow-y: auto; /* Allow scrolling inside the right side */
+    padding-right: 10px; /* Slight spacing for scrollbar */
+    padding-bottom: 20px;
+}
+/* --- 🛠️ 3-Column Generator Layout --- */
+
+.generator-layout {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+    gap: 0; /* Remove gap, use padding inside containers for cleaner collapse */
+    overflow: hidden;
+    position: relative;
+    background: #f0f2f5;
+}
+
+/* Center Container (Controls) */
+.generator-container {
+    flex: 1; /* Grow to fill space */
+    height: 100%;
+    overflow-y: auto;
+    padding: 20px;
+    min-width: 400px; /* Stop it from getting too small */
+    transition: all 0.3s ease;
+}
+
+/* --- 📂 Left Side: Media Sidebar (Fixed Layout) --- */
+.media-sidebar {
+    width: 320px;
+    height: 100%;
+    background: #ffffff;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    z-index: 20; /* Ensure it sits above other elements if they overlap */
+}
+
+.media-sidebar.hidden {
+    width: 0;
+    opacity: 0;
+    border: none;
+    pointer-events: none; /* Prevent clicking when hidden */
 }
 
 .sidebar-header {
-    padding: 20px;
-    background: linear-gradient(to right, #f8f9fa, #fff);
+    padding: 15px;
+    background: #f8f9fa;
     border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0; /* Don't let header shrink */
 }
 
-.sidebar-header h4 {
-    font-size: 1rem;
-    color: var(--text-dark);
-    font-weight: 700;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.close-sidebar-btn {
-    color: var(--text-light);
-    background: transparent;
-    border: none;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.close-sidebar-btn:hover {
-    background: #ffebee;
-    color: #e91e63;
-    transform: rotate(90deg);
-}
-
+/* The Scrollable Container */
 .sidebar-content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px;
+    flex: 1; /* Fill remaining height */
+    overflow-y: auto; /* ENABLE SCROLL */
+    overflow-x: hidden;
+    padding: 15px;
 }
 
-.sidebar-hint {
-    font-size: 0.8rem;
-    color: #999;
-    margin-bottom: 15px;
-    text-align: center;
-}
-
-/* Grid Styling inside Sidebar */
+/* --- 🖼️ Media Grid Styling --- */
 .media-grid-layout {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 columns looks good in sidebar */
+    grid-template-columns: repeat(2, 1fr); /* Exactly 2 columns */
     gap: 12px;
+    width: 100%;
 }
 
 .media-item {
-    aspect-ratio: 1; /* Perfect squares */
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1; /* Force Square Shape */
     border-radius: 8px;
     overflow: hidden;
     cursor: pointer;
-    border: 3px solid transparent;
-    transition: all 0.2s;
-    position: relative;
     background: #eee;
+    border: 3px solid transparent; /* Reserve space for selection border */
+    transition: transform 0.2s, border-color 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .media-item:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
+/* Selected State */
 .media-item.selected {
-    border-color: #e91e63;
+    border-color: #e91e63; /* Pink Border */
 }
 
-.media-sidebar .close-sidebar-btn {
-    color: #444 !important; /* Force dark grey color */
-    background: rgba(0, 0, 0, 0.05); /* Light grey background circle */
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 1px solid #ddd;
-}
-
-.media-sidebar .close-sidebar-btn:hover {
-    background: #ff5252; /* Red background on hover */
-    color: white !important; /* White icon on red background */
-    border-color: #ff5252;
-    transform: rotate(90deg); /* Fun spin effect */
-    box-shadow: 0 2px 8px rgba(255, 82, 82, 0.4);
-}
-
-/* Add a cute checkmark when selected */
 .media-item.selected::after {
-    content: '\f00c'; /* FontAwesome Check */
+    content: '\f00c'; /* FontAwesome Checkmark */
     font-family: "Font Awesome 6 Free";
     font-weight: 900;
     position: absolute;
@@ -360,25 +360,110 @@ body {
     right: 5px;
     background: #e91e63;
     color: white;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
-    font-size: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 10;
 }
 
+/* The Image Image */
 .media-item img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: cover; /* Crop to fill square */
+    display: block;
+    pointer-events: none; /* Let clicks pass to the .media-item div */
 }
 
-/* Mobile Adjustments */
-@media (max-width: 768px) {
-    .media-sidebar {
-        width: 85%; /* Wider on mobile */
+/* Title Overlay (Optional - adds gradient text at bottom) */
+.media-item .title {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 8px 8px; /* Top padding for gradient fade */
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    color: white;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+}
+
+/* --- 🧐 Right Side: Prompt Inspector (NEW) --- */
+.prompt-sidebar {
+    width: 350px; /* Slightly wider for code reading */
+    height: 100%;
+    background: #282c34; /* Dark theme for "code" look */
+    color: #abb2bf;
+    border-left: 1px solid #444;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: width 0.3s ease, opacity 0.3s ease;
+    overflow: hidden;
+    opacity: 1;
+}
+
+.prompt-sidebar.hidden {
+    width: 0;
+    opacity: 0;
+    border: none;
+}
+
+/* Dark Theme Header for Right Sidebar */
+.prompt-sidebar .sidebar-header {
+    background: #21252b;
+    border-bottom: 1px solid #181a1f;
+    color: #e0e0e0;
+}
+.prompt-sidebar .sidebar-header h4 i { color: var(--accent); }
+
+/* Debug View Content */
+.prompt-debug-wrapper {
+    padding: 15px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+.debug-label {
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    color: #5c6370;
+    font-weight: bold;
+    margin-bottom: 5px;
+    margin-top: 15px;
+    border-bottom: 1px solid #3e4451;
+    padding-bottom: 2px;
+}
+.debug-label:first-child { margin-top: 0; }
+
+.debug-pre {
+    white-space: pre-wrap; /* Wrap text */
+    word-break: break-word;
+    color: #98c379; /* Greenish for context */
+}
+
+#debug-user-view {
+    color: #61afef; /* Blueish for user prompt */
+}
+
+/* Mobile Responsive */
+@media (max-width: 1100px) {
+    .prompt-sidebar {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 50;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.2);
     }
 }
 
