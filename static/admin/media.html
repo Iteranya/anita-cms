@@ -336,10 +336,15 @@
                 empty.classList.add('hidden');
                 grid.classList.remove('hidden');
 
-                mediaFiles.forEach(filename => {
+                mediaFiles.forEach(item => {
+                    // FIX: Extract the filename string from the object provided by FastAPI
+                    const filename = item.filename; 
+
                     const meta = mediaMeta[filename] || {};
                     const displayName = meta.title || filename;
-                    const isOptimized = filename.includes('_temp') ? 'opacity-50' : ''; // Just in case
+                    
+                    // Now this works because 'filename' is a string
+                    const isOptimized = filename.includes('_temp') ? 'opacity-50' : ''; 
 
                     const card = document.createElement('div');
                     card.className = `image-card relative group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden aspect-square cursor-pointer ${isOptimized}`;
@@ -348,20 +353,17 @@
                     card.innerHTML = `
                         <img src="/media/${filename}" class="w-full h-full object-cover transition duration-500 group-hover:scale-110" loading="lazy">
                         
-                        <!-- Hover Overlay -->
                         <div class="overlay absolute inset-0 bg-slate-900/60 opacity-0 transition duration-300 flex flex-col justify-end p-3">
                             <p class="text-white font-bold text-sm truncate">${displayName}</p>
                             <p class="text-slate-300 text-xs truncate font-mono mb-2">${filename}</p>
                         </div>
                         
-                        <!-- Type Badge -->
                         <div class="absolute top-2 right-2 bg-white/90 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase text-slate-600 shadow">
                             ${filename.split('.').pop()}
                         </div>
                     `;
                     grid.appendChild(card);
                 });
-
             } catch (e) {
                 console.error(e);
             }
