@@ -19,6 +19,9 @@ Anita comes with two AI assistants who work together to bring your vision to lif
 
 ### 🖋️ **Asta: Your AI Writing Assistant**
 
+<img width="1919" height="910" alt="Screenshot 2025-11-20 184342" src="https://github.com/user-attachments/assets/106ddc96-0f68-4cd7-9a76-e203b1c5b17c" />
+
+
 Asta is your personal editor and content writer. She helps you craft beautiful blog posts, articles, and pages with ease in a clean, distraction-free writing space.
 
 *   **Focus on Your Words**: Write in a simple, clean editor with a live preview, so you always know what your page will look like.
@@ -28,6 +31,9 @@ Asta is your personal editor and content writer. She helps you craft beautiful b
 ---
 
 ### 🎨 **Aina: Your AI Website Designer**
+
+<img width="1919" height="906" alt="Screenshot 2025-11-21 152132" src="https://github.com/user-attachments/assets/5ec5c7d7-ac00-46e5-b0fe-a135f0723ca6" />
+
 
 Aina is the architect who builds and designs your website. Unlike other AI builders that just fill in a template, Aina is *smart*. She understands how your website works and can create pages that are not only beautiful but truly functional.
 
