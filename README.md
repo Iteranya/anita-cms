@@ -23,7 +23,7 @@ Asta is your personal editor and content writer. She helps you craft beautiful b
 
 *   **Focus on Your Words**: Write in a simple, clean editor with a live preview, so you always know what your page will look like.
 *   **Never Face a Blank Page Again**: Stuck for words? Click the magic button, and Asta prepares a perfect request for your favorite AI. Tell her your ideas in the "notes" section, and she'll help you ask the AI to write a first draft, brainstorm ideas, or polish your text.
-*   **Write About Your Art**: Easily add images from your media library. Asta will make sure the AI knows about them, so it can write descriptions or stories inspired by your visuals.
+*   **Real Time Editing**: Easily add images from your media library. Select text and ask AI to only edit that one specific text! 
 
 ---
 
