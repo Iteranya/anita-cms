@@ -42,24 +42,20 @@ class MailModel(BaseModel):
 
 templates = Jinja2Templates(directory="static")
 
-@router.get("/old", response_class=HTMLResponse)
-async def get_html(request: Request, user: Optional[str] = Depends(optional_auth)):
-    if not user:
-        return RedirectResponse(url="/auth/login", status_code=302)
-    
-    template_path = "static/admin/index_old.html"
-    with open(template_path, "r") as f:
-        html = f.read()
-
-    return html
-
 @router.get("/")
 async def admin_panel(request: Request,  user: Optional[str] = Depends(optional_auth)):
     if not user:
         return RedirectResponse(url="/auth/login", status_code=302)
-    return templates.TemplateResponse("admin/index.html", {"request": request})
+    return templates.TemplateResponse("admin/page.html", {"request": request})
 
-@router.post("/api/", response_model=PageModel)
+@router.get("/page/")
+async def admin_panel(request: Request,  user: Optional[str] = Depends(optional_auth)):
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    return templates.TemplateResponse("admin/page.html", {"request": request})
+
+
+@router.post("/api/page/", response_model=PageModel)
 def create_page(
     page: PageModel,
     user: dict = Depends(get_current_user),  # Enforces authentication
@@ -78,14 +74,26 @@ def create_page(
     db.add_page(PageData(**page_data))
     return PageModel(**page_data)
 
-@router.get("/api/{slug}/", response_model=PageModel)
+@router.get("/api/page/list/", response_model=List[PageModel])
+def list_pages(user: dict = Depends(get_current_user)):
+    return db.list_pages()
+
+@router.delete("/api/page/{slug}/")
+def delete_page(slug: str,user: dict = Depends(get_current_user)):
+    if not db.get_page(slug):
+        raise HTTPException(status_code=404, detail="Page not found")
+    db.delete_page(slug)
+    return {"message": "Page deleted successfully"}
+
+
+@router.get("/api/page/{slug}/", response_model=PageModel)
 def read_page(slug: str, user: dict = Depends(get_current_user)):
     page = db.get_page(slug)
     if not page:
         raise HTTPException(status_code=404, detail="Page not found")
     return page
 
-@router.put("/api/{slug}/", response_model=PageModel)
+@router.put("/api/page/{slug}/", response_model=PageModel)
 def update_page(slug: str, page: PageModel, user: dict = Depends(get_current_user)):
     print("Received data:", page.dict())
     existing_page = db.get_page(slug)
@@ -103,18 +111,14 @@ def update_page(slug: str, page: PageModel, user: dict = Depends(get_current_use
     db.update_page(PageData(**page_data))
     return PageModel(**page_data)
 
-@router.delete("/api/{slug}/")
-def delete_page(slug: str,user: dict = Depends(get_current_user)):
-    if not db.get_page(slug):
-        raise HTTPException(status_code=404, detail="Page not found")
-    db.delete_page(slug)
-    return {"message": "Page deleted successfully"}
+@router.get("/config/")
+async def admin_panel(request: Request,  user: Optional[str] = Depends(optional_auth)):
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    return templates.TemplateResponse("admin/config.html", {"request": request})
 
-@router.get("/list/", response_model=List[PageModel])
-def list_pages(user: dict = Depends(get_current_user)):
-    return db.list_pages()
 
-@router.get("/config/", response_model=ConfigModel)
+@router.get("/api/config/", response_model=ConfigModel)
 def get_config(user: dict = Depends(get_current_user)):
     config = load_or_create_config()
     return ConfigModel(
@@ -125,7 +129,7 @@ def get_config(user: dict = Depends(get_current_user)):
         # Do not include ai_key
     )
 
-@router.post("/config/", response_model=ConfigModel)
+@router.post("/api/config/", response_model=ConfigModel)
 def update_config(updated: ConfigModel,user: dict = Depends(get_current_user)):
     config = load_or_create_config()
     config.system_note = updated.system_note
@@ -139,33 +143,25 @@ def update_config(updated: ConfigModel,user: dict = Depends(get_current_user)):
     save_config(config)
     return updated
 
-@router.get("/mail/", response_model=MailModel)
-def get_config(user: dict = Depends(get_current_user)):
-    config = load_or_create_mail_config()
-    return MailModel(
-    server_email=config.server_email,
-    target_email= config.target_email,
-    header= config.header,
-    footer=config.header,
-    api_key=""
-    )
+@router.get("/forms/")
+async def admin_panel(request: Request,  user: Optional[str] = Depends(optional_auth)):
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    return templates.TemplateResponse("admin/form.html", {"request": request})
 
-@router.post("/mail/", response_model=MailModel)
-def update_config(updated: MailModel,user: dict = Depends(get_current_user)):
-    config = load_or_create_mail_config()
-    config.server_email = updated.server_email
-    config.header = updated.header
-    config.footer = updated.footer
-    config.api_key = updated.api_key
-    config.target_email = updated.target_email
+@router.get("/media/")
+async def admin_panel(request: Request,  user: Optional[str] = Depends(optional_auth)):
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    return templates.TemplateResponse("admin/media.html", {"request": request})
 
-    if updated.api_key is not None:
-        config.api_key = updated.api_key  # Save if provided
+@router.get("/files/")
+async def admin_panel(request: Request,  user: Optional[str] = Depends(optional_auth)):
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    return templates.TemplateResponse("admin/file_manager.html", {"request": request})
 
-    save_mail_config(config)
-    return updated
-
-# Dynamic route to serve 'main' pages
+# Dynamic route to serve 'custom admin' pages
 @router.get("/{slug}/", response_class=HTMLResponse)
 async def serve_custom_admin_page(slug: str, user: Optional[str] = Depends(optional_auth)):
     if not user:

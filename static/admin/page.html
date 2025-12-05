@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anita Admin | Pages</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Nunito', 'sans-serif'] },
+                    colors: {
+                        anita: {
+                            50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd', 300: '#7dd3fc',
+                            400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        
+        .glass-effect { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+
+        /* Tag styling */
+        .tag-chip {
+            animation: fadeIn 0.2s ease-in-out;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans h-screen overflow-hidden flex">
+
+    <!-- 1. LEFT SIDEBAR (Same as before) -->
+    <aside class="w-64 bg-slate-900 text-white flex flex-col flex-shrink-0 transition-all duration-300 z-20">
+        <!-- Logo Area -->
+        <div class="h-16 flex items-center px-6 border-b border-slate-800 bg-slate-950">
+            <img src="/media/anita.jpg" class="h-8 w-8 rounded-full border border-anita-500 mr-3" alt="Logo">
+            <span class="font-bold text-lg tracking-wide">Anita CMS</span>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-4 space-y-1 px-3">
+            
+            <!-- ACTIVE: Pages -->
+            <a href="/admin/page/" class="flex items-center px-3 py-2.5 bg-anita-600 text-white rounded-lg shadow-lg shadow-anita-900/20 transition-colors group">
+                <i class="fas fa-layer-group w-6 text-center text-lg"></i>
+                <span class="ml-3 font-semibold">Pages</span>
+            </a>
+
+            <a href="/admin/forms/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors group">
+                <i class="fas fa-inbox w-6 text-center text-lg group-hover:text-anita-400"></i>
+                <span class="ml-3 font-medium">Forms</span>
+            </a>
+
+            <a href="/admin/media/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors group">
+                <i class="fas fa-images w-6 text-center text-lg group-hover:text-purple-400"></i>
+                <span class="ml-3 font-medium">Images</span>
+            </a>
+
+            <a href="/admin/files/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
+                <i class="fas fa-folder-open w-6 text-center text-lg"></i>
+                <span class="ml-3 font-medium">Files</span>
+            </a>
+
+            <div class="pt-4 pb-2">
+                <p class="px-3 text-xs font-bold text-slate-500 uppercase tracking-wider">System</p>
+            </div>
+
+            <a href="/admin/config/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors group">
+                <i class="fas fa-cog w-6 text-center text-lg group-hover:text-gray-300"></i>
+                <span class="ml-3 font-medium">Config</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- 2. MAIN CONTENT -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-8 shadow-sm z-10">
+            <div>
+                <h1 class="text-xl font-bold text-slate-800">Pages Manager</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="openModal('create')" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg transition-all transform hover:-translate-y-0.5 font-bold text-sm flex items-center">
+                    <i class="fas fa-plus mr-2"></i> New Page
+                </button>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-8">
+            <!-- Search & Filter -->
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                <div class="relative w-full sm:w-96">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="searchInput" placeholder="Search pages..." class="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-anita-500 outline-none shadow-sm">
+                </div>
+            </div>
+
+            <div id="pages-loader" class="flex justify-center items-center h-64">
+                <i class="fas fa-circle-notch fa-spin text-4xl text-anita-400"></i>
+            </div>
+            <div id="pages-container" class="grid gap-4 hidden"></div>
+        </div>
+    </main>
+
+    <!-- 3. ADD/EDIT PAGE MODAL -->
+    <div id="page-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+        
+        <!-- Modal Content -->
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-float border border-slate-100">
+            
+            <!-- Header -->
+            <div class="flex justify-between items-center px-6 py-4 border-b border-slate-100">
+                <h3 id="modal-title" class="text-xl font-bold text-slate-800">Add New Page</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-red-500 transition"><i class="fas fa-times text-xl"></i></button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex border-b border-slate-100 px-6">
+                <button class="tab-btn active px-4 py-3 text-sm font-bold border-b-2 border-anita-600 text-anita-600 transition-colors" data-tab="details">
+                    <i class="fas fa-info-circle mr-1"></i> Details
+                </button>
+                <button class="tab-btn px-4 py-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors" data-tab="content">
+                    <i class="fas fa-pen-alt mr-1"></i> Content
+                </button>
+            </div>
+
+            <!-- Body (Scrollable) -->
+            <div class="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                <form id="page-form">
+                    <input type="hidden" id="page-id"> <!-- Hidden field for Slug storage if needed -->
+
+                    <!-- Tab 1: Details -->
+                    <div id="tab-details" class="space-y-5">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Title *</label>
+                                <input type="text" id="page-title" required class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none transition">
+                            </div>
+                            <div class="form-group">
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Slug *</label>
+                                <input type="text" id="page-slug" required class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none bg-slate-50 transition">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Description</label>
+                            <textarea id="page-description" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none transition"></textarea>
+                        </div>
+
+                        <!-- Thumbnail Section -->
+                        <div class="form-group">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Thumbnail</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="page-thumbnail" placeholder="/media/image.webp" class="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none">
+                                <input type="file" id="thumbnail-file-input" class="hidden" accept="image/*">
+                                <button type="button" id="upload-thumbnail-btn" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-lg font-bold text-sm border border-slate-200 transition">
+                                    <i class="fas fa-upload mr-1"></i> Upload
+                                </button>
+                            </div>
+                            <small id="upload-status" class="text-xs text-anita-600 mt-1 hidden">Uploading...</small>
+                        </div>
+
+                        <!-- Tags Input -->
+                        <div class="form-group">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tags</label>
+                            <div class="flex flex-wrap gap-2 p-2 border border-slate-200 rounded-lg bg-white focus-within:ring-2 focus-within:ring-anita-500 transition">
+                                <div id="tags-list" class="flex flex-wrap gap-2"></div>
+                                <input type="text" id="page-tags-input" placeholder="Type tag & Enter..." class="flex-1 min-w-[120px] outline-none text-sm bg-transparent">
+                            </div>
+                        </div>
+
+                        <!-- Custom Fields -->
+                        <div class="form-group">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="block text-xs font-bold text-slate-500 uppercase">Custom Fields</label>
+                                <button type="button" onclick="addCustomField()" class="text-xs font-bold text-anita-600 hover:underline">+ Add Field</button>
+                            </div>
+                            <div id="custom-fields-container" class="space-y-2">
+                                <!-- Dynamic Rows -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Content -->
+                    <div id="tab-content" class="hidden space-y-5">
+                        <div class="form-group">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Content Type *</label>
+                            <select id="content-type" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none">
+                                <option value="markdown">Markdown (Asta)</option>
+                                <option value="html">HTML (Aina)</option>
+                            </select>
+                        </div>
+
+                        <!-- Markdown Preview/Link -->
+                        <div id="markdown-group">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Markdown Content</label>
+                            <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 text-center">
+                                <i class="fas fa-file-markdown text-4xl text-purple-400 mb-3"></i>
+                                <p class="text-sm text-slate-500 mb-4">Content is managed in the Asta Editor.</p>
+                                <a href="#" id="edit-with-asta" target="_blank" class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold shadow-lg shadow-purple-200 transition transform hover:-translate-y-1">
+                                    <i class="fas fa-magic mr-2"></i> Open Asta Editor
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- HTML Preview/Link -->
+                        <div id="html-group" class="hidden">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">HTML Content</label>
+                            <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 text-center">
+                                <i class="fas fa-code text-4xl text-pink-400 mb-3"></i>
+                                <p class="text-sm text-slate-500 mb-4">Layout is managed in the Aina Builder.</p>
+                                <a href="#" id="edit-with-aina" target="_blank" class="inline-block bg-pink-600 hover:bg-pink-700 text-white px-6 py-2 rounded-full font-bold shadow-lg shadow-pink-200 transition transform hover:-translate-y-1">
+                                    <i class="fas fa-paint-brush mr-2"></i> Open Aina Builder
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3 rounded-b-2xl">
+                <button onclick="closeModal()" class="px-4 py-2 text-sm font-bold text-slate-500 hover:text-slate-700 bg-white border border-slate-200 rounded-lg shadow-sm hover:bg-slate-50 transition">Cancel</button>
+                <button onclick="savePage()" class="px-6 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold rounded-lg shadow-lg transition transform hover:-translate-y-0.5">Save Page</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. DELETE MODAL -->
+    <div id="delete-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 text-center animate-float">
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Delete Page?</h3>
+            <p class="text-sm text-slate-500 mb-6">Are you sure you want to delete <span id="del-slug-display" class="font-mono font-bold text-slate-700"></span>? This cannot be undone.</p>
+            <div class="flex justify-center gap-3">
+                <button onclick="closeDeleteModal()" class="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200">Cancel</button>
+                <button id="confirm-delete-btn" class="px-4 py-2 text-sm font-bold text-white bg-red-500 rounded-lg hover:bg-red-600 shadow-lg shadow-red-200">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGIC -->
+    <script>
+        // --- State ---
+        let allPages = [];
+        let currentTags = [];
+        let isEditing = false;
+        let currentSlug = '';
+
+        // --- Init ---
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchPages();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Tab Switching
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.tab-btn').forEach(b => {
+                        b.classList.remove('border-anita-600', 'text-anita-600', 'active');
+                        b.classList.add('border-transparent', 'text-slate-500');
+                    });
+                    e.currentTarget.classList.remove('border-transparent', 'text-slate-500');
+                    e.currentTarget.classList.add('border-anita-600', 'text-anita-600', 'active');
+
+                    const tabName = e.currentTarget.dataset.tab;
+                    document.getElementById('tab-details').classList.toggle('hidden', tabName !== 'details');
+                    document.getElementById('tab-content').classList.toggle('hidden', tabName !== 'content');
+                });
+            });
+
+            // Content Type Toggle
+            document.getElementById('content-type').addEventListener('change', (e) => {
+                const type = e.target.value;
+                document.getElementById('markdown-group').classList.toggle('hidden', type !== 'markdown');
+                document.getElementById('html-group').classList.toggle('hidden', type !== 'html');
+            });
+
+            // Slug Generation
+            document.getElementById('page-title').addEventListener('input', (e) => {
+                if (!isEditing) {
+                    const slug = e.target.value.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+                    document.getElementById('page-slug').value = slug;
+                }
+            });
+
+            // Tag Input
+            document.getElementById('page-tags-input').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const val = e.target.value.trim();
+                    if (val && !currentTags.includes(val)) {
+                        currentTags.push(val);
+                        renderTags();
+                    }
+                    e.target.value = '';
+                }
+            });
+
+            // Thumbnail Upload Trigger
+            document.getElementById('upload-thumbnail-btn').addEventListener('click', () => {
+                document.getElementById('thumbnail-file-input').click();
+            });
+
+            // Thumbnail File Change
+            document.getElementById('thumbnail-file-input').addEventListener('change', async (e) => {
+                if(e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    const status = document.getElementById('upload-status');
+                    const inputField = document.getElementById('page-thumbnail');
+                    
+                    // UI Updates
+                    status.classList.remove('hidden', 'text-red-500', 'text-green-500');
+                    status.classList.add('text-anita-600');
+                    status.innerText = "Uploading...";
+                    
+                    // Prepare Data
+                    const formData = new FormData();
+                    // IMPORTANT: Your python route expects 'files' (plural), not 'file'
+                    formData.append('files', file); 
+
+                    try {
+                        const res = await fetch('/media/', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (!res.ok) throw new Error("Upload failed");
+
+                        const data = await res.json();
+                        
+                        // The router returns: { files: [ { saved_as: "..." } ] }
+                        if(data.files && data.files.length > 0) {
+                            const finalName = data.files[0].saved_as;
+                            
+                            // Set the input value
+                            inputField.value = `/media/${finalName}`;
+                            
+                            // Success UI
+                            status.classList.remove('text-anita-600');
+                            status.classList.add('text-green-500');
+                            status.innerText = "Done!";
+                            
+                            // (Optional) Register metadata silently so it has a nice title in Media Manager
+                            // We don't await this to keep UI snappy
+                            const metaPayload = {
+                                data: {
+                                    friendly_name: file.name.split('.')[0], // Simple name
+                                    description: "Uploaded via Page Editor",
+                                    saved_filename: finalName,
+                                    public_link: `/media/${finalName}`
+                                }
+                            };
+                            fetch('/forms/media-data/submit', {
+                                method: 'POST', 
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify(metaPayload)
+                            }).catch(err => console.log("Meta register skipped (form might not exist yet)"));
+
+                        } else {
+                            throw new Error("Server returned no file data");
+                        }
+                    } catch(err) {
+                        console.error(err);
+                        status.classList.add('text-red-500');
+                        status.innerText = "Error!";
+                    }
+
+                    // Cleanup UI after 3 seconds
+                    setTimeout(() => {
+                        if(status.innerText === 'Done!') status.classList.add('hidden');
+                    }, 3000);
+                }
+            });
+        }
+
+        // --- Render Logic ---
+        async function fetchPages() {
+            const container = document.getElementById('pages-container');
+            const loader = document.getElementById('pages-loader');
+            
+            try {
+                const res = await fetch('/admin/api/page/list/');
+                if(res.status === 401) window.location.href = '/auth/login';
+                if(!res.ok) throw new Error("Failed");
+                
+                allPages = await res.json();
+                loader.classList.add('hidden');
+                container.classList.remove('hidden');
+                renderList();
+            } catch(err) { console.error(err); }
+        }
+
+        function renderList() {
+            const container = document.getElementById('pages-container');
+            container.innerHTML = '';
+            
+allPages.forEach(page => {
+                const div = document.createElement('div');
+                div.className = 'bg-white p-4 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition flex items-center justify-between';
+                
+                // Determine styles based on type
+                const isMd = page.type === 'markdown';
+                const iconBg = isMd ? 'bg-purple-100 text-purple-600' : 'bg-pink-100 text-pink-600';
+                const iconClass = isMd ? 'fa-pen-nib' : 'fa-code';
+                const badgeText = isMd ? 'Markdown (Asta)' : 'HTML (Aina)';
+                const badgeStyle = isMd 
+                    ? 'bg-purple-50 text-purple-700 border-purple-200' 
+                    : 'bg-pink-50 text-pink-700 border-pink-200';
+
+                // 🏷️ Generate Tags HTML
+                const tagsHtml = (page.tags || []).map(t => 
+                    `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200">#${t}</span>`
+                ).join('');
+
+                div.innerHTML = `
+                    <div class="flex items-center gap-4 overflow-hidden">
+                        <!-- Type Icon -->
+                        <div class="w-10 h-10 rounded-lg ${iconBg} flex items-center justify-center flex-shrink-0">
+                            <i class="fas ${iconClass}"></i>
+                        </div>
+                        
+                        <!-- Text Info -->
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2">
+                                <h4 class="font-bold text-slate-800 leading-none truncate">${page.title}</h4>
+                                <span class="text-[10px] uppercase font-extrabold px-1.5 py-0.5 rounded border ${badgeStyle} flex-shrink-0">
+                                    ${badgeText}
+                                </span>
+                            </div>
+                            
+                            <!-- Slug & Tags Container -->
+                            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
+                                <p class="text-xs text-slate-400 font-mono">/${page.slug}</p>
+                                ${tagsHtml ? `<div class="flex flex-wrap gap-1">${tagsHtml}</div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex gap-2 ml-4 flex-shrink-0">
+                        <button onclick="openModal('edit', '${page.slug}')" class="w-8 h-8 rounded-full bg-slate-50 hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition flex items-center justify-center" title="Edit Settings"><i class="fas fa-cog text-xs"></i></button>
+                        <a href="/${isMd ? 'asta' : 'aina'}/?slug=${page.slug}" class="w-8 h-8 rounded-full bg-slate-50 hover:bg-anita-50 text-slate-400 hover:text-anita-600 transition flex items-center justify-center" title="Edit Content"><i class="fas fa-edit text-xs"></i></a>
+                        <button onclick="confirmDelete('${page.slug}')" class="w-8 h-8 rounded-full bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-600 transition flex items-center justify-center" title="Delete"><i class="fas fa-trash text-xs"></i></button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // --- Modal Logic ---
+
+        function openModal(mode, slug = null) {
+            const modal = document.getElementById('page-modal');
+            const title = document.getElementById('modal-title');
+            const slugInput = document.getElementById('page-slug');
+            
+            // Reset
+            document.getElementById('page-form').reset();
+            document.getElementById('custom-fields-container').innerHTML = '';
+            currentTags = [];
+            renderTags();
+
+            // Set Content Type Default
+            document.getElementById('content-type').dispatchEvent(new Event('change'));
+
+            if (mode === 'create') {
+                isEditing = false;
+                title.innerText = "Add New Page";
+                slugInput.disabled = false;
+                slugInput.classList.remove('bg-slate-100', 'text-slate-500');
+                
+                // Reset Links
+                document.getElementById('edit-with-asta').href = "#";
+                document.getElementById('edit-with-aina').href = "#";
+
+            } else {
+                isEditing = true;
+                currentSlug = slug;
+                title.innerText = "Edit Page";
+                slugInput.disabled = true;
+                slugInput.classList.add('bg-slate-100', 'text-slate-500');
+                
+                // Populate
+                const page = allPages.find(p => p.slug === slug);
+                if(page) {
+                    document.getElementById('page-title').value = page.title;
+                    document.getElementById('page-slug').value = page.slug;
+                    document.getElementById('page-description').value = page.custom?.description || '';
+                    document.getElementById('page-thumbnail').value = page.thumb || '';
+                    document.getElementById('content-type').value = page.type || 'markdown';
+                    
+                    // Trigger type change to show correct link
+                    document.getElementById('content-type').dispatchEvent(new Event('change'));
+                    
+                    // Update Editor Links
+                    document.getElementById('edit-with-asta').href = `/asta/?slug=${slug}`;
+                    document.getElementById('edit-with-aina').href = `/aina/?slug=${slug}`;
+
+                    // Tags
+                    currentTags = page.tags || [];
+                    renderTags();
+
+                    // Custom Fields
+                    if(page.custom) {
+                        Object.entries(page.custom).forEach(([k, v]) => {
+                            if(k !== 'description') addCustomField(k, v);
+                        });
+                    }
+                }
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('page-modal').classList.add('hidden');
+        }
+
+        // --- Tag Logic ---
+        function renderTags() {
+            const list = document.getElementById('tags-list');
+            list.innerHTML = '';
+            currentTags.forEach((tag, index) => {
+                const span = document.createElement('span');
+                span.className = 'tag-chip bg-slate-100 text-slate-700 px-2 py-1 rounded text-xs font-bold flex items-center gap-1 border border-slate-200';
+                span.innerHTML = `${tag} <button onclick="removeTag(${index})" class="hover:text-red-500"><i class="fas fa-times"></i></button>`;
+                list.appendChild(span);
+            });
+        }
+
+        function removeTag(index) {
+            currentTags.splice(index, 1);
+            renderTags();
+        }
+
+        // --- Custom Field Logic ---
+        function addCustomField(key = '', value = '') {
+            const container = document.getElementById('custom-fields-container');
+            const div = document.createElement('div');
+            div.className = 'flex gap-2 items-center custom-field-row';
+            div.innerHTML = `
+                <input type="text" placeholder="Key" value="${key}" class="field-key w-1/3 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-anita-500 outline-none">
+                <input type="text" placeholder="Value" value="${value}" class="field-value flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-anita-500 outline-none">
+                <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-red-500 p-2"><i class="fas fa-trash"></i></button>
+            `;
+            container.appendChild(div);
+        }
+
+        // --- Save Logic ---
+        async function savePage() {
+            const title = document.getElementById('page-title').value;
+            const slug = document.getElementById('page-slug').value;
+            
+            if(!title || !slug) { alert('Title and Slug are required'); return; }
+
+            // Collect Custom Fields
+            const custom = {};
+            custom.description = document.getElementById('page-description').value;
+            
+            document.querySelectorAll('.custom-field-row').forEach(row => {
+                const k = row.querySelector('.field-key').value.trim();
+                const v = row.querySelector('.field-value').value.trim();
+                if(k) custom[k] = v;
+            });
+
+            // 🟢 FIX START: Preserve existing content
+            let preservedContent = "";
+            let preservedMarkdown = null;
+            let preservedHtml = null;
+
+            if (isEditing) {
+                // Find the original page object in our local array
+                const originalPage = allPages.find(p => p.slug === currentSlug);
+                if (originalPage) {
+                    preservedContent = originalPage.content || "";
+                    preservedMarkdown = originalPage.markdown || null;
+                    preservedHtml = originalPage.html || null;
+                }
+            }
+            // 🟢 FIX END
+
+            const payload = {
+                title: title,
+                slug: slug,
+                type: document.getElementById('content-type').value,
+                thumb: document.getElementById('page-thumbnail').value,
+                tags: currentTags,
+                custom: custom,
+                
+                // Inject the preserved content back into the payload
+                content: preservedContent,
+                markdown: preservedMarkdown,
+                html: preservedHtml
+            };
+
+            const method = isEditing ? 'PUT' : 'POST';
+            const url = isEditing ? `/admin/api/page/${currentSlug}/` : '/admin/api/page/';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if(res.ok) {
+                    // If we renamed the slug, we need to handle that logic, 
+                    // but for now simply closing and refreshing is safest.
+                    closeModal();
+                    fetchPages();
+                } else {
+                    const err = await res.json();
+                    alert('Error: ' + err.detail);
+                }
+            } catch(e) { 
+                console.error(e);
+                alert('Network Error'); 
+            }
+        }
+
+        // --- Delete Logic ---
+        let deleteTarget = '';
+        function confirmDelete(slug) {
+            deleteTarget = slug;
+            document.getElementById('del-slug-display').innerText = slug;
+            document.getElementById('delete-modal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.add('hidden');
+        }
+
+        document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+            try {
+                const res = await fetch(`/admin/api/page/${deleteTarget}/`, { method: 'DELETE' });
+                if(res.ok) {
+                    closeDeleteModal();
+                    fetchPages();
+                } else {
+                    alert('Failed to delete');
+                }
+            } catch(e) { alert('Network error'); }
+        });
+
+    </script>
+</body>
+</html>

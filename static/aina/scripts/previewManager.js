@@ -12,8 +12,6 @@ export async function initPreview(htmlCode, preview, slug) {
             }
     }
    
-    
-
     updatePreview(htmlCode, preview);
 }
 

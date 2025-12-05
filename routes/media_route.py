@@ -7,6 +7,7 @@ from src.auth import get_current_user
 from PIL import Image
 import io
 from typing import List
+
 router = APIRouter(prefix="/media", tags=["Media"])
 
 MEDIA_DIR = "data/media"
@@ -21,7 +22,16 @@ async def list_images():
         files = os.listdir(MEDIA_DIR)
         # Filter only image files
         image_extensions = (".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp")
-        images = [f for f in files if f.lower().endswith(image_extensions)]
+        
+        # Create a list of dictionaries containing both the ID (filename) and the Display URL
+        images = []
+        for f in files:
+            if f.lower().endswith(image_extensions):
+                images.append({
+                    "filename": f,              # Use this for DELETE requests
+                    "url": f"/media/{f}"        # Use this for Markdown/HTML display
+                })
+                
         return {"images": images}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -51,7 +61,7 @@ async def upload_media(
                 raise ValueError("No data read from file")
             
             image = Image.open(io.BytesIO(contents))
-            original_format = image.format  # JPG, PNG, etc.
+            original_format = image.format
             
             # Handle transparency
             if image.mode == 'RGBA':
@@ -64,30 +74,30 @@ async def upload_media(
             original_name = os.path.splitext(file.filename)[0]
             timestamp = int(time.time())
             
-            # Try different compression strategies
+            # Compression logic
             compressed_files = []
             
-            # Strategy 1: If JPEG, recompress as JPEG
+            # Strategy 1: JPEG
             if original_format in ['JPEG', 'JPG']:
                 jpg_path = os.path.join(MEDIA_DIR, f"{original_name}_{timestamp}_temp.jpg")
                 image.save(jpg_path, 'JPEG', quality=75, optimize=True)
                 compressed_files.append(('jpg', jpg_path, os.path.getsize(jpg_path)))
             
-            # Strategy 2: Always try WebP (lighter settings for JPEGs)
+            # Strategy 2: WebP
             webp_path = os.path.join(MEDIA_DIR, f"{original_name}_{timestamp}_temp.webp")
             webp_quality = 75 if original_format in ['JPEG', 'JPG'] else 85
             image.save(webp_path, 'WEBP', quality=webp_quality, method=4)
             compressed_files.append(('webp', webp_path, os.path.getsize(webp_path)))
             
-            # Pick the smallest one
+            # Pick best
             best_format, best_path, best_size = min(compressed_files, key=lambda x: x[2])
             
-            # Rename winner and delete loser
+            # Rename
             final_filename = f"{original_name}_{timestamp}.{best_format}"
             final_path = os.path.join(MEDIA_DIR, final_filename)
             os.rename(best_path, final_path)
             
-            # Clean up other temp files
+            # Cleanup
             for fmt, path, _ in compressed_files:
                 if path != best_path and os.path.exists(path):
                     os.remove(path)
@@ -95,6 +105,7 @@ async def upload_media(
             uploaded_files.append({
                 "original": file.filename,
                 "saved_as": final_filename,
+                "url": f"/media/{final_filename}",  # <--- ADDED THIS RELATIVE URL
                 "size": best_size,
                 "format_chosen": best_format
             })

@@ -10,7 +10,7 @@
 </head>
 <body>
 
-    <!-- ✨ Floating Characters (Soul kept intact) -->
+    <!-- ✨ Floating Characters (Soul Intact) -->
     <div class="floating-characters">
         <div class="character" style="top: 10%; left: 5%; font-size: 30px;">(>^.^)></div>
         <div class="character" style="top: 30%; left: 80%; font-size: 40px;">(◕‿◕✿)</div>
@@ -18,14 +18,14 @@
         <div class="character" style="top: 50%; left: 70%; font-size: 35px;">(づ｡◕‿‿◕｡)づ</div>
     </div>
 
-<!-- 🟢 Header / Top Bar -->
+    <!-- 🟢 Header -->
     <header class="main-header">
         <div class="brand">
             <h1>Aina's Coding Dojo</h1>
             <span class="badge">v2.0</span>
         </div>
 
-        <!-- 🔄 MOVED HERE: Tab Navigation (Center of Header) -->
+        <!-- Tabs Navigation -->
         <div class="tabs-nav">
             <button class="tab-btn active" data-tab="tab-generator">
                 <i class="fas fa-wand-magic-sparkles"></i> Generator
@@ -44,72 +44,110 @@
 
     <!-- 🟢 Main Application Wrapper -->
     <main class="app-wrapper">
-        <!-- Tabs Nav was removed from here -->
-
-        <!-- 📄 Tab Content Area -->
-        <div class="tabs-content">
-
-                
-<!-- ✨ TAB 1: Generator & API Tools -->
+        
+<!-- ✨ TAB 1: Generator -->
 <div id="tab-generator" class="tab-pane active">
+    
+    <!-- Flex Wrapper -->
     <div class="generator-layout">
         
-        <!-- Left Col: Prompt Engineering -->
-        <div class="card prompt-card">
-            <div class="card-header">
-                <h3><i class="fas fa-brain"></i> Prompt Engineering</h3>
-                <p>Describe the dream website, onii-chan~</p>
+        <!-- 📂 LEFT: Media Drawer -->
+        <div id="media-picker-drawer" class="media-sidebar hidden">
+            <div class="sidebar-header">
+                <h4><i class="fas fa-photo-video"></i> Media Library</h4>
+                <button id="btn-close-media" class="icon-btn close-sidebar-btn">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
             </div>
-            <div class="card-body">
+            <div class="sidebar-content">
+                <p class="sidebar-hint">Select images for context.</p>
+                <div id="media-grid" class="media-grid-layout">
+                    <div class="loading-spinner">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 👉 CENTER: Controls -->
+        <div class="generator-container">
+            
+            <!-- Context Panel -->
+            <div class="panel-card">
+                <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3><i class="fas fa-brain"></i> AI Context Control</h3>
+                    
+                    <!-- Toggle for Right Sidebar (Terminal Icon) -->
+                    <button id="btn-toggle-debug" class="btn secondary-btn" style="padding: 4px 10px; font-size: 0.8rem;">
+                        <i class="fas fa-terminal"></i> View Prompt
+                    </button>
+                </div>
+                
+                <div class="context-control-panel">
+                    <div class="panel-section">
+                        <label><i class="fas fa-network-wired"></i> API Routes</label>
+                        <div class="custom-select-wrapper">
+                            <select id="route-multi-select" class="modern-select">
+                                <option value="" disabled selected>+ Add Route Context</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="panel-section">
+                        <label><i class="fas fa-images"></i> Visual Assets</label>
+                        <!-- THE MEDIA BUTTON IS HERE -->
+                        <button id="btn-open-media-picker" class="btn secondary-btn full-width">
+                            <i class="fas fa-images"></i> Open Media Library
+                        </button>
+                    </div>
+                </div>
+
+                <div id="active-context-container" class="context-chips-area">
+                    <span class="placeholder-text"><i class="fas fa-info-circle"></i> No context selected.</span>
+                </div>
+            </div>
+
+            <!-- Prompt Area -->
+            <div class="panel-card prompt-card">
+                <div class="panel-header">
+                    <h3><i class="fas fa-pen-nib"></i> Design Prompt</h3>
+                </div>
                 <form action="#" method="post" id="generator-form">
-                    <textarea name="content" id="content" 
-                        placeholder="I want a kawaii landing page with pink buttons and cat ears..." 
-                        spellcheck="false"></textarea>
-                    <div class="form-actions">
-                        <button type="submit" class="btn large-btn glow">
-                            <i class="fas fa-bolt"></i> Generate Website
+                    <div class="input-group">
+                        <textarea name="content" id="content" 
+                            class="modern-textarea"
+                            rows="3"
+                            placeholder="Describe the website..." 
+                            spellcheck="false"></textarea>
+                        <button type="submit" class="btn primary-btn glow" id="generate-btn">
+                            <i class="fas fa-magic"></i> <br> Generate
                         </button>
                     </div>
                 </form>
             </div>
-        </div>
+        </div> 
 
-        <!-- Right Col: API Helper (Route Inspector restored!) -->
-        <div class="card api-card">
-            <div class="card-header">
-                <h3><i class="fas fa-route"></i> API Helper</h3>
-                <p>Route Inspector & Schema Loader</p>
+        <!-- 🧐 RIGHT: Prompt Inspector -->
+        <!-- Added 'hidden' class by default so it starts closed -->
+        <div id="prompt-inspector-drawer" class="prompt-sidebar hidden">
+            <div class="sidebar-header">
+                <!-- Close Button -->
+                <button id="btn-close-debug" class="icon-btn" style="margin-right: 10px;">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <h4>Live Prompt View</h4>
+                <div style="flex:1"></div>
+                <button id="btn-copy-prompt" class="icon-btn" title="Copy to Clipboard">
+                    <i class="fas fa-copy"></i>
+                </button>
             </div>
-            <div class="card-body">
-                
-                <div class="api-controls">
-                    <!-- 1. Select Route Type (Restored) -->
-                    <div class="control-group">
-                        <label for="route-type-select">1. Select Route Type:</label>
-                        <select id="route-type-select">
-                            <!-- Populated by your JS -->
-                            <option value="">-- Loading types... --</option>
-                        </select>
-                    </div>
-
-                    <!-- 2. Select Item (Restored) -->
-                    <div class="control-group">
-                        <label for="route-item-select">2. Select Item:</label>
-                        <select id="route-item-select" disabled>
-                            <!-- Populated by your JS -->
-                            <option value="">-- Select a type first --</option>
-                        </select>
-                    </div>
-
-                    <!-- Load Button (Restored ID) -->
-                    <button id="load-route-btn" class="btn full-width" disabled>
-                        <i class="fas fa-download"></i> Load Info
-                    </button>
-                </div>
-
-                <div class="notes-wrapper">
-                    <label for="notes-textarea">Helper Notes (Context):</label>
-                    <textarea id="notes-textarea" placeholder="Route schema and info will appear here..."></textarea>
+            
+            <!-- This content area will be scrollable -->
+            <div class="sidebar-content code-view">
+                <div class="prompt-debug-wrapper">
+                    <div class="debug-label">System Context</div>
+                    <pre id="debug-context-view" class="debug-pre">...</pre>
+                    
+                    <div class="debug-label">User Request</div>
+                    <pre id="debug-user-view" class="debug-pre">...</pre>
                 </div>
             </div>
         </div>
@@ -119,94 +157,49 @@
 
   
 
-            <!-- ✨ TAB 2: HTML Editor & Preview -->
-<!-- ✨ TAB 2: HTML Editor & Preview -->
-<div id="tab-editor" class="tab-pane">
-    <div class="panes-container" id="panes-container">
-        
-        <!-- 📝 Left: Editor -->
-        <div class="editor-pane" id="editor-pane" style="width: 50%;">
-            <div class="pane-header">
-                <div class="header-left">
-                    <i class="fas fa-file-code"></i> index.html
-                </div>
-                <div class="header-right">
-                    <!-- ID added, onclick removed -->
-                    <button class="icon-btn" id="btn-max-editor" title="Maximize Editor">
-                        <i class="fas fa-expand"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="pane-content">
-                <textarea id="html-code" placeholder="<!-- Generated code appears here -->"></textarea>
-            </div>
-        </div>
+            <!-- ✨ TAB 2: HTML Editor & Preview (UNCHANGED LOGIC) -->
+            <div id="tab-editor" class="tab-pane">
+                <div class="panes-container" id="panes-container">
+                    <div class="editor-pane" id="editor-pane" style="width: 50%;">
+                        <div class="pane-header">
+                            <div class="header-left"><i class="fas fa-file-code"></i> index.html</div>
+                            <div class="header-right">
+                                <button class="icon-btn" id="btn-max-editor" title="Maximize Editor"><i class="fas fa-expand"></i></button>
+                            </div>
+                        </div>
+                        <div class="pane-content">
+                            <textarea id="html-code" placeholder="<!-- Generated code appears here -->"></textarea>
+                        </div>
+                    </div>
 
-        <!-- ↔️ The Draggable Gutter -->
-        <div class="gutter" id="resizer-gutter">
-            <i class="fas fa-grip-lines-vertical"></i>
-        </div>
+                    <div class="gutter" id="resizer-gutter"><i class="fas fa-grip-lines-vertical"></i></div>
 
-        <!-- 👁️ Right: Preview -->
-        <div class="preview-pane" id="preview-pane" style="width: 50%;">
-            <div class="pane-header">
-                <div class="header-left">
-                    <i class="fas fa-globe"></i> Live Preview
-                </div>
-                <div class="header-right">
-                    <!-- ID added, onclick removed -->
-                    <button class="icon-btn" id="btn-max-preview" title="Maximize Preview">
-                        <i class="fas fa-expand"></i>
-                    </button>
+                    <div class="preview-pane" id="preview-pane" style="width: 50%;">
+                        <div class="pane-header">
+                            <div class="header-left"><i class="fas fa-globe"></i> Live Preview</div>
+                            <div class="header-right">
+                                <button class="icon-btn" id="btn-max-preview" title="Maximize Preview"><i class="fas fa-expand"></i></button>
+                            </div>
+                        </div>
+                        <div class="pane-content">
+                            <div class="iframe-wrapper"><iframe id="preview"></iframe></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="pane-content">
-                <!-- Wrapper crucial for resize to work over iframe -->
-                <div class="iframe-wrapper">
-                    <iframe id="preview"></iframe>
-                </div>
-            </div>
-        </div>
 
-    </div>
-</div>
         </div>
     </main>
 
-    <!-- 💌 Footer -->
+    <!-- Footer -->
     <footer class="footer">
         <p>Made with ♥ by Aina-chan</p>
     </footer>
-
-    <!-- Hidden Logic Containers -->
+    <!-- Hidden Logic Containers (Keep these!) -->
     <div id="slug-container" style="display: none;" data-slug=""></div>
-    
-    <!-- Dummy elements to prevent legacy script errors if sidebar logic isn't fully cleaned yet -->
     <div id="notes-sidebar" style="display:none;"></div> 
     <button id="sidebar-toggle" style="display:none;"></button>
 
-    <!-- Scripts -->
     <script type="module" src="/static/aina/scripts/main.js"></script>
-    
-    <!-- Simple Tab Logic -->
-    <!-- <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const tabs = document.querySelectorAll('.tab-btn');
-            const panes = document.querySelectorAll('.tab-pane');
-
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    // Remove active class from all
-                    tabs.forEach(t => t.classList.remove('active'));
-                    panes.forEach(p => p.classList.remove('active'));
-
-                    // Add active class to clicked
-                    tab.classList.add('active');
-                    const targetId = tab.getAttribute('data-tab');
-                    document.getElementById(targetId).classList.add('active');
-                });
-            });
-        });
-    </script> -->
 </body>
 </html>

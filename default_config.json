@@ -7,26 +7,15 @@
   "theme": "default",
   "routes": [
     {
-      "name": "media_list",
-      "schema": {
-        "method": "GET",
-        "path": "/media",
-        "returns": "List of images in media directory"
-      },
-      "type": "media",
-      "description": "List all uploaded media files",
-      "usage_note": "Used internally by CMS and file pickers."
-    },
-    {
       "name": "media_get_file",
       "schema": {
         "method": "GET",
         "path": "/media/{filename}",
         "params": { "filename": "string" },
-        "returns": "Image file"
+        "returns": "Binary Image File (Blob)"
       },
       "type": "media",
-      "description": "Retrieve an uploaded media file"
+      "description": "Retrieve an uploaded media file directly."
     },
     {
       "name": "media_upload",
@@ -36,10 +25,15 @@
         "body": {
           "files": "List[UploadFile]"
         },
-        "auth": true
+        "auth": true,
+        "returns": {
+          "status": "string",
+          "total": "int",
+          "files": "List[{ 'original': string, 'saved_as': string, 'url': string, 'size': int, 'format_chosen': string }]"
+        }
       },
       "type": "media",
-      "description": "Upload images with automatic compression & conversion"
+      "description": "Upload images. Returns a JSON list. Use the 'url' field (e.g., /media/file.webp) to display the image to the user. Use 'saved_as' if you need to delete it later."
     },
     {
       "name": "media_delete",
@@ -47,10 +41,27 @@
         "method": "DELETE",
         "path": "/media/{filename}",
         "params": { "filename": "string" },
-        "auth": true
+        "auth": true,
+        "returns": {
+          "status": "string",
+          "filename": "string"
+        }
       },
       "type": "media",
-      "description": "Delete an uploaded media file"
+      "description": "Delete an uploaded media file. Requires the clean filename (without /media/ prefix)."
+    },
+    {
+      "name": "media_list",
+      "schema": {
+        "method": "GET",
+        "path": "/media",
+        "params": {},
+        "returns": {
+          "images": "List[{ 'filename': string, 'url': string }]"
+        }
+      },
+      "type": "media",
+      "description": "List all available images. Returns objects containing 'filename' (for deletion) and 'url' (relative path for display)."
     },
     {
       "name": "file_get",

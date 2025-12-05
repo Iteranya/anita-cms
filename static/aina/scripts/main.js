@@ -4,8 +4,7 @@ import { initAiGeneration } from './aiIntegration.js';
 import { setupFileHandlers } from './fileHandler.js';
 import { setupDeployment } from './deploymentService.js';
 import { setupEffects } from './effects.js';
-import { initFormGeneration } from './formIntegration.js'; // Legacy support
-import { initRouteHelper } from './routeHelper.js'; // New Route Helper
+import { initContextManager } from './contextManager.js';
 
 // --------------------------------------------------
 // 🚀 DOM LOADED HANDLER
@@ -87,6 +86,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         // 1. Initialize UI (Tabs, Resizer, Maximize)
         // We run this first so the layout is interactive immediately
+        setupDojoUI(); 
 
         // 2. Preview System
         await initPreview(htmlCode, preview, slug);
@@ -99,12 +99,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 6. Route Helper (The new API tool)
         // This looks for #route-type-select and #route-item-select
-        initRouteHelper();
+        initContextManager();
+
+        // 7. Initialize the AI
+        initAiGeneration(htmlCode,updatePreview,notesArea);
 
         // 8. Visual Effects
         setupEffects();
 
-        setupDojoUI(); 
+        
 
         console.log("✅ All systems initialized successfully!");
     } catch (err) {
