@@ -4,12 +4,12 @@ from pathlib import Path
 
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from data import db, forms_db
-from src.auth import Depends, get_current_user
+from src.auth import get_current_user
 
 # Load environment variables
 load_dotenv()
@@ -37,9 +37,7 @@ app = FastAPI(redirect_slashes=True)
 db.get_connection()
 forms_db.get_connection()
 BASE_DIR = Path(__file__).resolve().parent
-app.mount(
-    "/static", StaticFiles(directory=BASE_DIR / "static"), name="static-directory"
-)
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static-directory")
 
 # Set up CORS
 app.add_middleware(
