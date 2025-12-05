@@ -1,26 +1,41 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request, Response, Form
+import os
+from fastapi import APIRouter, HTTPException, status, Response, Form, Request
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from datetime import timedelta
+from pydantic import BaseModel
+from typing import Optional
+
+# Import the updated functions from your src.auth file
 from src.auth import (
     authenticate_user,
     create_access_token,
-    ACCESS_TOKEN_EXPIRE_MINUTES,
-    secrets_file_exists,
-    set_admin_password
+    create_or_update_user,
+    load_all_users,
+    ACCESS_TOKEN_EXPIRE_MINUTES
 )
-from pydantic import BaseModel
 
-router = APIRouter(prefix="/auth",tags=["Auth"])
+router = APIRouter(prefix="/auth", tags=["Auth"])
 
-class LoginForm(BaseModel):
-    username: str
-    password: str
-    remember_me: bool = False
+# --- HELPERS ---
+
+def is_system_initialized() -> bool:
+    """Checks if at least one user exists in the system."""
+    users = load_all_users()
+    return len(users) > 0
+
+def is_production() -> bool:
+    """Simple check to determine if we should enforce HTTPS only cookies."""
+    # check if 'MODE' env var is set to 'PROD' or similar
+    return os.getenv("APP_ENV", "dev").lower() in ["prod", "production"]
+
+# --- ROUTES ---
 
 @router.get("/login")
-async def serve_custom_page():
-    if not secrets_file_exists():
+async def serve_login_page():
+    # If no users exist, force them to setup
+    if not is_system_initialized():
         return RedirectResponse(url="/auth/setup", status_code=status.HTTP_302_FOUND)
+    
     return FileResponse("static/auth/login.html")
 
 @router.post("/login")
@@ -30,44 +45,59 @@ async def login_for_access_token(
     password: str = Form(...),
     remember_me: bool = Form(False),
 ):
-    if not secrets_file_exists():
+    # Security: Don't allow login if system isn't set up (prevents weird states)
+    if not is_system_initialized():
         return RedirectResponse(url="/auth/setup", status_code=status.HTTP_302_FOUND)
-    if not authenticate_user(username, password):
+
+    # 1. Authenticate (Returns full user dict or False)
+    user = authenticate_user(username, password)
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
         )
 
+    # 2. Define Expiry
     expires_in = timedelta(days=7) if remember_me else timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    
+    # 3. Create Token Payload (Includes Role & Display Name now!)
+    token_payload = {
+        "sub": user["username"],
+        "role": user["role"],
+        "display_name": user.get("display_name", user["username"]),
+        "pfp_url": user.get("pfp_url", "")
+    }
+
     access_token = create_access_token(
-        data={"sub": username}, expires_delta=expires_in
+        data=token_payload, 
+        expires_delta=expires_in
     )
 
+    # 4. Set Secure Cookie
+    # 'secure=True' requires HTTPS. We check environment to prevent localhost issues.
     response.set_cookie(
         key="access_token",
         value=access_token,
-        httponly=True,
-        secure=False, # Change In Production
-        samesite="lax",
-        max_age=expires_in.total_seconds(),
+        httponly=True,  # JavaScript cannot access this cookie (XSS protection)
+        secure=is_production(), 
+        samesite="lax", # CSRF protection
+        max_age=int(expires_in.total_seconds()),
     )
     
-    return {"status": "success"}
+    return {"status": "success", "role": user["role"]}
 
 @router.post("/logout")
 async def logout(response: Response):
     response.delete_cookie("access_token")
     return {"status": "success"}
 
-class SetupForm(BaseModel):
-    username: str
-    password: str
-    confirm_password: str
+# --- SETUP ROUTES ---
 
 @router.get("/setup", response_class=HTMLResponse)
-async def setup_page(request: Request):
-    if secrets_file_exists():
-        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+async def setup_page():
+    # Security: Block setup page if an admin already exists
+    if is_system_initialized():
+        return RedirectResponse(url="/auth/login", status_code=status.HTTP_302_FOUND)
     
     return FileResponse("static/auth/setup.html")
 
@@ -77,12 +107,14 @@ async def setup_admin_account(
     password: str = Form(...),
     confirm_password: str = Form(...)
 ):
-    if secrets_file_exists():
+    # Security: Double check prevents overwriting if multiple people hit endpoint at once
+    if is_system_initialized():
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Admin account already exists"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="System is already initialized. Please login."
         )
     
+    # Input Validation
     if password != confirm_password:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -95,16 +127,23 @@ async def setup_admin_account(
             detail="Password must be at least 8 characters"
         )
 
-    set_admin_password(password,username)
+    # Create the First User (Admin)
+    # We set role='admin' specifically here
+    create_or_update_user(
+        username=username, 
+        password=password, 
+        role="admin", 
+        display_name="System Admin",
+        pfp_url="" 
+    )
     
     return {
         "status": "success",
-        "message": "Admin account created successfully"
+        "message": "Admin account created successfully. You may now login."
     }
 
 @router.get("/check-setup")
 async def check_setup():
     return {
-        "initialized": secrets_file_exists()
+        "initialized": is_system_initialized()
     }
-

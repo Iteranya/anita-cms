@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anita Admin | Users & Roles</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Nunito', 'sans-serif'] },
+                    colors: {
+                        anita: {
+                            50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd', 300: '#7dd3fc',
+                            400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1',
+                        }
+                    },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        slideUp: { '0%': { transform: 'translateY(10px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.2s ease-out',
+                        'slide-up': 'slideUp 0.3s ease-out'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .tab-active { border-bottom: 2px solid #0284c7; color: #0284c7; font-weight: 700; }
+        .tab-inactive { border-bottom: 2px solid transparent; color: #64748b; }
+        .tab-inactive:hover { color: #334155; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans h-screen overflow-hidden flex">
+
+    <!-- 1. LEFT SIDEBAR -->
+    <aside class="w-64 bg-slate-900 text-white flex flex-col flex-shrink-0 transition-all duration-300 z-20">
+        <div class="h-16 flex items-center px-6 border-b border-slate-800 bg-slate-950">
+            <img src="/media/anita.jpg" class="h-8 w-8 rounded-full border border-anita-500 mr-3" alt="Logo">
+            <span class="font-bold text-lg tracking-wide">Anita CMS</span>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto py-4 space-y-1 px-3">
+            <a href="/admin/page/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors group">
+                <i class="fas fa-layer-group w-6 text-center text-lg group-hover:text-blue-400"></i>
+                <span class="ml-3 font-medium">Pages</span>
+            </a>
+            <a href="/admin/forms/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors group">
+                <i class="fas fa-inbox w-6 text-center text-lg group-hover:text-anita-400"></i>
+                <span class="ml-3 font-medium">Forms</span>
+            </a>
+            <a href="/admin/media/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors group">
+                <i class="fas fa-images w-6 text-center text-lg group-hover:text-purple-400"></i>
+                <span class="ml-3 font-medium">Images</span>
+            </a>
+            <a href="/admin/files/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
+                <i class="fas fa-folder-open w-6 text-center text-lg"></i>
+                <span class="ml-3 font-medium">Files</span>
+            </a>
+
+            <div class="pt-4 pb-2">
+                <p class="px-3 text-xs font-bold text-slate-500 uppercase tracking-wider">System</p>
+            </div>
+
+            <a href="/admin/config/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors group">
+                <i class="fas fa-cog w-6 text-center text-lg group-hover:text-gray-300"></i>
+                <span class="ml-3 font-medium">Config</span>
+            </a>
+            
+            <!-- ACTIVE: Users -->
+            <a href="/admin/users/" class="flex items-center px-3 py-2.5 bg-anita-600 text-white rounded-lg shadow-lg shadow-anita-900/20 transition-colors group">
+                <i class="fas fa-users-cog w-6 text-center text-lg"></i>
+                <span class="ml-3 font-semibold">Users</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- 2. MAIN CONTENT -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        
+        <!-- Header -->
+        <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-8 shadow-sm z-10">
+            <div>
+                <h1 class="text-xl font-bold text-slate-800">User Management</h1>
+                <p class="text-xs text-slate-500">Manage access, profiles, and security roles</p>
+            </div>
+            
+            <!-- Dynamic Action Button based on Tab -->
+            <button id="main-action-btn" onclick="openUserModal('create')" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg transition-all transform hover:-translate-y-0.5 font-bold text-sm flex items-center">
+                <i class="fas fa-user-plus mr-2"></i> New User
+            </button>
+        </header>
+
+        <!-- Tabs & Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            
+            <!-- Tab Navigation -->
+            <div class="px-8 pt-6 bg-slate-50 border-b border-slate-200">
+                <div class="flex gap-6">
+                    <button onclick="switchTab('users')" id="tab-users" class="tab-active pb-3 text-sm transition-colors">
+                        <i class="fas fa-users mr-1"></i> Users
+                    </button>
+                    <button onclick="switchTab('roles')" id="tab-roles" class="tab-inactive pb-3 text-sm transition-colors">
+                        <i class="fas fa-shield-alt mr-1"></i> Roles & Permissions
+                    </button>
+                </div>
+            </div>
+
+            <!-- Scrollable Area -->
+            <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                
+                <!-- LOADING STATE -->
+                <div id="loader" class="flex justify-center items-center h-40">
+                    <i class="fas fa-circle-notch fa-spin text-3xl text-anita-400"></i>
+                </div>
+
+                <!-- USERS VIEW -->
+                <div id="view-users" class="hidden animate-slide-up space-y-4">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                        <table class="min-w-full text-left text-sm">
+                            <thead class="bg-slate-50 border-b border-slate-100 text-slate-500 uppercase font-bold text-xs">
+                                <tr>
+                                    <th class="px-6 py-4">User</th>
+                                    <th class="px-6 py-4">Role</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-6 py-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-tbody" class="divide-y divide-slate-100">
+                                <!-- JS Injection -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ROLES VIEW -->
+                <div id="view-roles" class="hidden animate-slide-up">
+                    <div id="roles-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <!-- JS Injection -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- USER MODAL -->
+    <div id="user-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeModal('user-modal')"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-slide-up">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                <h3 id="u-modal-title" class="font-bold text-lg text-slate-800">New User</h3>
+                <button onclick="closeModal('user-modal')" class="text-slate-400 hover:text-red-500"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="user-form" onsubmit="submitUser(event)" class="p-6 space-y-4">
+                <input type="hidden" id="u-mode" value="create">
+                <input type="hidden" id="u-original-username">
+
+                <!-- Avatar & Name -->
+                <div class="flex gap-4">
+                    <div class="w-1/3">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Avatar URL</label>
+                        <input type="text" id="u-pfp" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-anita-500 outline-none" placeholder="/media/face.jpg">
+                    </div>
+                    <div class="w-2/3">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Display Name</label>
+                        <input type="text" id="u-display" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-anita-500 outline-none" placeholder="John Doe">
+                    </div>
+                </div>
+
+                <!-- Auth -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Username *</label>
+                        <input type="text" id="u-username" required class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-anita-500 outline-none bg-slate-50 font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Password</label>
+                        <input type="password" id="u-password" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-anita-500 outline-none" placeholder="Min 6 chars">
+                        <p id="pass-hint" class="text-[10px] text-slate-400 mt-1 hidden">Leave blank to keep current.</p>
+                    </div>
+                </div>
+
+                <!-- Role & Status -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Role *</label>
+                        <select id="u-role" required class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-anita-500 outline-none bg-white">
+                            <!-- Populated via JS -->
+                        </select>
+                    </div>
+                    <div class="flex items-end pb-2">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" id="u-disabled" class="sr-only peer">
+                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-500 relative"></div>
+                            <span class="ml-2 text-xs font-bold text-slate-600">Disable Account</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('user-modal')" class="px-4 py-2 rounded-lg text-slate-500 hover:bg-slate-100 text-sm font-bold">Cancel</button>
+                    <button type="submit" class="px-6 py-2 rounded-lg bg-anita-600 hover:bg-anita-700 text-white text-sm font-bold shadow-lg">Save User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ROLE MODAL -->
+    <div id="role-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeModal('role-modal')"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-slide-up">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="font-bold text-lg text-slate-800">Manage Role</h3>
+                <button onclick="closeModal('role-modal')" class="text-slate-400 hover:text-red-500"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="role-form" onsubmit="submitRole(event)" class="p-6 space-y-4">
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Role Name *</label>
+                    <input type="text" id="r-name" required class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-anita-500 outline-none font-bold text-anita-700">
+                    <p class="text-[10px] text-slate-400 mt-1">Unique identifier (e.g., 'editor', 'moderator')</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Permissions (Tags)</label>
+                    <div class="border border-slate-200 rounded-lg p-2 bg-slate-50 min-h-[50px] flex flex-wrap gap-2" onclick="document.getElementById('r-perm-input').focus()">
+                        <div id="r-tags-container" class="contents"></div>
+                        <input type="text" id="r-perm-input" class="bg-transparent text-sm outline-none flex-1 min-w-[100px]" placeholder="Add permission...">
+                    </div>
+                    <div class="mt-2 flex gap-2 text-[10px] font-bold text-slate-400">
+                        <span>Presets:</span>
+                        <button type="button" onclick="addPermTag('*')" class="hover:text-anita-600">All (*)</button>
+                        <button type="button" onclick="addPermTag('page:create')" class="hover:text-anita-600">page:create</button>
+                        <button type="button" onclick="addPermTag('users:view')" class="hover:text-anita-600">users:view</button>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('role-modal')" class="px-4 py-2 rounded-lg text-slate-500 hover:bg-slate-100 text-sm font-bold">Cancel</button>
+                    <button type="submit" class="px-6 py-2 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold shadow-lg">Save Role</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- LOGIC -->
+    <script>
+        // --- State ---
+        let currentTab = 'users'; // 'users' or 'roles'
+        let usersData = [];
+        let rolesData = {}; // Object { role: [perms] }
+        let currentRoleTags = [];
+
+        // --- Init ---
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchData();
+            
+            // Permission Input Logic
+            const permInput = document.getElementById('r-perm-input');
+            permInput.addEventListener('keydown', (e) => {
+                if(e.key === 'Enter') {
+                    e.preventDefault();
+                    addPermTag(permInput.value);
+                    permInput.value = '';
+                }
+            });
+        });
+
+        // --- Navigation ---
+        function switchTab(tab) {
+            currentTab = tab;
+            const btnMain = document.getElementById('main-action-btn');
+            
+            // Tab UI
+            if(tab === 'users') {
+                document.getElementById('tab-users').className = 'tab-active pb-3 text-sm transition-colors';
+                document.getElementById('tab-roles').className = 'tab-inactive pb-3 text-sm transition-colors';
+                document.getElementById('view-users').classList.remove('hidden');
+                document.getElementById('view-roles').classList.add('hidden');
+                
+                // Button
+                btnMain.innerHTML = `<i class="fas fa-user-plus mr-2"></i> New User`;
+                btnMain.onclick = () => openUserModal('create');
+            } else {
+                document.getElementById('tab-users').className = 'tab-inactive pb-3 text-sm transition-colors';
+                document.getElementById('tab-roles').className = 'tab-active pb-3 text-sm transition-colors';
+                document.getElementById('view-users').classList.add('hidden');
+                document.getElementById('view-roles').classList.remove('hidden');
+                
+                // Button
+                btnMain.innerHTML = `<i class="fas fa-shield-alt mr-2"></i> New Role`;
+                btnMain.onclick = () => openRoleModal('create');
+            }
+        }
+
+        // --- Fetch Data ---
+        async function fetchData() {
+            const loader = document.getElementById('loader');
+            loader.classList.remove('hidden');
+            document.getElementById('view-users').classList.add('hidden');
+            document.getElementById('view-roles').classList.add('hidden');
+
+            try {
+                // 1. Fetch Roles (Dictionary)
+                const resRoles = await fetch('/users/roles/');
+                if(resRoles.status === 401) window.location.href = '/auth/login';
+                rolesData = await resRoles.json();
+
+                // 2. Fetch Users (List)
+                const resUsers = await fetch('/users/');
+                usersData = await resUsers.json();
+
+                renderUsers();
+                renderRoles();
+                
+                loader.classList.add('hidden');
+                if(currentTab === 'users') document.getElementById('view-users').classList.remove('hidden');
+                else document.getElementById('view-roles').classList.remove('hidden');
+
+            } catch (err) {
+                console.error(err);
+                alert("Failed to load data. See console.");
+            }
+        }
+
+        // --- Render Users ---
+        function renderUsers() {
+            const tbody = document.getElementById('users-tbody');
+            tbody.innerHTML = '';
+            
+            usersData.forEach(u => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition group';
+                
+                // Avatar fallback
+                const avatar = u.pfp_url 
+                    ? `<img src="${u.pfp_url}" class="h-10 w-10 rounded-full object-cover border border-slate-200">`
+                    : `<div class="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-lg">${u.username[0].toUpperCase()}</div>`;
+
+                // Status Badge
+                const statusHtml = u.disabled 
+                    ? `<span class="bg-red-100 text-red-600 px-2 py-1 rounded text-xs font-bold uppercase">Disabled</span>` 
+                    : `<span class="bg-green-100 text-green-600 px-2 py-1 rounded text-xs font-bold uppercase">Active</span>`;
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4">
+                        <div class="flex items-center">
+                            ${avatar}
+                            <div class="ml-4">
+                                <div class="font-bold text-slate-800">${u.display_name || u.username}</div>
+                                <div class="text-xs text-slate-400 font-mono">@${u.username}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            ${u.role}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">${statusHtml}</td>
+                    <td class="px-6 py-4 text-right opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="openUserModal('edit', '${u.username}')" class="text-slate-400 hover:text-anita-600 mr-3"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteUser('${u.username}')" class="text-slate-400 hover:text-red-600"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- Render Roles ---
+        function renderRoles() {
+            const grid = document.getElementById('roles-grid');
+            grid.innerHTML = '';
+
+            Object.entries(rolesData).forEach(([name, perms]) => {
+                const div = document.createElement('div');
+                div.className = 'bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col relative group hover:shadow-md transition';
+                
+                // Color logic
+                let accent = 'bg-slate-100 text-slate-600';
+                if(name === 'admin') accent = 'bg-purple-100 text-purple-700';
+                if(name === 'user') accent = 'bg-blue-100 text-blue-700';
+
+                // Tags HTML
+                const tagsHtml = perms.map(p => `<span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded border border-slate-200 font-mono">${p}</span>`).join('');
+
+                div.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="h-10 w-10 rounded-lg flex items-center justify-center ${accent} font-bold text-xl uppercase">
+                                ${name[0]}
+                            </div>
+                            <h3 class="font-bold text-lg capitalize text-slate-800">${name}</h3>
+                        </div>
+                        <div class="opacity-0 group-hover:opacity-100 transition">
+                            <button onclick="openRoleModal('edit', '${name}')" class="text-slate-400 hover:text-anita-600 mr-2"><i class="fas fa-cog"></i></button>
+                            ${name !== 'admin' ? `<button onclick="deleteRole('${name}')" class="text-slate-400 hover:text-red-600"><i class="fas fa-trash"></i></button>` : ''}
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-xs font-bold text-slate-400 uppercase mb-2">Permissions</p>
+                        <div class="flex flex-wrap gap-1.5">
+                            ${tagsHtml || '<span class="text-xs text-slate-300 italic">No specific permissions</span>'}
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        // ================= USER OPERATIONS =================
+
+        function openUserModal(mode, username = null) {
+            document.getElementById('user-modal').classList.remove('hidden');
+            const select = document.getElementById('u-role');
+            
+            // Populate roles select
+            select.innerHTML = '';
+            Object.keys(rolesData).forEach(r => {
+                const opt = document.createElement('option');
+                opt.value = r; opt.innerText = r;
+                select.appendChild(opt);
+            });
+
+            if (mode === 'create') {
+                document.getElementById('u-modal-title').innerText = 'New User';
+                document.getElementById('u-mode').value = 'create';
+                document.getElementById('user-form').reset();
+                document.getElementById('u-username').disabled = false;
+                document.getElementById('u-password').required = true;
+                document.getElementById('pass-hint').classList.add('hidden');
+            } else {
+                document.getElementById('u-modal-title').innerText = 'Edit User';
+                document.getElementById('u-mode').value = 'edit';
+                document.getElementById('u-original-username').value = username;
+                document.getElementById('u-password').required = false;
+                document.getElementById('pass-hint').classList.remove('hidden');
+                
+                const user = usersData.find(u => u.username === username);
+                if(user) {
+                    document.getElementById('u-username').value = user.username;
+                    document.getElementById('u-username').disabled = true; // Can't change username
+                    document.getElementById('u-display').value = user.display_name || '';
+                    document.getElementById('u-pfp').value = user.pfp_url || '';
+                    document.getElementById('u-role').value = user.role;
+                    document.getElementById('u-disabled').checked = !!user.disabled;
+                }
+            }
+        }
+
+        async function submitUser(e) {
+            e.preventDefault();
+            const mode = document.getElementById('u-mode').value;
+            const payload = {
+                role: document.getElementById('u-role').value,
+                display_name: document.getElementById('u-display').value,
+                pfp_url: document.getElementById('u-pfp').value,
+                disabled: document.getElementById('u-disabled').checked
+            };
+            
+            const pass = document.getElementById('u-password').value;
+            if(pass) payload.password = pass;
+
+            let url, method;
+
+            if (mode === 'create') {
+                url = '/users/';
+                method = 'POST';
+                payload.username = document.getElementById('u-username').value;
+                if(!payload.password) { alert("Password required for new users"); return; }
+            } else {
+                const target = document.getElementById('u-original-username').value;
+                url = `/users/${target}`;
+                method = 'PUT';
+            }
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+
+                if(res.ok) {
+                    closeModal('user-modal');
+                    fetchData();
+                } else {
+                    const err = await res.json();
+                    alert(err.detail || "Error saving user");
+                }
+            } catch(e) { alert("Network Error"); }
+        }
+
+        async function deleteUser(username) {
+            if(!confirm(`Delete user ${username}? This cannot be undone.`)) return;
+            try {
+                const res = await fetch(`/users/${username}`, { method: 'DELETE' });
+                if(res.ok) fetchData();
+                else {
+                    const d = await res.json();
+                    alert(d.detail);
+                }
+            } catch(e) { alert("Network Error"); }
+        }
+
+        // ================= ROLE OPERATIONS =================
+
+        function openRoleModal(mode, roleName = null) {
+            document.getElementById('role-modal').classList.remove('hidden');
+            currentRoleTags = [];
+            
+            if(mode === 'create') {
+                document.getElementById('r-name').value = '';
+                document.getElementById('r-name').disabled = false;
+            } else {
+                document.getElementById('r-name').value = roleName;
+                document.getElementById('r-name').disabled = true; // Key shouldn't change
+                if(rolesData[roleName]) currentRoleTags = [...rolesData[roleName]];
+            }
+            renderRoleTags();
+        }
+
+        function addPermTag(val) {
+            const v = val.trim();
+            if(v && !currentRoleTags.includes(v)) {
+                currentRoleTags.push(v);
+                renderRoleTags();
+            }
+        }
+
+        function renderRoleTags() {
+            const c = document.getElementById('r-tags-container');
+            c.innerHTML = '';
+            currentRoleTags.forEach((t, i) => {
+                const s = document.createElement('span');
+                s.className = 'bg-white border border-slate-200 text-slate-700 px-2 py-1 rounded text-xs font-bold flex items-center gap-1 shadow-sm';
+                s.innerHTML = `${t} <button type="button" onclick="currentRoleTags.splice(${i},1); renderRoleTags()" class="hover:text-red-500"><i class="fas fa-times"></i></button>`;
+                c.appendChild(s);
+            });
+        }
+
+        async function submitRole(e) {
+            e.preventDefault();
+            const name = document.getElementById('r-name').value;
+            const perms = currentRoleTags;
+
+            try {
+                const res = await fetch('/users/roles/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ name: name, permissions: perms })
+                });
+
+                if(res.ok) {
+                    closeModal('role-modal');
+                    fetchData();
+                } else {
+                    alert("Error saving role");
+                }
+            } catch(e) { alert("Network Error"); }
+        }
+
+        async function deleteRole(name) {
+            if(!confirm(`Delete role '${name}'? Users with this role might lose access.`)) return;
+            try {
+                const res = await fetch(`/users/roles/${name}`, { method: 'DELETE' });
+                if(res.ok) fetchData();
+                else alert("Cannot delete role");
+            } catch(e) { alert("Network Error"); }
+        }
+
+        // --- Utils ---
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

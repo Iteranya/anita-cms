@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Import routers
-from routes import admin_route, asta_route, media_route, aina_route, public_route, auth_route, mail_route, forms_route, file_route
+from routes import admin_route, asta_route, media_route, aina_route, public_route, auth_route, mail_route, forms_route, file_route,roles_route
 
 # Check if JWT_SECRET exists
 if not os.getenv("JWT_SECRET"):
@@ -45,6 +45,7 @@ app.include_router(auth_route.router)
 app.include_router(mail_route.router)
 app.include_router(forms_route.router)
 app.include_router(file_route.router)
+app.include_router(roles_route.router)
 # Protected Routers
 app.include_router(
     admin_route.router,
