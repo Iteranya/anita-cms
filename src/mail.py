@@ -1,9 +1,12 @@
 # email_utils.py
 import resend
+
 from src.config import load_or_create_mail_config
 
 
-def send_contact_email(name: str, company: str, email: str, phone: str, service: str, message: str):
+def send_contact_email(
+    name: str, company: str, email: str, phone: str, service: str, message: str
+):
     mail_config = load_or_create_mail_config()
     resend.api_key = mail_config.api_key
     html_content = f"""
@@ -18,11 +21,13 @@ def send_contact_email(name: str, company: str, email: str, phone: str, service:
     <p><strong>Pesan:</strong><br>{message}</p>
     """
 
-    response = resend.Emails.send({
-        "from": mail_config.server_email,  # Replace with your verified domain email
-        "to": [mail_config.target_email],
-        "subject": f"[Kontak] {name} - {company}",
-        "html": html_content
-    })
+    response = resend.Emails.send(
+        {
+            "from": mail_config.server_email,  # Replace with your verified domain email
+            "to": [mail_config.target_email],
+            "subject": f"[Kontak] {name} - {company}",
+            "html": html_content,
+        }
+    )
 
     return response

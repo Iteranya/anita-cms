@@ -1,12 +1,13 @@
+import json
 import os
 from datetime import datetime, timedelta
-from fastapi import Depends, HTTPException, status, Request
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from pathlib import Path
+
+from dotenv import load_dotenv  # Add this import
+from fastapi import HTTPException, Request, status
+from fastapi.security import HTTPBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-import json
-from pathlib import Path
-from dotenv import load_dotenv  # Add this import
 
 # Load environment variables from .env file
 load_dotenv()  # Add this line to load variables from .env
@@ -28,6 +29,7 @@ class AdminUser(BaseModel):
     password: str  # This will be hashed before storage
     disabled: bool = False
 
+
 # Load user data
 def get_user_data():
     try:
@@ -36,12 +38,14 @@ def get_user_data():
     except (FileNotFoundError, json.JSONDecodeError, KeyError):
         raise RuntimeError("Invalid or missing secret.json file")
 
+
 def verify_password(plain_password: str, hashed_password: str):
     # print(f"Plain: {plain_password}\nHashed: {hashed_password}")
     return pwd_context.verify(plain_password, hashed_password)
 
+
 def authenticate_user(username: str, password: str):
-    print(f"Username: {username}\nPassword: {password}" )
+    print(f"Username: {username}\nPassword: {password}")
     user_data = get_user_data()
     if username != user_data["username"]:
         return False
@@ -49,8 +53,9 @@ def authenticate_user(username: str, password: str):
         return False
     return True
 
+
 def create_access_token(data: dict, expires_delta: timedelta = None):
-    SECRET_KEY = os.getenv("JWT_SECRET") 
+    SECRET_KEY = os.getenv("JWT_SECRET")
     if not SECRET_KEY:
         raise ValueError("SECRET_KEY environment variable is not set")
     to_encode = data.copy()
@@ -62,8 +67,9 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+
 async def get_current_user(request: Request):
-    SECRET_KEY = os.getenv("JWT_SECRET") 
+    SECRET_KEY = os.getenv("JWT_SECRET")
     if not SECRET_KEY:
         raise ValueError("SECRET_KEY environment variable is not set")
     token = request.cookies.get("access_token")
@@ -73,7 +79,7 @@ async def get_current_user(request: Request):
             detail="Not authenticated",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
@@ -84,54 +90,61 @@ async def get_current_user(request: Request):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+
 async def optional_auth(request: Request):
-    SECRET_KEY = os.getenv("JWT_SECRET") 
+    SECRET_KEY = os.getenv("JWT_SECRET")
     if not SECRET_KEY:
         raise ValueError("SECRET_KEY environment variable is not set")
     token = request.cookies.get("access_token")
     if not token:
         return None
-    
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
     except JWTError:
         return None
 
+
 def get_secrets_path() -> Path:
     return Path(SECRETS_FILE)
 
+
 def secrets_file_exists() -> bool:
     return get_secrets_path().exists()
+
 
 def create_default_secrets():
     secrets = {
         "admin": {
             "username": "admin",
             "hashed_password": "",  # Will be set during setup
-            "disabled": False
+            "disabled": False,
         }
     }
     save_secrets(secrets)
 
+
 def save_secrets(secrets: dict):
-    with open(SECRETS_FILE, 'w') as f:
+    with open(SECRETS_FILE, "w") as f:
         json.dump(secrets, f, indent=2)
+
 
 def get_admin_user() -> AdminUser:
     if not secrets_file_exists():
         raise HTTPException(
             status_code=400,
-            detail="System not initialized. Please create admin account."
+            detail="System not initialized. Please create admin account.",
         )
-    
+
     with open(SECRETS_FILE) as f:
         data = json.load(f)
         return AdminUser(**data["admin"])
 
-def set_admin_password(password: str, username = "Admin"):
+
+def set_admin_password(password: str, username="Admin"):
     hashed_password = pwd_context.hash(password)
-    
+
     if secrets_file_exists():
         with open(SECRETS_FILE) as f:
             secrets = json.load(f)
@@ -140,9 +153,9 @@ def set_admin_password(password: str, username = "Admin"):
             "admin": {
                 "username": username,
                 "hashed_password": hashed_password,
-                "disabled": False
+                "disabled": False,
             }
         }
-    
+
     secrets["admin"]["hashed_password"] = hashed_password
     save_secrets(secrets)

@@ -1,15 +1,17 @@
 from __future__ import annotations
-import asyncio
-import os
+
 import json
+import os
 import shutil
-from dataclasses import dataclass, asdict
-from typing import Dict, Any, Optional, List
+from dataclasses import asdict, dataclass
+from typing import List
+
 from data.models import RouteData
 
 # -----------------------
 # Data Models
 # -----------------------
+
 
 @dataclass
 class DefaultConfig:
@@ -19,7 +21,7 @@ class DefaultConfig:
     temperature: float = 0.5
     ai_key: str = ""
     theme: str = "default"
-    routes: List[RouteData] = None  
+    routes: List[RouteData] = None
 
     def __post_init__(self):
         if self.routes is None:
@@ -48,9 +50,10 @@ MAIL_CONFIG_PATH = "mail_config.json"
 # Load Functions
 # -----------------------
 
+
 def load_or_create_config(path: str = CONFIG_PATH) -> DefaultConfig:
     if os.path.exists(path):
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             data = json.load(f)
 
         # Deserialize routes into RouteData objects
@@ -67,10 +70,10 @@ def load_or_create_config(path: str = CONFIG_PATH) -> DefaultConfig:
     if os.path.exists(DEFAULT_CONFIG_PATH):
         print(f"Config not found. Copying from {DEFAULT_CONFIG_PATH} to {path}.")
         shutil.copy2(DEFAULT_CONFIG_PATH, path)
-        
+
         # Now load it (recursive call, but will only happen once)
         return load_or_create_config(path)
-    
+
     # Last resort: create from scratch
     default_config = DefaultConfig()
     save_config(default_config, path)
@@ -80,7 +83,7 @@ def load_or_create_config(path: str = CONFIG_PATH) -> DefaultConfig:
 
 def load_or_create_mail_config(path: str = MAIL_CONFIG_PATH) -> MailConfig:
     if os.path.exists(path):
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             data = json.load(f)
             return MailConfig(**data)
 
@@ -94,9 +97,10 @@ def load_or_create_mail_config(path: str = MAIL_CONFIG_PATH) -> MailConfig:
 # Getter Helpers
 # -----------------------
 
+
 def get_key(path: str = CONFIG_PATH) -> str:
     if os.path.exists(path):
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             data = json.load(f)
             return data.get("ai_key", "")
     return ""
@@ -104,7 +108,7 @@ def get_key(path: str = CONFIG_PATH) -> str:
 
 def get_theme(path: str = CONFIG_PATH) -> str:
     if os.path.exists(path):
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             data = json.load(f)
             return data.get("theme", "default")
     return "default"
@@ -114,10 +118,11 @@ def get_theme(path: str = CONFIG_PATH) -> str:
 # Save Functions
 # -----------------------
 
+
 def save_config(config: DefaultConfig, path: str = CONFIG_PATH) -> None:
     # Preserve existing ai_key if new config has empty key
     if os.path.exists(path):
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             existing = json.load(f)
             if not config.ai_key:
                 config.ai_key = existing.get("ai_key", "")
@@ -128,16 +133,16 @@ def save_config(config: DefaultConfig, path: str = CONFIG_PATH) -> None:
     # Ensure RouteData objects become dicts
     serialized["routes"] = [asdict(r) for r in config.routes]
 
-    with open(path, 'w') as f:
+    with open(path, "w") as f:
         json.dump(serialized, f, indent=2)
 
 
 def save_mail_config(config: MailConfig, path: str = MAIL_CONFIG_PATH) -> None:
     if os.path.exists(path):
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             existing = json.load(f)
             if not config.api_key:
                 config.api_key = existing.get("api_key", "")
 
-    with open(path, 'w') as f:
+    with open(path, "w") as f:
         json.dump(asdict(config), f, indent=2)

@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from datetime import datetime
 from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel
-from datetime import datetime
 
-from src.config import load_or_create_config, save_config, load_or_create_mail_config, save_mail_config
 from data import forms_db  # Your database helper module
 from src.auth import get_current_user, optional_auth
 
@@ -14,8 +14,10 @@ router = APIRouter(prefix="/forms", tags=["Form"])
 # 🧱 MODELS
 # ----------------------------------------------------
 
+
 class FormModel(BaseModel):
     """Represents a custom form definition."""
+
     slug: str
     title: str
     schema: Dict[str, Any]
@@ -29,6 +31,7 @@ class FormModel(BaseModel):
 
 class FormSubmissionModel(BaseModel):
     """Represents a single submission to a form."""
+
     id: Optional[int] = None
     form_slug: str
     data: Dict[str, Any]
@@ -37,9 +40,11 @@ class FormSubmissionModel(BaseModel):
     author: Optional[str] = None
     custom: Optional[Dict[str, Any]] = {}
 
+
 # ----------------------------------------------------
 # 🖼️ FORM HTML VIEW
 # ----------------------------------------------------
+
 
 @router.get("/", response_class=HTMLResponse)
 async def get_html(request: Request, user: Optional[str] = Depends(optional_auth)):
@@ -54,13 +59,15 @@ async def get_html(request: Request, user: Optional[str] = Depends(optional_auth
 
     html = html.replace(
         '<div id="slug-container" style="display: none;" data-slug=""></div>',
-        f'<div id="slug-container" style="display: none;" data-slug="{slug}">{slug}</div>'
+        f'<div id="slug-container" style="display: none;" data-slug="{slug}">{slug}</div>',
     )
     return html
+
 
 # ----------------------------------------------------
 # 🧩 FORMS CRUD
 # ----------------------------------------------------
+
 
 @router.post("/", response_model=FormModel)
 def create_form(form: FormModel, user=Depends(get_current_user)):
@@ -81,7 +88,7 @@ def create_form(form: FormModel, user=Depends(get_current_user)):
         form.description,
         author=form.author,
         tags=form.tags,  # 🏷️ NEW!
-        custom=form.custom
+        custom=form.custom,
     )
     return form
 
@@ -90,11 +97,11 @@ def create_form(form: FormModel, user=Depends(get_current_user)):
 def list_forms(user=Depends(optional_auth), tag: Optional[str] = None):
     """List all available forms, optionally filtered by tag."""
     all_forms = forms_db.list_forms()
-    
+
     # 🏷️ NEW: Filter by tag if provided
     if tag:
         all_forms = [f for f in all_forms if tag in f.get("tags", [])]
-    
+
     return all_forms
 
 
@@ -104,11 +111,11 @@ def get_form(slug: str, user=Depends(optional_auth)):
     form = forms_db.get_form(slug)
     if not form:
         raise HTTPException(status_code=404, detail="Form not found.")
-    
+
     # Allow if form has 'read' tag OR if user is authenticated
     if "read" not in form["tags"] and not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    
+
     return form
 
 
@@ -133,9 +140,11 @@ def delete_form(slug: str, user=Depends(get_current_user)):
     forms_db.delete_form(slug)
     return {"detail": f"Form '{slug}' deleted successfully."}
 
+
 # ----------------------------------------------------
 # 🏷️ TAG UTILITIES (BONUS!)
 # ----------------------------------------------------
+
 
 @router.get("/tags/all", response_model=List[str])
 def get_all_tags(user=Depends(optional_auth)):
@@ -146,22 +155,26 @@ def get_all_tags(user=Depends(optional_auth)):
         tags.update(form.get("tags", []))
     return sorted(list(tags))
 
+
 # ----------------------------------------------------
 # 📨 FORM SUBMISSIONS
 # ----------------------------------------------------
 
+
 @router.post("/{slug}/submit", response_model=FormSubmissionModel)
-def submit_form(slug: str, submission: FormSubmissionModel, user=Depends(optional_auth)):
+def submit_form(
+    slug: str, submission: FormSubmissionModel, user=Depends(optional_auth)
+):
     """Submit a response to a form."""
     form = forms_db.get_form(slug)
     if not form:
         print("Form Not Found")
         raise HTTPException(status_code=404, detail="Form not found.")
-    
+
     # Allow if form has 'create' tag OR if user is authenticated
     if "create" not in form["tags"] and not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    
+
     print("NYOOOOOM~")
     now = datetime.now().isoformat()
     submission.form_slug = slug
@@ -172,9 +185,10 @@ def submit_form(slug: str, submission: FormSubmissionModel, user=Depends(optiona
         form_slug=slug,
         data=submission.data,
         author=submission.author,
-        custom=submission.custom
+        custom=submission.custom,
     )
     return submission
+
 
 @router.get("/{slug}/submissions", response_model=List[FormSubmissionModel])
 def list_submissions(slug: str, user=Depends(optional_auth)):
@@ -182,12 +196,13 @@ def list_submissions(slug: str, user=Depends(optional_auth)):
     form = forms_db.get_form(slug)
     if not form:
         raise HTTPException(status_code=404, detail="Form not found.")
-    
+
     # Allow if form has 'read' tag OR if user is authenticated
     if "read" not in form["tags"] and not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    
+
     return forms_db.list_submissions(slug)
+
 
 @router.get("/{slug}/submissions/{submission_id}", response_model=FormSubmissionModel)
 def get_submission(slug: str, submission_id: int, user=Depends(optional_auth)):
@@ -195,37 +210,38 @@ def get_submission(slug: str, submission_id: int, user=Depends(optional_auth)):
     form = forms_db.get_form(slug)
     if not form:
         raise HTTPException(status_code=404, detail="Form not found.")
-    
+
     # Allow if form has 'read' tag OR if user is authenticated
     if "read" not in form["tags"] and not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    
+
     submission = forms_db.get_submission(submission_id)
     if not submission or submission["form_slug"] != slug:
         raise HTTPException(status_code=404, detail="Submission not found.")
-    
+
     return submission
+
 
 @router.put("/{slug}/submissions/{submission_id}", response_model=FormSubmissionModel)
 def update_submission(
     slug: str,
     submission_id: int,
     updated_submission: FormSubmissionModel,
-    user=Depends(optional_auth)
+    user=Depends(optional_auth),
 ):
     """Update a specific submission for a form."""
     form = forms_db.get_form(slug)
     if not form:
         raise HTTPException(status_code=404, detail="Form not found.")
-    
+
     # Allow if form has 'update' tag OR if user is authenticated
     if "update" not in form["tags"] and not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    
+
     existing = forms_db.get_submission(submission_id)
     if not existing or existing["form_slug"] != slug:
         raise HTTPException(status_code=404, detail="Submission not found.")
-    
+
     updated_submission.id = submission_id
     updated_submission.form_slug = slug
     updated_submission.updated = datetime.now().isoformat()
@@ -240,11 +256,11 @@ def delete_submission(slug: str, submission_id: int, user=Depends(optional_auth)
     form = forms_db.get_form(slug)
     if not form:
         raise HTTPException(status_code=404, detail="Form not found.")
-    
+
     # Allow if form has 'delete' tag OR if user is authenticated
     if "delete" not in form["tags"] and not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    
+
     submission = forms_db.get_submission(submission_id)
     if not submission or submission["form_slug"] != slug:
         raise HTTPException(status_code=404, detail="Submission not found.")
