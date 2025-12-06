@@ -209,8 +209,20 @@ You know... It'll take a while until Hikarin Framework is ready right???
 
 *I don't care*
 
-Fine, fine, whatever you say...
+You really think people would prefer Hikarin over Aina???
 
-Oh but what if I market you for the academy?
+*YES!*
 
-*Eh? W-wait, I'm not ready for-*
+I think they'd prefer *both* not either...
+
+*Well, I prefer Hikarin!!!*
+
+You literally won't be here if it weren't for Aina you know that right???
+
+*Well no one will use me if you keep pushing Aina to the front*
+
+Aina is AWESOME! 
+
+*Well Not In This Day And Age!!!*
+
+Fine, I'll finish up Hikarin, see how many people prefer working with yet another Web Development Framework!
