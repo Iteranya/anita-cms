@@ -211,4 +211,6 @@ You know... It'll take a while until Hikarin Framework is ready right???
 
 Fine, fine, whatever you say...
 
-Oh but what if I market you for AI?
+Oh but what if I market you for the academy?
+
+*Eh? W-wait, I'm not ready for-*
