@@ -172,3 +172,23 @@ class MarkdownEditRequest(BaseModel):
     edit_instruction: str
     editor_content: str
     selected_text: str
+
+class MediaFile(BaseModel):
+    """Represents a single media file available on the server."""
+    filename: str  # The actual name of the file on disk (e.g., my-image_12345.webp)
+    url: str       # The relative URL to access the file (e.g., /media/my-image_12345.webp)
+
+class UploadedFileReport(BaseModel):
+    """Reports the result of a single file upload attempt."""
+    original: str
+    saved_as: Optional[str] = None
+    url: Optional[str] = None
+    size: Optional[int] = None
+    format_chosen: Optional[str] = None
+    error: Optional[str] = None
+
+class UploadResult(BaseModel):
+    """The final response after an upload operation."""
+    status: str
+    total: int
+    files: List[UploadedFileReport]
