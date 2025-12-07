@@ -23,9 +23,14 @@ def get_pages_by_tag(db: Session, tag: str) -> List[models.Page]:
     # The .contains() operator is a powerful feature for JSON columns in SQLAlchemy
     return db.query(models.Page).filter(models.Page.tags.contains(tag)).order_by(models.Page.created.desc()).all()
 
+    
 def get_first_page_by_tag(db: Session, tag: str) -> Optional[models.Page]:
-    """Retrieve the most recent page with a specific tag."""
-    return db.query(models.Page).filter(models.Page.tags.contains(tag)).order_by(models.Page.created.desc()).first()
+    candidates = db.query(models.Page).filter(models.Page.tags.contains(tag)).all()
+    valid_pages = [p for p in candidates if tag in p.tags]
+    valid_pages.sort(key=lambda x: x.created, reverse=True)
+    return valid_pages[0] if valid_pages else None
+
+  
 
 def create_page(db: Session, page: schemas.PageCreate) -> models.Page:
     """Create a new page."""

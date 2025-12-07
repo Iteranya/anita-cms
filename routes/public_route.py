@@ -32,8 +32,6 @@ def serve_home_page(page_service: PageService = Depends(get_page_service)):
     if not page:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Home page not configured.")
 
-    check_page_is_public(page)
-    
     # We serve the pre-rendered HTML directly from the database
     return HTMLResponse(content=page.html, status_code=200)
 

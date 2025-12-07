@@ -96,35 +96,25 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static-di
 # --- API Router Organization ---
 
 # This is the main router for your entire API, prefixed for versioning
-api_router = APIRouter(prefix="/api/v1")
+api_router = APIRouter()
 
 # This router is for all routes that REQUIRE authentication
 # We apply the dependency here once, and it applies to all included routers.
-protected_router = APIRouter(dependencies=[Depends(get_current_user)])
 
 # Include all protected routes into the protected_router
-protected_router.include_router(admin_route.router, tags=["Admin"])
-protected_router.include_router(aina_route.router, tags=["Aina"])
-protected_router.include_router(asta_route.router, tags=["Asta"])
-protected_router.include_router(media_route.router, tags=["Media"])
-protected_router.include_router(forms_route.router, tags=["Forms"])
-protected_router.include_router(file_route.router, tags=["Files"])
-protected_router.include_router(roles_route.router, tags=["Roles"])
-protected_router.include_router(pages_route.router, tags=["Pages"]) # Your new pages router
-
-# Include unprotected and protected routers into the main api_router
+api_router.include_router(admin_route.router, tags=["Admin"])
+api_router.include_router(aina_route.router, tags=["Aina"])
+api_router.include_router(asta_route.router, tags=["Asta"])
+api_router.include_router(media_route.router, tags=["Media"])
+api_router.include_router(forms_route.router, tags=["Forms"])
+api_router.include_router(file_route.router, tags=["Files"])
+api_router.include_router(roles_route.router, tags=["Roles"])
+api_router.include_router(pages_route.router, tags=["Pages"]) # Your new pages router
 api_router.include_router(auth_route.router, tags=["Authentication"]) # Public auth routes
-api_router.include_router(public_route.router, tags=["Public"])     # Other public routes
-api_router.include_router(protected_router)                         # All protected routes
+api_router.include_router(public_route.router, tags=["Public"])     # Other public routes                    # All protected routes
 
 # Finally, include the versioned API router in the main app
 app.include_router(api_router)
-
-
-# --- Root Endpoint for Health Check ---
-@app.get("/", tags=["Health Check"])
-def read_root():
-    return {"status": "ok", "message": "Welcome to the API!"}
 
 
 # --- Main Entry Point for Uvicorn ---
