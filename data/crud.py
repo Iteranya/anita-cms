@@ -1,4 +1,6 @@
 from datetime import datetime
+import json
+from pathlib import Path
 from typing import List, Optional, Dict, Any
 
 from sqlalchemy.orm import Session
@@ -248,3 +250,40 @@ def seed_default_roles(db: Session):
         for role_name, permissions in defaults.items():
             save_role(db, role_name=role_name, permissions=permissions)
         print("✓ Default roles seeded.")
+
+
+def seed_default_pages(db: Session):
+    """
+    Adds default pages from a JSON file if no pages exist in the database.
+    This function is idempotent and safe to run on every application startup.
+    """
+    # 1. Check if any pages already exist to prevent re-seeding.
+    if db.query(models.Page).count() > 0:
+        # Optional: You could add a log or print statement here for debugging.
+        # print("Pages table is not empty. Skipping seeding.")
+        return
+
+    print("No pages found in database. Seeding default pages...")
+    
+    # 2. Locate and load the default pages data.
+    try:
+        # Assumes default_pages.json is in the same directory as this script.
+        # Adjust the path as necessary.
+        pages_file = "default_pages.json"
+        with open(pages_file, "r") as f:
+            default_pages_data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Error loading default_pages.json: {e}. Skipping page seeding.")
+        return
+
+    # 3. Iterate, validate with Pydantic, and create each page.
+    for page_dict in default_pages_data:
+        # Check if a page with this slug already exists (extra safety).
+        if not get_page(db, slug=page_dict['slug']):
+            # Use the Pydantic schema to create a validated object
+            page_schema = schemas.PageCreate(**page_dict)
+            # Use your existing CRUD function to create the page
+            create_page(db, page=page_schema)
+            print(f"  - Created page: '{page_dict['title']}' ({page_dict['slug']})")
+
+    print("✓ Default pages seeded.")
