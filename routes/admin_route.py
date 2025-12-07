@@ -28,7 +28,7 @@ async def view_dashboard(user: dict = Depends(optional_user)):
         return RedirectResponse(url="/auth/login", status_code=302)
     
     # Serves the static HTML file for the dashboard.
-    return FileResponse(os.path.join(ADMIN_APP_DIR, "dashboard.html"))
+    return FileResponse(os.path.join(ADMIN_APP_DIR, "page.html"))
 
 @router.get("/pages", response_class=FileResponse)
 async def view_page_manager(user: dict = Depends(optional_user)):
@@ -59,7 +59,7 @@ async def view_users(user: dict = Depends(require_admin)):
 
 # --- CUSTOM DYNAMIC ADMIN PAGES (from Database) ---
 
-@router.get("/custom/{slug}", response_class=HTMLResponse)
+@router.get("/{slug}", response_class=HTMLResponse)
 async def serve_custom_admin_page(
     slug: str,
     db: Session = Depends(get_db),
