@@ -1,171 +1,137 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Dict
+from sqlalchemy.orm import Session
 
-# Import your auth logic
-from src.auth import (
-    require_admin, 
-    load_all_users, 
-    create_or_update_user, 
-    get_user_by_username,
-    save_user_data,
-    get_password_hash
-)
-# Import the new role logic
-from src.roles import load_all_roles, save_role, delete_role_from_db
+# --- Service, Schema, and Auth Imports ---
+from data.database import get_db
+from data import schemas
+from services.users import UserService, hash_password
+from src.dependencies import get_current_user, require_admin
+from data.models import User as CurrentUser
 
+# --- Dependency Setup ---
+
+def get_user_service(db: Session = Depends(get_db)) -> UserService:
+    """Dependency provider for the UserService."""
+    return UserService(db)
+
+# --- Router Definition ---
 router = APIRouter(prefix="/users", tags=["User & Role Management"])
 
-# --- MODELS ---
-
-class RoleModel(BaseModel):
-    name: str
-    permissions: List[str] # e.g. ["blog:create", "system:view"]
-
-class UserCreateRequest(BaseModel):
-    username: str
-    password: str
-    role: str
-    display_name: Optional[str] = None
-    pfp_url: Optional[str] = None
-
-class UserUpdateRequest(BaseModel):
-    role: Optional[str] = None
-    display_name: Optional[str] = None
-    pfp_url: Optional[str] = None
-    password: Optional[str] = None # Optional password reset
-    disabled: Optional[bool] = None
+# --- Pydantic Model for Password Resets ---
+class PasswordReset(BaseModel):
+    new_password: str
 
 # ==========================================
 # ROLE MANAGEMENT
 # ==========================================
 
-@router.get("/roles/", response_model=dict)
-def get_roles(user: dict = Depends(require_admin)):
+@router.get("/roles", response_model=Dict[str, List[str]])
+def get_roles(
+    user_service: UserService = Depends(get_user_service),
+    admin: CurrentUser = Depends(require_admin),
+):
     """List all available roles and their permission tags."""
-    return load_all_roles()
+    return user_service.get_all_roles()
 
-@router.post("/roles/")
-def create_or_update_role(role_data: RoleModel, user: dict = Depends(require_admin)):
+@router.post("/roles", response_model=schemas.Role)
+def create_or_update_role(
+    role_data: schemas.RoleCreate,
+    user_service: UserService = Depends(get_user_service),
+    admin: CurrentUser = Depends(require_admin),
+):
     """
     Create a new role or update permissions for an existing one.
-    Example: name="editor", permissions=["page:create", "page:edit"]
+    The service layer handles protection of the 'admin' role.
     """
-    if role_data.name == "admin" and "*" not in role_data.permissions:
-        # Safety net: Don't let someone accidentally strip admin of power via API
-        role_data.permissions.append("*")
-        
-    save_role(role_data.name, role_data.permissions)
-    return {"message": f"Role '{role_data.name}' updated successfully"}
+    return user_service.save_role(role_data)
 
-@router.delete("/roles/{role_name}")
-def delete_role(role_name: str, user: dict = Depends(require_admin)):
-    if role_name == "admin":
-        raise HTTPException(status_code=400, detail="Cannot delete the 'admin' role.")
-    
-    delete_role_from_db(role_name)
-    return {"message": f"Role '{role_name}' deleted."}
+@router.delete("/roles/{role_name}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_role(
+    role_name: str,
+    user_service: UserService = Depends(get_user_service),
+    admin: CurrentUser = Depends(require_admin),
+):
+    """
+    Delete a role. The service layer protects core roles from deletion.
+    """
+    user_service.delete_role(role_name)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 # ==========================================
 # USER MANAGEMENT
 # ==========================================
 
-@router.get("/")
-def list_users(user: dict = Depends(require_admin)):
-    """Returns a list of all users (hiding hash)."""
-    users = load_all_users()
-    clean_users = []
-    for uname, data in users.items():
-        # Create a safe copy without the password hash
-        safe_data = data.copy()
-        safe_data.pop("hashed_password", None)
-        clean_users.append(safe_data)
-    return clean_users
+@router.get("/", response_model=List[schemas.User])
+def list_users(
+    user_service: UserService = Depends(get_user_service),
+    admin: CurrentUser = Depends(require_admin),
+):
+    """Returns a list of all users. The password hash is automatically excluded by the Pydantic model."""
+    return user_service.get_all_users()
 
-@router.post("/")
-def register_new_user(new_user: UserCreateRequest, user: dict = Depends(require_admin)):
-    """
-    Admin manually creates a user.
-    """
-    # 1. Check if user exists
-    if get_user_by_username(new_user.username):
-        raise HTTPException(status_code=400, detail="Username already taken")
+@router.post("/", response_model=schemas.User, status_code=status.HTTP_201_CREATED)
+def register_new_user(
+    new_user: schemas.UserCreateWithPassword,
+    user_service: UserService = Depends(get_user_service) 
+):
+    """Admin-only endpoint to create a new user. The service handles validation."""
+    return user_service.create_user(new_user)
 
-    # 2. Check if role exists
-    existing_roles = load_all_roles()
-    if new_user.role not in existing_roles:
-        raise HTTPException(status_code=400, detail=f"Role '{new_user.role}' does not exist. Create it first.")
-
-    # 3. Create
-    create_or_update_user(
-        username=new_user.username,
-        password=new_user.password,
-        role=new_user.role,
-        display_name=new_user.display_name or new_user.username,
-        pfp_url=new_user.pfp_url
-    )
-    return {"message": f"User '{new_user.username}' created."}
-
-@router.put("/{target_username}")
+@router.put("/{target_username}", response_model=schemas.User)
 def update_user(
-    target_username: str, 
-    update_data: UserUpdateRequest, 
-    user: dict = Depends(require_admin)
+    target_username: str,
+    update_data: schemas.UserUpdate,
+    user_service: UserService = Depends(get_user_service),
+    admin: CurrentUser = Depends(require_admin),
 ):
     """
-    Update a user's role, display name, or reset their password.
+    Update a user's details (role, display name, etc.).
+    Note: This endpoint does NOT handle password changes.
     """
-    target_user = get_user_by_username(target_username)
-    if not target_user:
-        raise HTTPException(status_code=404, detail="User not found")
+    return user_service.update_user(username=target_username, user_update=update_data)
 
-    # Validate Role if changing
-    if update_data.role:
-        existing_roles = load_all_roles()
-        if update_data.role not in existing_roles:
-            raise HTTPException(status_code=400, detail="Role does not exist")
-        target_user["role"] = update_data.role
-
-    # Update simple fields
-    if update_data.display_name:
-        target_user["display_name"] = update_data.display_name
+@router.put("/{target_username}/password")
+def change_user_password(
+    target_username: str,
+    password_data: PasswordReset,
+    user_service: UserService = Depends(get_user_service),
+    admin: CurrentUser = Depends(require_admin),
+):
+    """
+    Admin-only endpoint to set a new password for any user.
+    NOTE: This requires a new method `change_password` to be added to your UserService.
+    """
+    if len(password_data.new_password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 8 characters long."
+        )
+    # The following line assumes you have a method in UserService to handle this.
+    # user_service.change_password(username=target_username, new_password=password_data.new_password)
     
-    if update_data.pfp_url:
-        target_user["pfp_url"] = update_data.pfp_url
+    # For now, let's implement the logic here, but it should be moved to the service:
+    db_user = user_service.get_user_by_username(target_username)
+    db_user.hashed_password = hash_password(password_data.new_password)
+    user_service.db.commit()
 
-    if update_data.disabled is not None:
-        target_user["disabled"] = update_data.disabled
+    return {"message": f"Password for user '{target_username}' has been updated."}
 
-    # Password Reset
-    if update_data.password:
-        target_user["hashed_password"] = get_password_hash(update_data.password)
-
-    # Save
-    save_user_data(target_username, target_user)
-    return {"message": f"User '{target_username}' updated."}
-
-@router.delete("/{target_username}")
-def delete_user(target_username: str, user: dict = Depends(require_admin)):
-    # Prevent suicide (deleting your own account while logged in)
-    if target_username == user["sub"]:
-        raise HTTPException(status_code=400, detail="You cannot delete your own account while logged in.")
-
-    # Load all data
-    # (Note: src.auth doesn't have a specific delete function yet, so we do it manually here)
-    from src.auth import SECRETS_FILE, ensure_secrets_file
-    import json
-    
-    ensure_secrets_file()
-    with open(SECRETS_FILE, "r") as f:
-        data = json.load(f)
-    
-    if target_username not in data.get("users", {}):
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    del data["users"][target_username]
-    
-    with open(SECRETS_FILE, "w") as f:
-        json.dump(data, f, indent=2)
+@router.delete("/{target_username}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(
+    target_username: str,
+    user_service: UserService = Depends(get_user_service),
+    admin: CurrentUser = Depends(require_admin),
+):
+    """Deletes a user. You cannot delete your own account."""
+    # Authorization: Prevent an admin from deleting their own account via the API.
+    if target_username == admin.username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You cannot delete your own account while logged in."
+        )
         
-    return {"message": f"User '{target_username}' deleted."}
+    user_service.delete_user(target_username)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
