@@ -1,7 +1,13 @@
-{
+from sqlalchemy.orm import Session
+from fastapi import HTTPException, status
+from typing import Dict, Any, Optional
+
+from data import crud, schemas
+
+DEFAULT_CONFIG = {
   "system_note": "You are a friendly AI Assistant, Do as you are instructed to.",
-  "ai_endpoint": "https://generativelanguage.googleapis.com/v1beta/openai/",
-  "base_llm": "gemini-2.5-pro-exp-03-25",
+  "ai_endpoint": "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent",
+  "base_llm": "gemini-1.5-pro-latest",
   "temperature": 0.5,
   "ai_key": "",
   "theme": "default",
@@ -25,7 +31,7 @@
         "body": {
           "files": "List[UploadFile]"
         },
-        "auth": true,
+        "auth": True,
         "returns": {
           "status": "string",
           "total": "int",
@@ -41,7 +47,7 @@
         "method": "DELETE",
         "path": "/media/{filename}",
         "params": { "filename": "string" },
-        "auth": true,
+        "auth": True,
         "returns": {
           "status": "string",
           "filename": "string"
@@ -81,7 +87,7 @@
         "body": {
           "file": "UploadFile"
         },
-        "auth": true
+        "auth": True
       },
       "type": "media",
       "description": "Upload arbitrary file"
@@ -134,3 +140,96 @@
     }
   ]
 }
+
+
+class ConfigService:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_all_settings(self) -> Dict[str, Any]:
+        """
+        Retrieves all settings from the database and reconstructs them into a
+        single configuration dictionary.
+        """
+        return crud.get_all_settings(self.db)
+
+    def get_setting_value(self, key: str, default: Any = None) -> Optional[Any]:
+        """
+        Retrieves the value for a single setting by its key.
+
+        If the setting is not found in the database, it returns the provided
+        default value. This is the primary way other services should
+        interact with configuration.
+        """
+        value = crud.get_setting(self.db, key=key)
+        
+        # If the value is not in the DB, fall back to the hardcoded default
+        if value is None:
+            return DEFAULT_CONFIG.get(key, default)
+            
+        return value
+
+    def _validate_setting(self, key: str, value: Any):
+        """
+        A private method for running business logic validation on specific settings.
+        This ensures data integrity before saving to the database.
+        """
+        if key == "temperature":
+            if not isinstance(value, (int, float)) or not (0.0 <= value <= 2.0):
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="Setting 'temperature' must be a number between 0.0 and 2.0."
+                )
+        
+        if key == "routes":
+            if not isinstance(value, list):
+                 raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="Setting 'routes' must be a valid JSON array."
+                )
+            for i, route in enumerate(value):
+                if not isinstance(route, dict) or "name" not in route or "schema" not in route:
+                    raise HTTPException(
+                        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                        detail=f"Route at index {i} is invalid. It must be an object with 'name' and 'schema' keys."
+                    )
+        
+        if key in ["ai_key", "theme", "system_note", "ai_endpoint"]:
+            if not isinstance(value, str):
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"Setting '{key}' must be a string."
+                )
+
+    def save_settings(self, settings_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Saves a dictionary of settings to the database.
+        Each key-value pair in the dictionary will be validated and saved as a
+        separate setting row.
+        """
+        for key, value in settings_data.items():
+            # Run any specific validation rules for the setting key.
+            self._validate_setting(key, value)
+            
+            # Use the CRUD function to save each setting.
+            crud.save_setting(self.db, key=key, value=value)
+        
+        # Return the complete, updated set of all settings.
+        return self.get_all_settings()
+
+    def seed_initial_settings(self):
+        """
+        Seeds the database with the default application configuration if no
+        settings currently exist.
+        """
+        # Check if a core setting already exists. If so, we assume seeding is done.
+        if crud.get_setting(self.db, "system_note"):
+            return
+
+        print("No settings found in database. Seeding initial application configuration.")
+        
+        # Iterate through the default config dictionary and save each item
+        for key, value in DEFAULT_CONFIG.items():
+            crud.save_setting(self.db, key=key, value=value)
+
+        print("✓ Default settings seeded.")

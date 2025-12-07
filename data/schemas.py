@@ -3,7 +3,7 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-
+from dataclasses import dataclass
 # --- Page Schemas ---
 
 class PageBase(BaseModel):
@@ -138,3 +138,37 @@ class RoleCreate(RoleBase):
 class Role(RoleCreate):
     class Config:
         orm_mode = True
+
+class UserCreateWithPassword(UserBase):
+    """Schema used for creating a user via the API, accepts plain password."""
+    username: str
+    password: str
+
+class Prompt(BaseModel):
+    # Core content
+    system: Optional[str] = None
+    user: Optional[str] = None
+    assistant: Optional[str] = None 
+
+    # Overrides for default settings
+    model: Optional[str] = None
+    temp: Optional[float] = None
+    endpoint: Optional[str] = None
+    ai_key: Optional[str] = None
+    stop: Optional[List[str]] = None
+
+    # Field to store the final result
+    result: Optional[str] = None
+
+class RouteData(BaseModel):
+    name: str
+    type: str
+    description: Optional[str] = None
+    schema_: Optional[Dict[str, Any]] = None
+    usage_note: Optional[str] = None
+
+class MarkdownEditRequest(BaseModel):
+    global_instruction: str
+    edit_instruction: str
+    editor_content: str
+    selected_text: str

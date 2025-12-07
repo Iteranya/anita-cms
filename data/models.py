@@ -1,8 +1,9 @@
 # file: data/models.py
 
+from typing import Any, Dict, Optional
 from sqlalchemy import Column, Integer, String, Text, JSON, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
-
+from dataclasses import dataclass
 from .database import Base
 
 class Page(Base):
@@ -73,3 +74,4 @@ class Role(Base):
     
     role_name = Column(String, primary_key=True)
     permissions = Column("permissions_json", JSON, nullable=False)
+
