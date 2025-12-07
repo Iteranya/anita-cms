@@ -8,7 +8,7 @@ from data.database import get_db
 from data import schemas
 from services.users import UserService, hash_password
 from src.dependencies import get_current_user, require_admin
-from data.models import User as CurrentUser
+from data.schemas import User as CurrentUser
 
 # --- Dependency Setup ---
 

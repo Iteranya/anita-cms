@@ -5,7 +5,7 @@ from data.database import get_db
 from data import schemas
 from services.pages import PageService
 from src.dependencies import get_current_user, optional_user as optional_auth
-from data.models import User as CurrentUser
+from data.schemas import User as CurrentUser
 
 # --- Dependency Setup ---
 # This dependency provider makes the PageService available to our routes
