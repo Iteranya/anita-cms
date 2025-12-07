@@ -6,4 +6,5 @@ venv
 *.json
 *.exe
 !default_config.json
+!default_pages.json
 /uploads
