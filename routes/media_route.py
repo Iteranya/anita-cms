@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status
 from fastapi.responses import FileResponse
 
 # Adjust this import to your project's authentication location
-from services.users import get_current_user_dependency
+from src.dependencies import get_current_user
 
 from services.media import MediaService, InvalidFileNameError, FileNotFoundError, ImageProcessingError
 from data.schemas import MediaFile, UploadResult, UploadedFileReport
@@ -33,7 +33,7 @@ async def get_media(filename: str):
 @router.post("/", response_model=UploadResult)
 async def upload_media(
     files: List[UploadFile] = File(...),
-    user: dict = Depends(get_current_user_dependency) # Authentication is an API-layer concern
+    user: dict = Depends(get_current_user) # Authentication is an API-layer concern
 ):
     """Upload one or more image files for processing and storage."""
     reports: List[UploadedFileReport] = []
