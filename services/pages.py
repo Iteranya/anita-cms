@@ -2,6 +2,7 @@
 
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
+from typing import List, Optional # 👈 Added Optional and List for type hinting
 
 from data import crud, schemas, models
 
@@ -80,3 +81,23 @@ class PageService:
         crud.delete_page(self.db, slug=slug)
 
         # Return nothing, as the router will handle the 204 response.
+
+    # -----------------------------------------------------------------
+    # ✨ NEW METHODS FOR TAG-BASED QUERIES ✨
+    # -----------------------------------------------------------------
+
+    def get_pages_by_tag(self, tag: str) -> List[models.Page]:
+        """
+        Retrieves all pages containing a specific tag by calling the efficient
+        CRUD function that filters in the database.
+        """
+        # This is now simpler and much more performant!
+        return crud.get_pages_by_tag(self.db, tag=tag)
+
+    def get_first_page_by_tag(self, tag: str) -> Optional[models.Page]:
+        """
+        Retrieves the most recent page with a specific tag by calling the
+        efficient CRUD function.
+        """
+        # This is also simpler and more performant.
+        return crud.get_first_page_by_tag(self.db, tag=tag)
