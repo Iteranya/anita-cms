@@ -1,14 +1,15 @@
+# file: config.py
+
 from __future__ import annotations
-import asyncio
-import os
-import json
-import shutil
 from dataclasses import dataclass, asdict
 from typing import Dict, Any, Optional, List
+
+# Import the new database module for persistence
+from data import database
 from data.models import RouteData
 
 # -----------------------
-# Data Models
+# Data Models (Unchanged)
 # -----------------------
 
 @dataclass
@@ -19,12 +20,11 @@ class DefaultConfig:
     temperature: float = 0.5
     ai_key: str = ""
     theme: str = "default"
-    routes: List[RouteData] = None  
+    routes: List[RouteData] = None
 
     def __post_init__(self):
         if self.routes is None:
             self.routes = []
-
 
 @dataclass
 class MailConfig:
@@ -34,110 +34,92 @@ class MailConfig:
     footer: str = ""
     api_key: str = ""
 
-
 # -----------------------
-# File Paths
-# -----------------------
-
-CONFIG_PATH = "config.json"
-DEFAULT_CONFIG_PATH = "default_config.json"
-MAIL_CONFIG_PATH = "mail_config.json"
-
-
-# -----------------------
-# Load Functions
+# File Paths (REMOVED)
+# No longer needed as we use the database.
 # -----------------------
 
-def load_or_create_config(path: str = CONFIG_PATH) -> DefaultConfig:
-    if os.path.exists(path):
-        with open(path, 'r') as f:
-            data = json.load(f)
+# -----------------------
+# Load Functions (Refactored for Database)
+# -----------------------
 
+def load_or_create_config() -> DefaultConfig:
+    """Loads the main configuration from the database, or creates it if it doesn't exist."""
+    data = database.get_setting("main_config")
+
+    if data:
         # Deserialize routes into RouteData objects
         raw_routes = data.get("routes", [])
         data["routes"] = [RouteData(**route) for route in raw_routes]
 
         config = DefaultConfig(**data)
 
-        # Duct Tape Security
+        # "Duct Tape Security": Always clear the key on a general load
+        # to prevent it from being accidentally exposed to the client.
         config.ai_key = ""
         return config
 
-    # Try to copy from default_config.json if it exists
-    if os.path.exists(DEFAULT_CONFIG_PATH):
-        print(f"Config not found. Copying from {DEFAULT_CONFIG_PATH} to {path}.")
-        shutil.copy2(DEFAULT_CONFIG_PATH, path)
-        
-        # Now load it (recursive call, but will only happen once)
-        return load_or_create_config(path)
-    
-    # Last resort: create from scratch
+    # If no config in DB, create one from scratch
+    print("No main config found in database. Creating a default one.")
     default_config = DefaultConfig()
-    save_config(default_config, path)
-    print(f"No config or default_config found. Created fresh config at {path}.")
+    save_config(default_config)
+    
+    # Clear key after saving before returning
+    default_config.ai_key = ""
     return default_config
 
+def load_or_create_mail_config() -> MailConfig:
+    """Loads the mail configuration from the database, or creates it if it doesn't exist."""
+    data = database.get_setting("mail_config")
 
-def load_or_create_mail_config(path: str = MAIL_CONFIG_PATH) -> MailConfig:
-    if os.path.exists(path):
-        with open(path, 'r') as f:
-            data = json.load(f)
-            return MailConfig(**data)
+    if data:
+        return MailConfig(**data)
 
+    print("No mail config found in database. Creating a default one.")
     mail_config = MailConfig()
-    save_mail_config(mail_config, path)
-    print(f"No mail config found. Created default at {path}.")
+    save_mail_config(mail_config)
     return mail_config
 
-
 # -----------------------
-# Getter Helpers
-# -----------------------
-
-def get_key(path: str = CONFIG_PATH) -> str:
-    if os.path.exists(path):
-        with open(path, 'r') as f:
-            data = json.load(f)
-            return data.get("ai_key", "")
-    return ""
-
-
-def get_theme(path: str = CONFIG_PATH) -> str:
-    if os.path.exists(path):
-        with open(path, 'r') as f:
-            data = json.load(f)
-            return data.get("theme", "default")
-    return "default"
-
-
-# -----------------------
-# Save Functions
+# Getter Helpers (Refactored for Database)
 # -----------------------
 
-def save_config(config: DefaultConfig, path: str = CONFIG_PATH) -> None:
-    # Preserve existing ai_key if new config has empty key
-    if os.path.exists(path):
-        with open(path, 'r') as f:
-            existing = json.load(f)
-            if not config.ai_key:
-                config.ai_key = existing.get("ai_key", "")
+def get_key() -> str:
+    """Securely retrieves just the AI key from the database."""
+    data = database.get_setting("main_config")
+    return data.get("ai_key", "") if data else ""
 
-    # Convert for JSON
-    serialized = asdict(config)
+def get_theme() -> str:
+    """Retrieves just the theme name from the database."""
+    data = database.get_setting("main_config")
+    return data.get("theme", "default") if data else "default"
 
-    # Ensure RouteData objects become dicts
-    serialized["routes"] = [asdict(r) for r in config.routes]
+# -----------------------
+# Save Functions (Refactored for Database)
+# -----------------------
 
-    with open(path, 'w') as f:
-        json.dump(serialized, f, indent=2)
+def save_config(config: DefaultConfig) -> None:
+    """Saves the main configuration to the database."""
+    # Preserve existing ai_key if the new config has an empty one
+    if not config.ai_key:
+        existing_key = get_key() # Use our secure getter
+        if existing_key:
+            config.ai_key = existing_key
 
+    # Convert the dataclass object to a dictionary for JSON serialization
+    serialized_data = asdict(config)
+    
+    # Ensure nested RouteData objects also become dictionaries
+    serialized_data["routes"] = [asdict(r) for r in config.routes]
 
-def save_mail_config(config: MailConfig, path: str = MAIL_CONFIG_PATH) -> None:
-    if os.path.exists(path):
-        with open(path, 'r') as f:
-            existing = json.load(f)
-            if not config.api_key:
-                config.api_key = existing.get("api_key", "")
+    database.save_setting("main_config", serialized_data)
 
-    with open(path, 'w') as f:
-        json.dump(asdict(config), f, indent=2)
+def save_mail_config(config: MailConfig) -> None:
+    """Saves the mail configuration to the database."""
+    # Preserve existing api_key
+    if not config.api_key:
+        existing_data = database.get_setting("mail_config")
+        if existing_data and existing_data.get("api_key"):
+            config.api_key = existing_data["api_key"]
+
+    database.save_setting("mail_config", asdict(config))

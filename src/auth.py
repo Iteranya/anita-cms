@@ -1,7 +1,7 @@
+# file: auth.py
+
 import os
-import json
 from datetime import datetime, timedelta
-from pathlib import Path
 from typing import Optional, Dict
 
 from fastapi import Depends, HTTPException, status, Request
@@ -10,75 +10,37 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from dotenv import load_dotenv
+from data import database
 
 # Load environment variables
 load_dotenv()
 
-# Security settings
-SECRETS_FILE = "secret.json"
+# Security settings remain the same
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
-# --- NEW MODEL STRUCTURE ---
+# --- MODEL STRUCTURE (Unchanged) ---
 class UserAccount(BaseModel):
     username: str
-    password: Optional[str] = None # Used for input, not stored in JSON
+    password: Optional[str] = None # Used for input, not stored
     hashed_password: str
-    role: str = "user"             # Default role
-    display_name: str = "New User" # Default display name
-    pfp_url: Optional[str] = None  # Profile picture URL
+    role: str = "user"
+    display_name: str = "New User"
+    pfp_url: Optional[str] = None
     disabled: bool = False
 
-# --- FILE OPERATIONS ---
+# --- FILE OPERATIONS (REMOVED) ---
+# All json file handling has been removed and replaced with database calls.
 
-def get_secrets_path() -> Path:
-    return Path(SECRETS_FILE)
-
-def ensure_secrets_file():
-    """Ensures the JSON file exists with a valid structure."""
-    if not get_secrets_path().exists():
-        with open(SECRETS_FILE, 'w') as f:
-            json.dump({"users": {}}, f, indent=2)
-
-def load_all_users() -> Dict:
-    """Returns the dictionary of all users."""
-    ensure_secrets_file()
-    try:
-        with open(SECRETS_FILE, "r") as f:
-            data = json.load(f)
-            return data.get("users", {})
-    except (json.JSONDecodeError, KeyError):
-        return {}
-
-def save_user_data(username: str, user_data: dict):
-    """Saves or updates a single user."""
-    ensure_secrets_file()
-    
-    # Load existing full data
-    with open(SECRETS_FILE, "r") as f:
-        try:
-            full_data = json.load(f)
-        except json.JSONDecodeError:
-            full_data = {"users": {}}
-
-    if "users" not in full_data:
-        full_data["users"] = {}
-
-    # Update specific user
-    full_data["users"][username] = user_data
-
-    # Write back
-    with open(SECRETS_FILE, "w") as f:
-        json.dump(full_data, f, indent=2)
-
+# --- UPDATED USER LOOKUP ---
 def get_user_by_username(username: str) -> Optional[dict]:
-    users = load_all_users()
-    return users.get(username)
+    """Wrapper function that calls the database to get user data."""
+    return database.get_user_by_username_db(username)
 
-# --- AUTH LOGIC ---
+# --- AUTH LOGIC (Logic is unchanged, data source is now DB) ---
 
 def verify_password(plain_password: str, hashed_password: str):
     return pwd_context.verify(plain_password, hashed_password)
@@ -86,16 +48,21 @@ def verify_password(plain_password: str, hashed_password: str):
 def get_password_hash(password: str):
     return pwd_context.hash(password)
 
-def authenticate_user(username: str, password: str):
+def authenticate_user(username: str, password: str) -> Optional[dict]:
+    """
+    Authenticates a user against the database.
+    Returns the user dictionary on success, otherwise False.
+    """
     user_dict = get_user_by_username(username)
     if not user_dict:
-        return False
+        return None
     
     if not verify_password(password, user_dict["hashed_password"]):
-        return False
+        return None
         
-    if user_dict.get("disabled", False):
-        return False
+    # The database stores disabled as 0 or 1
+    if user_dict.get("disabled"): 
+        return None
         
     return user_dict
 
@@ -114,9 +81,9 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-# --- DEPENDENCIES ---
+# --- DEPENDENCIES (Unchanged as they operate on the token, not storage) ---
 
-async def get_current_user(request: Request):
+async def get_current_user(request: Request) -> dict:
     SECRET_KEY = os.getenv("JWT_SECRET") 
     if not SECRET_KEY:
         raise ValueError("SECRET_KEY environment variable is not set")
@@ -143,7 +110,7 @@ async def get_current_user(request: Request):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-async def require_admin(payload: dict = Depends(get_current_user)):
+async def require_admin(payload: dict = Depends(get_current_user)) -> dict:
     """Helper dependency to lock routes to admins only"""
     role = payload.get("role", "user")
     if role != "admin":
@@ -153,7 +120,7 @@ async def require_admin(payload: dict = Depends(get_current_user)):
         )
     return payload
 
-async def optional_auth(request: Request):
+async def optional_auth(request: Request) -> Optional[dict]:
     SECRET_KEY = os.getenv("JWT_SECRET") 
     if not SECRET_KEY:
         return None
@@ -167,50 +134,50 @@ async def optional_auth(request: Request):
     except JWTError:
         return None
 
-# --- USER MANAGEMENT FUNCTIONS ---
+# --- REFACTORED USER MANAGEMENT FUNCTIONS ---
 
 def create_or_update_user(
     username: str, 
     password: str = None, 
-    role: str = "user", 
+    role: str = None, 
     display_name: str = None,
     pfp_url: str = None
 ):
     """
-    Creates a new user or updates an existing one. 
-    If password is None, it keeps the old password (for updates).
+    Creates a new user or updates an existing one by saving to the database.
+    If password is None on an existing user, it keeps the old password.
     """
     existing_user = get_user_by_username(username)
     
-    # Determine Hash
     if password:
         final_hash = get_password_hash(password)
     elif existing_user:
         final_hash = existing_user["hashed_password"]
     else:
-        raise ValueError("Cannot create new user without a password")
+        raise ValueError("Cannot create a new user without a password")
 
-    # Set Defaults if not provided
-    final_role = role if role else (existing_user["role"] if existing_user else "user")
-    final_name = display_name if display_name else (existing_user.get("display_name", username) if existing_user else username)
-    final_pfp = pfp_url if pfp_url else (existing_user.get("pfp_url") if existing_user else "")
-
+    # Build the user data dictionary, falling back to existing data if available
     user_data = {
         "username": username,
         "hashed_password": final_hash,
-        "role": final_role,
-        "display_name": final_name,
-        "pfp_url": final_pfp,
+        "role": role or (existing_user.get("role") if existing_user else "user"),
+        "display_name": display_name or (existing_user.get("display_name", username) if existing_user else username),
+        "pfp_url": pfp_url or (existing_user.get("pfp_url") if existing_user else None),
         "disabled": False
     }
     
-    save_user_data(username, user_data)
-    print(f"User '{username}' saved with role '{final_role}'.")
+    # Save to the database using the new function
+    database.save_user_db(user_data)
+    print(f"User '{username}' saved to database with role '{user_data['role']}'.")
 
 def create_default_admin():
-    """Initializes the system with a default admin if no users exist."""
-    users = load_all_users()
-    if not users:
-        print("No users found. Creating default 'admin' account.")
-        # Pass a default password, usually you'd want to prompt for this or generate it
-        create_or_update_user("admin", "admin123", role="admin", display_name="System Admin")
+    """Initializes the system with a default admin if no users exist in the DB."""
+    # Check the database instead of the file
+    if database.count_users_db() == 0:
+        print("No users found in database. Creating default 'admin' account.")
+        create_or_update_user(
+            username="admin", 
+            password="admin123", # Consider making this more secure
+            role="admin", 
+            display_name="System Admin"
+        )
