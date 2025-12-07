@@ -53,13 +53,17 @@ def serve_blog_index(page_service: PageService = Depends(get_page_service)):
 def serve_blog_post(slug: str, page_service: PageService = Depends(get_page_service)):
     """Serves a single blog post page."""
     page = page_service.get_page_by_slug(slug) # Service handles 404 if slug doesn't exist
+    markdown_template = page_service.get_first_page_by_tag('markdown-template')
     
     # Ensure this endpoint only serves pages with the 'blog' tag
     if not page.tags or 'blog' not in page.tags:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found in this category.")
         
     check_page_is_public(page)
-    return HTMLResponse(content=page.html, status_code=200)
+    if page.type == 'html':
+        return HTMLResponse(content=page.html, status_code=200)
+    else:
+        return HTMLResponse(content=markdown_template.html, status_code=200)
 
 
 @router.get("/{slug}", response_class=HTMLResponse)
@@ -70,6 +74,8 @@ def serve_generic_page(slug: str, page_service: PageService = Depends(get_page_s
     """
     page = page_service.get_page_by_slug(slug)
     check_page_is_public(page)
+    if not page.tags or 'main' not in page.tags:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found in this category.")
     return HTMLResponse(content=page.html, status_code=200)
 
 
@@ -85,10 +91,7 @@ def api_list_blog_pages(page_service: PageService = Depends(get_page_service)):
     """
     all_blog_pages = page_service.get_pages_by_tag("blog")
     
-    # Filter out any private pages before returning
-    public_pages = [page for page in all_blog_pages if not (page.tags and "private" in page.tags)]
-    
-    return public_pages
+    return all_blog_pages
 
 
 @router.get("/api/blog/{slug}", response_model=schemas.Page)
