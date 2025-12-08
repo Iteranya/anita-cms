@@ -23,13 +23,6 @@ class AIService:
         self.temperature = config_service.get_setting_value("temperature")
         self.system_note = config_service.get_setting_value("system_note")
 
-        # # Business Logic: Ensure critical configuration is set before proceeding.
-        # if not self.base_url or not self.api_key or not self.base_llm:
-        #     raise HTTPException(
-        #         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-        #         detail="AI service is not configured. Please set AI endpoint, key, and base LLM in settings."
-        #     )
-
     def _get_client(self, prompt: Prompt) -> AsyncOpenAI:
         """Helper to create an AsyncOpenAI client with prompt-specific overrides."""
         return AsyncOpenAI(
