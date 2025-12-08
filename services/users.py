@@ -47,9 +47,6 @@ class UserService:
         """
         Creates a new user.
         Handles password hashing and role validation.
-
-        Note: We expect a Pydantic schema `UserCreateWithPassword` that includes
-        a plain-text 'password' field.
         """
         # Business Logic 1: Check if username already exists.
         if crud.get_user_by_username(self.db, username=user_in.username):

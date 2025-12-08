@@ -9,7 +9,7 @@ from data.database import get_db
 from data import schemas  # Import Pydantic schemas from your data layer
 from services.forms import FormService
 from src.dependencies import get_current_user, optional_user
-from data.schemas import User as CurrentUser
+from data.schemas import CurrentUser
 
 # --- Dependency Setup ---
 # This function allows FastAPI to inject the FormService into our routes.

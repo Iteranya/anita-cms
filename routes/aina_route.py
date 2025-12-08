@@ -52,7 +52,7 @@ async def generate_website_stream(
     Starts a new AI website generation stream for the authenticated user.
     Cancels any pre-existing stream for that same user.
     """
-    username = user.get("sub") # 'sub' is the standard JWT claim for username/ID
+    username = user.get("username") # 'sub' is the standard JWT claim for username/ID
     if not username:
         return JSONResponse(content={"error": "Invalid user token"}, status_code=400)
 
@@ -97,7 +97,7 @@ async def generate_website_stream(
 @router.post("/stop-website-stream")
 async def stop_website_stream(user: dict = Depends(get_current_user)):
     """Stops the current stream for the authenticated user."""
-    username = user.get("sub")
+    username = user.get("username")
     if not username:
         return JSONResponse(content={"error": "Invalid user token"}, status_code=400)
 

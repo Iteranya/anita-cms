@@ -25,9 +25,6 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 # --- HELPERS ---
 
 def is_system_initialized(user_service: UserService) -> bool:
-    """Checks if at least one user exists in the system using the UserService."""
-    # In a larger system, you might specifically check for a user with the 'admin' role.
-    # For initial setup, checking if any users exist is sufficient.
     return len(user_service.get_all_users()) > 0
 
 def is_production() -> bool:
@@ -35,6 +32,14 @@ def is_production() -> bool:
     return os.getenv("APP_ENV", "dev").lower() in ["prod", "production"]
 
 # --- ROUTES ---
+
+@router.get("/login")
+async def serve_login_page(user_service: UserService = Depends(get_user_service)):
+    # If no users exist, force them to setup
+    if not is_system_initialized(user_service):
+        return RedirectResponse(url="/auth/setup", status_code=status.HTTP_302_FOUND)
+    
+    return FileResponse("static/auth/login.html")
 
 @router.post("/login")
 async def login_for_access_token(
@@ -61,7 +66,7 @@ async def login_for_access_token(
     # The service now takes the Pydantic User model directly
     access_token = auth_service.create_access_token(
         user=user, 
-        expires_delta=expires_in
+        exp=expires_in
     )
 
     # Calculate max_age for the cookie
@@ -87,6 +92,16 @@ async def login_for_access_token(
 async def logout(response: Response):
     response.delete_cookie("access_token")
     return {"status": "success"}
+
+@router.get("/setup")
+async def serve_setup_page(user_service: UserService = Depends(get_user_service)):
+    # If no users exist, force them to setup
+    if is_system_initialized(user_service):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND
+        )
+    
+    return FileResponse("static/auth/setup.html")
 
 @router.post("/setup")
 async def setup_admin_account(
@@ -117,6 +132,7 @@ async def setup_admin_account(
 
     # Create the first user (Admin) using the UserService
     # The service handles password hashing and validation.
+    print("Making admin creds")
     admin_user_data = schemas.UserCreateWithPassword(
         username=username,
         password=password,
@@ -142,6 +158,14 @@ async def check_setup(user_service: UserService = Depends(get_user_service)):
     return {
         "initialized": is_system_initialized(user_service)
     }
+
+@router.get("/register")
+async def serve_register_page(user_service: UserService = Depends(get_user_service)):
+    # If no users exist, force them to setup
+    if not is_system_initialized(user_service):
+        return RedirectResponse(url="/auth/setup", status_code=status.HTTP_302_FOUND)
+    
+    return FileResponse("static/auth/register.html")
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 async def register_user(

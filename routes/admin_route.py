@@ -10,7 +10,7 @@ from data.database import get_db
 from services.pages import PageService
 
 # Import the new, decoupled authentication dependencies
-from src.dependencies import optional_user, require_admin
+from src.dependencies import get_current_user, require_admin
 
 router = APIRouter(prefix="/admin", tags=["Admin Views (MPA)"])
 
@@ -22,7 +22,7 @@ ADMIN_APP_DIR = "static/admin"
 # --- HTML VIEW ROUTES (The Unified Dashboard - MPA Style) ---
 
 @router.get("/", response_class=FileResponse)
-async def view_dashboard(user: dict = Depends(optional_user)):
+async def view_dashboard(user: dict = Depends(get_current_user)):
     """Main Dashboard. Accessible by ANY logged-in user."""
     if not user:
         return RedirectResponse(url="/auth/login", status_code=302)
@@ -31,7 +31,7 @@ async def view_dashboard(user: dict = Depends(optional_user)):
     return FileResponse(os.path.join(ADMIN_APP_DIR, "page.html"))
 
 @router.get("/pages", response_class=FileResponse)
-async def view_page_manager(user: dict = Depends(optional_user)):
+async def view_page_manager(user: dict = Depends(get_current_user)):
     if not user:
         return RedirectResponse(url="/auth/login", status_code=302)
     

@@ -21,8 +21,6 @@ sys.path.append(str(Path(__file__).resolve().parent))
 
 # Now that the path is set, we can use absolute imports
 from data import crud, database
-from src.dependencies import get_current_user
-
 # Import all your route modules
 from routes import (
     admin_route,

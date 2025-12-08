@@ -30,7 +30,7 @@ class Page(PageBase):
     updated: str
 
     class Config:
-        orm_mode = True # Allows Pydantic to read data from ORM models
+        from_attributes=True # Allows Pydantic to read data from ORM models
 
 # --- Form Schemas ---
 
@@ -62,7 +62,7 @@ class Form(FormBase):
     updated: str
     
     class Config:
-        orm_mode = True
+        from_attributes=True 
         allow_population_by_field_name = True
 
 # --- Submission Schemas ---
@@ -87,7 +87,7 @@ class Submission(SubmissionBase):
     updated: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # --- User Schemas ---
 
@@ -113,7 +113,14 @@ class User(UserBase):
     username: str
     
     class Config:
-        orm_mode = True
+        from_attributes=True
+
+class CurrentUser(BaseModel):
+    """Schema representing the data decoded from the JWT access token."""
+    username: str
+    role: str
+    display_name: Optional[str] = None
+    exp: int
 
 # --- Setting Schemas ---
 
@@ -125,7 +132,7 @@ class SettingCreate(SettingBase):
 
 class Setting(SettingCreate):
     class Config:
-        orm_mode = True
+        from_attributes=True
 
 # --- Role Schemas ---
 
@@ -137,12 +144,14 @@ class RoleCreate(RoleBase):
 
 class Role(RoleCreate):
     class Config:
-        orm_mode = True
+        from_attributes=True
 
 class UserCreateWithPassword(UserBase):
     """Schema used for creating a user via the API, accepts plain password."""
     username: str
     password: str
+    role:str
+    display_name:str
 
 class Prompt(BaseModel):
     # Core content

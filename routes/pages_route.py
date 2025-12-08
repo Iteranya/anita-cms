@@ -5,7 +5,7 @@ from data.database import get_db
 from data import schemas
 from services.pages import PageService
 from src.dependencies import get_current_user, optional_user as optional_auth
-from data.schemas import User as CurrentUser
+from data.schemas import CurrentUser
 
 # --- Dependency Setup ---
 # This dependency provider makes the PageService available to our routes
@@ -13,7 +13,7 @@ def get_page_service(db: Session = Depends(get_db)) -> PageService:
     return PageService(db)
 
 # --- Router Definition ---
-router = APIRouter(prefix="/pages", tags=["Pages"])
+router = APIRouter(prefix="/page", tags=["Pages"])
 
 
 # ----------------------------------------------------
@@ -36,7 +36,7 @@ def create_page(
     return page_service.create_new_page(page_data=page_in)
 
 
-@router.get("/", response_model=List[schemas.Page])
+@router.get("/list", response_model=List[schemas.Page])
 def list_pages(
     skip: int = 0,
     limit: int = 100,
