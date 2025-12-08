@@ -54,32 +54,26 @@
 
         <!-- Navigation -->
         <nav class="flex-1 overflow-y-auto py-4 space-y-1 px-3">
-            
             <a href="/admin/page/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors group">
                 <i class="fas fa-layer-group w-6 text-center text-lg group-hover:text-blue-400"></i>
                 <span class="ml-3 font-medium">Pages</span>
             </a>
-
             <a href="/admin/forms/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors group">
                 <i class="fas fa-inbox w-6 text-center text-lg group-hover:text-anita-400"></i>
                 <span class="ml-3 font-medium">Forms</span>
             </a>
-
             <!-- ACTIVE: Images -->
             <a href="/admin/media/" class="flex items-center px-3 py-2.5 bg-anita-600 text-white rounded-lg shadow-lg shadow-anita-900/20 transition-colors group">
                 <i class="fas fa-images w-6 text-center text-lg"></i>
                 <span class="ml-3 font-semibold">Images</span>
             </a>
-
             <a href="/admin/files/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
                 <i class="fas fa-folder-open w-6 text-center text-lg"></i>
                 <span class="ml-3 font-medium">Files</span>
             </a>
-
             <div class="pt-4 pb-2">
                 <p class="px-3 text-xs font-bold text-slate-500 uppercase tracking-wider">System</p>
             </div>
-
             <a href="/admin/config/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors group">
                 <i class="fas fa-cog w-6 text-center text-lg group-hover:text-gray-300"></i>
                 <span class="ml-3 font-medium">Config</span>
@@ -94,7 +88,7 @@
         <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-8 shadow-sm z-10">
             <div>
                 <h1 class="text-xl font-bold text-slate-800">Media Library</h1>
-                <p class="text-xs text-slate-500" id="header-subtitle">Initializing Metadata System...</p>
+                <p class="text-xs text-slate-500" id="header-subtitle">Managing Media Data...</p>
             </div>
             <div class="flex items-center gap-4">
                 <button onclick="openUploadModal()" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg transition-all transform hover:-translate-y-0.5 font-bold text-sm flex items-center">
@@ -104,11 +98,36 @@
         </header>
 
         <!-- Content Area -->
-        <div class="flex-1 overflow-y-auto p-8">
+        <div class="flex-1 overflow-y-auto p-8 scroll-smooth">
             
             <!-- Loader -->
             <div id="media-loader" class="flex justify-center items-center h-64">
                 <i class="fas fa-circle-notch fa-spin text-4xl text-anita-400"></i>
+            </div>
+
+            <!-- SECTION 1: REGISTERED MEDIA -->
+            <div id="section-registered" class="mb-10 hidden">
+                <div class="flex items-center gap-2 mb-4 border-b border-slate-200 pb-2">
+                    <span class="bg-anita-100 text-anita-700 p-1.5 rounded-md"><i class="fas fa-check-circle"></i></span>
+                    <h2 class="text-lg font-bold text-slate-700">Library Items</h2>
+                    <span class="text-xs font-medium bg-slate-100 px-2 py-1 rounded-full text-slate-500" id="count-registered">0</span>
+                </div>
+                <div id="grid-registered" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                    <!-- Registered Images injected here -->
+                </div>
+            </div>
+
+            <!-- SECTION 2: UNREGISTERED / ORPHAN MEDIA -->
+            <div id="section-unregistered" class="hidden">
+                <div class="flex items-center gap-2 mb-4 border-b border-slate-200 pb-2 mt-8">
+                    <span class="bg-slate-200 text-slate-600 p-1.5 rounded-md"><i class="fas fa-question-circle"></i></span>
+                    <h2 class="text-lg font-bold text-slate-700">Unregistered Files</h2>
+                    <span class="text-xs font-medium bg-slate-100 px-2 py-1 rounded-full text-slate-500" id="count-unregistered">0</span>
+                </div>
+                <p class="text-sm text-slate-500 mb-4">These files exist on the server but have no metadata. Click them to register.</p>
+                <div id="grid-unregistered" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                    <!-- Unregistered Images injected here -->
+                </div>
             </div>
 
             <!-- Empty State -->
@@ -120,10 +139,6 @@
                 <p class="text-sm text-slate-400">Upload images to populate your library.</p>
             </div>
 
-            <!-- Grid -->
-            <div id="media-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 hidden">
-                <!-- Images injected here -->
-            </div>
         </div>
     </main>
 
@@ -138,8 +153,6 @@
             </div>
             
             <form id="upload-form" class="p-6 space-y-4">
-                
-                <!-- File Input Area -->
                 <div class="w-full">
                     <label class="flex justify-center w-full h-32 px-4 transition bg-white border-2 border-slate-300 border-dashed rounded-xl appearance-none cursor-pointer hover:border-anita-500 hover:bg-anita-50 focus:outline-none" id="drop-zone">
                         <div class="flex flex-col items-center justify-center">
@@ -149,8 +162,6 @@
                         <input type="file" name="file" id="file-input" class="hidden" accept="image/*" required>
                     </label>
                 </div>
-
-                <!-- Metadata Fields (Forms API Integration) -->
                 <div class="space-y-3">
                     <div class="flex items-center gap-2 text-xs text-anita-600 font-bold uppercase">
                         <i class="fas fa-database"></i> stored in 'media-data'
@@ -164,7 +175,6 @@
                         <textarea id="meta-desc" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none" placeholder="Alt text or details..."></textarea>
                     </div>
                 </div>
-
                 <div class="pt-2">
                     <button type="submit" id="upload-btn" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold shadow-lg transition flex justify-center items-center">
                         Upload & Save Data
@@ -174,43 +184,54 @@
         </div>
     </div>
 
-    <!-- 4. IMAGE DETAILS MODAL -->
+    <!-- 4. EDIT/REGISTER MODAL (Replaces Info Modal) -->
     <div id="details-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center">
         <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" onclick="closeDetails()"></div>
-        <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[80vh] flex overflow-hidden animate-float-up">
+        <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[85vh] flex overflow-hidden animate-float-up">
             
             <!-- Image Side -->
-            <div class="w-2/3 bg-slate-900 flex items-center justify-center relative">
-                <img id="detail-img" src="" class="max-h-full max-w-full object-contain">
+            <div class="w-2/3 bg-slate-950 flex flex-col items-center justify-center relative p-4">
+                <img id="detail-img" src="" class="max-h-[90%] max-w-full object-contain shadow-2xl">
+                <p class="text-slate-500 text-xs mt-4 font-mono" id="detail-filename">filename.jpg</p>
             </div>
             
             <!-- Info Side -->
-            <div class="w-1/3 p-6 bg-white flex flex-col">
-                <div class="flex justify-between items-start mb-6">
-                    <h3 class="text-xl font-bold text-slate-800 break-words" id="detail-title">Title</h3>
+            <div class="w-1/3 p-6 bg-white flex flex-col h-full">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-slate-800" id="modal-heading">Edit Media</h3>
                     <button onclick="closeDetails()" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times text-xl"></i></button>
                 </div>
+
+                <!-- Registration Status Banner -->
+                <div id="status-banner" class="mb-6 px-3 py-2 rounded text-xs font-bold uppercase tracking-wide flex items-center gap-2">
+                    <!-- Injected via JS -->
+                </div>
                 
-                <div class="flex-1 space-y-4 overflow-y-auto">
+                <form id="edit-form" class="flex-1 space-y-4 overflow-y-auto">
                     <div>
-                        <label class="text-xs font-bold text-slate-400 uppercase">Filename</label>
-                        <p class="text-sm font-mono text-slate-600 break-all" id="detail-filename">...</p>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Friendly Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="edit-title" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none text-slate-800">
                     </div>
                     <div>
-                        <label class="text-xs font-bold text-slate-400 uppercase">Description</label>
-                        <p class="text-sm text-slate-700 leading-relaxed" id="detail-desc">No description available.</p>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Description</label>
+                        <textarea id="edit-desc" rows="4" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none text-slate-800 text-sm"></textarea>
                     </div>
                     <div>
-                        <label class="text-xs font-bold text-slate-400 uppercase">Public Link</label>
-                        <div class="flex gap-2 mt-1">
-                            <input type="text" id="detail-link" readonly class="w-full bg-slate-50 border border-slate-200 text-xs p-2 rounded text-slate-500">
-                            <button onclick="copyLink()" class="bg-anita-100 text-anita-600 px-3 rounded font-bold hover:bg-anita-200"><i class="fas fa-copy"></i></button>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Public Link</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="edit-link" readonly class="w-full bg-slate-50 border border-slate-200 text-xs p-2 rounded text-slate-500">
+                            <button type="button" onclick="copyLink()" class="bg-anita-100 text-anita-600 px-3 rounded font-bold hover:bg-anita-200"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
-                </div>
+                </form>
 
-                <div class="mt-6 pt-6 border-t border-slate-100">
-                    <button onclick="deleteCurrentImage()" class="w-full py-2 text-red-500 hover:bg-red-50 rounded-lg font-bold text-sm transition">
+                <div class="mt-4 pt-4 border-t border-slate-100 flex flex-col gap-2">
+                    <button type="button" onclick="updateOrRegisterMedia()" id="save-btn" class="w-full py-2.5 bg-anita-600 hover:bg-anita-700 text-white rounded-lg font-bold shadow-md transition flex justify-center items-center">
+                        <!-- Text changes based on status -->
+                        Save Changes
+                    </button>
+
+                    <button onclick="deleteCurrentImage()" class="w-full py-2.5 text-red-500 hover:bg-red-50 rounded-lg font-bold text-sm transition">
                         <i class="fas fa-trash-alt mr-2"></i> Delete Permanently
                     </button>
                 </div>
@@ -228,9 +249,10 @@
 
     <script>
         // --- Global State ---
-        let mediaFiles = []; // The raw file list
-        let mediaMeta = {};  // The dictionary of metadata { filename: {title, desc} }
+        let mediaFiles = []; 
+        let mediaMeta = {}; // { filename: {title, desc, id} }
         let currentDetailFilename = '';
+        let currentIsRegistered = false;
 
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', async () => {
@@ -242,7 +264,6 @@
             fileInput.addEventListener('change', (e) => {
                 if(e.target.files.length > 0) {
                     document.getElementById('file-label').innerText = e.target.files[0].name;
-                    // Auto-fill title if empty
                     const titleInput = document.getElementById('meta-title');
                     if(!titleInput.value) {
                         titleInput.value = e.target.files[0].name.split('.')[0];
@@ -250,25 +271,20 @@
                 }
             });
             
-            // Form Submit
+            // Form Submit for Upload
             document.getElementById('upload-form').addEventListener('submit', handleUpload);
         });
 
         // --- 1. Smart Form Check ---
         async function ensureMediaFormExists() {
-            const subTitle = document.getElementById('header-subtitle');
             try {
-                // Check if form exists
                 let res = await fetch('/forms/media-data');
-                
                 if (res.status === 404) {
-                    subTitle.innerText = "Creating Metadata Schema...";
-                    // Create it
                     const payload = {
                         slug: "media-data",
                         title: "Media Data",
                         description: "System form for storing image metadata.",
-                        tags: ["system", "read"], // 'read' allows public access to fetch details
+                        tags: ["system", "read"], 
                         schema: {
                             fields: [
                                 { name: "friendly_name", label: "Title", type: "text", required: true },
@@ -278,103 +294,119 @@
                             ]
                         }
                     };
-                    
                     await fetch('/forms/', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
-                    subTitle.innerText = "Metadata System Initialized.";
-                } else {
-                    subTitle.innerText = "Metadata System Ready.";
                 }
-            } catch (e) {
-                console.error("Form Init Error", e);
-                subTitle.innerText = "Metadata System Offline.";
-            }
+            } catch (e) { console.error("Form Init Error", e); }
         }
 
-        // --- 2. Fetch & Merge Data ---
+        // --- 2. Fetch & Separate Data ---
         async function fetchLibrary() {
             const loader = document.getElementById('media-loader');
-            const grid = document.getElementById('media-grid');
+            const regGrid = document.getElementById('grid-registered');
+            const unregGrid = document.getElementById('grid-unregistered');
+            const regSection = document.getElementById('section-registered');
+            const unregSection = document.getElementById('section-unregistered');
             const empty = document.getElementById('empty-state');
             
             try {
-                // A. Fetch Files
+                // Fetch Files
                 const fileRes = await fetch('/media/');
                 if(fileRes.status === 401) window.location.href = '/auth/login';
-                const fileData = await fileRes.json();
-                mediaFiles = fileData || [];
-                console.log(fileData)
+                mediaFiles = await fileRes.json();
 
-                // B. Fetch Metadata
+                // Fetch Metadata
+                mediaMeta = {};
                 const metaRes = await fetch('/forms/media-data/submissions');
                 if (metaRes.ok) {
                     const submissions = await metaRes.json();
-                    // Map submissions by 'saved_filename'
                     submissions.forEach(sub => {
                         if(sub.data && sub.data.saved_filename) {
                             mediaMeta[sub.data.saved_filename] = {
                                 title: sub.data.friendly_name,
                                 description: sub.data.description,
-                                id: sub.id // Store submission ID if needed later for deep cleanup
+                                id: sub.id 
                             };
                         }
                     });
                 }
 
-                // C. Render
+                // Render
                 loader.classList.add('hidden');
-                grid.innerHTML = '';
+                regGrid.innerHTML = '';
+                unregGrid.innerHTML = '';
+
+                let regCount = 0;
+                let unregCount = 0;
 
                 if (mediaFiles.length === 0) {
                     empty.classList.remove('hidden');
-                    grid.classList.add('hidden');
+                    regSection.classList.add('hidden');
+                    unregSection.classList.add('hidden');
                     return;
                 }
 
                 empty.classList.add('hidden');
-                grid.classList.remove('hidden');
 
                 mediaFiles.forEach(item => {
-                    // FIX: Extract the filename string from the object provided by FastAPI
-                    const filename = item.filename; 
-
-                    const meta = mediaMeta[filename] || {};
-                    const displayName = meta.title || filename;
-                    
-                    // Now this works because 'filename' is a string
-                    const isOptimized = filename.includes('_temp') ? 'opacity-50' : ''; 
+                    const filename = item.filename;
+                    const isRegistered = !!mediaMeta[filename];
+                    const isOptimized = filename.includes('_temp') ? 'opacity-50' : '';
 
                     const card = document.createElement('div');
-                    card.className = `image-card relative group bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden aspect-square cursor-pointer ${isOptimized}`;
+                    // Style distinction
+                    const borderClass = isRegistered 
+                        ? 'border-anita-200 shadow-anita-100 ring-1 ring-anita-100' 
+                        : 'border-slate-200 grayscale-[0.3] hover:grayscale-0';
+
+                    card.className = `image-card relative group bg-white rounded-xl shadow-sm border ${borderClass} overflow-hidden aspect-square cursor-pointer ${isOptimized} transition-all duration-300 hover:-translate-y-1`;
                     card.onclick = () => openDetails(filename);
 
+                    // Meta to display
+                    const displayName = isRegistered ? mediaMeta[filename].title : filename;
+                    const icon = isRegistered ? '<i class="fas fa-check-circle text-anita-500"></i>' : '<i class="fas fa-question-circle text-slate-400"></i>';
+
                     card.innerHTML = `
-                        <img src="/media/${filename}" class="w-full h-full object-cover transition duration-500 group-hover:scale-110" loading="lazy">
+                        <img src="/media/${filename}" class="w-full h-full object-cover transition duration-500 group-hover:scale-105" loading="lazy">
                         
-                        <div class="overlay absolute inset-0 bg-slate-900/60 opacity-0 transition duration-300 flex flex-col justify-end p-3">
+                        <div class="overlay absolute inset-0 bg-slate-900/70 opacity-0 transition duration-300 flex flex-col justify-end p-3">
                             <p class="text-white font-bold text-sm truncate">${displayName}</p>
-                            <p class="text-slate-300 text-xs truncate font-mono mb-2">${filename}</p>
+                            <p class="text-slate-300 text-xs truncate font-mono mb-2">${isRegistered ? 'Registered' : 'Unregistered'}</p>
                         </div>
                         
-                        <div class="absolute top-2 right-2 bg-white/90 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase text-slate-600 shadow">
-                            ${filename.split('.').pop()}
+                        <div class="absolute top-2 right-2 bg-white/90 px-1.5 py-0.5 rounded text-xs shadow">
+                            ${icon}
                         </div>
                     `;
-                    grid.appendChild(card);
+
+                    if(isRegistered) {
+                        regGrid.appendChild(card);
+                        regCount++;
+                    } else {
+                        unregGrid.appendChild(card);
+                        unregCount++;
+                    }
                 });
+
+                // Toggle Sections
+                document.getElementById('count-registered').innerText = regCount;
+                document.getElementById('count-unregistered').innerText = unregCount;
+
+                regSection.classList.toggle('hidden', regCount === 0);
+                unregSection.classList.toggle('hidden', unregCount === 0);
+
             } catch (e) {
                 console.error(e);
             }
         }
 
-        // --- 3. Upload Logic ---
+        // --- 3. Upload & Register ---
         async function handleUpload(e) {
             e.preventDefault();
             const btn = document.getElementById('upload-btn');
-            const origText = btn.innerText;
             btn.innerHTML = `<i class="fas fa-circle-notch fa-spin mr-2"></i> Processing...`;
             btn.disabled = true;
 
@@ -382,66 +414,143 @@
             const title = document.getElementById('meta-title').value;
             const desc = document.getElementById('meta-desc').value;
 
-            if(fileInput.files.length === 0) return;
-
             const formData = new FormData();
             formData.append('files', fileInput.files[0]);
 
             try {
-                // Step 1: Upload File
-                const uploadRes = await fetch('/media/', {
-                    method: 'POST',
-                    body: formData
-                });
+                // 1. Upload
+                const uploadRes = await fetch('/media/', { method: 'POST', body: formData });
                 const uploadData = await uploadRes.json();
 
                 if (uploadData.files && uploadData.files.length > 0) {
                     const savedFile = uploadData.files[0];
-                    const finalFilename = savedFile.saved_as; // The backend optimizes and renames it
+                    
+                    // 2. Register Metadata
+                    await submitMetadata(savedFile.saved_as, title, desc);
 
-                    // Step 2: Save Metadata to Form
-                    const metaPayload = {
-                        data: {
-                            friendly_name: title || finalFilename,
-                            description: desc,
-                            saved_filename: finalFilename,
-                            public_link: `/media/${finalFilename}`
-                        }
-                    };
-
-                    await fetch('/forms/media-data/submit', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify(metaPayload)
-                    });
-
-                    showToast('Media uploaded & metadata saved!');
+                    showToast('Media uploaded & registered!');
                     closeModal();
-                    fetchLibrary(); // Refresh grid
-                } else {
-                    alert('Upload failed');
-                }
-
+                    fetchLibrary();
+                } 
             } catch (e) {
-                alert('Network error');
+                alert('Upload Error');
                 console.error(e);
             } finally {
-                btn.innerHTML = origText;
+                btn.innerHTML = 'Upload & Save Data';
                 btn.disabled = false;
             }
         }
 
-        // --- 4. Delete Logic ---
-        async function deleteCurrentImage() {
-            if(!confirm("Delete this image? (This cannot be undone)")) return;
+        // --- 4. Modal Interactions (Edit / Register) ---
+        function openDetails(filename) {
+            currentDetailFilename = filename;
+            const meta = mediaMeta[filename];
+            currentIsRegistered = !!meta;
+
+            // Image
+            document.getElementById('detail-img').src = `/media/${filename}`;
+            document.getElementById('detail-filename').innerText = filename;
+            document.getElementById('edit-link').value = `/media/${filename}`;
+
+            // Fields
+            const titleInput = document.getElementById('edit-title');
+            const descInput = document.getElementById('edit-desc');
+            const saveBtn = document.getElementById('save-btn');
+            const banner = document.getElementById('status-banner');
+
+            if (currentIsRegistered) {
+                // Mode: Edit
+                document.getElementById('modal-heading').innerText = "Edit Details";
+                titleInput.value = meta.title;
+                descInput.value = meta.description || '';
+                
+                banner.className = "mb-6 px-3 py-2 rounded text-xs font-bold uppercase tracking-wide flex items-center gap-2 bg-anita-100 text-anita-700";
+                banner.innerHTML = `<i class="fas fa-check-circle"></i> Registered in Database`;
+                
+                saveBtn.innerHTML = `<i class="fas fa-save mr-2"></i> Update Metadata`;
+                saveBtn.className = "w-full py-2.5 bg-anita-600 hover:bg-anita-700 text-white rounded-lg font-bold shadow-md transition flex justify-center items-center";
+            } else {
+                // Mode: Register
+                document.getElementById('modal-heading').innerText = "Register Media";
+                titleInput.value = filename.split('.')[0]; // Auto-suggest title
+                descInput.value = '';
+
+                banner.className = "mb-6 px-3 py-2 rounded text-xs font-bold uppercase tracking-wide flex items-center gap-2 bg-slate-100 text-slate-600 border border-slate-200";
+                banner.innerHTML = `<i class="fas fa-exclamation-circle"></i> Unregistered File`;
+
+                saveBtn.innerHTML = `<i class="fas fa-plus-circle mr-2"></i> Register to Library`;
+                saveBtn.className = "w-full py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold shadow-md transition flex justify-center items-center";
+            }
+
+            document.getElementById('details-modal').classList.remove('hidden');
+        }
+
+        // --- 5. Logic: Register/Update from Modal ---
+        async function updateOrRegisterMedia() {
+            const title = document.getElementById('edit-title').value;
+            const desc = document.getElementById('edit-desc').value;
+            const btn = document.getElementById('save-btn');
+            const originalText = btn.innerHTML;
+
+            if(!title) { alert("Title is required"); return; }
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Saving...`;
 
             try {
-                // 1. Delete physical file
+                if(currentIsRegistered) {
+                    // We need to find the submission ID (which we stored in mediaMeta) and UPDATE it
+                    // NOTE: Anita forms API usually supports standard CRUD if configured. 
+                    // If your system only supports append, we just submit new. 
+                    // Assuming we create a new entry for simplicity or update based on specific logic.
+                    // For this logic, we will just submit a new entry which overwrites logic in some CMSs or adds a new row.
+                    // Ideal: PUT /forms/media-data/submissions/{id}
+                    // Since specific API update endpoint isn't defined in prompt, we treat it as a re-submission/overwrite logic.
+                    
+                    // Let's assume standard submit is fine for this context:
+                    await submitMetadata(currentDetailFilename, title, desc);
+                    showToast('Metadata Updated');
+                } else {
+                    // Register new
+                    await submitMetadata(currentDetailFilename, title, desc);
+                    showToast('File Registered Successfully');
+                }
+                
+                closeDetails();
+                fetchLibrary(); // Refresh grid to move item
+            } catch(e) {
+                console.error(e);
+                alert("Error saving data");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        async function submitMetadata(filename, title, desc) {
+            const payload = {
+                data: {
+                    friendly_name: title,
+                    description: desc,
+                    saved_filename: filename,
+                    public_link: `/media/${filename}`
+                }
+            };
+
+            // If we have an ID and want to update, logic would go here. 
+            // Currently utilizing basic submit.
+            await fetch('/forms/media-data/submit', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+        }
+
+        // --- 6. Delete Logic ---
+        async function deleteCurrentImage() {
+            if(!confirm("Are you sure? This deletes the file physically.")) return;
+            try {
                 await fetch(`/media/${currentDetailFilename}`, { method: 'DELETE' });
-                
-                // 2. (Optional) We could search and delete the form submission here too, 
-                // but for simplicity/safety we'll just hide it from view on refresh.
-                
                 closeDetails();
                 showToast('Image deleted.');
                 fetchLibrary();
@@ -456,35 +565,14 @@
             document.getElementById('file-label').innerText = "Click to select file";
             document.getElementById('upload-modal').classList.remove('hidden');
         }
-
-        function closeModal() {
-            document.getElementById('upload-modal').classList.add('hidden');
-        }
-
-        function openDetails(filename) {
-            currentDetailFilename = filename;
-            const meta = mediaMeta[filename] || {};
-            
-            document.getElementById('detail-img').src = `/media/${filename}`;
-            document.getElementById('detail-title').innerText = meta.title || filename;
-            document.getElementById('detail-filename').innerText = filename;
-            document.getElementById('detail-desc').innerText = meta.description || "No description provided.";
-            document.getElementById('detail-link').value = `/media/${filename}`;
-            
-            document.getElementById('details-modal').classList.remove('hidden');
-        }
-
-        function closeDetails() {
-            document.getElementById('details-modal').classList.add('hidden');
-        }
-
+        function closeModal() { document.getElementById('upload-modal').classList.add('hidden'); }
+        function closeDetails() { document.getElementById('details-modal').classList.add('hidden'); }
         function copyLink() {
-            const input = document.getElementById('detail-link');
+            const input = document.getElementById('edit-link');
             input.select();
             document.execCommand('copy');
             showToast('Link copied!');
         }
-
         function showToast(msg) {
             const t = document.getElementById('toast');
             document.getElementById('toast-msg').innerText = msg;

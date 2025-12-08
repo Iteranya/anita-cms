@@ -47,10 +47,6 @@ class FormService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Form schema cannot be empty."
             )
-        print("Trying to create Form")
-        print(form_data.slug)
-        print("The data whole")
-        print(form_data)
         
         # If all checks pass, proceed to create the form in the database.
         return crud.create_form(self.db, form=form_data)
