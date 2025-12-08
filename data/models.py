@@ -28,7 +28,7 @@ class Form(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     slug = Column(String, unique=True, nullable=False, index=True)
     title = Column(String, nullable=False)
-    schema_ = Column("schema_json", JSON, nullable=False) # Maps to schema_json column
+    schema = Column("schema_json", JSON, nullable=False) # Maps to schema_json column
     description = Column(Text)
     created = Column(String)
     updated = Column(String)

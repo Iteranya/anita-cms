@@ -30,7 +30,7 @@ async def view_dashboard(user: dict = Depends(get_current_user)):
     # Serves the static HTML file for the dashboard.
     return FileResponse(os.path.join(ADMIN_APP_DIR, "page.html"))
 
-@router.get("/pages", response_class=FileResponse)
+@router.get("/page", response_class=FileResponse)
 async def view_page_manager(user: dict = Depends(get_current_user)):
     if not user:
         return RedirectResponse(url="/auth/login", status_code=302)
@@ -43,7 +43,7 @@ async def view_config(user: dict = Depends(require_admin)):
 
 @router.get("/forms", response_class=FileResponse)
 async def view_forms(user: dict = Depends(require_admin)):
-    return FileResponse(os.path.join(ADMIN_APP_DIR, "forms.html"))
+    return FileResponse(os.path.join(ADMIN_APP_DIR, "form.html"))
 
 @router.get("/media", response_class=FileResponse)
 async def view_media(user: dict = Depends(require_admin)):

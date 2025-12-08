@@ -19,10 +19,26 @@ def list_pages(db: Session, skip: int = 0, limit: int = 100) -> List[models.Page
     return db.query(models.Page).order_by(models.Page.created.desc()).offset(skip).limit(limit).all()
 
 def get_pages_by_tag(db: Session, tag: str) -> List[models.Page]:
-    """Retrieve all pages containing a specific tag in their JSON tags list."""
-    # The .contains() operator is a powerful feature for JSON columns in SQLAlchemy
-    return db.query(models.Page).filter(models.Page.tags.contains(tag)).order_by(models.Page.created.desc()).all()
+    """Retrieve all pages containing a specific tag in their JSON tags list,
+    with input validation and post-query verification."""
+    
+    if not isinstance(tag, str) or not tag.strip():
+        raise ValueError("Tag must be a non-empty string.")
 
+    # Initial DB-level filtering (efficient but may require verification)
+    candidates = (
+        db.query(models.Page)
+        .filter(models.Page.tags.contains([tag]))   # safer than contains(tag) if tags is a list
+        .all()
+    )
+
+    # Double-check tags actually contain the requested tag
+    valid_pages = [p for p in candidates if isinstance(p.tags, list) and tag in p.tags]
+
+    # Sort newest first
+    valid_pages.sort(key=lambda x: x.created, reverse=True)
+
+    return valid_pages
     
 def get_first_page_by_tag(db: Session, tag: str) -> Optional[models.Page]:
     candidates = db.query(models.Page).filter(models.Page.tags.contains(tag)).all()
@@ -78,14 +94,14 @@ def list_forms(db: Session, skip: int = 0, limit: int = 100) -> List[models.Form
 def create_form(db: Session, form: schemas.FormCreate) -> models.Form:
     """Create a new form."""
     now = datetime.now().isoformat()
-    # The Pydantic schema uses 'schema', the model uses 'schema_'. We handle it here.
-    form_data = form.dict()
+    form_data = form.model_dump(by_alias=True)
+
     db_form = models.Form(
         **form_data,
-        schema_=form_data.pop('schema'),
         created=now,
         updated=now
     )
+
     db.add(db_form)
     db.commit()
     db.refresh(db_form)
@@ -96,15 +112,13 @@ def update_form(db: Session, slug: str, form_update: schemas.FormUpdate) -> Opti
     db_form = get_form(db, slug=slug)
     if not db_form:
         return None
-    
-    update_data = form_update.dict(exclude_unset=True)
-    # Handle the 'schema' to 'schema_' mapping
-    if 'schema' in update_data:
-        setattr(db_form, 'schema_', update_data.pop('schema'))
-        
+
+    # Use by_alias=True and exclude_unset=True to only get updated fields with correct names.
+    update_data = form_update.model_dump(by_alias=True, exclude_unset=True)
+
     for key, value in update_data.items():
         setattr(db_form, key, value)
-    
+
     db_form.updated = datetime.now().isoformat()
     db.commit()
     db.refresh(db_form)

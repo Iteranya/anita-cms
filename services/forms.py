@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
 from data import crud, schemas, models
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Set
 
 class FormService:
     def __init__(self, db: Session):
@@ -42,11 +42,15 @@ class FormService:
             )
 
         # Business Logic 2 (Example): Ensure the schema is not empty.
-        if not form_data.schema_:
+        if not form_data.schema:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Form schema cannot be empty."
             )
+        print("Trying to create Form")
+        print(form_data.slug)
+        print("The data whole")
+        print(form_data)
         
         # If all checks pass, proceed to create the form in the database.
         return crud.create_form(self.db, form=form_data)
@@ -83,19 +87,25 @@ class FormService:
     def _validate_submission_data(self, schema: Dict[str, Any], data: Dict[str, Any]):
         """
         A simple validator to check if submission data conforms to the form's schema.
-        NOTE: For production, a more robust library like `jsonschema` would be better.
         """
-        # Check for required fields
-        for field_name, field_props in schema.items():
-            if field_props.get("required", False) and field_name not in data:
-                raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail=f"Missing required field: '{field_name}'"
-                )
         
-        # Check for extra fields not in the schema
+        # 1. Extract the names of all valid fields from the schema's 'fields' list.
+        #    Using a set is more efficient for membership checking ('in').
+        try:
+            valid_field_names: Set[str] = {field['name'] for field in schema['fields']}
+        except (KeyError, TypeError):
+            # Handle cases where the schema format is not what we expect
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Server has a misconfigured form schema."
+            )
+
+        # 2. Check for extra fields not defined in the schema
         for field_name in data:
-            if field_name not in schema:
+            # 3. Now, check if the field_name is in our set of valid names
+            if field_name not in valid_field_names:
+                print(f"Schema's valid fields: {valid_field_names}")
+                print(f"Unexpected field in submission: '{field_name}'")
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                     detail=f"Unexpected field in submission: '{field_name}'"
@@ -109,7 +119,7 @@ class FormService:
         form = self.get_form_by_slug(submission_data.form_slug)
         
         # Business Logic 2: Validate the incoming data against the form's schema.
-        self._validate_submission_data(schema=form.schema_, data=submission_data.data)
+        self._validate_submission_data(schema=form.schema, data=submission_data.data)
 
         # If validation passes, create the submission.
         return crud.create_submission(self.db, submission=submission_data)

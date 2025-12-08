@@ -36,16 +36,13 @@ class Page(PageBase):
 
 class FormBase(BaseModel):
     title: str
-    # The API will use 'schema', but we map it to 'schema_' for the model
-    schema_: Dict[str, Any] = Field(alias='schema')
+    # The API field is 'schema'. Pydantic will populate it from the ORM attribute 'schema'.
+    # CHANGE: Use `alias` so it works for both input and output serialization.
+    schema: Dict[str, Any] = Field(alias='schema') 
     description: Optional[str] = None
     tags: Optional[List[str]] = []
     custom: Optional[Dict[str, Any]] = {}
     author: Optional[str] = None
-
-    class Config:
-        # This allows using 'schema' in API requests/responses
-        allow_population_by_field_name = True
 
 class FormCreate(FormBase):
     slug: str
@@ -53,7 +50,10 @@ class FormCreate(FormBase):
 class FormUpdate(FormBase):
     # All fields are optional for updating
     title: Optional[str] = None
-    schema_: Optional[Dict[str, Any]] = Field(alias='schema')
+    # We redefine `schema` here to make it optional for updates
+    # CHANGE: Use `alias` here as well.
+    schema: Optional[Dict[str, Any]] = Field(default=None, alias='schema')
+
 
 class Form(FormBase):
     id: int
@@ -63,7 +63,6 @@ class Form(FormBase):
     
     class Config:
         from_attributes=True 
-        allow_population_by_field_name = True
 
 # --- Submission Schemas ---
 
@@ -173,7 +172,7 @@ class RouteData(BaseModel):
     name: str
     type: str
     description: Optional[str] = None
-    schema_: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = None
     usage_note: Optional[str] = None
 
 class MarkdownEditRequest(BaseModel):

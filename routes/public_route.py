@@ -18,7 +18,7 @@ def check_page_is_public(page: schemas.Page):
     Raises a 404 error if the page is private.
     We use 404 instead of 403 to avoid revealing the existence of private content.
     """
-    if page.tags and "public" not in page.tags:
+    if page.tags and "private" in page.tags:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found")
 
 # ==========================================
@@ -51,7 +51,7 @@ def serve_blog_index(page_service: PageService = Depends(get_page_service)):
 def serve_blog_post(slug: str, page_service: PageService = Depends(get_page_service)):
     """Serves a single blog post page."""
     page = page_service.get_page_by_slug(slug) # Service handles 404 if slug doesn't exist
-    markdown_template = page_service.get_first_page_by_tag('markdown-template')
+    markdown_template = page_service.get_first_page_by_tag('blog-template')
     
     # Ensure this endpoint only serves pages with the 'blog' tag
     if not page.tags or 'blog' not in page.tags:
@@ -62,19 +62,6 @@ def serve_blog_post(slug: str, page_service: PageService = Depends(get_page_serv
         return HTMLResponse(content=page.html, status_code=200)
     else:
         return HTMLResponse(content=markdown_template.html, status_code=200)
-
-
-@router.get("/{slug}", response_class=HTMLResponse)
-def serve_generic_page(slug: str, page_service: PageService = Depends(get_page_service)):
-    """
-    Serves a generic top-level page by its slug.
-    This acts as a catch-all for any slug not matched by other routes.
-    """
-    page = page_service.get_page_by_slug(slug)
-    check_page_is_public(page)
-    if not page.tags or 'main' not in page.tags:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found in this category.")
-    return HTMLResponse(content=page.html, status_code=200)
 
 
 # ==========================================
@@ -104,3 +91,15 @@ def api_get_blog_page(slug: str, page_service: PageService = Depends(get_page_se
 
     check_page_is_public(page)
     return page
+
+@router.get("/{slug}", response_class=HTMLResponse)
+def serve_generic_page(slug: str, page_service: PageService = Depends(get_page_service)):
+    """
+    Serves a generic top-level page by its slug.
+    This acts as a catch-all for any slug not matched by other routes.
+    """
+    page = page_service.get_page_by_slug(slug)
+    check_page_is_public(page)
+    if not page.tags or 'main' not in page.tags:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found in this category.")
+    return HTMLResponse(content=page.html, status_code=200)

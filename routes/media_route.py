@@ -17,6 +17,7 @@ media_service = MediaService() # Instantiate the service once
 async def list_images():
     """List all available media files."""
     images = media_service.list_files()
+    print(images)
     return images
 
 @router.get("/{filename}")

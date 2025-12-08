@@ -251,7 +251,7 @@
             const loader = document.getElementById('loader');
 
             try {
-                const res = await fetch('/admin/api/config/');
+                const res = await fetch('/config/');
                 
                 if (res.status === 401) {
                     window.location.href = '/auth/login';
@@ -303,7 +303,7 @@
             }
 
             try {
-                const res = await fetch('/admin/api/config/', {
+                const res = await fetch('/config/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)

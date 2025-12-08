@@ -305,7 +305,8 @@
                 const fileRes = await fetch('/media/');
                 if(fileRes.status === 401) window.location.href = '/auth/login';
                 const fileData = await fileRes.json();
-                mediaFiles = fileData.images || [];
+                mediaFiles = fileData || [];
+                console.log(fileData)
 
                 // B. Fetch Metadata
                 const metaRes = await fetch('/forms/media-data/submissions');

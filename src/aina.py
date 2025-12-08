@@ -77,7 +77,7 @@ class WebsiteBuilderService:
         forms = self.form_service.get_all_forms(skip=0, limit=1000)
         for f in forms:
             form_slug = f.slug
-            form_schema = f.schema_
+            form_schema = f.schema
             tags_info = f"Tags: {', '.join(f.tags)}" if f.tags else "No tags"
 
             submission_schema = {
@@ -133,7 +133,7 @@ class WebsiteBuilderService:
                     name=form_slug,
                     type="form",
                     description=f.description,
-                    schema_=form_schema,
+                    schema=form_schema,
                     usage_note=usage_note
                 )
             )
@@ -145,7 +145,7 @@ class WebsiteBuilderService:
             style_description = self._generate_page_style_description(p.html or "")
             collected.append(RouteData(
                 name=p.slug, type="page", description=style_description,
-                schema_={"title": p.title, "slug": p.slug, "tags": p.tags or []},
+                schema={"title": p.title, "slug": p.slug, "tags": p.tags or []},
                 usage_note="Represents a CMS page layout and style theme."
             ))
 
