@@ -94,7 +94,7 @@ class Submission(SubmissionBase):
 class UserBase(BaseModel):
     display_name: Optional[str] = None
     pfp_url: Optional[str] = None
-    role: str = "user"
+    role: str = "viewer"
     disabled: bool = False
 
 class UserCreate(UserBase):

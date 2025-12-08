@@ -36,14 +36,6 @@ def is_production() -> bool:
 
 # --- ROUTES ---
 
-@router.get("/login")
-async def serve_login_page(user_service: UserService = Depends(get_user_service)):
-    # If no users exist, force them to setup
-    if not is_system_initialized(user_service):
-        return RedirectResponse(url="/auth/setup", status_code=status.HTTP_302_FOUND)
-    
-    return FileResponse("static/auth/login.html")
-
 @router.post("/login")
 async def login_for_access_token(
     response: Response,
@@ -95,16 +87,6 @@ async def login_for_access_token(
 async def logout(response: Response):
     response.delete_cookie("access_token")
     return {"status": "success"}
-
-# --- SETUP ROUTES ---
-
-@router.get("/setup", response_class=HTMLResponse)
-async def setup_page(user_service: UserService = Depends(get_user_service)):
-    # Security: Block setup page if a user already exists
-    if is_system_initialized(user_service):
-        return RedirectResponse(url="/auth/login", status_code=status.HTTP_302_FOUND)
-    
-    return FileResponse("static/auth/setup.html")
 
 @router.post("/setup")
 async def setup_admin_account(
@@ -159,4 +141,51 @@ async def check_setup(user_service: UserService = Depends(get_user_service)):
     """
     return {
         "initialized": is_system_initialized(user_service)
+    }
+
+@router.post("/register", status_code=status.HTTP_201_CREATED)
+async def register_user(
+    username: str = Form(...),
+    password: str = Form(...),
+    confirm_password: str = Form(...),
+    display_name: str = Form(None), # Optional
+    user_service: UserService = Depends(get_user_service)
+):
+    """
+    Public endpoint to register a new account. 
+    The role is strictly enforced as 'user'.
+    """
+    # 1. Input Validation
+    if password != confirm_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Passwords do not match"
+        )
+
+    if len(password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 8 characters"
+        )
+
+    # 2. Prepare Data
+    new_user_data = schemas.UserCreateWithPassword(
+        username=username,
+        password=password,
+        role="viewer", 
+        display_name=display_name or username
+    )
+
+    # 3. Call Service
+    # The service handles hashing and username uniqueness checks
+    try:
+        created_user = user_service.create_user(new_user_data)
+    except HTTPException as e:
+        # Pass through service-level exceptions (like Username taken)
+        raise e
+
+    return {
+        "status": "success",
+        "message": "User registered successfully",
+        "username": created_user.username
     }

@@ -5,6 +5,7 @@ venv
 *.db
 *.json
 *.exe
+*.log
 !default_config.json
 !default_pages.json
 /uploads
