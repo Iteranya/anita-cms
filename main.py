@@ -32,7 +32,8 @@ from routes import (
     media_route,
     pages_route, 
     public_route,
-    roles_route
+    roles_route,
+    config_route
 )
 
 # --- Pre-startup Checks ---
@@ -101,15 +102,16 @@ api_router = APIRouter()
 
 # Include all protected routes into the protected_router
 api_router.include_router(admin_route.router, tags=["Admin"])
+api_router.include_router(config_route.router, tags=["Config"])
 api_router.include_router(aina_route.router, tags=["Aina"])
 api_router.include_router(asta_route.router, tags=["Asta"])
 api_router.include_router(media_route.router, tags=["Media"])
 api_router.include_router(forms_route.router, tags=["Forms"])
 api_router.include_router(file_route.router, tags=["Files"])
 api_router.include_router(roles_route.router, tags=["Roles"])
-api_router.include_router(pages_route.router, tags=["Pages"]) # Your new pages router
-api_router.include_router(auth_route.router, tags=["Authentication"]) # Public auth routes
-api_router.include_router(public_route.router, tags=["Public"])     # Other public routes                    # All protected routes
+api_router.include_router(pages_route.router, tags=["Pages"]) 
+api_router.include_router(auth_route.router, tags=["Authentication"]) 
+api_router.include_router(public_route.router, tags=["Public"])   
 
 # Finally, include the versioned API router in the main app
 app.include_router(api_router)
