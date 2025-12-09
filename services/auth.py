@@ -3,10 +3,8 @@ from datetime import datetime, timedelta
 from typing import Optional, Dict
 from fastapi import HTTPException, status
 from jose import JWTError, jwt
-
-# Import the user service to interact with user data
 from services.users import UserService, verify_password, hash_password
-from data.schemas import User  # Pydantic schema for the user
+from data.schemas import User 
 
 class AuthService:
     def __init__(self, user_service: UserService):
