@@ -105,7 +105,7 @@ DEFAULT_CONFIG = {
             "content": "string - A summary of the blog post's content.",
             "tags": "List[string] - A list of tags associated with the post.",
             "thumb": "string - URL or path to the post's thumbnail image.",
-            "type": "string - The type of the page (e.g., 'blog').",
+            "type": "string - The type of the page (e.g., 'sys:blog').",
             "created": "string - The creation date of the post (ISO format).",
             "updated": "string - The last updated date of the post (ISO format).",
             "author": "string - The name of the post's author."
@@ -129,7 +129,7 @@ DEFAULT_CONFIG = {
           "html": "string - The full content of the post rendered as HTML.",
           "tags": "List[string] - A list of tags associated with the post.",
           "thumb": "string - URL or path to the post's thumbnail image.",
-          "type": "string - The type of the page (e.g., 'blog').",
+          "type": "string - The type of the page (e.g., 'sys:blog').",
           "created": "string - The creation date of the post (ISO format).",
           "updated": "string - The last updated date of the post (ISO format).",
           "author": "string - The name of the post's author."

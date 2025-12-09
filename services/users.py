@@ -163,3 +163,36 @@ class UserService:
         # For simplicity here, we'll proceed, but in a real app you'd add this check.
         
         crud.delete_role(self.db, role_name=role_name)
+
+    def get_user_permissions(self, username: str) -> List[str]:
+        """
+        Gets a list of all permissions for a specific user.
+
+        Args:
+            username: The username of the user to check.
+
+        Returns:
+            A list of permission strings. Returns an empty list if the user
+            does not exist, their role doesn't exist, or their role has no permissions.
+        """
+        # Step 1: Find the user without raising an exception on failure.
+        # We use the CRUD function directly to get None instead of a 404.
+        user = crud.get_user_by_username(self.db, username=username)
+        if not user:
+            return []
+
+        # Step 2: Get the user's role name.
+        user_role_name = user.role
+        if not user_role_name:
+            return []
+
+        # Step 3: Get the dictionary of all roles and their permissions.
+        # We can reuse the existing service method for this.
+        all_roles_with_permissions = self.get_all_roles()
+
+        # Step 4: Look up the permissions for the user's role.
+        # The .get() method safely handles cases where the role might not be in the dict,
+        # returning our specified default value (an empty list).
+        permissions = all_roles_with_permissions.get(user_role_name, [])
+        
+        return permissions

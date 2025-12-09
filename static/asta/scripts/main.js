@@ -64,7 +64,7 @@ function initializeButtons(slug, inputElement, sidePanel, projectData) {
 
     // Set initial toggle state from our single source of truth
     if (blogToggle) {
-        const hasBlogTag = Array.isArray(initialTags) && initialTags.includes('blog');
+        const hasBlogTag = Array.isArray(initialTags) && initialTags.includes('sys:blog');
         blogToggle.checked = hasBlogTag;
     }
 
@@ -78,12 +78,12 @@ function initializeButtons(slug, inputElement, sidePanel, projectData) {
                 
                 // IMPORTANT: Always start modifications from the original data
                 let project_tags = [...initialTags];
-                const hasBlogTag = project_tags.includes('blog');
+                const hasBlogTag = project_tags.includes('sys:blog');
 
                 if (isBlog && !hasBlogTag) {
-                    project_tags.push('blog');
+                    project_tags.push('sys:blog');
                 } else if (!isBlog && hasBlogTag) {
-                    project_tags = project_tags.filter(tag => tag !== 'blog');
+                    project_tags = project_tags.filter(tag => tag !== 'sys:blog');
                 }
 
                 ButtonHandlers.handleActionButton(

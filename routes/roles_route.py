@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from data.database import get_db
 from data import schemas
 from services.users import UserService, hash_password
-from src.dependencies import get_current_user, require_admin
+from src.dependencies import require_admin
 from data.schemas import CurrentUser
 
 # --- Dependency Setup ---
@@ -33,6 +33,11 @@ def get_roles(
     admin: CurrentUser = Depends(require_admin),
 ):
     """List all available roles and their permission tags."""
+    if not admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to view this page."
+        )
     return user_service.get_all_roles()
 
 @router.post("/roles", response_model=schemas.Role)
@@ -45,6 +50,11 @@ def create_or_update_role(
     Create a new role or update permissions for an existing one.
     The service layer handles protection of the 'admin' role.
     """
+    if not admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to view this page."
+        )
     return user_service.save_role(role_data)
 
 @router.delete("/roles/{role_name}", status_code=status.HTTP_204_NO_CONTENT)
@@ -56,6 +66,11 @@ def delete_role(
     """
     Delete a role. The service layer protects core roles from deletion.
     """
+    if not admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to view this page."
+        )
     user_service.delete_role(role_name)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -75,9 +90,16 @@ def list_users(
 @router.post("/", response_model=schemas.User, status_code=status.HTTP_201_CREATED)
 def register_new_user(
     new_user: schemas.UserCreateWithPassword,
-    user_service: UserService = Depends(get_user_service) 
+    user_service: UserService = Depends(get_user_service),
+    admin: CurrentUser = Depends(require_admin),
 ):
-    """Admin-only endpoint to create a new user. The service handles validation."""
+    """Admin-only endpoint to create a new user. The service handles validation. Public register exists in auth route"""
+    if not admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to view this page."
+        )
+    
     return user_service.create_user(new_user)
 
 @router.put("/{target_username}", response_model=schemas.User)
@@ -91,6 +113,11 @@ def update_user(
     Update a user's details (role, display name, etc.).
     Note: This endpoint does NOT handle password changes.
     """
+    if not admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to view this page."
+        )
     return user_service.update_user(username=target_username, user_update=update_data)
 
 @router.put("/{target_username}/password")
@@ -102,8 +129,12 @@ def change_user_password(
 ):
     """
     Admin-only endpoint to set a new password for any user.
-    NOTE: This requires a new method `change_password` to be added to your UserService.
     """
+    if not admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to view this page."
+        )
     if len(password_data.new_password) < 8:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -127,6 +158,11 @@ def delete_user(
 ):
     """Deletes a user. You cannot delete your own account."""
     # Authorization: Prevent an admin from deleting their own account via the API.
+    if not admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to view this page."
+        )
     if target_username == admin.username:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

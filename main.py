@@ -15,8 +15,6 @@ from pathlib import Path
 # Load environment variables from .env file
 load_dotenv()
 
-# We need to add the project root to the path to allow for clean imports
-# Adjust this if your main.py is in a different location (e.g., inside an 'app' folder)
 sys.path.append(str(Path(__file__).resolve().parent))
 
 # Now that the path is set, we can use absolute imports
@@ -72,7 +70,7 @@ async def lifespan(app: FastAPI):
 
 # --- FastAPI App Initialization ---
 app = FastAPI(
-    title="Your Project API",
+    title="Anita CMS",
     version="1.0.0",
     lifespan=lifespan,
     redirect_slashes=True
@@ -81,10 +79,15 @@ app = FastAPI(
 # --- Middleware ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, restrict this to your frontend's domain
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=[
+        "http://localhost:5469" # Sometimes, this is too strict for development, but do resist the urge to use * you will most likely forget it.
+    ],
+    allow_credentials=True, 
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=[
+        "Content-Type",
+        "Authorization",
+    ],
 )
 
 # --- Static Files ---
@@ -96,9 +99,6 @@ app.mount("/uploads", StaticFiles(directory=BASE_DIR / "uploads"), name="uploads
 
 # This is the main router for your entire API, prefixed for versioning
 api_router = APIRouter()
-
-# This router is for all routes that REQUIRE authentication
-# We apply the dependency here once, and it applies to all included routers.
 
 # Include all protected routes into the protected_router
 api_router.include_router(admin_route.router, tags=["Admin"])

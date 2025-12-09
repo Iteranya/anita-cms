@@ -4,13 +4,18 @@ from sqlalchemy.orm import Session
 from data.database import get_db
 from data import schemas
 from services.pages import PageService
-from src.dependencies import get_current_user, optional_user as optional_auth
-from data.schemas import CurrentUser
-
+from services.users import UserService
+from src import dependencies as dep
+from data.schemas import CurrentUser, Page
+from src.audit import logger
 # --- Dependency Setup ---
 # This dependency provider makes the PageService available to our routes
 def get_page_service(db: Session = Depends(get_db)) -> PageService:
     return PageService(db)
+
+def get_user_service(db: Session = Depends(get_db)) -> UserService:
+    """Dependency to get an instance of UserService with a DB session."""
+    return UserService(db)
 
 # --- Router Definition ---
 router = APIRouter(prefix="/page", tags=["Pages"])
@@ -24,60 +29,108 @@ router = APIRouter(prefix="/page", tags=["Pages"])
 def create_page(
     page_in: schemas.PageCreate,
     page_service: PageService = Depends(get_page_service),
-    user: CurrentUser = Depends(get_current_user),
+    user_service: UserService = Depends(get_user_service),  
+    user: CurrentUser = Depends(dep.get_current_user),  
 ):
     """
-    Create a new page. The author is automatically set to the current user.
-    The service layer will handle slug uniqueness and other business rules.
+    Create a new page with permission-based restrictions.
+    - Users with 'page:create' or admin rights can create any type of page.
+    - Users with only 'blog:create' permission can create pages, but they
+      MUST include the 'sys:blog' tag and are restricted to the 'markdown'
+      page type.
     """
-    # Assign the current user as the author before creation
+    user_permissions = user_service.get_user_permissions(user.username)
+
+    can_create_any_page = "*" in user_permissions or "page:create" in user_permissions
+    can_create_blog_page = "blog:create" in user_permissions
+
+    if can_create_any_page:
+        # User has full page creation privileges. No special checks needed.
+        pass
+    elif can_create_blog_page:
+        # User only has permission to create blog posts. Enforce rules.
+
+        # 1. Rule: Must include the 'sys:blog' tag.
+        if "sys:blog" not in page_in.tags:
+            page_in.tags.append("sys:blog")
+
+        # 2. Rule: Page type is hardcoded to 'markdown'.
+        page_in.type = "markdown"
+
+    else:
+        # User has neither of the required permissions.
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to create a page."
+        )
     page_in.author = user.username
-    
+    logger.info(f"{user.username} attempted to create the page: {page_in.slug}")
     return page_service.create_new_page(page_data=page_in)
 
 
-@router.get("/list", response_model=List[schemas.Page])
+@router.get("/list", response_model=List[Page])
 def list_pages(
     skip: int = 0,
     limit: int = 100,
     page_service: PageService = Depends(get_page_service),
-    user: Optional[CurrentUser] = Depends(optional_auth),
+    user_service: UserService = Depends(get_user_service),
+    user: CurrentUser = Depends(dep.get_current_user),
 ):
     """
-    List all pages.
-    - If a user is not authenticated, only public pages (without a 'private' tag) are returned.
-    - If a user is authenticated, all pages are returned.
+    List all pages with permission-based filtering.
+    - Users with 'page:read' permission (or admin) can see all pages.
+    - Users with only 'blog:read' permission can see pages tagged with 'sys:blog'.
+    - Non Anonymous user without either permission can only see public page.
+    - Anonymous users who never register will get an error
     """
-    all_pages = page_service.get_all_pages(skip=skip, limit=limit)
-    
-    # Authorization Logic: Filter out private pages for anonymous users
-    if not user:
-        return [page for page in all_pages if not (page.tags and "private" in page.tags)]
-        
-    return all_pages
 
+    if not user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Unauthorized")
+
+    user_permissions = user_service.get_user_permissions(user.username)
+
+    if "*" in user_permissions or "page:read" in user_permissions:
+        return page_service.get_all_pages(skip=skip, limit=limit)
+    
+    elif "blog:read" in user_permissions:
+        blog_pages = page_service.get_pages_by_tag("sys:blog")
+        return blog_pages[skip : skip + limit]
+
+    else:
+        public_pages = page_service.get_pages_by_tag("public")
+        return public_pages[skip : skip + limit]
 
 @router.get("/{slug}", response_model=schemas.Page)
 def get_page(
     slug: str,
     page_service: PageService = Depends(get_page_service),
-    user: Optional[CurrentUser] = Depends(optional_auth),
+    user_service: UserService = Depends(get_user_service),
+    user: Optional[CurrentUser] = Depends(dep.optional_user),
 ):
     """
     Get a single page by its unique slug.
-    If the page is tagged as 'private', an authenticated user is required.
+    Access is granted based on user permissions and page tags.
     """
     page = page_service.get_page_by_slug(slug)
-    
-    # Authorization Logic: Protect private pages
-    is_private = page.tags and "private" in page.tags
-    if is_private and not user:
+    if not page:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found")
+
+    # If not public, a user must be authenticated
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required for this page")
+
+    user_permissions = user_service.get_user_permissions(user.username)
+
+    if "*" in user_permissions or "page:read" in user_permissions:
+        return page
+    elif "blog:read" in user_permissions and "sys:blog" in page.tags:
+        return page
+    else:
+        # If user is authenticated but lacks specific permissions for this non-public page
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="You must be logged in to view this page."
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to view this page."
         )
-        
-    return page
 
 
 @router.put("/{slug}", response_model=schemas.Page)
@@ -85,22 +138,65 @@ def update_page(
     slug: str,
     page_update: schemas.PageUpdate,
     page_service: PageService = Depends(get_page_service),
-    user: CurrentUser = Depends(get_current_user),
+    user_service: UserService = Depends(get_user_service),
+    user: CurrentUser = Depends(dep.get_current_user),
 ):
     """
-    Update an existing page.
-    Only the original author of the page can update it.
+    Update an existing page with permission-based restrictions.
+
+    - Admins or users with 'page:update' can modify anything on any page.
+    - The author of a *non-blog* page can modify anything on that page.
+    - Users with 'blog:update' or the page's author can update a blog page
+      (i.e., a page tagged with 'sys:blog').
+
+    For users editing a blog page under these restricted permissions,
+    the following rules are enforced:
+      - The 'sys:blog' tag cannot be removed.
+      - The page 'type' cannot be changed.
     """
-    # First, get the page to check for authorship
     db_page = page_service.get_page_by_slug(slug)
-    
-    # Authorization Logic: Only the author can update
-    if db_page.author != user.username and user.role != "admin":
+    if not db_page:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found")
+
+    user_permissions = user_service.get_user_permissions(user.username)
+
+    is_author = db_page.author == user.username
+    is_blog_page = "sys:blog" in db_page.tags
+
+    # Condition for full, unrestricted update privileges
+    has_full_privileges = (
+        "*" in user_permissions
+        or "page:update" in user_permissions
+    )
+
+    # Condition for restricted update privileges on blog pages
+    can_update_blog_page = (
+        is_blog_page
+        and ("blog:update" in user_permissions or is_author)
+    )
+
+    if has_full_privileges:
+        # User has full permissions for this page. No special checks needed.
+        pass
+    elif can_update_blog_page:
+        # User has permission to update this blog page, but with restrictions.
+
+        # Rule 1: Cannot change the page type. We overwrite to enforce this.
+        if page_update.type is not None:
+            page_update.type = "markdown"
+
+        # Rule 2: Cannot remove the 'sys:blog' tag. Add it back if removed.
+        if page_update.tags is not None and "sys:blog" not in page_update.tags:
+            page_update.tags.append("sys:blog")
+    else:
+        # User does not meet any criteria to edit this page.
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to edit this page."
         )
-        
+    
+    logger.info(f"{user.username} attempted to update the page: {page_update.slug}")
+
     return page_service.update_existing_page(slug=slug, page_update_data=page_update)
 
 
@@ -108,23 +204,35 @@ def update_page(
 def delete_page(
     slug: str,
     page_service: PageService = Depends(get_page_service),
-    user: CurrentUser = Depends(get_current_user),
+    user_service: UserService = Depends(get_user_service), # <-- Added dependency
+    user: CurrentUser = Depends(dep.get_current_user),
 ):
     """
     Delete a page by its slug.
-    Only the original author of the page can delete it.
+    Permission is granted if the user is the author, an admin, has the 'page:delete'
+    permission, or has the 'blog:delete' permission for a page tagged as 'sys:blog'.
     """
-    # First, get the page to check for authorship before deleting
     db_page = page_service.get_page_by_slug(slug)
+    if not db_page:
+        # We still return 204 to avoid leaking information about which pages exist
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+    user_permissions = user_service.get_user_permissions(user.username)
     
-    # Authorization Logic: Only the author can delete
-    if db_page.author != user.username:
+    # Authorization Logic: Check all allowed conditions
+    is_author = db_page.author == user.username
+    is_admin = "*" in user_permissions
+    can_delete_all_pages = "page:delete" in user_permissions
+    can_delete_blog_pages = ("blog:delete" in user_permissions and "sys:blog" in db_page.tags)
+
+    if not (is_author or is_admin or can_delete_all_pages or can_delete_blog_pages):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to delete this page."
         )
+    
+    logger.info(f"{user.username} attempted to delete the page: {slug}")
         
     page_service.delete_page_by_slug(slug)
     
-    # Return a 204 response which has no content body
     return Response(status_code=status.HTTP_204_NO_CONTENT)

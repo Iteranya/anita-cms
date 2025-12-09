@@ -3,12 +3,11 @@
 from typing import Optional
 from fastapi import Depends, HTTPException, status, Cookie
 from sqlalchemy.orm import Session
-from pydantic import ValidationError # <-- ADDED: For catching schema validation errors
-
+from pydantic import ValidationError
 from services.auth import AuthService
 from services.users import UserService
 from data.database import get_db
-from data import schemas # <-- ADDED: Import your schemas module
+from data import schemas
 
 def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
     """Dependency to get an instance of AuthService with a DB session."""
@@ -18,7 +17,7 @@ def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
 def get_current_user(
     access_token: Optional[str] = Cookie(None),
     auth_service: AuthService = Depends(get_auth_service)
-) -> schemas.CurrentUser: # <--- CHANGED: Return type is now the Pydantic schema
+) -> schemas.CurrentUser:
     """
     FastAPI dependency to get the current authenticated user from a cookie.
     Returns a Pydantic model of the user's token data.
@@ -38,6 +37,8 @@ def get_current_user(
     except ValidationError:
         # Catches cases where the token is valid but the payload is malformed
         return None
+    
+
 
 def require_permission(permission: str):
     """
@@ -67,10 +68,6 @@ def require_permission(permission: str):
         return current_user
     return dependency
 
-# Specific permission dependencies now work seamlessly with the changes
-require_admin = require_permission("*") 
-require_editor = require_permission("page:update")
-
 def optional_user(
     access_token: Optional[str] = Cookie(None),
     auth_service: AuthService = Depends(get_auth_service)
@@ -93,3 +90,35 @@ def optional_user(
     except ValidationError:
         # If the token exists but is malformed, treat as an anonymous user
         return None
+    
+
+# List All Specific Permissions Here
+require_admin = require_permission("*") 
+
+form_create = require_permission("form:create")
+form_read = require_permission("form:read")
+form_update = require_permission("form:update")
+form_delete = require_permission("form:delete")
+
+media_create = require_permission("media:create")
+media_read = require_permission("media:read") # List all media perm, by default, all media can be accessed publicly
+media_update = require_permission("media:update") # Media Meta Data Edit
+media_delete = require_permission("media:delete")
+
+blog_create = require_permission("blog:create")
+blog_read = require_permission("blog:read")
+blog_update = require_permission("blog:update")
+blog_delete = require_permission("blog:delete")
+
+config_access = require_permission("config:read") # Does not show keys
+config_edit = require_permission("config:update")
+
+aina_access = require_permission("aina") # Access Aina AI, manipulation follows page crud perms
+asta_access = require_permission("asta") # Access Asta AI, manipulation follows blog crud perms
+
+# Managing Blog Does NOT Require These Permissions 
+# These are system level access to all pages in the CMS
+page_create = require_permission("page:create")
+page_read = require_permission("page:read")
+page_update = require_permission("page:update")
+page_delete = require_permission("page:delete")
