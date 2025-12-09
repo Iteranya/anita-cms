@@ -1,228 +1,138 @@
-*This is the stupidest Read Me ever...*
+# 🌸 Anita CMS
 
-No, no it's great, meta commentary are cool! 
+**Your Creative Partner for the Web.**
 
-*IT'S CRINGE THAT'S WHAT IT-*
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![Python](https://img.shields.io/badge/Python-3.10+-yellow.svg)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/Framework-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
+[![SQLAlchemy](https://img.shields.io/badge/ORM-SQLAlchemy-red.svg)](https://www.sqlalchemy.org/)
 
-# 🌸 Anita: Your Creative Partner for the Web
+Anita is a lightweight, self-hosted Content Management System (CMS) designed to give you total creative freedom without the monthly subscriptions or technical headaches. It combines the speed of modern web frameworks with a team of embedded AI assistants to help you build, write, and design.
 
-*Oh god why do you put emoji there?*
+---
 
-What's wrong?
+## 🌟 Why Anita?
 
-*This is  2025, people sees emoji and thinks "AI Generated Slop"*
+*   **Own Your Data:** No vendor lock-in. No hidden fees. Your website runs on your machine or your server.
+*   **AI-Native:** Built from the ground up to work with LLMs (like ChatGPT, Claude, or local models) to handle the heavy lifting.
+*   **Hybrid Engine:** Seamlessly mix standard blogging with completely custom-coded pages.
 
-You're not?
+---
 
-...
+## 🏗️ Technical Architecture
 
-Okay I'm sorry...
+Anita is built for simplicity in development and robustness in production.
 
-*THAT'S SO MEAN!!!*
+### 🗄️ Database & ORM
+Anita is powered by **SQLAlchemy**, the industry-standard ORM for Python.
+*   **Zero-Config Start:** By default, Anita runs on **SQLite**. The entire database is a single file (`anita.db`). You can copy, backup, or move your website just by copying this file.
+*   **PostgreSQL Ready:** Need to scale? Because Anita is built on SQLAlchemy, switching to **PostgreSQL** (or MySQL) is as simple as changing a single connection string in your `.env` file. No code changes required.
 
-Okay, okay it's fine, let's just pull up the image...
+### ⚡ Service-Oriented Backend
+Under the hood, Anita is a modular **FastAPI** application. It uses a clean service-layer architecture (Controllers → Services → Data Access), ensuring the codebase is easy to maintain and extend if you are a developer.
 
-*NO! Technical Spec and we're DONE!!!*
+---
 
-Come on, at least let me, ahem...
+## 📄 The Hybrid Content Engine
 
-```
-Tired of expensive monthly fees, complicated website builders, and templates that just don't feel like *you*?
+Most CMSs force you to choose: *Are you a blog using a rigid theme? Or are you a static site hand-coding HTML?*
 
-Anita is different. It’s a simple, powerful tool that helps you build a beautiful, fast, and completely custom website without needing to be a tech wizard. Think of it as your own personal creative studio, powered by a friendly AI team who handles the hard stuff so you can focus on what you do best.
+**Anita lets you be both.** Every page can be toggled between two modes:
 
-Best of all? It's free. No subscriptions, no hidden costs. Just your creativity, unleashed.
-```
-See? Not bad right?
+### 1. Markdown Mode (For Writers)
+Perfect for blog posts, documentation, and articles.
+*   Write in simple Markdown.
+*   **Template Injection:** Anita wraps your Markdown in a "Master Template" (which is itself an editable page in the system).
+*   **Customize the Render:** You can edit the code of the `blog-template` page to instantly change the layout, fonts, and style of *all* your Markdown pages at once.
 
-*It reads like an ad, oh god it reads like an ad...*
+### 2. HTML Mode (For Designers)
+Perfect for Landing Pages, Homepages, and Interactive Art.
+*   The page serves **raw HTML** directly from the database.
+*   No constraints. Import GSAP, Three.js, or Tailwind CDN directly.
+*   Aina (the AI Architect) can write this code for you, giving you bespoke layouts that standard CMS themes can't match.
 
-Look, come on, it's fine...
+---
 
-*IT'S NOT FINE!!! Just go straight to feature listing, no emoji BS, get to the point, you're embarrassing me!!!*
+## 🤖 Meet Your AI Team
 
-```
-Anita comes with two AI assistants who work together to bring your vision to life. You can use them with any AI you already love, like ChatGPT or Claude—no technical setup required!
+Anita isn't just a tool; it's a studio. You have two dedicated AI specialists ready to help:
 
-Asta: Your AI Writing Assistant
+### 🖋️ Asta: The Editor
+Asta is your **Markdown & Content Assistant**.
+*   **Context Aware:** Asta helps you draft blog posts and documentation.
+*   **Smart Editing:** Ask Asta to "fix the tone," "expand this section," or "summarize this for a meta description."
 
-```
+### 🎨 Aina: The Architect
+Aina is your **Site Builder & Designer**.
+*   **Route Aware:** Aina understands your website's structure (pages, forms, assets).
+*   **Code Generation:** Describe the page you want, and Aina generates the HTML/CSS structure for you.
+*   **Integration:** Aina knows how to fetch data from your custom Forms to build dynamic layouts.
 
-<img width="1919" height="910" alt="Screenshot 2025-11-20 184342" src="https://github.com/user-attachments/assets/106ddc96-0f68-4cd7-9a76-e203b1c5b17c" />
+---
 
+## 🛠️ The Power Feature: Dynamic Forms
 
-*Stop Here*
+Anita treats "Forms" as more than just a way to collect emails. **Forms are your No-Code Backend.**
 
-What?
+When you create a Form in Anita, you are instantly creating a database schema and an API endpoint. This allows you to build complex data structures without writing a single line of Python or SQL.
 
-*It's a markdown editor, that's all they have to know*
+**What can you build?**
+*   **☕ Cafe Menu:** Create a form with `dish_name`, `price`, and `photo`.
+*   **🎨 Portfolio:** Create a form with `project_title`, `client`, and `gallery_images`.
+*   **📅 Events:** Create a form with `date`, `location`, and `rsvp_link`.
 
-It's AI Powered with Inline-
+Once your form is created, **Aina** can access this data to generate dynamic galleries, lists, and tables automatically.
 
-*IT'S A MARKDOWN EDITOR!!! THAT'S IT!!!*
+---
 
-```
+## 🚀 Installation
 
-Aina: Your API Aware AI Website Designer
+### Windows (One-Click)
+1.  Download the `anita_installer.bat` file from the Release Page
+2.  Double-click to install.
+3.  Launch via the desktop shortcut.
 
-Aina is the architect who builds and designs your website. Unlike other AI builders that just fill in a template, Aina is *smart*. She understands how your website works and can create pages that are not only beautiful but truly functional.
-
-```
-
-<img width="1919" height="906" alt="Screenshot 2025-11-21 152132" src="https://github.com/user-attachments/assets/5ec5c7d7-ac00-46e5-b0fe-a135f0723ca6" />
-
-*AND THAT'S ALL THEY NEED TO KNOW!!!*
-
-Why are you so embarrassed of your own feature???
-
-*Sh-Shut it!!! I'm replacing Aina with Hikarin, get to it!*
-
-Anita, you know how mean you are to Aina right now???
-
-*I DON'T CARE!!! People Hate AI!!!*
-
-Okay, okay, let's move on...
-
-## Forms: Your Secret Weapon for Creativity
-
-This is where Anita’s real magic shines. The "Forms" tool isn't just for contact forms—it’s a simple way to create any custom feature you can imagine, without writing a single line of code.
-
-When you create a form, Anita automatically builds a mini-database just for you, ready to be used by Aina.
-
-What could you build with this?
-
-*   **A Cafe Menu**: Create a "Menu Item" form with fields for a dish name, price, description, and photo. Aina can then design a beautiful, interactive menu page for your customers that pulls directly from your list.
-*   **A Portfolio Gallery**: Make a "Project" form with fields for a title, image, and client details. Now you have an organized portfolio you can update anytime, and Aina can build a stunning gallery page to show it off.
-*   **An Events Calendar**: Create an "Event" form with a date, location, and description. Aina can design a calendar page that automatically updates whenever you add a new event.
-
-You can manage all your entries—menu items, portfolio pieces, events—from a simple table in your admin area. You can even export your data as a spreadsheet with one click.
-
-**This is your key to a truly custom website, no developer needed.**
-
-...
-
-Oh now you're not stopping me
-
-*Okay, put the forms feature at the top*
-
-Are you serious??
-
-*And let's rebrand, let's call it "No Code Backend Feature"*
-
-And that's not markety?
-
-*It's not AI Slop!!!*
-
-Okay, okay, geez...
-
-*Now the installation*
-
-We should pitch this!
-
-```
-Why Choose Anita?
-
-Anita is for creative people who value simplicity, speed, and freedom.
-
-Escape Subscription Hell
-
-Stop paying $20, $30, or more every month for a website builder. Anita is **free, forever**. It runs so efficiently you can host it on a very cheap server (we're talking a few dollars a month) or even on a computer you have at home. You own your website, completely.
-
-Focus on Your Craft, Not on Code
-
-You're an artist, a writer, a freelancer. Your time is better spent creating, not wrestling with confusing settings or code. Anita's AI team lets you describe what you want in plain English and makes it happen.
-
-A Website That's Truly Yours 
-
-No more being stuck in a rigid template. Combine Aina's design skills with the magic of forms to build a site that perfectly reflects your brand and meets your unique needs. Your data is stored in simple files, so you're never locked in. You can pack up and leave anytime, taking all your content with you.
-```
-
-See? Not bad isn't it?
-
-*Mmmm... I still don't like it, just move on with installation*
-
-```
-Installation
-
-1.  Download the **`anita_installer.bat`** file from our [Releases page](https://github.com/Iteranya/anita-cms/releases).
-2.  Double-click the file. It will automatically handle the boring technical setup and create a new "ANITA" shortcut on your desktop.
-3.  Click your new shortcut to start the magic!
-```
-
-<details>
-<summary>For Mac/Linux or technical users (Manual Setup)</summary>
+### Mac / Linux / Manual Setup
+We recommend using `uv` for lightning-fast dependency management.
 
 ```bash
-# We recommend using 'uv' for a fast installation
-# Create and activate a virtual environment
+# 1. Clone the repository
+git clone https://github.com/iteranya/anita-cms.git
+cd anita-cms
+
+# 2. Create virtual environment
 python -m uv venv venv
 source venv/bin/activate  # or .\venv\Scripts\activate on Windows
 
-# Install the needed packages
+# 3. Install dependencies
 uv pip install -r requirements.txt
 
-# Copy the example environment file
+# 4. Configuration
 cp example.env .env
-# You'll need to open .env and add a secret key. You can generate one with:
-# python -c "import secrets; print(secrets.token_hex(32))"
-# and paste the result after JWT_SECRET=
+# Edit .env to add your JWT_SECRET and AI API keys.
 
-# Run the app!
+# 5. Run the server
 python main.py
 ```
-</details>
 
-```
-1.  Once it's running, go to your website and add `/admin` to the end of the address (e.g., `http://127.0.0.1:8000/admin`).
-2.  Start creating! Write a blog post with Asta, or ask Aina to design your homepage.
-3.  Build a custom form to manage your portfolio, products, or anything else you dream up.
-4.  Publish your work and share your amazing new site with the world.
-```
+Once running, access your dashboard at:
+`http://127.0.0.1:8000/admin`
 
-*OKAY! We're done!!!*
+---
 
-Wha?
+## 🤝 Contributing
 
-*We're DONE, it's done, no need to add anything else, now we wait until Hikarin Update*
+Anita is open-source software. We welcome contributions!
+*   **Frontend:** HTML/JS/CSS (located in `static/`).
+*   **Backend:** Python/FastAPI (located in `api/`, `services/`, and `data/`).
 
-You're just gonna ditch Aina???
+Please feel free to open issues or submit Pull Requests.
 
-*She has her place and it is NOT in the Github Readme*
+---
 
-Wait, wait, license, at least let me add license...
+## 📄 License
 
-```
-License
-
-Anita is licensed under AGPL-3.0. This basically means it will always be free and open for everyone!
-```
-
-Done!
-
-*Good...*
-
-You seriously gonna wait until Hikarin update?
-
-*Yes, just lay low until Hikarin Update...*
-
-You know... It'll take a while until Hikarin Framework is ready right???
-
-*I don't care*
-
-You really think people would prefer Hikarin over Aina???
-
-*YES!*
-
-I think they'd prefer *both* not either...
-
-*Well, I prefer Hikarin!!!*
-
-You literally won't be here if it weren't for Aina you know that right???
-
-*Well no one will use me if you keep pushing Aina to the front*
-
-Aina is AWESOME! 
-
-*Well Not In This Day And Age!!!*
-
-Fine, I'll finish up Hikarin, see how many people prefer working with yet another Web Development Framework!
+Anita CMS is licensed under **AGPL-3.0**.
+*   **Free to use.**
+*   **Free to modify.**
+*   **Open source forever.**

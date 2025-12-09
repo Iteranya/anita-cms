@@ -16,9 +16,6 @@ from src.dependencies import optional_user, get_current_user
 
 router = APIRouter(prefix="/aina", tags=["Aina Website Builder"])
 
-# --- PER-USER STREAM MANAGEMENT ---
-# Replaces the single global variable. This dictionary maps a user's username
-# to their active stream cancellation token. This is a crucial fix for multi-user support.
 active_streams: Dict[str, CancellableStream] = {}
 
 @router.get("/", response_class=HTMLResponse)

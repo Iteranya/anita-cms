@@ -14,9 +14,6 @@ from src.dependencies import get_current_user, require_admin
 
 router = APIRouter(prefix="/admin", tags=["Admin Views (MPA)"])
 
-# --- Define the location of your admin panel's static HTML files ---
-# NOTE: Your HTML files must be located in this directory.
-# e.g., static/admin/dashboard.html, static/admin/page.html, etc.
 ADMIN_APP_DIR = "static/admin"
 
 # --- HTML VIEW ROUTES (The Unified Dashboard - MPA Style) ---

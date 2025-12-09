@@ -26,7 +26,6 @@ def test_login_success(client, db_session):
     db_session.commit()
 
     # 2. ACT: Attempt to login
-    # IMPORTANT: Use 'data' for Form(...), not 'json'
     payload = {
         "username": "test_admin", 
         "password": password,
@@ -40,8 +39,6 @@ def test_login_success(client, db_session):
 
     # 4. ASSERT: Check Cookie
     assert "access_token" in response.cookies
-    # Optional: Check cookie attributes (httponly is hard to check via TestClient usually, 
-    # but presence is the main thing)
 
 def test_login_bad_credentials(client, db_session):
     """
@@ -76,7 +73,7 @@ def test_login_disabled_user(client, db_session):
         username="banned_user",
         hashed_password=hash_password("password"),
         role="user",
-        disabled=True # <--- User is disabled
+        disabled=True 
     )
     db_session.add(new_user)
     db_session.commit()
