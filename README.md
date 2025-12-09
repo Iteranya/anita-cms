@@ -134,7 +134,7 @@ Once running, access your dashboard at:
 
 Anita is open-source software. We welcome contributions!
 *   **Frontend:** HTML/JS/CSS (located in `static/`).
-*   **Backend:** Python/FastAPI (located in `api/`, `services/`, and `data/`).
+*   **Backend:** Python/FastAPI (located in `routes/`, `services/`, and `data/`).
 
 Please feel free to open issues or submit Pull Requests.
 
