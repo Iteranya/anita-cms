@@ -141,3 +141,26 @@ cp example.env .env
 
 # 5. Run the server
 python main.py
+
+Once running, access your dashboard at:
+`http://127.0.0.1:5469/admin`
+For the initial setup
+
+---
+
+## 🤝 Contributing
+
+Anita is open-source software. We welcome contributions!
+*   **Frontend:** HTML/JS/CSS (located in `static/`).
+*   **Backend:** Python/FastAPI (located in `routes/`, `services/`, and `data/`).
+
+Please feel free to open issues or submit Pull Requests.
+
+---
+
+## 📄 License
+
+Anita CMS is licensed under **AGPL-3.0**.
+*   **Free to use.**
+*   **Free to modify.**
+*   **Open source forever.**
