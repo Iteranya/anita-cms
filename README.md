@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/dced49c6-87ce-42d3-b83d-d6a1fa751393" alt="Anita" width="557" height="557" style="border: 2px solid #f0f0f0; border-radius: 8px; padding: 5px;" />
+</div>
+
 # 🌸 Anita CMS
 
 **Your Creative Partner for the Web.**
@@ -59,11 +63,17 @@ Anita isn't just a tool; it's a studio. You have two dedicated AI specialists re
 
 ### 🖋️ Asta: The Editor
 Asta is your **Markdown & Content Assistant**.
+
+<img width="1917" height="906" alt="Screenshot 2025-11-18 192317" src="https://github.com/user-attachments/assets/b6ba65fd-51d4-40c9-981a-5e8c2ad92a55" />
+
 *   **Context Aware:** Asta helps you draft blog posts and documentation.
 *   **Smart Editing:** Ask Asta to "fix the tone," "expand this section," or "summarize this for a meta description."
 
 ### 🎨 Aina: The Architect
 Aina is your **Site Builder & Designer**.
+
+<img width="1919" height="906" alt="Screenshot 2025-11-21 152132" src="https://github.com/user-attachments/assets/a457de07-a322-4102-9060-ea439a541856" />
+
 *   **Route Aware:** Aina understands your website's structure (pages, forms, assets).
 *   **Code Generation:** Describe the page you want, and Aina generates the HTML/CSS structure for you.
 *   **Integration:** Aina knows how to fetch data from your custom Forms to build dynamic layouts.
@@ -109,7 +119,7 @@ uv pip install -r requirements.txt
 
 # 4. Configuration
 cp example.env .env
-# Edit .env to add your JWT_SECRET and AI API keys.
+# Edit .env to add your JWT_SECRET
 
 # 5. Run the server
 python main.py
