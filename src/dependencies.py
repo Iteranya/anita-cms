@@ -50,7 +50,6 @@ def require_permission(permission: str):
         db: Session = Depends(get_db)
     ) -> schemas.CurrentUser:
         user_service = UserService(db)
-        # CHANGED: Use clean attribute access instead of .get() on a dictionary
         user_role = current_user.role
         
         all_roles = user_service.get_all_roles()

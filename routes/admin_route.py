@@ -12,13 +12,13 @@ from services.pages import PageService
 # Import the new, decoupled authentication dependencies
 from src.dependencies import get_current_user, require_admin
 
-router = APIRouter(prefix="/admin", tags=["Admin Views (MPA)"])
+router = APIRouter(tags=["Admin Views (MPA)"])
 
 ADMIN_APP_DIR = "static/admin"
 
 # --- HTML VIEW ROUTES (The Unified Dashboard - MPA Style) ---
 
-@router.get("/", response_class=FileResponse)
+@router.get("/admin", response_class=FileResponse)
 async def view_dashboard(user: dict = Depends(get_current_user)):
     """Main Dashboard. Accessible by ANY logged-in user."""
     if not user:
@@ -27,36 +27,36 @@ async def view_dashboard(user: dict = Depends(get_current_user)):
     # Serves the static HTML file for the dashboard.
     return FileResponse(os.path.join(ADMIN_APP_DIR, "page.html"))
 
-@router.get("/page", response_class=FileResponse)
+@router.get("/admin/page", response_class=FileResponse)
 async def view_page_manager(user: dict = Depends(get_current_user)):
     if not user:
         return RedirectResponse(url="/auth/login", status_code=302)
     
     return FileResponse(os.path.join(ADMIN_APP_DIR, "page.html"))
 
-@router.get("/config", response_class=FileResponse)
+@router.get("/admin/config", response_class=FileResponse)
 async def view_config(user: dict = Depends(require_admin)):
     return FileResponse(os.path.join(ADMIN_APP_DIR, "config.html"))
 
-@router.get("/forms", response_class=FileResponse)
+@router.get("/admin/forms", response_class=FileResponse)
 async def view_forms(user: dict = Depends(require_admin)):
     return FileResponse(os.path.join(ADMIN_APP_DIR, "form.html"))
 
-@router.get("/media", response_class=FileResponse)
+@router.get("/admin/media", response_class=FileResponse)
 async def view_media(user: dict = Depends(require_admin)):
     return FileResponse(os.path.join(ADMIN_APP_DIR, "media.html"))
 
-@router.get("/files", response_class=FileResponse)
+@router.get("/admin/files", response_class=FileResponse)
 async def view_files(user: dict = Depends(require_admin)):
     return FileResponse(os.path.join(ADMIN_APP_DIR, "file_manager.html"))
 
-@router.get("/users", response_class=FileResponse)
+@router.get("/admin/users", response_class=FileResponse)
 async def view_users(user: dict = Depends(require_admin)):
     return FileResponse(os.path.join(ADMIN_APP_DIR, "users.html"))
 
 # --- CUSTOM DYNAMIC ADMIN PAGES (from Database) ---
 
-@router.get("/{slug}", response_class=HTMLResponse)
+@router.get("/admin/{slug}", response_class=HTMLResponse)
 async def serve_custom_admin_page(
     slug: str,
     db: Session = Depends(get_db),

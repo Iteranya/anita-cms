@@ -95,7 +95,7 @@ def update_page(
     db_page = page_service.get_page_by_slug(slug)
     
     # Authorization Logic: Only the author can update
-    if db_page.author != user.username:
+    if db_page.author != user.username and user.role != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to edit this page."
