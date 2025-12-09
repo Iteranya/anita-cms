@@ -20,6 +20,7 @@ Anita is a lightweight, self-hosted Content Management System (CMS) designed to 
 *   **Own Your Data:** No vendor lock-in. No hidden fees. Your website runs on your machine or your server.
 *   **AI-Native:** Built from the ground up to work with LLMs (like ChatGPT, Claude, or local models) to handle the heavy lifting.
 *   **Hybrid Engine:** Seamlessly mix standard blogging with completely custom-coded pages.
+*   **Secure by Default:** With built-in content sanitization, a configurable Content Security Policy (CSP), and role-based access, you control your site's security posture.
 
 ---
 
@@ -51,9 +52,10 @@ Perfect for blog posts, documentation, and articles.
 
 ### 2. HTML Mode (For Designers)
 Perfect for Landing Pages, Homepages, and Interactive Art.
-*   The page serves **raw HTML** directly from the database.
-*   No constraints. Import GSAP, Three.js, or Tailwind CDN directly.
-*   Aina (the AI Architect) can write this code for you, giving you bespoke layouts that standard CMS themes can't match.
+*   The page serves **HTML** directly from the database.
+*   **Safe by Default:** All HTML is sanitized using **Bleach** to prevent XSS attacks, meaning `<script>` tags are removed by default.
+*   **Structured Interactivity:** To add dynamic behavior, Aina uses a built-in Javascript module powered by **Alpine.js**. This allows for rich, client-side interactions that communicate safely with the backend.
+*   **Full Control (When You Need It):** For advanced users, the sanitization can be disabled in the granular security settings.
 
 ---
 
@@ -75,8 +77,24 @@ Aina is your **Site Builder & Designer**.
 <img width="1919" height="906" alt="Screenshot 2025-11-21 152132" src="https://github.com/user-attachments/assets/a457de07-a322-4102-9060-ea439a541856" />
 
 *   **Route Aware:** Aina understands your website's structure (pages, forms, assets).
-*   **Code Generation:** Describe the page you want, and Aina generates the HTML/CSS structure for you.
-*   **Integration:** Aina knows how to fetch data from your custom Forms to build dynamic layouts.
+*   **Secure Code Generation:** Describe the page you want, and Aina generates **sanitized HTML/CSS** and uses Anita's built-in Javascript module with **Alpine.js** to create interactivity safely.
+*   **Integration:** Aina knows how to fetch data from your custom Forms to build dynamic layouts that are both beautiful and secure.
+
+---
+
+## 🛡️ Security First
+
+Anita gives you extensive, granular control over your website's security.
+
+### 🔐 Content Sanitization & CSP
+*   **Bleach by Default:** All user- and AI-generated HTML is automatically sanitized to prevent cross-site scripting (XSS).
+*   **Opt-Out Control:** For trusted environments, you can disable Bleach on a per-page or system-wide basis.
+*   **Content Security Policy (CSP):** You have full control over your site's CSP headers. Configure allowed script sources, style sources, content origins, and more through the admin panel.
+
+### 🎭 Role-Based Access Control (RBAC)
+*   **Discord-Flavored Roles:** Anita uses a flexible RBAC system. Instead of a rigid hierarchy, you create roles (e.g., "Editor," "Designer," "Marketer") and assign specific permissions to each.
+*   **Granular Permissions:** Assign rights for actions like `edit_page`, `manage_users`, `change_settings`, `create_forms`, and more.
+*   **Admin Supremacy:** Only users with the `System Administrator` role can create, modify, or assign roles to other users, ensuring centralized control.
 
 ---
 
@@ -123,26 +141,3 @@ cp example.env .env
 
 # 5. Run the server
 python main.py
-```
-
-Once running, access your dashboard at:
-`http://127.0.0.1:8000/admin`
-
----
-
-## 🤝 Contributing
-
-Anita is open-source software. We welcome contributions!
-*   **Frontend:** HTML/JS/CSS (located in `static/`).
-*   **Backend:** Python/FastAPI (located in `routes/`, `services/`, and `data/`).
-
-Please feel free to open issues or submit Pull Requests.
-
----
-
-## 📄 License
-
-Anita CMS is licensed under **AGPL-3.0**.
-*   **Free to use.**
-*   **Free to modify.**
-*   **Open source forever.**
