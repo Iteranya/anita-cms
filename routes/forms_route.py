@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from data.database import get_db
 from data import schemas  # Import Pydantic schemas from your data layer
 from services.forms import FormService
+from services.users import UserService
 from src.dependencies import get_current_user, optional_user
 from data.schemas import CurrentUser
 
@@ -15,6 +16,10 @@ from data.schemas import CurrentUser
 # This function allows FastAPI to inject the FormService into our routes.
 def get_form_service(db: Session = Depends(get_db)) -> FormService:
     return FormService(db)
+
+def get_user_service(db: Session = Depends(get_db)) -> UserService:
+    """Dependency to get an instance of UserService with a DB session."""
+    return UserService(db)
 
 router = APIRouter(prefix="/forms", tags=["Form"])
 
@@ -36,7 +41,10 @@ class SubmissionBody(BaseModel):
 # ----------------------------------------------------
 
 @router.get("/", response_class=HTMLResponse)
-async def get_html(request: Request, user: Optional[CurrentUser] = Depends(optional_user)):
+async def get_html(
+    request: Request, 
+    user: Optional[CurrentUser] = Depends(optional_user)
+):
     if not user:
         return RedirectResponse(url="/auth/login", status_code=302)
 

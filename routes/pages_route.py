@@ -204,7 +204,7 @@ def update_page(
 def delete_page(
     slug: str,
     page_service: PageService = Depends(get_page_service),
-    user_service: UserService = Depends(get_user_service), # <-- Added dependency
+    user_service: UserService = Depends(get_user_service), 
     user: CurrentUser = Depends(dep.get_current_user),
 ):
     """

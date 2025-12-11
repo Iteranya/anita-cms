@@ -35,23 +35,23 @@ async def view_page_manager(user: dict = Depends(get_current_user)):
     return FileResponse(os.path.join(ADMIN_APP_DIR, "page.html"))
 
 @router.get("/admin/config", response_class=FileResponse)
-async def view_config(user: dict = Depends(require_admin)):
+async def view_config(user: dict = Depends(get_current_user)):
     return FileResponse(os.path.join(ADMIN_APP_DIR, "config.html"))
 
 @router.get("/admin/forms", response_class=FileResponse)
-async def view_forms(user: dict = Depends(require_admin)):
+async def view_forms(user: dict = Depends(get_current_user)):
     return FileResponse(os.path.join(ADMIN_APP_DIR, "form.html"))
 
 @router.get("/admin/media", response_class=FileResponse)
-async def view_media(user: dict = Depends(require_admin)):
+async def view_media(user: dict = Depends(get_current_user)):
     return FileResponse(os.path.join(ADMIN_APP_DIR, "media.html"))
 
 @router.get("/admin/files", response_class=FileResponse)
-async def view_files(user: dict = Depends(require_admin)):
+async def view_files(user: dict = Depends(get_current_user)):
     return FileResponse(os.path.join(ADMIN_APP_DIR, "file_manager.html"))
 
 @router.get("/admin/users", response_class=FileResponse)
-async def view_users(user: dict = Depends(require_admin)):
+async def view_users(user: dict = Depends(get_current_user)):
     return FileResponse(os.path.join(ADMIN_APP_DIR, "users.html"))
 
 # --- CUSTOM DYNAMIC ADMIN PAGES (from Database) ---
