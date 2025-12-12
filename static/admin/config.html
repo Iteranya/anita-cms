@@ -98,8 +98,12 @@
 
             <!-- ACTIVE: Config -->
             <a href="/admin/config/" class="flex items-center px-3 py-2.5 bg-anita-600 text-white rounded-lg shadow-lg shadow-anita-900/20 transition-colors group">
-                <i class="fas fa-cog w-6 text-center text-lg"></i>
-                <span class="ml-3 font-semibold">Config</span>
+                <i class="fas fa-robot w-6 text-center text-lg"></i>
+                <span class="ml-3 font-semibold">AI Config</span>
+            </a>
+            <a href="/admin/users/" class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors group">
+                <i class="fas fa-users-cog w-6 text-center text-lg"></i>
+                <span class="ml-3 font-semibold">Users & Roles</span>
             </a>
         </nav>
     </aside>
@@ -251,7 +255,7 @@
             const loader = document.getElementById('loader');
 
             try {
-                const res = await fetch('/admin/api/config/');
+                const res = await fetch('/config/');
                 
                 if (res.status === 401) {
                     window.location.href = '/auth/login';
@@ -303,7 +307,7 @@
             }
 
             try {
-                const res = await fetch('/admin/api/config/', {
+                const res = await fetch('/config/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)

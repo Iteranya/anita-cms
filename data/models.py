@@ -1,67 +1,77 @@
-from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+# file: data/models.py
 
+from typing import Any, Dict, Optional
+from sqlalchemy import Column, Integer, String, Text, JSON, ForeignKey, Boolean
+from sqlalchemy.orm import relationship
+from dataclasses import dataclass
+from .database import Base
 
-@dataclass
-class Page:
-    title: str # The title
-    slug: str # The slug and primary identifier
-    content: Optional[str] = None # Actually Description Now??? I messed UPPPPP This is Metadata or thing you put for blog thumbnail if you wanna use it like that! Be sure to let Aina know this!!!!!!!!
-    markdown: Optional[str] = None # Markdown Raw Text
-    html: Optional[str] = None # HTML Raw Text
-    url: Optional[str] = None # I forgor 💀
-    content_length: Optional[int] = None # Unused (Unless you want to)
-    tags: Optional[List[str]] = None # This how you mark pages as 'blog', 'home', 'blog-home', 'blog-template'
-    thumb: Optional[str] = None # Thumbnail file
-    type: str = "markdown" # Whether this page is Markdown or HTML type
-    created: Optional[str] = None
-    updated: Optional[str] = None
-    author: Optional[str] = None # Lol, this CMS don't even have user
-    custom: Dict[str, Any] = field(default_factory=dict) # When you need something fancier
+class Page(Base):
+    __tablename__ = "pages"
 
-@dataclass
-class Form:
-    """Represents a custom form definition in the CMS."""
-    slug: str
-    title: str
-    schema: Dict[str, Any]  # The form fields and settings
-    description: Optional[str] = None
-    created: Optional[str] = None
-    updated: Optional[str] = None
-    author: Optional[str] = None
-    tags :Optional[List[str]] = None
-    custom: Dict[str, Any] = field(default_factory=dict)
+    slug = Column(String, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    content = Column(Text)
+    markdown = Column(Text)
+    html = Column(Text)
+    tags = Column(JSON)  # SQLAlchemy handles json.dumps/loads automatically
+    thumb = Column(String)
+    type = Column(String)
+    created = Column(String)
+    updated = Column(String)
+    author = Column(String)
+    custom = Column(JSON)
 
-@dataclass
-class FormSubmission:
-    """Represents a single user submission to a form."""
-    id: Optional[int] = None
-    form_slug: str = ""
-    data: Dict[str, Any] = field(default_factory=dict)
-    created: Optional[str] = None
-    updated: Optional[str] = None
-    author: Optional[str] = None
-    custom: Dict[str, Any] = field(default_factory=dict)
+class Form(Base):
+    __tablename__ = "forms"
 
-@dataclass
-class Prompt:
-    system:str = None
-    user:str = None
-    assistant:str = None
-    model:str = None
-    endpoint:str = None
-    temp:str = None
-    context:str = None
-    limit:str = None
-    ai_key:str = None
-    stop:str = None
-    stream:bool = False
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    slug = Column(String, unique=True, nullable=False, index=True)
+    title = Column(String, nullable=False)
+    schema = Column("schema_json", JSON, nullable=False) # Maps to schema_json column
+    description = Column(Text)
+    created = Column(String)
+    updated = Column(String)
+    author = Column(String)
+    tags = Column(JSON)
+    custom = Column(JSON)
 
-@dataclass
-class RouteData:
-    """Represents a custom form definition in the CMS."""
-    name: str
-    schema: Dict[str, Any]  # The form fields and settings
-    type:str # Can be form, blog, media, and plugin
-    description: Optional[str] = None
-    usage_note: str|None = None
+    # Relationship to Submissions
+    submissions = relationship("Submission", back_populates="form", cascade="all, delete-orphan")
+
+class Submission(Base):
+    __tablename__ = "submissions"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    form_slug = Column(String, ForeignKey("forms.slug", ondelete="CASCADE"), nullable=False)
+    data = Column("submission_json", JSON, nullable=False)
+    created = Column(String)
+    updated = Column(String)
+    author = Column(String)
+    custom = Column(JSON)
+
+    # Relationship to Form
+    form = relationship("Form", back_populates="submissions")
+
+class User(Base):
+    __tablename__ = "users"
+
+    username = Column(String, primary_key=True, index=True)
+    hashed_password = Column(String, nullable=False)
+    role = Column(String, nullable=False, default="user")
+    display_name = Column(String)
+    pfp_url = Column(String)
+    disabled = Column(Boolean, nullable=False, default=False)
+
+class Setting(Base):
+    __tablename__ = "settings"
+
+    key = Column(String, primary_key=True, index=True)
+    value = Column(JSON, nullable=False) # Use JSON type for automatic handling
+
+class Role(Base):
+    __tablename__ = "roles"
+    
+    role_name = Column(String, primary_key=True)
+    permissions = Column("permissions_json", JSON, nullable=False)
+

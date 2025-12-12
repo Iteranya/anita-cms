@@ -1,123 +1,103 @@
-from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
-from data.db import get_first_page_by_tag, get_pages_by_tag, get_page
-from fastapi.templating import Jinja2Templates
-from src.generator import generate_markdown_page
-from src.config import get_theme
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import HTMLResponse
+from sqlalchemy.orm import Session
+from typing import List
+from data.database import get_db
+from data import schemas
+from services.pages import PageService
 
+# --- Dependency Setup ---
+def get_page_service(db: Session = Depends(get_db)) -> PageService:
+    return PageService(db)
 
 router = APIRouter(tags=["Public"])
-template_path = f"static/public/{get_theme()}"
-templates = Jinja2Templates(directory=template_path)
+
+# TODO: Database Optimization
+
+# ==========================================
+# 🖼️ HTML SERVING ROUTES
+# ==========================================
 
 @router.get("/", response_class=HTMLResponse)
-async def serve_custom_page(request: Request):
+def serve_home_page(page_service: PageService = Depends(get_page_service)):
+    """Serves the page tagged as 'home'."""
+    page = page_service.get_first_page_by_tag('sys:home')
+    if not page or "sys:public" not in page.tags:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Critical: Home page not configured, notify site owner.")
 
-    # Try to find the first page with 'home' tag
-    home_page = get_first_page_by_tag('home')
-
-    if home_page:
-        # If page is HTML, serve it directly
-        if home_page.type == 'html':
-            return HTMLResponse(content=home_page.html, status_code=200)
-        else:
-            # Otherwise, generate HTML from Markdown
-            generated = generate_markdown_page(home_page.title, home_page.markdown)
-            return HTMLResponse(content=generated, status_code=200)
-    
-    # Fallback to static index.html if no 'home' page found
-    path = f"{template_path}/index.html"
-    return FileResponse(path)
+    # We serve the pre-rendered HTML directly from the database
+    return HTMLResponse(content=page.html, status_code=200)
 
 
-@router.get("/blog/", response_class=HTMLResponse)
-async def home(request: Request):
-    blog_home = get_first_page_by_tag('blog-home')
-    blog_pages = get_pages_by_tag("blog")
+@router.get("/blog", response_class=HTMLResponse)
+def serve_blog_index(page_service: PageService = Depends(get_page_service)):
+    """Serves the page tagged as 'blog-home' as the main blog index."""
+    page = page_service.get_first_page_by_tag('sys:blog-home')
+    if not page or 'sys:public' not in page.tags:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Critical: Blog index page not found, notify site owner")
 
-    if blog_home and blog_home.type == 'html':
-        return HTMLResponse(content=blog_home.html, status_code=200)
+    return HTMLResponse(content=page.html, status_code=200)
 
-    return templates.TemplateResponse("blog.html", {"request": request, "pages": blog_pages})
 
-# Dynamic route to serve blog type pages
 @router.get("/blog/{slug}", response_class=HTMLResponse)
-async def render_site(slug: str):
-    page = get_page(slug)
-    if not page or not (page.tags and 'blog' in page.tags):
-        raise HTTPException(status_code=404, detail="Main page not found")
+def serve_blog_post(slug: str, page_service: PageService = Depends(get_page_service)):
+    """Serves a single blog post page."""
+    page = page_service.get_page_by_slug(slug) # Service handles 404 if slug doesn't exist
+    markdown_template = page_service.get_first_page_by_tag('sys:blog-template')
     
-    template = get_first_page_by_tag("blog-template")
-    if not page:
-        raise HTTPException(status_code=404, detail="Page not found")
+    # Ensure this endpoint only serves pages with the 'sys:blog' tag
+    if not page.tags or ('sys:blog' not in page.tags or 'sys:public' not in page.tags):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found.")
     if page.type == 'html':
         return HTMLResponse(content=page.html, status_code=200)
-    elif template:
-        generated = generate_markdown_page(page.title,page.markdown,template.html)
-        return HTMLResponse(content=generated, status_code=200)
-    else:
-        generated = generate_markdown_page(page.title,page.markdown)
-        return HTMLResponse(content=generated, status_code=200)
-
-# Dynamic route to serve 'main' pages
-@router.get("/{slug}/", response_class=HTMLResponse)
-async def serve_main_page(slug: str):
-    page = get_page(slug)
-
-    # Check if page exists and has the 'main' tag
-    if not page or not (page.tags and 'main' in page.tags):
-        raise HTTPException(status_code=404, detail="Main page not found")
-
-    # If it's pure HTML, return as is
-    if page.type == 'html':
-        return HTMLResponse(content=page.html, status_code=200)
-
-    # Otherwise, generate HTML from Markdown
-    generated = generate_markdown_page(page.title, page.markdown)
-    return HTMLResponse(content=generated, status_code=200)
-
-# API ROUTES!!!
-
-# API route to list all blog pages
-@router.get("/api/blog")
-async def api_list_pages():
-    blog_pages = get_pages_by_tag("blog")
-
-    return JSONResponse(content=[
-        {
-            "slug": page.slug,
-            "title": page.title,
-            "content": page.content,
-            "tags": page.tags or [],
-            "thumb": page.thumb,
-            "type": page.type,
-            "created": page.created,
-            "updated": page.updated,
-            "author": page.author
-        }
-        for page in blog_pages
-    ])
+    else: # Patch, markdown_template will retrieve page from client side, will fix later
+        return HTMLResponse(content=markdown_template.html, status_code=200)
 
 
-# API route to get a single blog page by slug
-@router.get("/api/blog/{slug}")
-async def api_get_page(slug: str):
-    page = get_page(slug)
-    if not "blog" in page.tags:
-        raise HTTPException(status_code=404, detail="Page not found")
-    if not page:
-        raise HTTPException(status_code=404, detail="Page not found")
+# ==========================================
+# 🚀 PUBLIC API ROUTES
+# ==========================================
 
-    return JSONResponse(content={
-        "slug": page.slug,
-        "title": page.title,
-        "content": page.content,
-        "markdown": page.markdown,
-        "html": page.html,
-        "tags": page.tags or [],
-        "thumb": page.thumb,
-        "type": page.type,
-        "created": page.created,
-        "updated": page.updated,
-        "author": page.author
-    })
+
+@router.get("/api/blog", response_model=List[schemas.Page])
+def api_list_blog_pages(page_service: PageService = Depends(get_page_service)):
+    """
+    API endpoint to get a list of all pages tagged with both 'sys:blog' and 'sys:public'.
+    The response is automatically serialized by FastAPI based on the Pydantic schema.
+    """
+    # 1. Fetch all pages that have the 'sys:blog' tag
+    all_blog_pages = page_service.get_pages_by_tag("sys:blog")
+    
+    # 2. Filter that list to only include pages that also have the 'sys:public' tag
+    public_blog_pages = [
+        page for page in all_blog_pages if "sys:public" in page.tags
+    ] 
+    for blog in public_blog_pages:
+        blog.html = ""
+        blog.markdown=""
+    
+    return public_blog_pages
+
+
+@router.get("/api/blog/{slug}", response_model=schemas.Page)
+def api_get_blog_page(slug: str, page_service: PageService = Depends(get_page_service)):
+    """
+    API endpoint to get a single public blog page by its slug.
+    """
+    page = page_service.get_page_by_slug(slug)
+    
+    if not page.tags or ('sys:blog' not in page.tags or 'sys:public' not in page.tags):
+         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found in this category.")
+
+    return page
+
+@router.get("/{slug}", response_class=HTMLResponse)
+def serve_generic_page(slug: str, page_service: PageService = Depends(get_page_service)):
+    """
+    Serves a generic top-level page by its slug.
+    This acts as a catch-all for any slug not matched by other routes.
+    """
+    page = page_service.get_page_by_slug(slug)
+    if not page.tags or ('sys:main' not in page.tags or 'sys:public' not in page.tags):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found in this category.")
+    return HTMLResponse(content=page.html, status_code=200)

@@ -1,91 +1,100 @@
-from openai import AsyncOpenAI  # Use AsyncOpenAI instead
-from data.models import Prompt
-from src.config import load_or_create_config, DefaultConfig, get_key
-
-async def generate_response(task: Prompt):
-    ai_config: DefaultConfig = load_or_create_config()
-    client = AsyncOpenAI(  # Changed to AsyncOpenAI
-        base_url=task.endpoint or ai_config.ai_endpoint,
-        api_key=task.ai_key or get_key(),
-    )
-    
-    completion = await client.chat.completions.create(  # Added await
-        model=task.model or ai_config.base_llm,
-        stop=task.stop or [],
-        temperature=task.temp or ai_config.temperature,
-        messages=[
-            {"role": "system", "content": task.system},
-            {"role": "user", "content": task.user},
-            {"role": "assistant", "content": task.assistant}
-        ]
-    )
-    result = completion.choices[0].message.content
-    task.result = result
-    return task.result
-
-async def generate_chat(message:list):
-    ai_config: DefaultConfig = load_or_create_config()
-    client = AsyncOpenAI(  # Changed to AsyncOpenAI
-        ai_config.ai_endpoint,
-        get_key(),
-    )
-    
-    completion = await client.chat.completions.create(  # Added await
-        ai_config.base_llm,
-        ai_config.temperature,
-        messages=message
-    )
-    result = completion.choices[0].message.content
-    return result
-
-async def stream_response(task: Prompt):
-    ai_config: DefaultConfig = load_or_create_config()
-    client = AsyncOpenAI(  # Changed to AsyncOpenAI
-        base_url=task.endpoint or ai_config.ai_endpoint,
-        api_key=task.ai_key or get_key(),
-    )
-    
-    stream = await client.chat.completions.create(  # Added await
-        model=task.model or ai_config.base_llm,
-        stop=task.stop or [],
-        temperature=task.temp or ai_config.temperature,
-        messages=[
-            {"role": "system", "content": task.system},
-            {"role": "user", "content": task.user}
-        ],
-        stream=True,
-    )
-    
-    full_response = ""
-    async for chunk in stream:  # Changed to async for
-        if chunk.choices[0].delta and chunk.choices[0].delta.content:
-            content_piece = chunk.choices[0].delta.content
-            full_response += content_piece
-            yield content_piece
-    
-    task.result = full_response
 
 
-async def stream_message_response(task: Prompt,messages):
-    ai_config: DefaultConfig = load_or_create_config()
-    client = AsyncOpenAI(  # Changed to AsyncOpenAI
-        base_url=ai_config.ai_endpoint,
-        api_key= get_key(),
-    )
+from typing import List, Dict, AsyncGenerator
+from sqlalchemy.orm import Session
+from fastapi import HTTPException, status
+from openai import AsyncOpenAI
+
+from services.config import ConfigService
+from data.schemas import Prompt
+
+class AIService:
+    def __init__(self, db: Session):
+        """
+        Initializes the AI Service by loading necessary configuration from the database.
+        """
+        self.db = db
+        config_service = ConfigService(self.db)
+
+        # Load essential settings from the database
+        self.base_url = config_service.get_setting_value("ai_endpoint")
+        self.api_key = config_service.get_setting_value("ai_key")
+        self.base_llm = config_service.get_setting_value("base_llm")
+        self.temperature = config_service.get_setting_value("temperature")
+        self.system_note = config_service.get_setting_value("system_note")
+
+    def _get_client(self, prompt: Prompt) -> AsyncOpenAI:
+        """Helper to create an AsyncOpenAI client with prompt-specific overrides."""
+        return AsyncOpenAI(
+            base_url=prompt.endpoint or self.base_url,
+            api_key=prompt.ai_key or self.api_key,
+        )
+
+    async def generate_response(self, prompt: Prompt) -> str:
+        """
+        Generates a single, non-streaming response based on a Prompt object.
+        """
+        client = self._get_client(prompt)
+
+        messages = [{"role": "system", "content": prompt.system or self.system_note}]
+        if prompt.user:
+            messages.append({"role": "user", "content": prompt.user})
+        if prompt.assistant:
+            messages.append({"role": "assistant", "content": prompt.assistant})
+
+        completion = await client.chat.completions.create(
+            model=prompt.model or self.base_llm,
+            stop=prompt.stop or [],
+            temperature=prompt.temp or self.temperature,
+            messages=messages
+        )
+        
+        result = completion.choices[0].message.content
+        return result
+
+    async def stream_response(self, prompt: Prompt) -> AsyncGenerator[str, None]:
+        """
+        Streams a response based on a Prompt object, yielding content chunks.
+        """
+        client = self._get_client(prompt)
+
+        stream = await client.chat.completions.create(
+            model=prompt.model or self.base_llm,
+            stop=prompt.stop or [],
+            temperature=prompt.temp or self.temperature,
+            messages=[
+                {"role": "system", "content": prompt.system or self.system_note},
+                {"role": "user", "content": prompt.user or ""}
+            ],
+            stream=True,
+        )
+
+        async for chunk in stream:
+            if chunk.choices[0].delta and chunk.choices[0].delta.content:
+                yield chunk.choices[0].delta.content
     
-    stream = await client.chat.completions.create(  # Added await
-        model=task.model or ai_config.base_llm,
-        stop=task.stop or [],
-        temperature=task.temp or ai_config.temperature,
-        messages = messages,
-        stream=True,
-    )
-    
-    full_response = ""
-    async for chunk in stream:  # Changed to async for
-        if chunk.choices[0].delta and chunk.choices[0].delta.content:
-            content_piece = chunk.choices[0].delta.content
-            full_response += content_piece
-            yield content_piece
-    
-    task.result = full_response
+    async def stream_chat(self, messages: List[Dict[str, str]], overrides: Prompt = None) -> AsyncGenerator[str, None]:
+        """
+        Streams a response for a given list of messages, allowing for overrides.
+        This is ideal for multi-turn chat applications.
+        """
+        if overrides is None:
+            overrides = Prompt()
+
+        client = self._get_client(overrides)
+
+        # Ensure a system message is present
+        if not any(msg.get("role") == "system" for msg in messages):
+            messages.insert(0, {"role": "system", "content": self.system_note})
+
+        stream = await client.chat.completions.create(
+            model=overrides.model or self.base_llm,
+            stop=overrides.stop or [],
+            temperature=overrides.temp or self.temperature,
+            messages=messages,
+            stream=True,
+        )
+
+        async for chunk in stream:
+            if chunk.choices[0].delta and chunk.choices[0].delta.content:
+                yield chunk.choices[0].delta.content

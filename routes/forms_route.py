@@ -1,276 +1,406 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from typing import Any, Dict, List, Optional
-from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel
-from datetime import datetime
+from sqlalchemy.orm import Session
+from data.database import get_db
+from data import schemas 
+from services.forms import FormService
+from services.users import UserService
+from src.dependencies import get_current_user, optional_user
+from data.schemas import CurrentUser
 
-from src.config import load_or_create_config, save_config, load_or_create_mail_config, save_mail_config
-from data import forms_db  # Your database helper module
-from src.auth import get_current_user, optional_auth
+# --- Dependency Setup ---
+# This function allows FastAPI to inject the FormService into our routes.
+def get_form_service(db: Session = Depends(get_db)) -> FormService:
+    return FormService(db)
+
+def get_user_service(db: Session = Depends(get_db)) -> UserService:
+    """Dependency to get an instance of UserService with a DB session."""
+    return UserService(db)
 
 router = APIRouter(prefix="/forms", tags=["Form"])
 
 # ----------------------------------------------------
-# 🧱 MODELS
+# 🧱 MODELS (for request bodies not covered by schemas)
 # ----------------------------------------------------
 
-class FormModel(BaseModel):
-    """Represents a custom form definition."""
-    slug: str
-    title: str
-    schema: Dict[str, Any]
-    description: Optional[str] = None
-    created: Optional[str] = None
-    updated: Optional[str] = None
-    author: Optional[str] = None
-    tags: Optional[List[str]] = []  # 🏷️ NEW!
-    custom: Optional[Dict[str, Any]] = {}
-
-
-class FormSubmissionModel(BaseModel):
-    """Represents a single submission to a form."""
-    id: Optional[int] = None
-    form_slug: str
-    data: Dict[str, Any]
-    created: Optional[str] = None
-    updated: Optional[str] = None
-    author: Optional[str] = None
-    custom: Optional[Dict[str, Any]] = {}
-
-class SubmissionInput(BaseModel):
+class SubmissionBody(BaseModel):
     """
-    This model represents exactly what comes from the JavaScript:
-    Just data and custom fields. No slug, no ID, no timestamps.
+    Represents the expected JSON body for a new submission.
+    It intentionally omits fields that are derived from the context,
+    like form_slug (from URL), id, author, and timestamps (from server).
     """
     data: Dict[str, Any]
     custom: Optional[Dict[str, Any]] = {}
-
-# ----------------------------------------------------
-# 🖼️ FORM HTML VIEW
-# ----------------------------------------------------
-
-@router.get("/", response_class=HTMLResponse)
-async def get_html(request: Request, user: Optional[str] = Depends(optional_auth)):
-    if not user:
-        return RedirectResponse(url="/auth/login", status_code=302)
-
-    template_path = "static/form/index.html"
-    slug = request.query_params.get("slug", "")
-
-    with open(template_path, "r") as f:
-        html = f.read()
-
-    html = html.replace(
-        '<div id="slug-container" style="display: none;" data-slug=""></div>',
-        f'<div id="slug-container" style="display: none;" data-slug="{slug}">{slug}</div>'
-    )
-    return html
 
 # ----------------------------------------------------
 # 🧩 FORMS CRUD
 # ----------------------------------------------------
 
-@router.post("/", response_model=FormModel)
-def create_form(form: FormModel, user=Depends(get_current_user)):
+@router.post("/", response_model=schemas.Form, status_code=status.HTTP_201_CREATED)
+def create_form(
+    form_in: schemas.FormCreate,
+    form_service: FormService = Depends(get_form_service),
+    user_service: UserService = Depends(get_user_service),  
+    user: CurrentUser = Depends(get_current_user),
+):
     """Create a new custom form."""
-    existing = forms_db.get_form(form.slug)
-    if existing:
-        raise HTTPException(status_code=400, detail="Form slug already exists.")
+    user_permissions = user_service.get_user_permissions(user.username)
+    can_create_form = "*" in user_permissions or "form:create" in user_permissions
+    if can_create_form:
+        form_in.author = user.username
+        return form_service.create_new_form(form_data=form_in)
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to create a form."
+        )
 
-    now = datetime.now().isoformat()
-    form.created = now
-    form.updated = now
-    form.author = getattr(user, "username", "Admin")
-
-    forms_db.add_form(
-        form.slug,
-        form.title,
-        form.schema,
-        form.description,
-        author=form.author,
-        tags=form.tags,  # 🏷️ NEW!
-        custom=form.custom
-    )
-    return form
-
-
-@router.get("/list", response_model=List[FormModel])
-def list_forms(user=Depends(optional_auth), tag: Optional[str] = None):
+@router.get("/list", response_model=List[schemas.Form])
+def list_forms(
+    tag: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 100,
+    form_service: FormService = Depends(get_form_service),
+    user_service: UserService = Depends(get_user_service),  
+    user: CurrentUser = Depends(get_current_user),
+):
     """List all available forms, optionally filtered by tag."""
-    all_forms = forms_db.list_forms()
+
+    user_permissions = user_service.get_user_permissions(user.username)
+    can_read_form = "*" in user_permissions or "form:read" in user_permissions
+    if not can_read_form:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to read a form."
+        )
     
-    # 🏷️ NEW: Filter by tag if provided
+    all_forms = form_service.get_all_forms(skip=skip, limit=limit)
+    
     if tag:
-        all_forms = [f for f in all_forms if tag in f.get("tags", [])]
+        return [f for f in all_forms if f.tags and tag in f.tags]
     
     return all_forms
 
-
-@router.get("/{slug}", response_model=FormModel)
-def get_form(slug: str, user=Depends(optional_auth)):
+@router.get("/{slug}", response_model=schemas.Form)
+def get_form(
+    slug: str,
+    form_service: FormService = Depends(get_form_service),
+    user_service: UserService = Depends(get_user_service),  
+    user: CurrentUser = Depends(get_current_user),
+):
     """Get a single form by its slug."""
-    form = forms_db.get_form(slug)
-    if not form:
-        raise HTTPException(status_code=404, detail="Form not found.")
-    
-    # Allow if form has 'read' tag OR if user is authenticated
-    if "read" not in form["tags"] and not user:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+    user_permissions = user_service.get_user_permissions(user.username)
+    can_read_form = "*" in user_permissions or "form:read" in user_permissions
+    if not can_read_form:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to read a form."
+        )
+    form = form_service.get_form_by_slug(slug)
     
     return form
 
-
-@router.put("/{slug}", response_model=FormModel)
-def update_form(slug: str, form: FormModel, user=Depends(get_current_user)):
+@router.put("/{slug}", response_model=schemas.Form)
+def update_form(
+    slug: str,
+    form_update: schemas.FormUpdate,
+    form_service: FormService = Depends(get_form_service),
+    user_service: UserService = Depends(get_user_service),  
+    user: CurrentUser = Depends(get_current_user),
+):
     """Update an existing form definition."""
-    existing = forms_db.get_form(slug)
-    if not existing:
-        raise HTTPException(status_code=404, detail="Form not found.")
+    # The service handles checking for existence and performing the update.
+    user_permissions = user_service.get_user_permissions(user.username)
+    can_update_form = "*" in user_permissions or "form:update" in user_permissions
+    if not can_update_form:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to update a form."
+        )
+    return form_service.update_existing_form(slug=slug, form_update_data=form_update)
 
-    form.updated = datetime.now().isoformat()
-    forms_db.update_form(form)
-    return form
-
-
-@router.delete("/{slug}")
-def delete_form(slug: str, user=Depends(get_current_user)):
-    """Delete a form by its slug."""
-    existing = forms_db.get_form(slug)
-    if not existing:
-        raise HTTPException(status_code=404, detail="Form not found.")
-    forms_db.delete_form(slug)
-    return {"detail": f"Form '{slug}' deleted successfully."}
+@router.delete("/{slug}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_form(
+    slug: str,
+    form_service: FormService = Depends(get_form_service),
+    user_service: UserService = Depends(get_user_service),  
+    user: CurrentUser = Depends(get_current_user),
+):
+    """Delete a form and all its submissions by its slug."""
+    user_permissions = user_service.get_user_permissions(user.username)
+    can_delete_form = "*" in user_permissions or "form:delete" in user_permissions
+    if not can_delete_form:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to delete a form."
+        )
+    form_service.delete_form_by_slug(slug)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 # ----------------------------------------------------
-# 🏷️ TAG UTILITIES (BONUS!)
+# 🏷️ TAG UTILITIES
 # ----------------------------------------------------
 
-@router.get("/tags/all", response_model=List[str])
-def get_all_tags(user=Depends(optional_auth)):
+@router.get("/tags/all", response_model=List[str]) #  Should I really secure this route???? Feels overkill...
+def get_all_tags(
+    form_service: FormService = Depends(get_form_service),
+    user: CurrentUser = Depends(get_current_user),
+    user_service: UserService = Depends(get_user_service),  
+):
     """Get a list of all unique tags across all forms."""
-    forms = forms_db.list_forms()
+    user_permissions = user_service.get_user_permissions(user.username)
+    permission = "*" in user_permissions or "form:read" in user_permissions
+    if not permission:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to access this route."
+        )
+    forms = form_service.get_all_forms(skip=0, limit=1000) # Adjust limit as needed
+    
     tags = set()
     for form in forms:
-        tags.update(form.get("tags", []))
+        if form.tags:
+            tags.update(form.tags)
     return sorted(list(tags))
 
 # ----------------------------------------------------
 # 📨 FORM SUBMISSIONS
 # ----------------------------------------------------
 
-@router.post("/{slug}/submit", response_model=FormSubmissionModel)
+@router.post("/{slug}/submit", response_model=schemas.Submission, status_code=status.HTTP_201_CREATED)
 def submit_form(
-    slug: str, 
-    submission_req: SubmissionInput,  # 👈 Change this type hint!
-    user=Depends(optional_auth)
+    slug: str,
+    submission_body: SubmissionBody,
+    form_service: FormService = Depends(get_form_service),
+    user_service: UserService = Depends(get_user_service),  
+    user: CurrentUser = Depends(get_current_user),
 ):
     """Submit a response to a form."""
-    form = forms_db.get_form(slug)
-    if not form:
-        print("Form Not Found")
-        raise HTTPException(status_code=404, detail="Form not found.")
+    form = form_service.get_form_by_slug(slug)
+    user_permissions = user_service.get_user_permissions(user.username)
+    override_submission = "*" in user_permissions or "submission:create" in user_permissions
+    form_is_open = "any:create" in form.tags
+    role_is_allowed = f"{user.role}:create" in form.tags
+    if override_submission:
+        pass
+    elif role_is_allowed:
+        pass
+    elif form_is_open:
+        pass
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to add submission in this form."
+        )
     
-    # Allow if form has 'create' tag OR if user is authenticated
-    if "create" not in form["tags"] and not user:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+    author_username = user.username if user else "Anon"
     
-    print("NYOOOOOM~")
-    now = datetime.now().isoformat()
-    
-    # Prepare the author
-    author_name = getattr(user, "username", None) if user else None
-
-    # Add to Database
-    # Note: Assuming add_submission returns the ID or the full dict
-    new_id = forms_db.add_submission(
+    # Construct the full submission data object for the service layer.
+    submission_data = schemas.SubmissionCreate(
         form_slug=slug,
-        data=submission_req.data,
-        author=author_name,
-        custom=submission_req.custom
+        data=submission_body.data,
+        custom=submission_body.custom,
+        author=author_username
     )
     
-    # Construct the Response Model manually combining URL slug + Input Body + Server Context
-    return FormSubmissionModel(
-        id=new_id if isinstance(new_id, int) else None, # Handle if DB returns ID
-        form_slug=slug,          # 👈 Taken from URL
-        data=submission_req.data, # 👈 Taken from Body
-        custom=submission_req.custom,
-        created=now,
-        updated=now,
-        author=author_name
-    )
+    # The service validates the data against the form's schema before saving.
+    return form_service.create_new_submission(submission_data=submission_data)
 
-@router.get("/{slug}/submissions", response_model=List[FormSubmissionModel])
-def list_submissions(slug: str, user=Depends(optional_auth)):
+@router.get("/{slug}/submissions", response_model=List[schemas.Submission])
+def list_submissions(
+    slug: str,
+    skip: int = 0,
+    limit: int = 100,
+    form_service: FormService = Depends(get_form_service),
+    user_service: UserService = Depends(get_user_service),  
+    user: CurrentUser = Depends(get_current_user),
+):
     """List all submissions for a form."""
-    form = forms_db.get_form(slug)
+    form = form_service.get_form_by_slug(slug)
     if not form:
-        raise HTTPException(status_code=404, detail="Form not found.")
+        raise HTTPException(status_code=404, detail="Form not found")
+    user_permissions = user_service.get_user_permissions(user.username)
+    override_submission = "*" in user_permissions or "submission:read" in user_permissions
+    form_is_open = "any:read" in form.tags
+    role_is_allowed = f"{user.role}:read" in form.tags
     
-    # Allow if form has 'read' tag OR if user is authenticated
-    if "read" not in form["tags"] and not user:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
-    return forms_db.list_submissions(slug)
+    # Authorization check
+    if not override_submission and not form_is_open and not role_is_allowed:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
+        
+    return form_service.get_submissions_for_form(form_slug=slug, skip=skip, limit=limit)
 
-@router.get("/{slug}/submissions/{submission_id}", response_model=FormSubmissionModel)
-def get_submission(slug: str, submission_id: int, user=Depends(optional_auth)):
-    """Get a specific submission from a form."""
-    form = forms_db.get_form(slug)
+@router.get("/{slug}/submissions/{submission_id}", response_model=schemas.Submission)
+def get_submission(
+    slug: str,
+    submission_id: int,
+    form_service: FormService = Depends(get_form_service),
+    user_service: UserService = Depends(get_user_service),
+    user: CurrentUser = Depends(get_current_user),
+):
+    """Get a specific submission from a form with proper authorization and no data leaks."""
+    
+    # --- Fetch the form ---
+    form = form_service.get_form_by_slug(slug)
     if not form:
-        raise HTTPException(status_code=404, detail="Form not found.")
+        raise HTTPException(status_code=404, detail="Form not found")
     
-    # Allow if form has 'read' tag OR if user is authenticated
-    if "read" not in form["tags"] and not user:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+    # --- Fetch the submission (no details leaked yet) ---
+    submission = form_service.get_submission_by_id(submission_id)
+    if not submission:
+        # Always return 404 for unauthorized or non-existent IDs
+        raise HTTPException(status_code=404, detail="Submission not found")
+
+    # --- Get user permissions ---
+    user_permissions = user_service.get_user_permissions(user.username)
+
+    override_submission = (
+        "*" in user_permissions or
+        "submission:read" in user_permissions
+    )
+    form_is_open = "any:read" in form.tags
+    role_is_allowed = f"{user.role}:read" in form.tags
+    user_owns_it = submission.author == user.username
+
+    # --- Authorization check (no info leak) ---
+    authorized = (
+        override_submission or
+        form_is_open or
+        role_is_allowed or
+        user_owns_it
+    )
+
+    if not authorized:
+        # Return 404 to avoid allowing ID enumeration
+        raise HTTPException(status_code=404, detail="Submission not found")
     
-    submission = forms_db.get_submission(submission_id)
-    if not submission or submission["form_slug"] != slug:
-        raise HTTPException(status_code=404, detail="Submission not found.")
-    
+    # --- Ensure the submission belongs to the form ---
+    if submission.form_slug != slug:
+        raise HTTPException(status_code=404, detail="Submission not found for this form.")
+
     return submission
 
-@router.put("/{slug}/submissions/{submission_id}", response_model=FormSubmissionModel)
+
+@router.put("/{slug}/submissions/{submission_id}", response_model=schemas.Submission)
 def update_submission(
     slug: str,
     submission_id: int,
-    updated_submission: FormSubmissionModel,
-    user=Depends(optional_auth)
+    submission_update: schemas.SubmissionUpdate,
+    form_service: FormService = Depends(get_form_service),
+    user: Optional[CurrentUser] = Depends(optional_user),
+    user_service: UserService = Depends(get_user_service),
 ):
-    """Update a specific submission for a form."""
-    form = forms_db.get_form(slug)
+    """
+    Update a specific submission using RBAC tags:
+    - "*" or "submission:update" for full override
+    - "any:update" for form-open updating
+    - "{role}:update" for role-based updating
+    - Ownership allows updating your own submission
+    """
+
+    # --- Fetch the form ---
+    form = form_service.get_form_by_slug(slug)
     if not form:
-        raise HTTPException(status_code=404, detail="Form not found.")
-    
-    # Allow if form has 'update' tag OR if user is authenticated
-    if "update" not in form["tags"] and not user:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
-    existing = forms_db.get_submission(submission_id)
-    if not existing or existing["form_slug"] != slug:
-        raise HTTPException(status_code=404, detail="Submission not found.")
-    
-    updated_submission.id = submission_id
-    updated_submission.form_slug = slug
-    updated_submission.updated = datetime.now().isoformat()
-    updated_submission.author = getattr(user, "username", None) if user else None
-    forms_db.update_submission(updated_submission)
-    return updated_submission
+        raise HTTPException(status_code=404, detail="Form not found")
+
+    # --- Require a user if the form isn't public for update ---
+    if user is None:
+        # No user -> must rely ONLY on public update permission
+        if "any:update" not in (form.tags or []):
+            raise HTTPException(status_code=404, detail="Submission not found")
+
+    # --- Fetch the submission (no leaks yet) ---
+    submission = form_service.get_submission_by_id(submission_id)
+    if not submission:
+        raise HTTPException(status_code=404, detail="Submission not found")
+
+    # --- Role & permission evaluation ---
+    user_permissions = user_service.get_user_permissions(user.username) if user else []
+
+    override_update = (
+        "*" in user_permissions or
+        "submission:update" in user_permissions
+    )
+
+    form_is_open_for_update = "any:update" in form.tags
+    role_is_allowed = user and f"{user.role}:update" in form.tags
+    user_owns_it = user and submission.author == user.username
+
+    authorized = (
+        override_update or
+        form_is_open_for_update or
+        role_is_allowed or
+        user_owns_it
+    )
+
+    if not authorized:
+        # Hide existence of submissions to avoid ID enumeration
+        raise HTTPException(status_code=404, detail="Submission not found")
+
+    # --- Ensure submission belongs to this form ---
+    if submission.form_slug != slug:
+        raise HTTPException(status_code=404, detail="Submission not found for this form.")
+
+    # --- Placeholder for actual update implementation ---
+    # return form_service.update_submission(submission_id, submission_update)
+    raise HTTPException(
+        status_code=status.HTTP_501_NOT_IMPLEMENTED,
+        detail="Update submission functionality not implemented in the service layer."
+    )
 
 
-@router.delete("/{slug}/submissions/{submission_id}")
-def delete_submission(slug: str, submission_id: int, user=Depends(optional_auth)):
-    """Delete a specific submission from a form."""
-    form = forms_db.get_form(slug)
+@router.delete("/{slug}/submissions/{submission_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_submission(
+    slug: str,
+    submission_id: int,
+    form_service: FormService = Depends(get_form_service),
+    user: Optional[CurrentUser] = Depends(optional_user),
+    user_service: UserService = Depends(get_user_service),
+):
+    """Delete a specific submission using RBAC and secure access controls."""
+
+    # --- Fetch form ---
+    form = form_service.get_form_by_slug(slug)
     if not form:
-        raise HTTPException(status_code=404, detail="Form not found.")
-    
-    # Allow if form has 'delete' tag OR if user is authenticated
-    if "delete" not in form["tags"] and not user:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
-    submission = forms_db.get_submission(submission_id)
-    if not submission or submission["form_slug"] != slug:
-        raise HTTPException(status_code=404, detail="Submission not found.")
-    forms_db.delete_submission(submission_id)
-    return {"detail": f"Submission {submission_id} deleted successfully."}
+        raise HTTPException(status_code=404, detail="Submission not found")
+
+    # Anonymous user ONLY allowed if the form explicitly grants any:delete
+    if user is None:
+        if "any:delete" not in (form.tags or []):
+            raise HTTPException(status_code=404, detail="Submission not found")
+
+    # --- Fetch submission (no info leaked) ---
+    submission = form_service.get_submission_by_id(submission_id)
+    if not submission:
+        raise HTTPException(status_code=404, detail="Submission not found")
+
+    # --- Evaluate permissions ---
+    user_permissions = user_service.get_user_permissions(user.username) if user else []
+
+    override_delete = (
+        "*" in user_permissions or
+        "submission:delete" in user_permissions
+    )
+
+    form_is_open_for_delete = "any:delete" in form.tags
+    role_is_allowed = user and f"{user.role}:delete" in form.tags
+    user_owns_it = user and submission.author == user.username
+
+    authorized = (
+        override_delete or
+        form_is_open_for_delete or
+        role_is_allowed or
+        user_owns_it
+    )
+
+    if not authorized:
+        raise HTTPException(status_code=404, detail="Submission not found")
+
+    # --- Ensure submission belongs to this form ---
+    if submission.form_slug != slug:
+        raise HTTPException(status_code=404, detail="Submission not found")
+
+    # --- Perform deletion ---
+    form_service.delete_submission_by_id(submission_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -1,181 +1,95 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
-from typing import Any, Dict, List, Optional
-from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
-from src.generator import generate_markdown_page
-from src.config import load_or_create_config, save_config, load_or_create_mail_config, save_mail_config
-from data import db  # Import the db module with standalone functions
-from data.models import Page as PageData
-from src.auth import get_current_user, optional_auth
-from datetime import datetime
+# file: api/admin.py
 
-router = APIRouter(prefix="/admin", tags=["Admin"])
+import os
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
+from sqlalchemy.orm import Session
 
-class PageModel(BaseModel):
-    title: str
-    slug: str
-    content: Optional[str] = None
-    markdown: Optional[str] = None
-    html: Optional[str] = None
-    tags: Optional[List[str]] = None
-    thumb: Optional[str] = None
-    type: str = "markdown"
-    created: Optional[str] = None
-    updated: Optional[str] = None
-    author: Optional[str] = None
-    custom: Optional[Dict[str, Any]] = {}
+# Local imports from our new architecture
+from data.database import get_db
+from services.pages import PageService
 
-class ConfigModel(BaseModel):
-    system_note: str
-    ai_endpoint: str
-    base_llm: str
-    temperature: float
-    ai_key: Optional[str] = None  # Accept in POST, but don't expose in GET
+# Import the new, decoupled authentication dependencies
+from src.dependencies import optional_user, require_admin
 
-class MailModel(BaseModel):
-    server_email:str
-    target_email:str
-    header:Optional[str] = ""
-    footer:Optional[str] = ""
-    api_key:Optional[str] = None
+router = APIRouter(tags=["Admin Views (MPA)"])
 
-templates = Jinja2Templates(directory="static")
+ADMIN_APP_DIR = "static/admin"
 
-@router.get("/")
-async def admin_panel(request: Request,  user: Optional[str] = Depends(optional_auth)):
+# --- HTML VIEW ROUTES (The Unified Dashboard - MPA Style) ---
+#
+
+@router.get("/admin", response_class=FileResponse)
+async def view_dashboard(user: dict = Depends(optional_user)):
+    """Main Dashboard. Accessible by ANY logged-in user."""
     if not user:
         return RedirectResponse(url="/auth/login", status_code=302)
-    return templates.TemplateResponse("admin/page.html", {"request": request})
+    
+    # Serves the static HTML file for the dashboard.
+    return FileResponse(os.path.join(ADMIN_APP_DIR, "page_hikarin.html"))
 
-@router.get("/page/")
-async def admin_panel(request: Request,  user: Optional[str] = Depends(optional_auth)):
+@router.get("/admin/page", response_class=FileResponse)
+async def view_page_manager(user: dict = Depends(optional_user)):
     if not user:
         return RedirectResponse(url="/auth/login", status_code=302)
-    return templates.TemplateResponse("admin/page.html", {"request": request})
+    
+    return FileResponse(os.path.join(ADMIN_APP_DIR, "page_hikarin.html"))
 
+@router.get("/admin/config", response_class=FileResponse)
+async def view_config(user: dict = Depends(optional_user)):
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    return FileResponse(os.path.join(ADMIN_APP_DIR, "config.html"))
 
-@router.post("/api/page/", response_model=PageModel)
-def create_page(
-    page: PageModel,
-    user: dict = Depends(get_current_user),  # Enforces authentication
+@router.get("/admin/forms", response_class=FileResponse)
+async def view_forms(user: dict = Depends(optional_user)):
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    return FileResponse(os.path.join(ADMIN_APP_DIR, "form.html"))
+
+@router.get("/admin/media", response_class=FileResponse)
+async def view_media(user: dict = Depends(optional_user)):
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    return FileResponse(os.path.join(ADMIN_APP_DIR, "media.html"))
+
+@router.get("/admin/files", response_class=FileResponse)
+async def view_files(user: dict = Depends(optional_user)):
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    return FileResponse(os.path.join(ADMIN_APP_DIR, "file_manager.html"))
+
+@router.get("/admin/users", response_class=FileResponse)
+async def view_users(user: dict = Depends(optional_user)):
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    return FileResponse(os.path.join(ADMIN_APP_DIR, "users_hikarin.html"))
+
+# --- CUSTOM DYNAMIC ADMIN PAGES (from Database) ---
+
+@router.get("/admin/{slug}", response_class=HTMLResponse)
+async def serve_custom_admin_page(
+    slug: str,
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
 ):
-    if db.get_page(page.slug):
-        raise HTTPException(status_code=400, detail="Page already exists")
-   
-    # Add timestamps and author
-    page_data = page.dict()
-    now = datetime.now().isoformat()
-    page_data['created'] = now
-    page_data['updated'] = now
-    page_data['author'] = user.get('username')  # Use whatever user identifier you have
-    page_data["custom"] = page_data.get("custom", {})
-    
-    db.add_page(PageData(**page_data))
-    return PageModel(**page_data)
+    """
+    Fetches a CMS page tagged with 'admin' and directly serves its raw HTML content.
+    """
+    page_service = PageService(db)
+    # The service will raise a 404 if the page is not found
+    page = page_service.get_page_by_slug(slug)
 
-@router.get("/api/page/list/", response_model=List[PageModel])
-def list_pages(user: dict = Depends(get_current_user)):
-    return db.list_pages()
+    # Check for the 'admin' tag
+    if not page.tags or 'admin' not in page.tags:
+        raise HTTPException(status_code=404, detail="Admin tool not found")
 
-@router.delete("/api/page/{slug}/")
-def delete_page(slug: str,user: dict = Depends(get_current_user)):
-    if not db.get_page(slug):
-        raise HTTPException(status_code=404, detail="Page not found")
-    db.delete_page(slug)
-    return {"message": "Page deleted successfully"}
-
-
-@router.get("/api/page/{slug}/", response_model=PageModel)
-def read_page(slug: str, user: dict = Depends(get_current_user)):
-    page = db.get_page(slug)
-    if not page:
-        raise HTTPException(status_code=404, detail="Page not found")
-    return page
-
-@router.put("/api/page/{slug}/", response_model=PageModel)
-def update_page(slug: str, page: PageModel, user: dict = Depends(get_current_user)):
-    print("Received data:", page.dict())
-    existing_page = db.get_page(slug)
-    if not existing_page:
-        raise HTTPException(status_code=404, detail="Page not found")
-    
-    # Update timestamp and preserve original author/created
-    page_data = page.dict()
-    page_data['updated'] = datetime.now().isoformat()
-    page_data['created'] = existing_page.created  # Preserve original creation time
-    page_data['author'] = existing_page.author    # Preserve original author
-    page_data["custom"] = page_data.get("custom", existing_page.custom or {})
-
-    
-    db.update_page(PageData(**page_data))
-    return PageModel(**page_data)
-
-@router.get("/config/")
-async def admin_panel(request: Request,  user: Optional[str] = Depends(optional_auth)):
-    if not user:
-        return RedirectResponse(url="/auth/login", status_code=302)
-    return templates.TemplateResponse("admin/config.html", {"request": request})
-
-
-@router.get("/api/config/", response_model=ConfigModel)
-def get_config(user: dict = Depends(get_current_user)):
-    config = load_or_create_config()
-    return ConfigModel(
-        system_note=config.system_note,
-        ai_endpoint=config.ai_endpoint,
-        base_llm=config.base_llm,
-        temperature=config.temperature
-        # Do not include ai_key
-    )
-
-@router.post("/api/config/", response_model=ConfigModel)
-def update_config(updated: ConfigModel,user: dict = Depends(get_current_user)):
-    config = load_or_create_config()
-    config.system_note = updated.system_note
-    config.ai_endpoint = updated.ai_endpoint
-    config.base_llm = updated.base_llm
-    config.temperature = updated.temperature
-
-    if updated.ai_key is not None:
-        config.ai_key = updated.ai_key  # Save if provided
-
-    save_config(config)
-    return updated
-
-@router.get("/forms/")
-async def admin_panel(request: Request,  user: Optional[str] = Depends(optional_auth)):
-    if not user:
-        return RedirectResponse(url="/auth/login", status_code=302)
-    return templates.TemplateResponse("admin/form.html", {"request": request})
-
-@router.get("/media/")
-async def admin_panel(request: Request,  user: Optional[str] = Depends(optional_auth)):
-    if not user:
-        return RedirectResponse(url="/auth/login", status_code=302)
-    return templates.TemplateResponse("admin/media.html", {"request": request})
-
-@router.get("/files/")
-async def admin_panel(request: Request,  user: Optional[str] = Depends(optional_auth)):
-    if not user:
-        return RedirectResponse(url="/auth/login", status_code=302)
-    return templates.TemplateResponse("admin/file_manager.html", {"request": request})
-
-# Dynamic route to serve 'custom admin' pages
-@router.get("/{slug}/", response_class=HTMLResponse)
-async def serve_custom_admin_page(slug: str, user: Optional[str] = Depends(optional_auth)):
-    if not user:
-        return RedirectResponse(url="/auth/login", status_code=302)
-    page = db.get_page(slug)
-
-    # Check if page exists and has the 'main' tag
-    if not page or not (page.tags and 'admin' in page.tags):
-        raise HTTPException(status_code=404, detail="Main page not found")
-
-    # If it's pure HTML, return as is
-    if page.type == 'html':
+    # Check if the page is of type 'html' and has content
+    if page.type == 'html' and page.html:
         return HTMLResponse(content=page.html, status_code=200)
 
-    # Otherwise, generate HTML from Markdown
-    generated = generate_markdown_page(page.title, page.markdown)
-    return HTMLResponse(content=generated, status_code=200)
+    # If it's not a valid HTML admin page, it's not found in this context
+    raise HTTPException(
+        status_code=404,
+        detail="Admin tool page is not configured for direct HTML display."
+    )

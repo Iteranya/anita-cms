@@ -405,7 +405,7 @@
             const loader = document.getElementById('pages-loader');
             
             try {
-                const res = await fetch('/admin/api/page/list/');
+                const res = await fetch('/page/list/');
                 if(res.status === 401) window.location.href = '/auth/login';
                 if(!res.ok) throw new Error("Failed");
                 
@@ -620,7 +620,7 @@ allPages.forEach(page => {
             };
 
             const method = isEditing ? 'PUT' : 'POST';
-            const url = isEditing ? `/admin/api/page/${currentSlug}/` : '/admin/api/page/';
+            const url = isEditing ? `/page/${currentSlug}/` : '/page/';
 
             try {
                 const res = await fetch(url, {
@@ -658,7 +658,7 @@ allPages.forEach(page => {
 
         document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
             try {
-                const res = await fetch(`/admin/api/page/${deleteTarget}/`, { method: 'DELETE' });
+                const res = await fetch(`/page/${deleteTarget}/`, { method: 'DELETE' });
                 if(res.ok) {
                     closeDeleteModal();
                     fetchPages();
