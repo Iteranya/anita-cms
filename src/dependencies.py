@@ -1,18 +1,37 @@
 # file: auth/dependencies.py
 
 from typing import Optional
-from fastapi import Depends, HTTPException, status, Cookie
+from fastapi import Depends, HTTPException, Request, status, Cookie
 from sqlalchemy.orm import Session
 from pydantic import ValidationError
 from services.auth import AuthService
 from services.users import UserService
 from data.database import get_db
 from data import schemas
+from fastapi_csrf_protect import CsrfProtect
 
 def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
     """Dependency to get an instance of AuthService with a DB session."""
     user_service = UserService(db)
     return AuthService(user_service)
+
+def csrf_protect_dependency(
+    request: Request, 
+    csrf_protect: CsrfProtect = Depends()
+):
+    """
+    A dependency that enforces CSRF protection on state-changing methods.
+    
+    It checks the request method. If it's a "safe" method (GET, HEAD, OPTIONS),
+    it does nothing. For all other methods (POST, PUT, DELETE, PATCH), it
+    validates the CSRF token. This dependency should be applied at the router level
+    for all protected API endpoints.
+    """
+    safe_methods = {"GET", "HEAD", "OPTIONS"}
+    
+    if request.method.upper() not in safe_methods:
+        csrf_protect.validate_csrf_in_request()
+
 
 def get_current_user(
     access_token: Optional[str] = Cookie(None),
@@ -24,19 +43,30 @@ def get_current_user(
     Raises 401 Unauthorized if the user is not authenticated or the token is invalid.
     """
     if not access_token:
-        return None
+        # Raise an exception instead of returning None to enforce authentication
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     
     payload = auth_service.decode_access_token(access_token)
     if not payload:
-        return None
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     
     try:
-        # CHANGED: Convert the dictionary payload into your Pydantic model
-        # This provides validation and enables attribute access (e.g., user.username)
         return schemas.CurrentUser(**payload)
     except ValidationError:
-        # Catches cases where the token is valid but the payload is malformed
-        return None
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token payload",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     
 
 

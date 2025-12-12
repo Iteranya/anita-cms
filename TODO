@@ -4,6 +4,6 @@ TODO
 - [x] Commission Yozzun for Anita Character Art
 - [ ] Pay Yozzun for Anita Character Art
 - [x] Implement RBAC Site-Wide
-- [ ] Add in the Role/User site on to the front end
 - [ ] Add Git Integration on Asta Markdown Editor (for history only, no pull, push, version control stuff)
 - [ ] Add CSP Setting on Aina's Routes and Site
+- [ ] Export to SSG Button (optionally add github token for quick push)

@@ -1,4 +1,4 @@
-// file: static/js/hikarin-api.js
+// file: static/hikarin/hikarin.js
 
 /**
  * Custom Error for API responses that are not successful.
@@ -13,14 +13,50 @@ class HikarinApiError extends Error {
 }
 
 /**
+ * A stateful wrapper for an API call.
+ * (This class is unchanged as its logic is independent of the request implementation)
+ */
+class ApiRequest {
+    constructor(apiCall) {
+        this._apiCall = apiCall;
+        this.data = null;
+        this.error = null;
+        this.loading = false;
+        this.called = false;
+    }
+    async execute(...args) {
+        this.loading = true;
+        this.error = null;
+        this.called = true;
+        try {
+            const result = await this._apiCall(...args);
+            this.data = result;
+            return result;
+        } catch (e) {
+            this.error = e;
+            throw e;
+        } finally {
+            this.loading = false;
+        }
+    }
+    reset() {
+        this.data = null;
+        this.error = null;
+        this.loading = false;
+        this.called = false;
+    }
+    get isLoading() { return this.loading; }
+    get isSuccess() { return this.called && !this.loading && !this.error; }
+    get isError() { return !!this.error; }
+}
+
+
+/**
  * The HikarinAPI Client for the browser.
- * This class organizes all API calls into logical groups (auth, pages, forms, etc.)
- * to be used by Alpine.js components.
  */
 class HikarinApi {
     constructor(baseUrl = '') {
         this.baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
-
         this.auth = new AuthAPI(this);
         this.config = new ConfigAPI(this);
         this.forms = new FormsAPI(this);
@@ -29,102 +65,152 @@ class HikarinApi {
         this.public = new PublicAPI(this);
         this.users = new UsersAPI(this);
     }
+    
+    /**
+     * Reads a cookie value by its name.
+     * Used internally to retrieve the CSRF token.
+     * @param {string} name The name of the cookie.
+     * @returns {string|null} The cookie value or null if not found.
+     */
+    _getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
 
     /**
-     * The core request method. Handles JSON/FormData, errors, and auth.
+     * The core request method. Enhanced with security and smart response handling.
      */
     async _request(method, endpoint, options = {}) {
         const url = `${this.baseUrl}${endpoint}`;
-        const config = { method: method.toUpperCase(), headers: {}, ...options };
+        const config = {
+            method: method.toUpperCase(),
+            headers: {},
+            // **SECURITY**: Always send cookies (for HttpOnly session tokens) with requests.
+            credentials: 'include',
+            ...options
+        };
 
-        if (options.body) {
-            if (options.body instanceof FormData) {
-                config.body = options.body;
+        const isStateChanging = !['GET', 'HEAD', 'OPTIONS'].includes(config.method);
+
+        // Set content type and stringify body for JSON requests
+        if (options.body && !(options.body instanceof FormData)) {
+            config.headers['Content-Type'] = 'application/json';
+            config.body = JSON.stringify(options.body);
+        }
+
+        // Set Accept header for non-FormData requests to signal we prefer JSON responses
+        if (!(options.body instanceof FormData)) {
+             config.headers['Accept'] = 'application/json';
+        }
+
+        // **SECURITY**: Automatically add CSRF token to state-changing requests.
+        // Your backend must set a 'csrftoken' cookie for this to work.
+        if (isStateChanging) {
+            const csrfToken = this._getCookie('csrftoken');
+            if (csrfToken) {
+                config.headers['X-CSRF-Token'] = csrfToken;
             } else {
-                config.headers['Content-Type'] = 'application/json';
-                config.body = JSON.stringify(options.body);
+                console.warn(`HikarinAPI: CSRF token cookie 'csrftoken' not found. State-changing requests to ${endpoint} may be rejected.`);
             }
         }
 
         const response = await fetch(url, config);
 
         if (!response.ok) {
-            let errorMessage = `API Error: ${response.status}`;
+            let errorMessage = `API Error: ${response.statusText}`;
             try {
                 const errorBody = await response.json();
                 errorMessage = errorBody.detail || JSON.stringify(errorBody);
-            } catch (e) { /* Response body might not be JSON */ }
+            } catch (e) { /* Response body might not be JSON or might be empty */ }
             throw new HikarinApiError(errorMessage, response.status);
         }
 
-        if (response.status === 204) return null;
-        if (options.rawResponse) return response;
+        if (response.status === 204) return null; // Handle No Content responses
+
+        // **SMART RESPONSE**: Check content type. If not JSON, return the raw response
+        // so the caller can handle it as a blob, text, etc.
+        const contentType = response.headers.get('content-type');
+        if (contentType && !contentType.includes('application/json')) {
+            return response;
+        }
+
         return response.json();
     }
 }
-
 // ===================================================================
-//  API Resource Classes
+//  API Resource Classes (Refactored to use ApiRequest)
 // ===================================================================
 
 class AuthAPI {
     constructor(client) { this._client = client; }
-    login(username, password, rememberMe = false) {
-        const formData = new FormData();
-        formData.append('username', username);
-        formData.append('password', password);
-        formData.append('remember_me', String(rememberMe));
-        return this._client._request('POST', '/auth/login', { body: formData });
+    login() {
+        return new ApiRequest((username, password, rememberMe = false) => {
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('password', password);
+            formData.append('remember_me', String(rememberMe));
+            return this._client._request('POST', '/auth/login', { body: formData });
+        });
     }
-    logout() { return this._client._request('POST', '/auth/logout'); }
-    setupAdmin(username, password, confirmPassword) {
-        const formData = new FormData();
-        formData.append('username', username);
-        formData.append('password', password);
-        formData.append('confirm_password', confirmPassword);
-        return this._client._request('POST', '/auth/setup', { body: formData });
+    logout() { return new ApiRequest(() => this._client._request('POST', '/auth/logout')); }
+    setupAdmin() {
+        return new ApiRequest((username, password, confirmPassword) => {
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('password', password);
+            formData.append('confirm_password', confirmPassword);
+            return this._client._request('POST', '/auth/setup', { body: formData });
+        });
     }
-    checkSetup() { return this._client._request('GET', '/auth/check-setup'); }
-    register(username, password, confirmPassword, displayName) {
-        const formData = new FormData();
-        formData.append('username', username);
-        formData.append('password', password);
-        formData.append('confirm_password', confirmPassword);
-        if (displayName) formData.append('display_name', displayName);
-        return this._client._request('POST', '/auth/register', { body: formData });
+    checkSetup() { return new ApiRequest(() => this._client._request('GET', '/auth/check-setup')); }
+    register() {
+        return new ApiRequest((username, password, confirmPassword, displayName) => {
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('password', password);
+            formData.append('confirm_password', confirmPassword);
+            if (displayName) formData.append('display_name', displayName);
+            return this._client._request('POST', '/auth/register', { body: formData });
+        });
     }
 }
 
 class ConfigAPI {
     constructor(client) { this._client = client; }
-    get() { return this._client._request('GET', '/config/'); }
-    update(configData) { return this._client._request('POST', '/config/', { body: configData }); }
+    get() { return new ApiRequest(() => this._client._request('GET', '/config/')); }
+    update() { return new ApiRequest((configData) => this._client._request('POST', '/config/', { body: configData })); }
 }
 
 class PagesAPI {
     constructor(client) { this._client = client; }
-    create(pageData) { return this._client._request('POST', '/page/', { body: pageData }); }
-    list({ skip = 0, limit = 100 } = {}) {
-        const params = new URLSearchParams({ skip, limit });
-        return this._client._request('GET', `/page/list?${params.toString()}`);
+    create() { return new ApiRequest((pageData) => this._client._request('POST', '/page/', { body: pageData })); }
+    list() {
+        return new ApiRequest(({ skip = 0, limit = 100 } = {}) => {
+            const params = new URLSearchParams({ skip, limit });
+            return this._client._request('GET', `/page/list?${params.toString()}`);
+        });
     }
-    get(slug) { return this._client._request('GET', `/page/${slug}`); }
-    update(slug, updateData) { return this._client._request('PUT', `/page/${slug}`, { body: updateData }); }
-    delete(slug) { return this._client._request('DELETE', `/page/${slug}`); }
+    get() { return new ApiRequest((slug) => this._client._request('GET', `/page/${slug}`)); }
+    update() { return new ApiRequest((slug, updateData) => this._client._request('PUT', `/page/${slug}`, { body: updateData })); }
+    delete() { return new ApiRequest((slug) => this._client._request('DELETE', `/page/${slug}`)); }
 }
 
 class FormsAPI {
     constructor(client) { this._client = client; }
-    create(formData) { return this._client._request('POST', '/forms/', { body: formData }); }
-    list({ tag, skip = 0, limit = 100 } = {}) {
-        const params = new URLSearchParams({ skip, limit });
-        if (tag) params.append('tag', tag);
-        return this._client._request('GET', `/forms/list?${params.toString()}`);
+    create() { return new ApiRequest((formData) => this._client._request('POST', '/forms/', { body: formData })); }
+    list() {
+        return new ApiRequest(({ tag, skip = 0, limit = 100 } = {}) => {
+            const params = new URLSearchParams({ skip, limit });
+            if (tag) params.append('tag', tag);
+            return this._client._request('GET', `/forms/list?${params.toString()}`);
+        });
     }
-    get(slug) { return this._client._request('GET', `/forms/${slug}`); }
-    update(slug, updateData) { return this._client._request('PUT', `/forms/${slug}`, { body: updateData }); }
-    delete(slug) { return this._client._request('DELETE', `/forms/${slug}`); }
-    getAllTags() { return this._client._request('GET', '/forms/tags/all'); }
+    get() { return new ApiRequest((slug) => this._client._request('GET', `/forms/${slug}`)); }
+    update() { return new ApiRequest((slug, updateData) => this._client._request('PUT', `/forms/${slug}`, { body: updateData })); }
+    delete() { return new ApiRequest((slug) => this._client._request('DELETE', `/forms/${slug}`)); }
+    getAllTags() { return new ApiRequest(() => this._client._request('GET', '/forms/tags/all')); }
     submissions(formSlug) { return new SubmissionsAPI(this._client, formSlug); }
 }
 
@@ -133,65 +219,60 @@ class SubmissionsAPI {
         this._client = client;
         this.basePath = `/forms/${formSlug}`;
     }
-    submit(data, custom = {}) {
-        return this._client._request('POST', `${this.basePath}/submit`, { body: { data, custom } });
+    submit() { return new ApiRequest((data, custom = {}) => this._client._request('POST', `${this.basePath}/submit`, { body: { data, custom } })); }
+    list() {
+        return new ApiRequest(({ skip = 0, limit = 100 } = {}) => {
+            const params = new URLSearchParams({ skip, limit });
+            return this._client._request('GET', `${this.basePath}/submissions?${params.toString()}`);
+        });
     }
-    list({ skip = 0, limit = 100 } = {}) {
-        const params = new URLSearchParams({ skip, limit });
-        return this._client._request('GET', `${this.basePath}/submissions?${params.toString()}`);
-    }
-    get(submissionId) { return this._client._request('GET', `${this.basePath}/submissions/${submissionId}`); }
-    update(submissionId, updateData) { return this._client._request('PUT', `${this.basePath}/submissions/${submissionId}`, { body: updateData }); }
-    delete(submissionId) { return this._client._request('DELETE', `${this.basePath}/submissions/${submissionId}`); }
+    get() { return new ApiRequest((submissionId) => this._client._request('GET', `${this.basePath}/submissions/${submissionId}`)); }
+    update() { return new ApiRequest((submissionId, updateData) => this._client._request('PUT', `${this.basePath}/submissions/${submissionId}`, { body: updateData })); }
+    delete() { return new ApiRequest((submissionId) => this._client._request('DELETE', `${this.basePath}/submissions/${submissionId}`)); }
 }
 
 class MediaAPI {
     constructor(client) { this._client = client; }
-    list() { return this._client._request('GET', '/media/'); }
-    get(filename) { return this._client._request('GET', `/media/${filename}`, { rawResponse: true }); }
-    upload(files) {
-        const formData = new FormData();
-        for (const file of files) formData.append('files', file);
-        return this._client._request('POST', '/media/', { body: formData });
+    list() { return new ApiRequest(() => this._client._request('GET', '/media/')); }
+    get() { return new ApiRequest((filename) => this._client._request('GET', `/media/${filename}`, { rawResponse: true })); }
+    upload() {
+        return new ApiRequest((files) => {
+            const formData = new FormData();
+            for (const file of files) formData.append('files', file);
+            return this._client._request('POST', '/media/', { body: formData });
+        });
     }
-    delete(filename) { return this._client._request('DELETE', `/media/${filename}`); }
+    delete() { return new ApiRequest((filename) => this._client._request('DELETE', `/media/${filename}`)); }
 }
 
 class PublicAPI {
     constructor(client) { this._client = client; }
-    listBlogPosts() { return this._client._request('GET', '/api/blog'); }
-    getBlogPost(slug) { return this._client._request('GET', `/api/blog/${slug}`); }
+    listBlogPosts() { return new ApiRequest(() => this._client._request('GET', '/api/blog')); }
+    getBlogPost() { return new ApiRequest((slug) => this._client._request('GET', `/api/blog/${slug}`)); }
 }
 
 class UsersAPI {
     constructor(client) { this._client = client; }
-    list() { return this._client._request('GET', '/users/'); }
-    create(userData) { return this._client._request('POST', '/users/', { body: userData }); }
-    update(username, updateData) { return this._client._request('PUT', `/users/${username}`, { body: updateData }); }
-    changePassword(username, newPassword) {
-        return this._client._request('PUT', `/users/${username}/password`, { body: { new_password: newPassword } });
-    }
-    delete(username) { return this._client._request('DELETE', `/users/${username}`); }
+    list() { return new ApiRequest(() => this._client._request('GET', '/users/')); }
+    create() { return new ApiRequest((userData) => this._client._request('POST', '/users/', { body: userData })); }
+    update() { return new ApiRequest((username, updateData) => this._client._request('PUT', `/users/${username}`, { body: updateData })); }
+    changePassword() { return new ApiRequest((username, newPassword) => this._client._request('PUT', `/users/${username}/password`, { body: { new_password: newPassword } })); }
+    delete() { return new ApiRequest((username) => this._client._request('DELETE', `/users/${username}`)); }
     roles() { return new RolesAPI(this._client); }
 }
 
 class RolesAPI {
     constructor(client) { this._client = client; }
-    list() { return this._client._request('GET', '/users/roles'); }
-    save(roleName, permissions) {
-        return this._client._request('POST', '/users/roles', { body: { role_name: roleName, permissions } });
-    }
-    delete(roleName) { return this._client._request('DELETE', `/users/roles/${roleName}`); }
+    list() { return new ApiRequest(() => this._client._request('GET', '/users/roles')); }
+    save() { return new ApiRequest((roleName, permissions) => this._client._request('POST', '/users/roles', { body: { role_name: roleName, permissions } })); }
+    delete() { return new ApiRequest((roleName) => this._client._request('DELETE', `/users/roles/${roleName}`)); }
 }
 
 // ===================================================================
-//  ALPINE.JS INTEGRATION - The CSP-Compliant "Glue"
+//  ALPINE.JS INTEGRATION (Unchanged)
 // ===================================================================
 
-// 1. Instantiate the single client instance for the entire application.
 const hikarinApi = new HikarinApi();
-
-// 2. Wait for Alpine to initialize, then register our client.
 document.addEventListener('alpine:init', () => {
     Alpine.magic('api', () => hikarinApi);
 });

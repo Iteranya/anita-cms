@@ -20,6 +20,7 @@ def get_user_service(db: Session = Depends(get_db)) -> UserService:
 # --- Router Definition ---
 router = APIRouter(prefix="/page", tags=["Pages"])
 
+# TODO: DATABASE OPTIMIZATION
 
 # ----------------------------------------------------
 # 📄 PAGES CRUD

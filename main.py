@@ -57,6 +57,7 @@ async def lifespan(app: FastAPI):
         # Call all your seeding functions. They are idempotent (safe to run multiple times).
         crud.seed_default_roles(db)
         crud.seed_default_pages(db)
+        crud.seed_initial_settings(db)
         # Add any other seeding functions here
         print("✅ Seeding complete.")
     finally:

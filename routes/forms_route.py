@@ -1,17 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from typing import Any, Dict, List, Optional
-from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-
-# --- New Imports for Service-Oriented Architecture ---
 from data.database import get_db
-from data import schemas  # Import Pydantic schemas from your data layer
+from data import schemas 
 from services.forms import FormService
 from services.users import UserService
 from src.dependencies import get_current_user, optional_user
 from data.schemas import CurrentUser
-from src import dependencies as dep
 
 # --- Dependency Setup ---
 # This function allows FastAPI to inject the FormService into our routes.
@@ -150,9 +146,18 @@ def delete_form(
 def get_all_tags(
     form_service: FormService = Depends(get_form_service),
     user: CurrentUser = Depends(get_current_user),
+    user_service: UserService = Depends(get_user_service),  
 ):
     """Get a list of all unique tags across all forms."""
+    user_permissions = user_service.get_user_permissions(user.username)
+    permission = "*" in user_permissions or "form:read" in user_permissions
+    if not permission:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to access this route."
+        )
     forms = form_service.get_all_forms(skip=0, limit=1000) # Adjust limit as needed
+    
     tags = set()
     for form in forms:
         if form.tags:

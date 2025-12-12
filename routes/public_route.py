@@ -12,6 +12,8 @@ def get_page_service(db: Session = Depends(get_db)) -> PageService:
 
 router = APIRouter(tags=["Public"])
 
+# TODO: Database Optimization
+
 # ==========================================
 # 🖼️ HTML SERVING ROUTES
 # ==========================================
