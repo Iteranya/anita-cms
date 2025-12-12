@@ -136,8 +136,8 @@
                   { key: 'config:read', label: 'View Config', desc: 'Allows viewing system configuration values without exposing sensitive secrets.' },
 { key: 'config:update', label: 'Edit Config', desc: 'Allows editing or updating system configuration values.' },
 
-{ key: 'aina', label: 'Access Aina (HTML AI)', desc: 'Allows using Aina, the HTML-based AI assistant, including generating or modifying HTML content.' },
-{ key: 'asta', label: 'Access Asta (Markdown AI)', desc: 'Allows using Asta, the Markdown-based AI assistant, including generating or editing Markdown content.' },
+{ key: 'aina', label: 'Access Aina (HTML AI)', desc: 'Allows using Aina, the HTML-based AI assistant.' },
+{ key: 'asta', label: 'Access Asta (Markdown AI)', desc: 'Allows using Asta, the Markdown Editor.' },
 
                 ]
             }
@@ -321,164 +321,176 @@
     </aside>
 
     <!-- MAIN CONTENT -->
-    <main class="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
-        <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-8 shadow-sm z-10">
+<!-- Preserving your existing x-data scope (removed the x-data attribute here so it uses yours) -->
+<main class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50">
+
+    <!-- HEADER & TABS -->
+    <!-- Replaced the top header and sidebar nav with this Tab bar -->
+    <header class="bg-white border-b border-slate-200 flex flex-col shrink-0 z-20 shadow-sm">
+        <!-- Top Title Bar -->
+        <div class="h-16 flex items-center justify-between px-8">
             <h1 class="text-xl font-bold text-slate-800">System Management</h1>
-        </header>
-
-        <div class="flex-1 flex overflow-hidden">
-                        <!-- INNER SIDEBAR (Settings Nav) -->
-            <div class="w-60 bg-slate-50 border-r border-slate-200 flex flex-col pt-6 pb-4 overflow-y-auto">
-                <div class="px-4 mb-2">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">User Management</h3>
-                    <div @click="view = 'users'" 
-                        :class="view === 'users' ? 'active' : ''" 
-                        class="discord-sidebar-item flex items-center px-3 py-2 rounded-md cursor-pointer transition-colors hover:bg-slate-200 text-slate-700 font-medium text-sm">
-                        <span class="flex-1">Users</span>
-                        <i x-show="view === 'users'" class="fas fa-chevron-right text-xs"></i>
-                    </div>
-                </div>
-
-                <div class="px-4 mt-2">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">Access Control</h3>
-                    <div @click="view = 'roles'; if(!selectedRole && roles.length > 0) selectRole(roles[0])" 
-                        :class="view === 'roles' ? 'active' : ''" 
-                        class="discord-sidebar-item flex items-center px-3 py-2 rounded-md cursor-pointer transition-colors hover:bg-slate-200 text-slate-700 font-medium text-sm">
-                        <span class="flex-1">Roles</span>
-                        <i x-show="view === 'roles'" class="fas fa-chevron-right text-xs"></i>
-                    </div>
-                </div>
             
-            </div>
-
-            <!-- Content -->
-            <div class="flex-1 bg-white overflow-hidden flex flex-col">
+            <!-- Global Actions -->
+            <div>
+                <!-- Shows "Add Member" only when on Users tab -->
+                <button x-show="view === 'users'" @click="openCreateUser" class="bg-anita-600 hover:bg-anita-700 text-white px-4 py-2 rounded-md text-sm font-bold transition shadow-sm flex items-center gap-2">
+                    <i class="fas fa-plus text-xs"></i> <span>Add Member</span>
+                </button>
                 
-                <!-- USERS VIEW -->
-                <div x-show="view === 'users'" class="flex-1 flex flex-col overflow-hidden" x-cloak>
-                    <div class="p-8 border-b border-slate-100 flex justify-between items-center">
-                        <div>
-                            <h2 class="text-lg font-bold text-slate-800">Server Members</h2>
-                            <p class="text-sm text-slate-500">Manage who has access to the CMS.</p>
-                        </div>
-                        <button @click="openCreateUser" class="bg-anita-600 hover:bg-anita-700 text-white px-4 py-2 rounded-md text-sm font-bold transition shadow-sm">Add Member</button>
-                    </div>
+                <!-- Shows "Add Role" only when on Roles tab -->
+                <button x-show="view === 'roles'" @click="createNewRole" class="bg-anita-600 hover:bg-anita-700 text-white px-4 py-2 rounded-md text-sm font-bold transition shadow-sm flex items-center gap-2">
+                    <i class="fas fa-plus text-xs"></i> <span>Create Role</span>
+                </button>
+            </div>
+        </div>
 
-                    <div class="flex-1 overflow-y-auto p-8">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                    <th class="pb-3 pl-2">User</th>
-                                    <th class="pb-3">Role</th>
-                                    <th class="pb-3 text-right pr-2">Actions</th>
+        <!-- Navigation Tabs (Replaces Sidebar) -->
+        <div class="px-8 flex items-center gap-8 -mb-px">
+            <button @click="view = 'users'" 
+                :class="view === 'users' ? 'border-anita-600 text-anita-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'"
+                class="pb-3 border-b-2 text-sm font-bold transition-colors flex items-center gap-2">
+                <i class="fas fa-users"></i> Users
+            </button>
+            <button @click="view = 'roles'; if(!selectedRole && roles.length > 0) selectRole(roles[0])" 
+                :class="view === 'roles' ? 'border-anita-600 text-anita-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'"
+                class="pb-3 border-b-2 text-sm font-bold transition-colors flex items-center gap-2">
+                <i class="fas fa-shield-alt"></i> Roles & Permissions
+            </button>
+        </div>
+    </header>
+
+    <!-- CONTENT BODY -->
+    <div class="flex-1 overflow-hidden p-6 relative">
+        
+        <!-- ==================== USERS VIEW ==================== -->
+        <div x-show="view === 'users'" class="h-full flex flex-col max-w-6xl mx-auto" x-cloak>
+            <div class="bg-white rounded-lg shadow-sm border border-slate-200 flex-1 flex flex-col overflow-hidden">
+                <div class="flex-1 overflow-y-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50 sticky top-0 z-10 shadow-sm">
+                            <tr class="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                <th class="py-3 px-6 pl-8">User</th>
+                                <th class="py-3 px-6">Role</th>
+                                <th class="py-3 px-6 text-right pr-8">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <template x-for="user in users" :key="user.username">
+                                <tr class="group hover:bg-slate-50/80 transition-colors">
+                                    <td class="py-3 px-6 pl-8">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 mr-3 overflow-hidden">
+                                                <template x-if="user.pfp_url"><img :src="user.pfp_url" class="w-full h-full object-cover"></template>
+                                                <template x-if="!user.pfp_url"><i class="fas fa-user"></i></template>
+                                            </div>
+                                            <div>
+                                                <div class="font-bold text-slate-800" x-text="user.display_name || user.username"></div>
+                                                <div class="text-xs text-slate-400 font-mono" x-text="'@' + user.username"></div>
+                                            </div>
+                                            <span x-show="user.disabled" class="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-600 uppercase">Disabled</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-6">
+                                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                                            <span class="w-2 h-2 rounded-full bg-anita-500 mr-1.5"></span>
+                                            <span x-text="user.role"></span>
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-6 text-right pr-8">
+                                        <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button @click="openEditUser(user)" class="w-8 h-8 flex items-center justify-center rounded bg-slate-100 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 text-slate-600 transition"><i class="fas fa-pen text-xs"></i></button>
+                                            <button @click="openPasswordModal(user)" class="w-8 h-8 flex items-center justify-center rounded bg-slate-100 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 text-slate-600 transition"><i class="fas fa-key text-xs"></i></button>
+                                            <button @click="confirmDelete('user', user.username)" class="w-8 h-8 flex items-center justify-center rounded bg-red-50 hover:bg-red-100 text-red-600 transition"><i class="fas fa-trash text-xs"></i></button>
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-50">
-                                <template x-for="user in users" :key="user.username">
-                                    <tr class="group hover:bg-slate-50 transition-colors">
-                                        <td class="py-3 pl-2">
-                                            <div class="flex items-center">
-                                                <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 mr-3 overflow-hidden">
-                                                    <template x-if="user.pfp_url"><img :src="user.pfp_url" class="w-full h-full object-cover"></template>
-                                                    <template x-if="!user.pfp_url"><i class="fas fa-user"></i></template>
-                                                </div>
-                                                <div>
-                                                    <div class="font-bold text-slate-800" x-text="user.display_name || user.username"></div>
-                                                    <div class="text-xs text-slate-400 font-mono" x-text="'@' + user.username"></div>
-                                                </div>
-                                                <span x-show="user.disabled" class="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-600 uppercase">Disabled</span>
-                                            </div>
-                                        </td>
-                                        <td class="py-3">
-                                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                                                <span class="w-2 h-2 rounded-full bg-anita-500 mr-1.5"></span>
-                                                <span x-text="user.role"></span>
-                                            </span>
-                                        </td>
-                                        <td class="py-3 text-right pr-2">
-                                            <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button @click="openEditUser(user)" class="w-8 h-8 flex items-center justify-center rounded bg-slate-200 hover:bg-slate-300 text-slate-600 transition"><i class="fas fa-pen text-xs"></i></button>
-                                                <button @click="openPasswordModal(user)" class="w-8 h-8 flex items-center justify-center rounded bg-slate-200 hover:bg-slate-300 text-slate-600 transition"><i class="fas fa-key text-xs"></i></button>
-                                                <button @click="confirmDelete('user', user.username)" class="w-8 h-8 flex items-center justify-center rounded bg-red-100 hover:bg-red-200 text-red-600 transition"><i class="fas fa-trash text-xs"></i></button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </template>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- ROLES VIEW -->
-                <div x-show="view === 'roles'" class="flex-1 flex overflow-hidden" x-cloak>
-                    <!-- Roles List -->
-                    <div class="w-48 bg-slate-50 border-r border-slate-200 flex flex-col">
-                        <div class="p-3 border-b border-slate-100 flex items-center justify-between">
-                            <span class="text-xs font-bold text-slate-400 uppercase">Roles</span>
-                            <button @click="createNewRole" class="text-slate-400 hover:text-slate-600"><i class="fas fa-plus"></i></button>
-                        </div>
-                        <div class="flex-1 overflow-y-auto p-2 space-y-1">
-                            <template x-for="role in roles" :key="role.role_name">
-                                <div @click="selectRole(role)" 
-                                     :class="selectedRole && selectedRole.role_name === role.role_name ? 'bg-slate-200 text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'"
-                                     class="px-2 py-2 rounded cursor-pointer text-sm font-medium flex items-center justify-between group">
-                                    <div class="flex items-center gap-2 truncate">
-                                        <div class="w-2 h-2 rounded-full bg-slate-400" :class="selectedRole && selectedRole.role_name === role.role_name ? 'bg-slate-800' : ''"></div>
-                                        <span x-text="role.role_name"></span>
-                                    </div>
-                                    <button @click.stop="confirmDelete('role', role.role_name)" class="text-xs text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition"><i class="fas fa-times"></i></button>
-                                </div>
                             </template>
-                        </div>
-                    </div>
-
-                    <!-- Role Settings -->
-                    <div class="flex-1 flex flex-col bg-white overflow-hidden relative">
-                        <div class="h-16 border-b border-slate-100 flex items-center justify-between px-8 bg-white z-10">
-                            <div>
-                                <h2 class="text-lg font-bold text-slate-800" x-text="roleForm.role_name || 'New Role'"></h2>
-                                <p class="text-xs text-slate-500">Edit permissions for this role.</p>
-                            </div>
-                            <button @click="saveRole" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow-lg shadow-green-900/20 font-bold text-sm transition transform hover:-translate-y-0.5">Save Changes</button>
-                        </div>
-                        
-                        <div class="flex-1 overflow-y-auto p-8" x-show="selectedRole">
-                            <div class="mb-8">
-                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Role Name</label>
-                                <input type="text" x-model="roleForm.role_name" class="w-full max-w-md px-3 py-2 border border-slate-200 rounded focus:ring-2 focus:ring-anita-500 outline-none text-slate-800 font-bold">
-                            </div>
-                            <div class="w-full border-t border-slate-100 mb-8"></div>
-
-                            <template x-for="cat in permCategories" :key="cat.name">
-                                <div class="mb-8">
-                                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4" x-text="cat.name"></h3>
-                                    <div class="space-y-4">
-                                        <template x-for="perm in cat.perms" :key="perm.key">
-                                            <div class="flex items-center justify-between py-2">
-                                                <div>
-                                                    <div class="text-sm font-bold text-slate-700" x-text="perm.label"></div>
-                                                    <div class="text-xs text-slate-500" x-text="perm.desc"></div>
-                                                </div>
-                                                <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
-                                                    <input type="checkbox" :id="perm.key" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-slate-300 transition-all duration-300" 
-                                                           :checked="roleForm.permissions.includes(perm.key)"
-                                                           @change="togglePermission(perm.key)"/>
-                                                    <label :for="perm.key" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300"></label>
-                                                </div>
-                                            </div>
-                                        </template>
-                                    </div>
-                                    <div class="w-full border-b border-slate-100 mt-4"></div>
-                                </div>
-                            </template>
-                        </div>
-                        <div x-show="!selectedRole" class="flex-1 flex items-center justify-center text-slate-400">Select a role to edit</div>
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </main>
 
+        <!-- ==================== ROLES VIEW ==================== -->
+        <div x-show="view === 'roles'" class="h-full flex gap-6 max-w-7xl mx-auto" x-cloak>
+            
+            <!-- Left: Roles List Sidebar -->
+            <div class="w-64 flex flex-col">
+                <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full">
+                    <div class="p-3 border-b border-slate-100 bg-slate-50/50">
+                        <span class="text-xs font-bold text-slate-400 uppercase">Roles</span>
+                    </div>
+                    <div class="flex-1 overflow-y-auto p-2 space-y-1">
+                        <template x-for="role in roles" :key="role.role_name">
+                            <div @click="selectRole(role)" 
+                                 :class="selectedRole && selectedRole.role_name === role.role_name ? 'bg-anita-50 border-anita-200 text-anita-700' : 'border-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-700'"
+                                 class="px-3 py-2 rounded border cursor-pointer text-sm font-medium flex items-center justify-between group transition-all">
+                                <div class="flex items-center gap-2 truncate">
+                                    <div class="w-2 h-2 rounded-full bg-slate-300" :class="selectedRole && selectedRole.role_name === role.role_name ? 'bg-anita-500' : ''"></div>
+                                    <span x-text="role.role_name"></span>
+                                </div>
+                                <button @click.stop="confirmDelete('role', role.role_name)" class="text-xs text-red-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition"><i class="fas fa-times"></i></button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Role Editor -->
+            <div class="flex-1 flex flex-col h-full">
+                <!-- Editor Container -->
+                <div x-show="selectedRole" class="bg-white rounded-lg shadow-sm border border-slate-200 flex flex-col h-full relative overflow-hidden">
+                    
+                    <!-- Editor Header -->
+                    <div class="h-16 border-b border-slate-100 flex items-center justify-between px-8 bg-white z-10">
+                        <div class="flex-1 mr-4">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Role Name</label>
+                            <input type="text" x-model="roleForm.role_name" class="w-full max-w-sm px-0 py-0 text-lg font-bold text-slate-800 border-none focus:ring-0 placeholder-slate-300" placeholder="Enter Role Name">
+                        </div>
+                        <button @click="saveRole" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow-sm font-bold text-sm transition">
+                            <i class="fas fa-check mr-2"></i>Save Changes
+                        </button>
+                    </div>
+                    
+                    <!-- Permissions Scroll Area -->
+                    <div class="flex-1 overflow-y-auto p-8 bg-slate-50/50">
+                        <template x-for="cat in permCategories" :key="cat.name">
+                            <div class="mb-8 bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
+                                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2" x-text="cat.name"></h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                                    <template x-for="perm in cat.perms" :key="perm.key">
+                                        <div class="flex items-center justify-between py-1">
+                                            <div class="mr-4">
+                                                <div class="text-sm font-bold text-slate-700" x-text="perm.label"></div>
+                                                <div class="text-xs text-slate-400" x-text="perm.desc"></div>
+                                            </div>
+                                            <!-- Toggle Switch -->
+                                            <div class="relative inline-block w-12 align-middle select-none">
+                                                <input type="checkbox" :id="perm.key" 
+                                                       class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-slate-200 transition-all duration-300 checked:right-0 checked:border-anita-500" 
+                                                       style="right: calc(100% - 1.5rem);"
+                                                       :checked="roleForm.permissions.includes(perm.key)"
+                                                       @change="togglePermission(perm.key)"/>
+                                                <label :for="perm.key" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-200 cursor-pointer transition-colors duration-300"
+                                                       :class="roleForm.permissions.includes(perm.key) ? '!bg-anita-500' : ''"></label>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div x-show="!selectedRole" class="flex-1 bg-white rounded-lg shadow-sm border border-slate-200 flex items-center justify-center text-slate-400">
+                    <p>Select a role to edit permissions</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
     <!-- Modals (User, Password, Delete) -->
     <div x-show="userModalOpen" class="fixed inset-0 z-50 flex items-center justify-center" x-cloak>
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="userModalOpen = false"></div>
