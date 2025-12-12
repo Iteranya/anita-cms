@@ -86,11 +86,6 @@ Aina is your **Site Builder & Designer**.
 
 Anita gives you extensive, granular control over your website's security.
 
-### 🔐 Content Sanitization & CSP
-*   **Bleach by Default:** All user- and AI-generated HTML is automatically sanitized to prevent cross-site scripting (XSS).
-*   **Opt-Out Control:** For trusted environments, you can disable Bleach on a per-page or system-wide basis.
-*   **Content Security Policy (CSP):** You have full control over your site's CSP headers. Configure allowed script sources, style sources, content origins, and more through the admin panel.
-
 ### 🎭 Role-Based Access Control (RBAC)
 *   **Discord-Flavored Roles:** Anita uses a flexible RBAC system. Instead of a rigid hierarchy, you create roles (e.g., "Editor," "Designer," "Marketer") and assign specific permissions to each.
 *   **Granular Permissions:** Assign rights for actions like `edit_page`, `manage_users`, `change_settings`, `create_forms`, and more.
