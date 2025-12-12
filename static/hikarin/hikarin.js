@@ -65,13 +65,14 @@ class HikarinApi {
         this.public = new PublicAPI(this);
         this.users = new UsersAPI(this);
     }
-    
-    /**
-     * Reads a cookie value by its name.
-     * Used internally to retrieve the CSRF token.
-     * @param {string} name The name of the cookie.
-     * @returns {string|null} The cookie value or null if not found.
-     */
+
+    // TODO: Implement Later
+    // /**
+    //  * Reads a cookie value by its name.
+    //  * Used internally to retrieve the CSRF token.
+    //  * @param {string} name The name of the cookie.
+    //  * @returns {string|null} The cookie value or null if not found.
+    //  */
     _getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
@@ -87,12 +88,9 @@ class HikarinApi {
         const config = {
             method: method.toUpperCase(),
             headers: {},
-            // **SECURITY**: Always send cookies (for HttpOnly session tokens) with requests.
             credentials: 'include',
             ...options
         };
-
-        const isStateChanging = !['GET', 'HEAD', 'OPTIONS'].includes(config.method);
 
         // Set content type and stringify body for JSON requests
         if (options.body && !(options.body instanceof FormData)) {
@@ -104,17 +102,17 @@ class HikarinApi {
         if (!(options.body instanceof FormData)) {
              config.headers['Accept'] = 'application/json';
         }
-
-        // **SECURITY**: Automatically add CSRF token to state-changing requests.
-        // Your backend must set a 'csrftoken' cookie for this to work.
-        if (isStateChanging) {
-            const csrfToken = this._getCookie('csrftoken');
-            if (csrfToken) {
-                config.headers['X-CSRF-Token'] = csrfToken;
-            } else {
-                console.warn(`HikarinAPI: CSRF token cookie 'csrftoken' not found. State-changing requests to ${endpoint} may be rejected.`);
-            }
-        }
+        // TODO: Implement later
+        // // **SECURITY**: Automatically add CSRF token to state-changing requests.
+        // // Your backend must set a 'csrftoken' cookie for this to work.
+        // if (isStateChanging) {
+        //     const csrfToken = this._getCookie('csrftoken');
+        //     if (csrfToken) {
+        //         config.headers['X-CSRF-Token'] = csrfToken;
+        //     } else {
+        //         console.warn(`HikarinAPI: CSRF token cookie 'csrftoken' not found. State-changing requests to ${endpoint} may be rejected.`);
+        //     }
+        // }
 
         const response = await fetch(url, config);
 

@@ -43,6 +43,7 @@ def get_current_user(
     Raises 401 Unauthorized if the user is not authenticated or the token is invalid.
     """
     if not access_token:
+        print("No Access Token")
         # Raise an exception instead of returning None to enforce authentication
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -52,6 +53,7 @@ def get_current_user(
     
     payload = auth_service.decode_access_token(access_token)
     if not payload:
+        print("No Payload")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
@@ -61,6 +63,7 @@ def get_current_user(
     try:
         return schemas.CurrentUser(**payload)
     except ValidationError:
+        print("Validation Error")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token payload",

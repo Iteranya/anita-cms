@@ -47,3 +47,6 @@ typing_extensions==4.13.2
 urllib3==2.4.0
 uvicorn==0.34.2
 webencodings==0.5.1
+fastapi-csrf-protect==1.0.7
+itsdangerous==2.2.0
+pydantic-settings==2.12.0

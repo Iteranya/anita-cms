@@ -27,18 +27,26 @@ class PasswordReset(BaseModel):
 # ROLE MANAGEMENT
 # ==========================================
 
-@router.get("/roles", response_model=Dict[str, List[str]])
+@router.get("/roles", response_model=List[schemas.Role]) # <--- Changed response_model
 def get_roles(
     user_service: UserService = Depends(get_user_service),
     admin: CurrentUser = Depends(require_admin),
 ):
-    """List all available roles and their permission tags."""
+    """List all available roles."""
     if not admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to view this page."
         )
-    return user_service.get_all_roles()
+    
+    # Get the Dict[str, List[str]] from service
+    roles_dict = user_service.get_all_roles()
+    
+    # Convert Dict to List[Role Object] for the frontend
+    return [
+        schemas.Role(role_name=k, permissions=v) 
+        for k, v in roles_dict.items()
+    ]
 
 @router.post("/roles", response_model=schemas.Role)
 def create_or_update_role(
