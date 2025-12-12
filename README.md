@@ -140,7 +140,7 @@ python main.py
 Once running, access your dashboard at:
 `http://127.0.0.1:5469/admin`
 For the initial setup
-
+```
 ---
 
 ## 🤝 Contributing
