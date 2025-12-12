@@ -185,16 +185,4 @@ document.addEventListener('alpine:init', () => {
 
     // 2. Expose as a global object (optional, for non-Alpine scripts if any)
     window.HikarinSDK = sdk;
-    
-    // 3. Optional: Create a global store for User State
-    Alpine.store('auth', {
-        user: null,
-        isLoggedIn: false,
-        
-        async checkStatus() {
-            // You might need a specific endpoint to check "me" 
-            // Currently using a try/catch on a protected route or dedicated /me endpoint
-            // Since your API is cookie based, simple presence of functionality implies auth
-        }
-    });
 });
