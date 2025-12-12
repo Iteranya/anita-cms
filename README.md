@@ -88,7 +88,7 @@ Anita gives you extensive, granular control over your website's security.
 
 ### 🎭 Role-Based Access Control (RBAC)
 *   **Discord-Flavored Roles:** Anita uses a flexible RBAC system. Instead of a rigid hierarchy, you create roles (e.g., "Editor," "Designer," "Marketer") and assign specific permissions to each.
-*   **Granular Permissions:** Assign rights for actions like `edit_page`, `manage_users`, `change_settings`, `create_forms`, and more.
+*   **Granular Permissions:** Assign rights for actions like `page:update`, `forms:read`, `media:create`, and more.
 *   **Admin Supremacy:** Only users with the `System Administrator` role can create, modify, or assign roles to other users, ensuring centralized control.
 
 ---
