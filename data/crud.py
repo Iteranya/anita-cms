@@ -257,18 +257,29 @@ def delete_role(db: Session, role_name: str) -> bool:
         return True
     return False
 
-def seed_default_roles(db: Session):
+
+def seed_default_roles(db: Session, json_path: str = "default_roles.json"):
     """Adds default roles and permissions if no roles exist in the database."""
     if db.query(models.Role).count() == 0:
         print("No roles found in database. Seeding default roles.")
-        defaults = {
-            "admin": ["*"],
-            "editor": ["page:create", "page:update", "media:upload"],
-            "viewer": ["page:read"]
-        }
+
+        try:
+            with open(json_path, "r") as f:
+                defaults = json.load(f)
+
+        except Exception as e:
+            print(f"❌ Unexpected error loading role seeds: {e}")
+            return
+
+        # Insert roles into DB
         for role_name, permissions in defaults.items():
-            save_role(db, role_name=role_name, permissions=permissions)
+            try:
+                save_role(db, role_name=role_name, permissions=permissions)
+            except Exception as e:
+                print(f"❌ Failed to save role '{role_name}': {e}")
+
         print("✓ Default roles seeded.")
+
 
 
 def seed_default_pages(db: Session):
@@ -286,8 +297,6 @@ def seed_default_pages(db: Session):
     
     # 2. Locate and load the default pages data.
     try:
-        # Assumes default_pages.json is in the same directory as this script.
-        # Adjust the path as necessary.
         pages_file = "default_pages.json"
         with open(pages_file, "r") as f:
             default_pages_data = json.load(f)
@@ -306,3 +315,31 @@ def seed_default_pages(db: Session):
             print(f"  - Created page: '{page_dict['title']}' ({page_dict['slug']})")
 
     print("✓ Default pages seeded.")
+
+def seed_initial_settings(db: Session, json_path: str = "default_config.json"):
+    """
+    Adds default settings from a JSON file if no settings exist in the database.
+    This function is idempotent and follows the same pattern as other seeders.
+    """
+    # 1. Check if a core setting already exists to prevent re-seeding.
+    if db.query(models.Setting).filter_by(key="system_note").first():
+        return
+
+    print("No settings found in database. Seeding initial application configuration.")
+
+    # 2. Locate and load the default settings data from the JSON file.
+    try:
+        with open(json_path, "r") as f:
+            default_settings = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"❌ Error loading {json_path}: {e}. Skipping settings seeding.")
+        return
+
+    # 3. Iterate and save each setting.
+    for key, value in default_settings.items():
+        try:
+            save_setting(db, key=key, value=value)
+        except Exception as e:
+            print(f"❌ Failed to save setting '{key}': {e}")
+            
+    print("✓ Default settings seeded.")

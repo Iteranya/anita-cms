@@ -8,3 +8,4 @@ venv
 *.log
 !default_config.json
 !default_pages.json
+!default_roles.json
