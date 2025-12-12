@@ -93,6 +93,8 @@ def optional_user(
     
 
 # List All Specific Permissions Here
+# Well, most aren't use since it's granular, but...
+# Eh, it's good to show what exists and what not
 require_admin = require_permission("*") 
 
 form_create = require_permission("form:create")
@@ -122,3 +124,11 @@ page_create = require_permission("page:create")
 page_read = require_permission("page:read")
 page_update = require_permission("page:update")
 page_delete = require_permission("page:delete")
+
+# THESE ARE OVERRIDES
+# By default, per form submission CRUD is managed by the Form's own tags
+# It uses per-role basis, these ones are system level access to form's own permission
+submission_create = require_permission("submission:create")
+submission_read = require_permission("submission:read")
+submission_update = require_permission("submission:update")
+submission_delete = require_permission("submission:delete")

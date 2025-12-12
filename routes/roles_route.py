@@ -140,10 +140,7 @@ def change_user_password(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Password must be at least 8 characters long."
         )
-    # The following line assumes you have a method in UserService to handle this.
-    # user_service.change_password(username=target_username, new_password=password_data.new_password)
-    
-    # For now, let's implement the logic here, but it should be moved to the service:
+
     db_user = user_service.get_user_by_username(target_username)
     db_user.hashed_password = hash_password(password_data.new_password)
     user_service.db.commit()

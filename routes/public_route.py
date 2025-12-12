@@ -28,7 +28,7 @@ def check_page_is_public(page: schemas.Page):
 @router.get("/", response_class=HTMLResponse)
 def serve_home_page(page_service: PageService = Depends(get_page_service)):
     """Serves the page tagged as 'home'."""
-    page = page_service.get_first_page_by_tag('home')
+    page = page_service.get_first_page_by_tag('sys:home')
     if not page:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Critical: Home page not configured, notify site owner.")
 
@@ -81,7 +81,10 @@ def api_list_blog_pages(page_service: PageService = Depends(get_page_service)):
     # 2. Filter that list to only include pages that also have the 'sys:public' tag
     public_blog_pages = [
         page for page in all_blog_pages if "sys:public" in page.tags
-    ]
+    ] 
+    for blog in public_blog_pages:
+        blog.html = ""
+        blog.markdown=""
     
     return public_blog_pages
 
@@ -93,7 +96,7 @@ def api_get_blog_page(slug: str, page_service: PageService = Depends(get_page_se
     """
     page = page_service.get_page_by_slug(slug)
     
-    if not page.tags or "sys:blog" not in page.tags:
+    if not page.tags or ('sys:blog' not in page.tags or 'sys:public' not in page.tags):
          raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found in this category.")
 
     check_page_is_public(page)
@@ -107,6 +110,6 @@ def serve_generic_page(slug: str, page_service: PageService = Depends(get_page_s
     """
     page = page_service.get_page_by_slug(slug)
     check_page_is_public(page)
-    if not page.tags or 'main' not in page.tags:
+    if not page.tags or ('sys:main' not in page.tags or 'sys:public' not in page.tags):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found in this category.")
     return HTMLResponse(content=page.html, status_code=200)

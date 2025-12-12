@@ -11,7 +11,7 @@ class AuthService:
         self.user_service = user_service
         self.SECRET_KEY = os.getenv("JWT_SECRET")
         self.ALGORITHM = "HS256"
-        self.ACCESS_TOKEN_EXPIRE_MINUTES = 30
+        self.ACCESS_TOKEN_EXPIRE_MINUTES = 300
 
         if not self.SECRET_KEY:
             raise ValueError("JWT_SECRET environment variable not set in .env file")

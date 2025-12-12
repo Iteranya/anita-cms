@@ -142,17 +142,24 @@ def update_page(
     user: CurrentUser = Depends(dep.get_current_user),
 ):
     """
-    Update an existing page with permission-based restrictions.
+    Update an existing page using a hybrid permission model.
 
-    - Admins or users with 'page:update' can modify anything on any page.
-    - The author of a *non-blog* page can modify anything on that page.
-    - Users with 'blog:update' or the page's author can update a blog page
-      (i.e., a page tagged with 'sys:blog').
+    This model provides tight security for critical system pages while offering
+    a user-friendly ownership model for regular content (e.g., blogs).
 
-    For users editing a blog page under these restricted permissions,
-    the following rules are enforced:
-      - The 'sys:blog' tag cannot be removed.
-      - The page 'type' cannot be changed.
+    - **Full Privileges (System Pages & Overrides):**
+      - Users with '*' or 'page:update' permissions can modify any page without
+        restriction. This is intended for administrators managing system pages
+        (e.g., 'home', 'about', templates).
+      - For non-blog pages, these are the ONLY permissions that allow an update.
+
+    - **Restricted Privileges (Blog Pages):**
+      - For pages explicitly tagged with 'sys:blog', access is broader.
+      - The original author OR a user with 'blog:update' can edit the page.
+      - When editing under these restricted permissions, the following rules
+        are enforced by the API to maintain integrity:
+          1. The 'sys:blog' tag CANNOT be removed.
+          2. The page 'type' (e.g., 'markdown') CANNOT be changed.
     """
     db_page = page_service.get_page_by_slug(slug)
     if not db_page:
@@ -160,45 +167,55 @@ def update_page(
 
     user_permissions = user_service.get_user_permissions(user.username)
 
+    # --- Define Permission Flags for Clarity ---
+
     is_author = db_page.author == user.username
     is_blog_page = "sys:blog" in db_page.tags
 
-    # Condition for full, unrestricted update privileges
+    # 1. Check for "overlord" permissions that grant unrestricted access to ANY page.
     has_full_privileges = (
         "*" in user_permissions
         or "page:update" in user_permissions
     )
 
-    # Condition for restricted update privileges on blog pages
+    # 2. Check for the specific, more lenient permissions that apply ONLY to blog pages.
     can_update_blog_page = (
         is_blog_page
         and ("blog:update" in user_permissions or is_author)
     )
 
-    if has_full_privileges:
-        # User has full permissions for this page. No special checks needed.
-        pass
-    elif can_update_blog_page:
-        # User has permission to update this blog page, but with restrictions.
+    # --- Authorization Check (Default Deny) ---
+    # The user must meet one of the two criteria to be authorized.
+    is_authorized = has_full_privileges or can_update_blog_page
 
-        # Rule 1: Cannot change the page type. We overwrite to enforce this.
-        if page_update.type is not None:
-            page_update.type = "markdown"
-
-        # Rule 2: Cannot remove the 'sys:blog' tag. Add it back if removed.
-        if page_update.tags is not None and "sys:blog" not in page_update.tags:
-            page_update.tags.append("sys:blog")
-    else:
-        # User does not meet any criteria to edit this page.
+    if not is_authorized:
+        # If user has neither full privileges nor blog-specific permissions, deny access.
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to edit this page."
         )
-    
-    logger.info(f"{user.username} attempted to update the page: {page_update.slug}")
 
+    # --- Restriction Enforcement ---
+    # If the user is authorized, we now check IF they are acting under the restricted
+    # blog permissions. If so, we enforce the integrity rules.
+    if not has_full_privileges:
+        # This block only runs if the user is authorized *solely* because they
+        # are a blog author or have the 'blog:update' permission.
+
+        # Rule 1: Enforce that the page type cannot be changed.
+        # We overwrite any incoming 'type' with the original to prevent modification.
+        page_update.type = db_page.type
+
+        # Rule 2: Enforce that the 'sys:blog' tag is not removed.
+        # If an update to tags is provided and it's missing, we add it back.
+        if page_update.tags is not None and "sys:blog" not in page_update.tags:
+            page_update.tags.append("sys:blog")
+
+    # --- Perform Update ---
+    # If we've reached this point, the user is authorized and all necessary
+    # restrictions have been applied to the update payload.
+    logger.info(f"User '{user.username}' is updating page '{slug}'.")
     return page_service.update_existing_page(slug=slug, page_update_data=page_update)
-
 
 @router.delete("/{slug}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_page(
