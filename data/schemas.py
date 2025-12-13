@@ -1,9 +1,34 @@
 # file: data/schemas.py
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 from dataclasses import dataclass
+
+# --- Utility ---
+
+def flatten_tags_to_strings(v: Any) -> List[str]:
+    """
+    Converts a list of Tag objects -> ['<cat>', '<dog>']
+    Also strips the brackets for cleaner API output: 'cat', 'dog'
+    """
+    if not v:
+        return []
+        
+    # Case 1: Already a list of strings (e.g. from client input)
+    # Note: We must check for an empty list first to avoid index errors on v[0]
+    if isinstance(v[0], str):
+        return [t.replace("<", "").replace(">", "") for t in v]
+        
+    # Case 2: It's a list of SQLAlchemy Tag objects from the database.
+    # We check for the .name attribute as a safe way to identify these objects.
+    if hasattr(v[0], 'name'):
+        return [tag.name.replace("<", "").replace(">", "") for tag in v]
+
+    # Fallback if the data is in an unexpected format
+    return v
+
+
 # --- Page Schemas ---
 
 class PageBase(BaseModel):
@@ -32,15 +57,9 @@ class Page(PageBase):
     @field_validator('tags', mode='before')
     @classmethod
     def clean_tags_output(cls, v):
-        if v is None:
-            return []
-        if isinstance(v, list):
-            # Strip < and > from every tag in the list
-            return [t.replace("<", "").replace(">", "") for t in v]
-        return v
+        return flatten_tags_to_strings(v)
 
-    class Config:
-        from_attributes=True # Allows Pydantic to read data from ORM models
+    model_config = ConfigDict(from_attributes=True)
 
 # --- Form Schemas ---
 
@@ -70,9 +89,13 @@ class Form(FormBase):
     slug: str
     created: str
     updated: str
+    # <--- NEW: Add the same tag validator here
+    @field_validator('tags', mode='before')
+    @classmethod
+    def clean_tags_output(cls, v):
+        return flatten_tags_to_strings(v)
     
-    class Config:
-        from_attributes=True 
+    model_config = ConfigDict(from_attributes=True)
 
 # --- Submission Schemas ---
 
@@ -98,8 +121,12 @@ class Submission(SubmissionBase):
     created: str
     updated: str
 
-    class Config:
-        from_attributes = True
+    @field_validator('tags', mode='before')
+    @classmethod
+    def clean_tags_output(cls, v):
+        return flatten_tags_to_strings(v)
+
+    model_config = ConfigDict(from_attributes=True)
 
 # --- User Schemas ---
 
