@@ -1,16 +1,14 @@
 # file: api/media.py
 
 from typing import List
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, UploadFile, File, HTTPException, status
 from fastapi.responses import FileResponse
 from pytest import Session
-
-# Adjust this import to your project's authentication location
 from data.database import get_db
 from services.users import UserService
 from src.dependencies import get_current_user
 
-from services.media import MediaService, InvalidFileNameError, FileNotFoundError, ImageProcessingError
+from services.media import CopypartyError, MediaService, InvalidFileNameError, FileNotFoundError, ImageProcessingError
 from data.schemas import MediaFile, UploadResult, UploadedFileReport,CurrentUser
 
 router = APIRouter(prefix="/media", tags=["Media"])
@@ -100,3 +98,39 @@ async def delete_media(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except FileNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    
+@router.post("/sync", status_code=status.HTTP_200_OK)
+async def sync_media_to_remote(
+    background_tasks: BackgroundTasks,
+    user: CurrentUser = Depends(get_current_user),
+    user_service: UserService = Depends(get_user_service),
+):
+    """
+    Trigger a synchronization of local files to the Copyparty server.
+    This checks for files missing on the remote server and uploads them.
+    """
+    user_permissions = user_service.get_user_permissions(user.username)
+    # Require admin or specific media permission
+    can_sync = "*" in user_permissions or "media:update" in user_permissions
+
+    if not can_sync:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions")
+
+    # Check if copyparty is enabled before running
+    if not media_service.copyparty:
+        raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Copyparty integration is not configured.")
+
+    try:
+        # Since sync involves network IO and could take time, 
+        # we can either await it (blocking response) or run it in background.
+        # For small folders, awaiting is fine for immediate feedback.
+        # For large folders, use background_tasks.add_task(media_service.sync_to_copyparty)
+        
+        # Here we wait for the result to return the report
+        report = media_service.sync_to_copyparty()
+        return report
+
+    except CopypartyError as e:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
