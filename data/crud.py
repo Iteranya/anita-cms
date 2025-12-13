@@ -158,6 +158,22 @@ def get_first_page_by_tag(db: Session, tag: str) -> Optional[models.Page]:
     pages = get_pages_by_tag(db, tag, limit=1)
     return pages[0] if pages else None
 
+def get_pages_by_author(
+    db: Session,
+    author: str,
+    skip: int = 0,
+    limit: int = 100
+) -> List[models.Page]:
+    """Fetch pages by author, newest first."""
+    return (
+        db.query(models.Page)
+        .filter(models.Page.author == author)
+        .order_by(models.Page.created.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
 def create_page(db: Session, page: schemas.PageCreate) -> models.Page:
     now = datetime.now().isoformat()
     

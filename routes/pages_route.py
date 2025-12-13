@@ -94,11 +94,11 @@ def list_pages(
         return page_service.get_all_pages(skip=skip, limit=limit)
     
     elif "blog:read" in user_permissions:
-        blog_pages = page_service.get_pages_by_tag("sys:blog")
+        blog_pages = page_service.get_pages_by_tags(["sys:blog", "sys:public"])
         return blog_pages[skip : skip + limit]
 
     else:
-        public_pages = page_service.get_pages_by_tag("public")
+        public_pages = page_service.get_pages_by_tag("sys:public")
         return public_pages[skip : skip + limit]
 
 @router.get("/{slug}", response_model=schemas.Page)
@@ -124,7 +124,7 @@ def get_page(
 
     if "*" in user_permissions or "page:read" in user_permissions:
         return page
-    elif "blog:read" in user_permissions and "sys:blog" in page.tags:
+    elif "blog:read" in user_permissions and "sys:blog" in [tag.name for tag in page.tags]:
         return page
     else:
         # If user is authenticated but lacks specific permissions for this non-public page
@@ -241,7 +241,7 @@ def delete_page(
     is_author = db_page.author == user.username
     is_admin = "*" in user_permissions
     can_delete_all_pages = "page:delete" in user_permissions
-    can_delete_blog_pages = ("blog:delete" in user_permissions and "sys:blog" in db_page.tags)
+    can_delete_blog_pages = ("blog:delete" in user_permissions and "sys:blog" in [tag.name for tag in db_page.tags])
 
     if not (is_author or is_admin or can_delete_all_pages or can_delete_blog_pages):
         raise HTTPException(
