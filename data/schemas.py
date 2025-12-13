@@ -1,6 +1,6 @@
 # file: data/schemas.py
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 from dataclasses import dataclass
@@ -28,6 +28,16 @@ class Page(PageBase):
     slug: str
     created: str
     updated: str
+
+    @field_validator('tags', mode='before')
+    @classmethod
+    def clean_tags_output(cls, v):
+        if v is None:
+            return []
+        if isinstance(v, list):
+            # Strip < and > from every tag in the list
+            return [t.replace("<", "").replace(">", "") for t in v]
+        return v
 
     class Config:
         from_attributes=True # Allows Pydantic to read data from ORM models
@@ -70,14 +80,17 @@ class SubmissionBase(BaseModel):
     data: Dict[str, Any]
     author: Optional[str] = None
     custom: Optional[Dict[str, Any]] = {}
+    tags: Optional[List[str]] = []  
 
 class SubmissionCreate(SubmissionBase):
     form_slug: str
 
 class SubmissionUpdate(BaseModel):
-    # Only allow updating data and custom fields
+    # Only allow updating data, custom fields, and tags
     data: Optional[Dict[str, Any]] = None
     custom: Optional[Dict[str, Any]] = None
+    tags: Optional[List[str]] = None 
+
 
 class Submission(SubmissionBase):
     id: int

@@ -49,6 +49,7 @@ class Submission(Base):
     updated = Column(String)
     author = Column(String)
     custom = Column(JSON)
+    tags = Column(JSON, default=list) # <--- NEW: JSON column for list of strings
 
     # Relationship to Form
     form = relationship("Form", back_populates="submissions")

@@ -3,10 +3,43 @@ import json
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 
+from sqlalchemy import String, cast
 from sqlalchemy.orm import Session
 
 # Import the SQLAlchemy models and Pydantic schemas
 from data import models, schemas
+
+# --- Utility Functions (Because SQLite Is Stupid) ---
+def format_tag_for_db(tag: str) -> str:
+    """Formats 'Cat' into '<cat>'."""
+    clean = tag.strip().lower()
+    # Prevent double brackets if data is dirty
+    clean = clean.replace("<", "").replace(">", "")
+    return f"<{clean}>"
+
+def parse_search_query(query_str: str):
+    """
+    Parses 'cat -dog' into:
+    included: ['<cat>']
+    excluded: ['<dog>']
+    """
+    if not query_str:
+        return [], []
+        
+    terms = query_str.split()
+    included = []
+    excluded = []
+    
+    for term in terms:
+        clean_term = term.strip()
+        if clean_term.startswith('-') and len(clean_term) > 1:
+            # Exclude
+            excluded.append(format_tag_for_db(clean_term[1:]))
+        else:
+            # Include
+            included.append(format_tag_for_db(clean_term))
+            
+    return included, excluded
 
 # --- Pages Functions ---
 
@@ -17,6 +50,44 @@ def get_page(db: Session, slug: str) -> Optional[models.Page]:
 def list_pages(db: Session, skip: int = 0, limit: int = 100) -> List[models.Page]:
     """Retrieve all pages with pagination."""
     return db.query(models.Page).order_by(models.Page.created.desc()).offset(skip).limit(limit).all()
+
+def search_pages(
+    db: Session, 
+    query_str: str, 
+    skip: int = 0, 
+    limit: int = 100
+) -> List[models.Page]:
+    """
+    Search pages with inclusion and exclusion.
+    Works on SQLite and Postgres.
+    Input: "cat -dog"
+    """
+    query = db.query(models.Page)
+    
+    if query_str:
+        included_tags, excluded_tags = parse_search_query(query_str)
+        
+        # Cast JSON column to String for universal text searching
+        # Postgres: JSONB -> Text
+        # SQLite: JSON -> String
+        tags_as_string = cast(models.Page.tags, String)
+
+        # 1. Handle Inclusion (AND)
+        for tag in included_tags:
+            # JSON arrays store strings in double quotes: ["<tag>"]
+            # We search for the pattern including quotes for safety
+            search_pat = f'%"{tag}"%' 
+            query = query.filter(tags_as_string.ilike(search_pat))
+
+        # 2. Handle Exclusion (NOT)
+        for tag in excluded_tags:
+            search_pat = f'%"{tag}"%'
+            query = query.filter(~tags_as_string.ilike(search_pat))
+
+    # Standard Sort
+    query = query.order_by(models.Page.created.desc())
+    
+    return query.offset(skip).limit(limit).all()
 
 def get_pages_by_tag(db: Session, tag: str) -> List[models.Page]:
     """Retrieve all pages containing a specific tag in their JSON tags list,
@@ -50,6 +121,9 @@ def get_first_page_by_tag(db: Session, tag: str) -> Optional[models.Page]:
 
 def create_page(db: Session, page: schemas.PageCreate) -> models.Page:
     """Create a new page."""
+    formatted_tags = [format_tag_for_db(t) for t in page.tags]
+    page_data = page.dict()
+    page_data['tags'] = formatted_tags
     now = datetime.now().isoformat()
     db_page = models.Page(**page.dict(), created=now, updated=now)
     db.add(db_page)
@@ -62,6 +136,9 @@ def update_page(db: Session, slug: str, page_update: schemas.PageUpdate) -> Opti
     db_page = get_page(db, slug=slug)
     if not db_page:
         return None
+    
+    if 'tags' in update_data and update_data['tags'] is not None:
+        update_data['tags'] = [format_tag_for_db(t) for t in update_data['tags']]
     
     update_data = page_update.dict(exclude_unset=True)
     for key, value in update_data.items():
