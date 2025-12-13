@@ -93,6 +93,22 @@ class PageService:
         """
         # This is now simpler and much more performant!
         return crud.get_pages_by_tag(self.db, tag=tag)
+    
+    def get_pages_by_tags(self, tags: List[str]) -> List[models.Page]:
+        """
+        Retrieves all pages containing ALL of the given tags.
+        """
+
+        if not tags:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="At least one tag must be provided."
+            )
+
+        # Normalize + join for the CRUD engine
+        query_str = " ".join(tags)
+
+        return crud.search_pages(self.db, query_str=query_str)
 
     def get_first_page_by_tag(self, tag: str) -> Optional[models.Page]:
         """

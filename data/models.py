@@ -38,16 +38,13 @@ class Tag(Base):
 class Page(Base):
     __tablename__ = "pages"
 
-    slug = Column(String, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    slug = Column(String, unique=True, nullable=False, index=True)
     title = Column(String, nullable=False)
     content = Column(Text)
     markdown = Column(Text)
     html = Column(Text)
-    
-    # OLD: tags = Column(JSON)
-    # NEW: Relationship
     tags = relationship("Tag", secondary=page_tags, backref="pages")
-    
     thumb = Column(String)
     type = Column(String)
     created = Column(String)

@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 # --- Utility ---
 
-def flatten_tags_to_strings(v: Any) -> List[str]:
+def flatten_tags_to_strings(v: Any) -> List[str]: # Legacy but useful
     """
     Converts a list of Tag objects -> ['<cat>', '<dog>']
     Also strips the brackets for cleaner API output: 'cat', 'dog'

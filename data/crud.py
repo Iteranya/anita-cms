@@ -16,7 +16,7 @@ def format_tag_for_db(tag: str) -> str:
     """Standardizes tag strings. ' Cat ' -> '<cat>'"""
     clean = tag.strip().lower()
     clean = clean.replace("<", "").replace(">", "")
-    return f"<{clean}>"
+    return f"{clean}"
 
 def get_or_create_tags(db: Session, tag_list: List[str]) -> List[models.Tag]:
     """
@@ -110,6 +110,49 @@ def search_pages(db: Session, query_str: str, skip: int = 0, limit: int = 100) -
 def get_pages_by_tag(db: Session, tag: str, limit: int = 100) -> List[models.Page]:
     """Wrapper for search logic."""
     return search_pages(db, query_str=tag, limit=limit)
+
+def get_pages_by_tags(
+    db: Session, 
+    tags: List[str], 
+    match_all: bool = True,
+    limit: int = 100
+) -> List[models.Page]:
+    """
+    Fetch pages matching multiple tags.
+    
+    Args:
+        db: Database session
+        tags: List of tag names to filter by
+        match_all: If True, pages must have ALL tags (AND logic).
+                   If False, pages need ANY tag (OR logic).
+        limit: Maximum number of results
+    
+    Returns:
+        List of matching pages, newest first
+    """
+    if not tags:
+        return []
+    
+    # Build query string for parse_search_query
+    if match_all:
+        # Space-separated = AND logic (all tags required)
+        query_str = " ".join(tags)
+    else:
+        # OR logic: just grab pages with any of these tags
+        query = (
+            db.query(models.Page)
+            .join(models.Page.tags.property.secondary)
+            .join(models.Tag)
+            .filter(models.Tag.name.in_(tags))
+            .distinct()
+            .order_by(models.Page.created.desc())
+            .limit(limit)
+        )
+        return query.all()
+    
+    # Reuse your optimized search for AND logic
+    return search_pages(db, query_str=query_str, limit=limit)
+
 
 def get_first_page_by_tag(db: Session, tag: str) -> Optional[models.Page]:
     pages = get_pages_by_tag(db, tag, limit=1)

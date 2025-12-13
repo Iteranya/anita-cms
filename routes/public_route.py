@@ -22,7 +22,7 @@ router = APIRouter(tags=["Public"])
 def serve_home_page(page_service: PageService = Depends(get_page_service)):
     """Serves the page tagged as 'home'."""
     page = page_service.get_first_page_by_tag('sys:home')
-    if not page or "sys:public" not in page.tags:
+    if not page or "sys:public" not in {tag.name for tag in page.tags}:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Critical: Home page not configured, notify site owner.")
 
     # We serve the pre-rendered HTML directly from the database
