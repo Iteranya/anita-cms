@@ -70,10 +70,12 @@
                         :class="activeTab === 'builder' ? 'border-anita-600 text-anita-600' : 'border-transparent text-slate-400 hover:text-slate-600'">
                         Schema Builder
                     </button>
-                    <button @click="activeTab = 'submissions'; loadSubmissions()" x-show="mode === 'edit'" class="pb-3 text-sm font-bold transition-colors border-b-2" 
-                        :class="activeTab === 'submissions' ? 'border-anita-600 text-anita-600' : 'border-transparent text-slate-400 hover:text-slate-600'">
-                        Submissions
-                    </button>
+                    <a :href="`/admin/submissions?slug=${form.slug}`" 
+                        target="_blank"
+                        class="pb-3 text-sm font-bold transition-colors border-b-2 border-transparent text-slate-400 hover:text-anita-600 hover:border-anita-300 flex items-center gap-2">
+                            <i class="fas fa-external-link-alt text-xs"></i> 
+                            View Submissions
+                    </a>
                 </div>
             </div>
 

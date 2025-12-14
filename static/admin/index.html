@@ -12,10 +12,9 @@
     
     <!-- Core JS -->
     <script defer src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     
     <!-- Middleware -->
-    <script src="/static/admin/js/middleware.js"></script>
+    
 
     <!-- Tailwind Config -->
     <script>
@@ -176,23 +175,30 @@
     </div>
     
     <!-- INITIAL LOADER: If direct visit, load that view immediately -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const path = window.location.pathname;
+    <script type="module" src="/static/hikarin/main.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // 1. Determine where we are
+        const path = window.location.pathname;
+        
+        // 2. Are we in a sub-page of admin? (e.g. /admin/users)
+        // We check length > 7 because "/admin/" is length 7.
+        if(path.includes('/admin/') && path.length > 7 && !path.includes('submissions')) {
             
-            // Only trigger if we are inside /admin/ and NOT at the root /admin/
-            if(path.includes('/admin/') && path.length > 7) {
-                
-                // FIX: Add a timestamp (?t=...) to force the browser to 
-                // ignore its cache and actually send the request to Python.
-                const url = path + "?t=" + Date.now();
-                
-                htmx.ajax('GET', url, {
-                    target: '#app-content', 
-                    swap: 'innerHTML'
-                });
-            }
-        });
-    </script>
+            console.log("Hikarin: Restoring view for", path);
+
+            // 3. Force HTMX to fetch the content for this path
+            // We append a timestamp to ensure the BROWSER doesn't use the
+            // cached 'Shell' HTML it just loaded to satisfy this AJAX request.
+            const antiCacheUrl = path + "?t=" + Date.now();
+            
+            htmx.ajax('GET', antiCacheUrl, {
+                target: '#app-content', 
+                swap: 'innerHTML'
+            });
+        }
+    });
+</script>
 </body>
 </html>
