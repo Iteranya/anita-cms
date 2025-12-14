@@ -1,6 +1,6 @@
 import os
 from fastapi import APIRouter, HTTPException, status, Response, Form, Depends
-from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from datetime import timedelta
 from sqlalchemy.orm import Session
 

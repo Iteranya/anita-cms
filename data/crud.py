@@ -1,9 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 from typing import List, Optional, Dict, Any
 
 from sqlalchemy.orm import Session, Query
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError # <--- Added Import
 
 # Import the SQLAlchemy models and Pydantic schemas
 from data import models, schemas
@@ -13,73 +14,83 @@ from data import models, schemas
 # ==========================================
 
 def format_tag_for_db(tag: str) -> str:
-    """Standardizes tag strings. ' Cat ' -> '<cat>'"""
+    """
+    Standardizes tag strings (Danbooru style).
+    """
+    if not tag:
+        return ""
     clean = tag.strip().lower()
+    clean = "_".join(clean.split())
     clean = clean.replace("<", "").replace(">", "")
-    return f"{clean}"
+    return clean
 
 def get_or_create_tags(db: Session, tag_list: List[str]) -> List[models.Tag]:
     """
-    Takes a list of strings ["news", "update"], finds them in the DB,
-    creates them if missing, and returns the List of Tag Objects.
+    Concurrency-Safe "Get or Create".
+    Uses nested transactions (savepoints) to handle race conditions 
+    where two users add the same new tag simultaneously.
     """
     if not tag_list:
         return []
 
-    tag_objects = []
-    for tag_str in tag_list:
-        clean_name = format_tag_for_db(tag_str)
-        
-        # Check if exists
-        tag = db.query(models.Tag).filter(models.Tag.name == clean_name).first()
-        
-        # If not, create
-        if not tag:
-            tag = models.Tag(name=clean_name)
-            db.add(tag)
-            db.commit()
-            db.refresh(tag)
-        
-        tag_objects.append(tag)
-        
-    return tag_objects
+    # 1. Clean and Deduplicate inputs
+    clean_names = set(format_tag_for_db(t) for t in tag_list if format_tag_for_db(t))
+    if not clean_names:
+        return []
 
+    # 2. Find existing tags (Batch read)
+    existing_tags = db.query(models.Tag).filter(models.Tag.name.in_(clean_names)).all()
+    existing_tag_map = {t.name: t for t in existing_tags}
+    
+    final_tags = list(existing_tags)
+
+    # 3. Identify missing tags
+    missing_names = clean_names - set(existing_tag_map.keys())
+    
+    # 4. Insert missing tags safely
+    for name in missing_names:
+        try:
+            with db.begin_nested():
+                new_tag = models.Tag(name=name)
+                db.add(new_tag)
+                db.flush() # Force SQL execution to catch errors now
+                final_tags.append(new_tag)
+        except IntegrityError:
+            existing = db.query(models.Tag).filter(models.Tag.name == name).first()
+            if existing:
+                final_tags.append(existing)
+
+    return final_tags
+
+# ... [parse_search_query and apply_tag_filters remain unchanged] ...
 def parse_search_query(query_str: str):
-    """Parses 'cat -dog' into included and excluded lists."""
     if not query_str:
         return [], []
-        
     terms = query_str.split()
-    included = []
-    excluded = []
-    
+    included = set()
+    excluded = set()
     for term in terms:
         clean_term = term.strip()
+        if not clean_term:
+            continue
         if clean_term.startswith('-') and len(clean_term) > 1:
-            excluded.append(format_tag_for_db(clean_term[1:]))
+            formatted = format_tag_for_db(clean_term[1:])
+            if formatted:
+                excluded.add(formatted)
         else:
-            included.append(format_tag_for_db(clean_term))
-            
-    return included, excluded
-
+            formatted = format_tag_for_db(clean_term)
+            if formatted:
+                included.add(formatted)
+    return list(included), list(excluded)
 
 def apply_tag_filters(query: Query, model_class: Any, query_str: str) -> Query:
-    """
-    Optimized tag filtering using JOIN + GROUP BY + HAVING.
-    Dramatically faster for multiple inclusion tags.
-    """
     if not query_str:
         return query
-
     included_tags, excluded_tags = parse_search_query(query_str)
-
     for tag_name in excluded_tags:
         query = query.filter(~model_class.tags.any(models.Tag.name == tag_name))
-
     if included_tags:
-        # Get the association table (e.g., page_tags)
         association_table = model_class.tags.property.secondary
-        
         query = (
             query
             .join(association_table)
@@ -88,7 +99,6 @@ def apply_tag_filters(query: Query, model_class: Any, query_str: str) -> Query:
             .group_by(model_class.id)
             .having(func.count(models.Tag.id) == len(included_tags))
         )
-
     return query
 
 # ==========================================
@@ -102,58 +112,32 @@ def list_pages(db: Session, skip: int = 0, limit: int = 100) -> List[models.Page
     return db.query(models.Page).order_by(models.Page.created.desc()).offset(skip).limit(limit).all()
 
 def search_pages(db: Session, query_str: str, skip: int = 0, limit: int = 100) -> List[models.Page]:
-    """Optimized relational search."""
     query = db.query(models.Page)
     query = apply_tag_filters(query, models.Page, query_str)
     return query.order_by(models.Page.created.desc()).offset(skip).limit(limit).all()
 
 def get_pages_by_tag(db: Session, tag: str, limit: int = 100) -> List[models.Page]:
-    """Wrapper for search logic."""
     return search_pages(db, query_str=tag, limit=limit)
 
-def get_pages_by_tags(
-    db: Session, 
-    tags: List[str], 
-    match_all: bool = True,
-    limit: int = 100
-) -> List[models.Page]:
-    """
-    Fetch pages matching multiple tags.
-    
-    Args:
-        db: Database session
-        tags: List of tag names to filter by
-        match_all: If True, pages must have ALL tags (AND logic).
-                   If False, pages need ANY tag (OR logic).
-        limit: Maximum number of results
-    
-    Returns:
-        List of matching pages, newest first
-    """
+def get_pages_by_tags(db: Session, tags: List[str], match_all: bool = True, limit: int = 100) -> List[models.Page]:
     if not tags:
         return []
-    
-    # Build query string for parse_search_query
     if match_all:
-        # Space-separated = AND logic (all tags required)
         query_str = " ".join(tags)
+        return search_pages(db, query_str=query_str, limit=limit)
     else:
-        # OR logic: just grab pages with any of these tags
+        # Optimized OR logic: group_by ID instead of distinct() on text columns
         query = (
             db.query(models.Page)
             .join(models.Page.tags.property.secondary)
             .join(models.Tag)
             .filter(models.Tag.name.in_(tags))
-            .distinct()
+            .group_by(models.Page.id) # Changed from .distinct() for performance
             .order_by(models.Page.created.desc())
             .limit(limit)
         )
         return query.all()
-    
-    # Reuse your optimized search for AND logic
-    return search_pages(db, query_str=query_str, limit=limit)
-
-
+        
 def get_first_page_by_tag(db: Session, tag: str) -> Optional[models.Page]:
     pages = get_pages_by_tag(db, tag, limit=1)
     return pages[0] if pages else None
@@ -162,35 +146,16 @@ def get_first_page_by_tags(db: Session, tag: List[str]) -> Optional[models.Page]
     pages = get_pages_by_tags(db, tag, limit=1)
     return pages[0] if pages else None
 
-
-def get_pages_by_author(
-    db: Session,
-    author: str,
-    skip: int = 0,
-    limit: int = 100
-) -> List[models.Page]:
-    """Fetch pages by author, newest first."""
-    return (
-        db.query(models.Page)
-        .filter(models.Page.author == author)
-        .order_by(models.Page.created.desc())
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+def get_pages_by_author(db: Session, author: str, skip: int = 0, limit: int = 100) -> List[models.Page]:
+    return db.query(models.Page).filter(models.Page.author == author).order_by(models.Page.created.desc()).offset(skip).limit(limit).all()
 
 def create_page(db: Session, page: schemas.PageCreate) -> models.Page:
-    now = datetime.now().isoformat()
-    
-    # 1. Prepare raw data (excluding tags)
+    now = datetime.now(timezone.utc).isoformat()
     page_data = page.model_dump(exclude={'tags'})
-    
-    # 2. Convert string tags to Database Objects
     tag_objects = get_or_create_tags(db, page.tags)
     
-    # 3. Create Page with Relationship
     db_page = models.Page(**page_data, created=now, updated=now)
-    db_page.tags = tag_objects # SQLAlchemy handles the association table magic
+    db_page.tags = tag_objects 
     
     db.add(db_page)
     db.commit()
@@ -202,21 +167,21 @@ def update_page(db: Session, slug: str, page_update: schemas.PageUpdate) -> Opti
     if not db_page:
         return None
     
-    # Get dict of set values
     update_data = page_update.model_dump(exclude_unset=True)
     
-    # Handle Tags specially if they exist in update data
+    # --- ENFORCE IMMUTABLE SLUG ---
+    # Even if the API request sent a new slug, we silently remove it.
+    update_data.pop('slug', None)
+    
     if 'tags' in update_data:
         new_tags_list = update_data.pop('tags')
         if new_tags_list is not None:
-            # Replaces all existing tags with the new set
             db_page.tags = get_or_create_tags(db, new_tags_list)
 
-    # Update other fields
     for key, value in update_data.items():
         setattr(db_page, key, value)
     
-    db_page.updated = datetime.now().isoformat()
+    db_page.updated = datetime.now(timezone.utc).isoformat()
     db.commit()
     db.refresh(db_page)
     return db_page
@@ -233,6 +198,7 @@ def delete_page(db: Session, slug: str) -> bool:
 # --- FORMS FUNCTIONS ---
 # ==========================================
 
+
 def get_form(db: Session, slug: str) -> Optional[models.Form]:
     return db.query(models.Form).filter(models.Form.slug == slug).first()
 
@@ -240,8 +206,7 @@ def list_forms(db: Session, skip: int = 0, limit: int = 100) -> List[models.Form
     return db.query(models.Form).order_by(models.Form.created.desc()).offset(skip).limit(limit).all()
 
 def create_form(db: Session, form: schemas.FormCreate) -> models.Form:
-    now = datetime.now().isoformat()
-    
+    now = datetime.now(timezone.utc).isoformat()
     form_data = form.model_dump(by_alias=True, exclude={'tags'})
     tag_objects = get_or_create_tags(db, form.tags)
 
@@ -260,6 +225,9 @@ def update_form(db: Session, slug: str, form_update: schemas.FormUpdate) -> Opti
 
     update_data = form_update.model_dump(by_alias=True, exclude_unset=True)
 
+    # --- ENFORCE IMMUTABLE SLUG ---
+    update_data.pop('slug', None)
+
     if 'tags' in update_data:
         new_tags = update_data.pop('tags')
         if new_tags is not None:
@@ -268,11 +236,12 @@ def update_form(db: Session, slug: str, form_update: schemas.FormUpdate) -> Opti
     for key, value in update_data.items():
         setattr(db_form, key, value)
 
-    db_form.updated = datetime.now().isoformat()
+    db_form.updated = datetime.now(timezone.utc).isoformat()
     db.commit()
     db.refresh(db_form)
     return db_form
 
+# ... [Rest of the file: Submissions, Users, Settings, Seeding... remains unchanged] ...
 def delete_form(db: Session, slug: str) -> bool:
     db_form = get_form(db, slug=slug)
     if db_form:
@@ -281,10 +250,6 @@ def delete_form(db: Session, slug: str) -> bool:
         return True
     return False
 
-# ==========================================
-# --- SUBMISSIONS FUNCTIONS ---
-# ==========================================
-
 def get_submission(db: Session, submission_id: int) -> Optional[models.Submission]:
     return db.query(models.Submission).filter(models.Submission.id == submission_id).first()
 
@@ -292,14 +257,12 @@ def list_submissions(db: Session, form_slug: str, skip: int = 0, limit: int = 10
     return db.query(models.Submission).filter(models.Submission.form_slug == form_slug).order_by(models.Submission.created.desc()).offset(skip).limit(limit).all()
 
 def search_submissions(db: Session, query_str: str) -> List[models.Submission]:
-    """Search submissions by tag."""
     query = db.query(models.Submission)
     query = apply_tag_filters(query, models.Submission, query_str)
     return query.order_by(models.Submission.created.desc()).all()
 
 def create_submission(db: Session, submission: schemas.SubmissionCreate) -> models.Submission:
-    now = datetime.now().isoformat()
-    
+    now = datetime.now(timezone.utc).isoformat()
     sub_data = submission.model_dump(exclude={'tags'})
     tag_objects = get_or_create_tags(db, submission.tags)
 
@@ -317,6 +280,7 @@ def update_submission(db: Session, submission_id: int, submission_update: schema
         return None
     
     update_data = submission_update.model_dump(exclude_unset=True)
+    update_data.pop('form_slug', None)
     
     if 'tags' in update_data:
         new_tags = update_data.pop('tags')
@@ -326,7 +290,7 @@ def update_submission(db: Session, submission_id: int, submission_update: schema
     for key, value in update_data.items():
         setattr(db_submission, key, value)
     
-    db_submission.updated = datetime.now().isoformat()
+    db_submission.updated =  datetime.now(timezone.utc).isoformat()
     db.commit()
     db.refresh(db_submission)
     return db_submission
@@ -338,10 +302,6 @@ def delete_submission(db: Session, submission_id: int) -> bool:
         db.commit()
         return True
     return False
-
-# ==========================================
-# --- USER / SETTINGS / ROLES (UNCHANGED) ---
-# ==========================================
 
 def get_user_by_username(db: Session, username: str) -> Optional[models.User]:
     return db.query(models.User).filter(models.User.username == username).first()
@@ -401,10 +361,6 @@ def delete_role(db: Session, role_name: str) -> bool:
         return True
     return False
 
-# ==========================================
-# --- SEEDING (UPDATED FOR NEW TAGS) ---
-# ==========================================
-
 def seed_default_roles(db: Session, json_path: str = "default_roles.json"):
     if db.query(models.Role).count() == 0:
         print("No roles found. Seeding default roles.")
@@ -420,16 +376,12 @@ def seed_default_roles(db: Session, json_path: str = "default_roles.json"):
 def seed_default_pages(db: Session):
     if db.query(models.Page).count() > 0:
         return
-
     print("No pages found. Seeding default pages...")
     try:
         with open("default_pages.json", "r") as f:
             default_pages_data = json.load(f)
-            
         for page_dict in default_pages_data:
             if not get_page(db, slug=page_dict['slug']):
-                # IMPORTANT: We use schemas.PageCreate to validate
-                # AND we use our create_page function to handle tag relation
                 page_schema = schemas.PageCreate(**page_dict)
                 create_page(db, page=page_schema)
                 print(f"  - Created page: '{page_dict['title']}'")

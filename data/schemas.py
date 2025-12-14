@@ -2,8 +2,6 @@
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from typing import List, Optional, Dict, Any
-from datetime import datetime
-from dataclasses import dataclass
 
 # --- Utility ---
 
@@ -141,7 +139,6 @@ class UserCreate(UserBase):
     hashed_password: str
 
 class UserUpdate(UserBase):
-    # You might want to have a separate schema for password updates
     display_name: Optional[str] = None
     pfp_url: Optional[str] = None
     role: Optional[str] = None

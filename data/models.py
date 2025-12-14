@@ -1,6 +1,5 @@
 # file: data/models.py
 
-from typing import Any, Dict, Optional
 from sqlalchemy import Column, Integer, String, Text, JSON, ForeignKey, Boolean, Table
 from sqlalchemy.orm import relationship
 from .database import Base
