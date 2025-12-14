@@ -342,12 +342,7 @@ def update_submission(
     if submission.form_slug != slug:
         raise HTTPException(status_code=404, detail="Submission not found for this form.")
 
-    # --- Placeholder for actual update implementation ---
-    # return form_service.update_submission(submission_id, submission_update)
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Update submission functionality not implemented in the service layer."
-    )
+    return form_service.create_new_submission(submission_id, submission_update)
 
 
 @router.delete("/{slug}/submissions/{submission_id}", status_code=status.HTTP_204_NO_CONTENT)

@@ -158,6 +158,11 @@ def get_first_page_by_tag(db: Session, tag: str) -> Optional[models.Page]:
     pages = get_pages_by_tag(db, tag, limit=1)
     return pages[0] if pages else None
 
+def get_first_page_by_tags(db: Session, tag: List[str]) -> Optional[models.Page]:
+    pages = get_pages_by_tags(db, tag, limit=1)
+    return pages[0] if pages else None
+
+
 def get_pages_by_author(
     db: Session,
     author: str,

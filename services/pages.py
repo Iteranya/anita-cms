@@ -109,6 +109,14 @@ class PageService:
         query_str = " ".join(tags)
 
         return crud.search_pages(self.db, query_str=query_str)
+    
+    def get_first_page_by_tags(self, tag: List[str]) -> Optional[models.Page]:
+        """
+        Retrieves the most recent page with a specific tag by calling the
+        efficient CRUD function.
+        """
+        # This is also simpler and more performant.
+        return crud.get_first_page_by_tags(self.db, tag=tag)
 
     def get_first_page_by_tag(self, tag: str) -> Optional[models.Page]:
         """

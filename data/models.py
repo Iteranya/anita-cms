@@ -5,8 +5,7 @@ from sqlalchemy import Column, Integer, String, Text, JSON, ForeignKey, Boolean,
 from sqlalchemy.orm import relationship
 from .database import Base
 
-# --- ASSOCIATION TABLES (The Glue) ---
-# These are invisible tables that link items to tags.
+# --- ASSOCIATION TABLES ---
 
 page_tags = Table(
     'page_tags', Base.metadata,
@@ -63,9 +62,6 @@ class Form(Base):
     created = Column(String)
     updated = Column(String)
     author = Column(String)
-    
-    # OLD: tags = Column(JSON)
-    # NEW: Relationship
     tags = relationship("Tag", secondary=form_tags, backref="forms")
     
     custom = Column(JSON)
@@ -81,9 +77,6 @@ class Submission(Base):
     updated = Column(String)
     author = Column(String)
     custom = Column(JSON)
-    
-    # OLD: tags = Column(JSON)
-    # NEW: Relationship
     tags = relationship("Tag", secondary=submission_tags, backref="submissions")
 
     form = relationship("Form", back_populates="submissions")
