@@ -157,10 +157,6 @@ class UserService:
             
         # Ensure role exists.
         self.get_role_by_name(role_name)
-
-        # Business Logic 2: Prevent deletion if any user is assigned to this role.
-        # Note: This would require a new CRUD function `count_users_with_role`.
-        # For simplicity here, we'll proceed, but in a real app you'd add this check.
         
         crud.delete_role(self.db, role_name=role_name)
 

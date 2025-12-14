@@ -2,7 +2,7 @@
 
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
-from typing import List, Optional # 👈 Added Optional and List for type hinting
+from typing import List, Optional
 
 from data import crud, schemas, models
 
@@ -32,7 +32,7 @@ class PageService:
         """
         # --- EXAMPLE BUSINESS LOGIC ---
         # 1. Check for forbidden slugs.
-        forbidden_slugs = {"admin", "api", "login", "static"}
+        forbidden_slugs = {"admin", "api", "login", "static","blog"}
         if page_data.slug in forbidden_slugs:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -49,12 +49,6 @@ class PageService:
 
         # 3. If all checks pass, call the CRUD function to create the page.
         new_page = crud.create_page(self.db, page=page_data)
-        
-        # --- MORE EXAMPLE BUSINESS LOGIC ---
-        # 4. You could send an email notification here.
-        #    send_notification(f"New page created: {new_page.title}")
-        # 5. You could log this action to an audit trail.
-        #    log_audit(user="current_user", action=f"Created page {new_page.slug}")
 
         return new_page
         
@@ -93,6 +87,36 @@ class PageService:
         """
         # This is now simpler and much more performant!
         return crud.get_pages_by_tag(self.db, tag=tag)
+    
+    def get_pages_by_author(self,author:str) -> List[models.Page]:
+        """
+        Retrieves all pages made by certain author.
+        """
+        return crud.get_pages_by_author(self.db,author)
+    
+    def get_pages_by_tags(self, tags: List[str]) -> List[models.Page]:
+        """
+        Retrieves all pages containing ALL of the given tags.
+        """
+
+        if not tags:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="At least one tag must be provided."
+            )
+
+        # Normalize + join for the CRUD engine
+        query_str = " ".join(tags)
+
+        return crud.search_pages(self.db, query_str=query_str)
+    
+    def get_first_page_by_tags(self, tag: List[str]) -> Optional[models.Page]:
+        """
+        Retrieves the most recent page with a specific tag by calling the
+        efficient CRUD function.
+        """
+        # This is also simpler and more performant.
+        return crud.get_first_page_by_tags(self.db, tag=tag)
 
     def get_first_page_by_tag(self, tag: str) -> Optional[models.Page]:
         """

@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Optional, Dict
 from fastapi import HTTPException, status
 from jose import JWTError, jwt
-from services.users import UserService, verify_password, hash_password
+from services.users import UserService, verify_password
 from data.schemas import User 
 
 class AuthService:
