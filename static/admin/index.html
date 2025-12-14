@@ -183,14 +183,10 @@
         const path = window.location.pathname;
         
         // 2. Are we in a sub-page of admin? (e.g. /admin/users)
-        // We check length > 7 because "/admin/" is length 7.
-        if(path.includes('/admin/') && path.length > 7 && !path.includes('submissions')) {
+        if(path.includes('/admin') && path.length > 7 && !path.includes('submissions')) {
             
             console.log("Hikarin: Restoring view for", path);
 
-            // 3. Force HTMX to fetch the content for this path
-            // We append a timestamp to ensure the BROWSER doesn't use the
-            // cached 'Shell' HTML it just loaded to satisfy this AJAX request.
             const antiCacheUrl = path + "?t=" + Date.now();
             
             htmx.ajax('GET', antiCacheUrl, {
