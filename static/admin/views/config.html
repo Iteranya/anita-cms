@@ -1,0 +1,116 @@
+<div x-data="configManager" class="flex flex-col h-full bg-slate-50">
+    
+    <!-- HEADER -->
+    <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-8 shadow-sm z-10 flex-shrink-0">
+        <div>
+            <h1 class="text-xl font-bold text-slate-800">System Configuration</h1>
+            <p class="text-xs text-slate-500">Manage AI provider and system behaviors</p>
+        </div>
+        
+        <button id="save-config-btn" @click="save" :disabled="isSaving" class="bg-slate-900 hover:bg-slate-800 text-white px-6 py-2 rounded-lg shadow-lg transition-all transform hover:-translate-y-0.5 font-bold text-sm flex items-center disabled:opacity-50">
+            <span x-show="!isSaving" class="flex items-center"><i class="fas fa-save mr-2"></i> Save Changes</span>
+            <span x-show="isSaving"><i class="fas fa-circle-notch fa-spin mr-2"></i> Saving...</span>
+        </button>
+    </header>
+
+    <!-- CONTENT -->
+    <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+        
+        <div x-show="isLoading" class="flex justify-center items-center h-64">
+            <i class="fas fa-circle-notch fa-spin text-4xl text-anita-400"></i>
+        </div>
+
+        <div x-show="!isLoading" class="max-w-4xl mx-auto space-y-6 animate-fade-in" x-cloak>
+            
+            <!-- CARD 1: AI Provider -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-slate-50/80 px-6 py-4 border-b border-slate-100 flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-700">AI Provider Settings</h3>
+                </div>
+                
+                <div class="p-6 space-y-6">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Endpoint -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">AI Endpoint URL</label>
+                            <div class="relative group">
+                                <i class="fas fa-link absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-purple-500 transition"></i>
+                                <input type="text" x-model="form.ai_endpoint" placeholder="https://api.openai.com/v1" 
+                                    class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-anita-500 outline-none text-sm font-mono text-slate-600 transition">
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-1.5 ml-1">Compatible with OpenAI, Ollama, or vLLM endpoints.</p>
+                        </div>
+
+                        <!-- Model Name -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Base Model Name</label>
+                            <div class="relative group">
+                                <i class="fas fa-microchip absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-purple-500 transition"></i>
+                                <input type="text" x-model="form.base_llm" placeholder="gpt-4o-mini" 
+                                    class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-anita-500 outline-none text-sm font-mono text-slate-600 transition">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- API Key -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">AI Secret Key</label>
+                        <div class="relative group">
+                            <i class="fas fa-key absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-purple-500 transition"></i>
+                            <input type="password" x-model="form.ai_key" placeholder="••••••••••••••••••••••••" autocomplete="new-password"
+                                class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-anita-500 outline-none text-sm font-mono text-slate-600 bg-slate-50/50 transition">
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-1.5 ml-1 flex items-center gap-1">
+                            <i class="fas fa-info-circle"></i> Leave blank to keep current key.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARD 2: Behavior -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-slate-50/80 px-6 py-4 border-b border-slate-100 flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-pink-100 text-pink-600 flex items-center justify-center">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-700">Personality & Behavior</h3>
+                </div>
+
+                <div class="p-6 space-y-6">
+                    <!-- Temperature Slider -->
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <label class="block text-xs font-bold text-slate-500 uppercase">Temperature (Creativity)</label>
+                            <span class="bg-anita-100 text-anita-700 text-xs font-mono font-bold px-2 py-1 rounded" x-text="form.temperature"></span>
+                        </div>
+                        
+                        <div class="relative h-10 flex items-center">
+                            <!-- Labels -->
+                            <span class="absolute left-0 -bottom-4 text-[10px] font-bold text-slate-400 uppercase">Precise</span>
+                            <span class="absolute right-0 -bottom-4 text-[10px] font-bold text-slate-400 uppercase">Creative</span>
+                            
+                            <!-- Slider -->
+                            <input type="range" x-model="form.temperature" min="0" max="2" step="0.1" 
+                                class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-anita-600 focus:outline-none focus:ring-2 focus:ring-anita-500/50">
+                        </div>
+                    </div>
+
+                    <!-- System Prompt -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">System Prompt / Persona</label>
+                        <div class="relative">
+                            <textarea x-model="form.system_note" rows="5" 
+                                class="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-anita-500 outline-none text-sm leading-relaxed text-slate-700 resize-none font-mono text-xs"></textarea>
+                            <div class="absolute bottom-3 right-3 text-slate-300 text-xs pointer-events-none"><i class="fas fa-pen"></i></div>
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-1.5 ml-1">Defines the core personality and rules for Aina & Asta assistants.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

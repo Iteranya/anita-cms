@@ -178,15 +178,10 @@ def update_page(
     if not (has_full_rights or has_blog_rights):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied")
 
-    # --- Enforce Integrity for Restricted Blog Updates ---
     if not has_full_rights:
-        # User is updating under restricted rights.
-        
-        # 1. Prevent changing type
+
         page_update.type = db_page.type
 
-        # 2. Prevent removing sys:blog tag
-        # page_update is a PYDANTIC SCHEMA (tags are strings)
         if page_update.tags is not None:
              page_update.tags = ensure_tag_in_schema(page_update.tags, "sys:blog")
 

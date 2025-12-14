@@ -1,106 +1,88 @@
 # file: api/admin.py
 
 import os
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
-# Local imports from our new architecture
 from data.database import get_db
 from services.pages import PageService
+from src.dependencies import optional_user
 
-# Import the new, decoupled authentication dependencies
-from src.dependencies import optional_user, require_admin
+router = APIRouter(tags=["Admin SPA"])
 
-router = APIRouter(tags=["Admin Views (MPA)"])
+# 1. Configuration
+ADMIN_DIR = "static/admin"
+SPA_VIEWS = {"dashboard", "page", "users", "forms", "files", "media", "config"}
 
-ADMIN_APP_DIR = "static/admin"
-
-def is_tag_in_db_page(db_page_tags: List, tag_name: str) -> bool:
+# 2. The Renderer (Internal Helper)
+def render_spa_view(request: Request, view_name: str):
     """
-    Checks if a tag exists in a list of SQLALCHEMY OBJECTS.
-    Used when inspecting existing data from the database.
+    Decides whether to serve the Shell (index.html) or the Partial (views/*.html)
+    based on the HTMX header.
     """
-    if not db_page_tags:
-        return False
-    # Checks t.name because these are DB objects
-    return any(t.name == tag_name for t in db_page_tags)
-
-# --- HTML VIEW ROUTES (The Unified Dashboard - MPA Style) ---
-#
-
-@router.get("/admin", response_class=FileResponse)
-async def view_dashboard(user: dict = Depends(optional_user)):
-    """Main Dashboard. Accessible by ANY logged-in user."""
-    if not user:
-        return RedirectResponse(url="/auth/login", status_code=302)
+    # 1. HTMX Request -> Serve Partial
+    if request.headers.get("HX-Request"):
+        view_path = os.path.join(ADMIN_DIR, "views", f"{view_name}.html")
+        if os.path.exists(view_path):
+            res = FileResponse(view_path)
+            # Crucial: Tell browser this URL's content varies based on headers
+            res.headers["Vary"] = "HX-Request"
+            res.headers["Cache-Control"] = "no-store, max-age=0"
+            return res
+        return HTMLResponse("<div class='p-8'>View not found</div>", status_code=404)
     
-    # Serves the static HTML file for the dashboard.
-    return FileResponse(os.path.join(ADMIN_APP_DIR, "page_hikarin.html"))
+    # 2. Browser Request -> Serve Shell
+    res = FileResponse(os.path.join(ADMIN_DIR, "index.html"))
+    # FIX IS HERE: Disable caching for the shell too, so the browser 
+    # doesn't assume this result is valid for the subsequent HTMX request.
+    res.headers["Cache-Control"] = "no-store, max-age=0"
+    res.headers["Vary"] = "HX-Request"
+    return res
 
-@router.get("/admin/page", response_class=FileResponse)
-async def view_page_manager(user: dict = Depends(optional_user)):
-    if not user:
-        return RedirectResponse(url="/auth/login", status_code=302)
-    
-    return FileResponse(os.path.join(ADMIN_APP_DIR, "page_hikarin.html"))
+# 3. Routes
 
-@router.get("/admin/config", response_class=FileResponse)
-async def view_config(user: dict = Depends(optional_user)):
-    if not user:
-        return RedirectResponse(url="/auth/login", status_code=302)
-    return FileResponse(os.path.join(ADMIN_APP_DIR, "config.html"))
-
-@router.get("/admin/forms", response_class=FileResponse)
-async def view_forms(user: dict = Depends(optional_user)):
-    if not user:
-        return RedirectResponse(url="/auth/login", status_code=302)
-    return FileResponse(os.path.join(ADMIN_APP_DIR, "form.html"))
-
-@router.get("/admin/media", response_class=FileResponse)
-async def view_media(user: dict = Depends(optional_user)):
-    if not user:
-        return RedirectResponse(url="/auth/login", status_code=302)
-    return FileResponse(os.path.join(ADMIN_APP_DIR, "media.html"))
-
-@router.get("/admin/files", response_class=FileResponse)
-async def view_files(user: dict = Depends(optional_user)):
-    if not user:
-        return RedirectResponse(url="/auth/login", status_code=302)
-    return FileResponse(os.path.join(ADMIN_APP_DIR, "file_manager.html"))
-
-@router.get("/admin/users", response_class=FileResponse)
-async def view_users(user: dict = Depends(optional_user)):
-    if not user:
-        return RedirectResponse(url="/auth/login", status_code=302)
-    return FileResponse(os.path.join(ADMIN_APP_DIR, "users_hikarin.html"))
-
-# --- CUSTOM DYNAMIC ADMIN PAGES (from Database) ---
+@router.get("/admin")
+async def admin_root():
+    return RedirectResponse("/admin/dashboard")
 
 @router.get("/admin/{slug}", response_class=HTMLResponse)
-async def serve_custom_admin_page(
-    slug: str,
-    db: Session = Depends(get_db),
-    user: dict = Depends(require_admin)
+async def admin_router(
+    slug: str, 
+    request: Request, 
+    user: dict = Depends(optional_user),
+    db: Session = Depends(get_db)
 ):
     """
-    Fetches a CMS page tagged with 'admin' and directly serves its raw HTML content.
+    The Unified Admin Handler.
+    Priority:
+    1. Is it a Static Admin View (e.g. 'users', 'config')? -> Serve SPA
+    2. Is it a Dynamic DB Page (e.g. 'custom-tool')? -> Serve HTML
     """
+    if not user:
+        return RedirectResponse(url="/auth/login", status_code=302)
+
+    # --- CASE A: Static SPA View (dashboard, users, etc) ---
+    if slug in SPA_VIEWS:
+        return render_spa_view(request, slug)
+
+    # --- CASE B: Dynamic Database Page ---
+    # If the slug isn't a known system view, check the database.
+    # We require full admin privileges for dynamic tools.
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+
     page_service = PageService(db)
-    # The service will raise a 404 if the page is not found
-    page = page_service.get_page_by_slug(slug)
+    page = page_service.get_page_by_slug(slug) # Raises 404 if not found
 
-    # Check for the 'admin' tag
-    if is_tag_in_db_page(page.tags,"sys:admin"):
-        raise HTTPException(status_code=404, detail="Admin tool not found")
+    # Logic Check: Ensure it is actually an admin tool
+    # (Checking if ANY tag matches 'sys:admin')
+    is_admin_tool = any(t.name == "sys:admin" for t in page.tags)
+    
+    if not is_admin_tool:
+        raise HTTPException(status_code=404, detail="Page is not an admin tool")
 
-    # Check if the page is of type 'html' and has content
     if page.type == 'html' and page.html:
         return HTMLResponse(content=page.html, status_code=200)
 
-    # If it's not a valid HTML admin page, it's not found in this context
-    raise HTTPException(
-        status_code=404,
-        detail="Admin tool page is not configured for direct HTML display."
-    )
+    raise HTTPException(status_code=404, detail="Content not available")

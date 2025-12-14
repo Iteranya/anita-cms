@@ -90,6 +90,7 @@ class User(Base):
     pfp_url = Column(String)
     disabled = Column(Boolean, nullable=False, default=False)
 
+
 class Setting(Base):
     __tablename__ = "settings"
 
