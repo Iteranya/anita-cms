@@ -1,7 +1,8 @@
 # file: api/admin.py
 
 import os
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
@@ -15,6 +16,16 @@ from src.dependencies import optional_user, require_admin
 router = APIRouter(tags=["Admin Views (MPA)"])
 
 ADMIN_APP_DIR = "static/admin"
+
+def is_tag_in_db_page(db_page_tags: List, tag_name: str) -> bool:
+    """
+    Checks if a tag exists in a list of SQLALCHEMY OBJECTS.
+    Used when inspecting existing data from the database.
+    """
+    if not db_page_tags:
+        return False
+    # Checks t.name because these are DB objects
+    return any(t.name == tag_name for t in db_page_tags)
 
 # --- HTML VIEW ROUTES (The Unified Dashboard - MPA Style) ---
 #
@@ -81,7 +92,7 @@ async def serve_custom_admin_page(
     page = page_service.get_page_by_slug(slug)
 
     # Check for the 'admin' tag
-    if not page.tags or 'admin' not in page.tags:
+    if is_tag_in_db_page(page.tags,"sys:admin"):
         raise HTTPException(status_code=404, detail="Admin tool not found")
 
     # Check if the page is of type 'html' and has content

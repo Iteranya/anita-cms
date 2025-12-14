@@ -1,9 +1,9 @@
 from datetime import datetime
 import json
-from typing import List, Optional, Dict, Any, Type
+from typing import List, Optional, Dict, Any
 
 from sqlalchemy.orm import Session, Query
-from sqlalchemy import func, or_
+from sqlalchemy import func
 
 # Import the SQLAlchemy models and Pydantic schemas
 from data import models, schemas
