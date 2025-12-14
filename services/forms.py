@@ -140,6 +140,35 @@ class FormService:
                 detail=f"Submission with ID {submission_id} not found."
             )
         return submission
+    
+    def update_submission(self, submission_id: int, submission_data: schemas.SubmissionUpdate) -> models.Submission:
+        """
+        Updates an existing submission after validating the new data against the form schema.
+        """
+        # 1. Get the current submission to ensure it exists and to find its parent form.
+        #    (Even though the route checks this, the service should be self-contained).
+        current_submission = self.get_submission_by_id(submission_id)
+
+        # 2. If the update includes new form 'data', we must validate it against the schema.
+        if submission_data.data is not None:
+            # Fetch the parent form to access the validation schema
+            form = self.get_form_by_slug(current_submission.form_slug)
+            
+            # Validate the new data
+            self._validate_submission_data(schema=form.schema, data=submission_data.data)
+
+        # 3. Call the CRUD operation
+        updated_submission = crud.update_submission(
+            self.db, 
+            submission_id=submission_id, 
+            submission_update=submission_data
+        )
+
+        if not updated_submission:
+            raise HTTPException(status_code=500, detail="Could not update submission.")
+
+        return updated_submission
+    
 
     def delete_submission_by_id(self, submission_id: int):
         """
