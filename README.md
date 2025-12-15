@@ -7,7 +7,7 @@
 <tbody>
   <tr>
     <td width="52" valign="top" style="padding-right: 10px;">
-      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="480" height="480" style="border-radius: 50%;" alt="Anita Avatar"/>
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
     </td>
     <td>
       <strong>Anita</strong><br/>
@@ -41,7 +41,7 @@
 
     
 <p align="center">
-  <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anitacms.png" alt="Anita CMS Logo" width="128">
+  <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anitacms.png" alt="Anita CMS Logo" width="512">
   <br><br>
   <a href="https://www.gnu.org/licenses/agpl-3.0">
     <img src="https://img.shields.io/badge/License-AGPL_v3-blue.svg" alt="License: AGPL v3">
