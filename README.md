@@ -596,22 +596,36 @@ Eh, not really, but it's a start~
 Also CSP Headers, we hard code applying CSP Headers
 
 ### Password? Auth? Role Escalation?
+
 Thankfully, Anita uses Attribute Based Access Control
+
 It's sophisticated
+
 And a lot like discord server's ABAC
+
 (also copies discord's ui)
+
 JWT and such for out
-(CSRF under work,  it's tricky)
+
+CSRF works with Samesite cookie and blocking old browser request
+
+(sorry iphone user
 
 ### Overall Security?
 Eh... How do I say this...
+
 It's more secure than Wordpress
+
 And since it's very small and very simple in architecture
-Implementing safety feature like CSRF does not require total rewrite
+
 And as you can see from `requirements.txt` there's really not much chance for Supply of Chain Attacks
+
 Unlike your local node modules, python depencies are sane
+
 So... Yeah
+
 Also of course, it'll get safer with every patch and update
+
 Fun~
 
 ---
@@ -725,7 +739,6 @@ TODO
 
 - Editing HTML should be exclusive to Aina
 - Editing Markdown should be exclusive to Asta
-- CSRF Token Protection Isn't Implemented Yet
 - Mitochondria Is The Powerhouse of Cell
 - Bleach Is Not Implemented Properly Yet (<script> tags should be forbidden)
 - CSP Is Not Forced Yet (should be configured per-page basis)
@@ -735,7 +748,7 @@ TODO
 - Form Page Tags Are Still Manual (Should be abstracted with switches / panel)
 - No Tags and Sort Filter Yet
 - No Darkmode Yet (seriously?)
-- Submission Sanitization not yet implemented
+- Submission Sanitization Coverage Is Tricky (Due to no code collection backend)
 - Pay Yozzun For Anita's Artwork
 - Asta and Aina doesn't save their own prompt/configuration
 - Better test coverage
@@ -765,7 +778,7 @@ TODO
     </td>
     <td>
       <strong>Anita</strong><br/>
-      Wh-what? But... but... You've been working on me for like... months!
+      Wait! Okay, look, let's focus on umm... CSP Header Control and Finetuned Bleach Control.
     </td>
   </tr>
     <tr>
@@ -774,7 +787,7 @@ TODO
     </td>
     <td>
       <strong>Artes</strong><br/>
-      Usually it takes years to develop a CMS not months...
+      Well someone's security conscious.
     </td>
   </tr>
   <tr>
@@ -783,7 +796,7 @@ TODO
     </td>
     <td>
       <strong>Anita</strong><br/>
-      Right... Ummm... And...
+      Oh no, it just looks really cool in the UI and is technically impressive.
     </td>
   </tr>
   <tr>
@@ -792,7 +805,7 @@ TODO
     </td>
     <td>
       <strong>Artes</strong><br/>
-      Yes, the Hikarin Website Builder is still ways away
+      What about prompt engineering on Aina?
     </td>
   </tr>
   <tr>
@@ -801,7 +814,7 @@ TODO
     </td>
     <td>
       <strong>Anita</strong><br/>
-      Can't you fix all of these tomorrow?
+      *shrug*
     </td>
   </tr>
   <tr>
@@ -810,7 +823,7 @@ TODO
     </td>
     <td>
       <strong>Artes</strong><br/>
-      No!!!
+      You have a good AI integration, be proud of it.
     </td>
   </tr>
   <tr>
@@ -819,7 +832,7 @@ TODO
     </td>
     <td>
       <strong>Anita</strong><br/>
-      Well... Next year is too long!!! 
+      Bad marketing, people hate AI and I put all my cards on the Hikarin Website Builder.
     </td>
   </tr>
   <tr>
@@ -837,7 +850,7 @@ TODO
     </td>
     <td>
       <strong>Anita</strong><br/>
-      Counterpoint, you have AI, and you're a master architecture!!!
+      Yep, good luck! I'm counting on you!!!
     </td>
   </tr>
   <tr>
@@ -846,7 +859,7 @@ TODO
     </td>
     <td>
       <strong>Artes</strong><br/>
-      ...
+      Anyway, license.
     </td>
   </tr>
 </tbody>
