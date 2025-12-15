@@ -266,8 +266,7 @@ You know what they say, a picture is worth a thousand words...
 <p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-file.png" alt="Admin UI File" width="700"></p>
 <em>Tired of Orphan media? Worry not! Anita Keeps Track of Everything!</em>
 
-#### AI, Users & Roles
-<p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-ai-setting.png" alt="Admin UI AI Setting" width="700"></p>
+#### Users & Roles
 <p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-user-and-roles.png" alt="Admin UI User And Roles" width="700"></p>
 <em>The heart of security!!! Inspired by Discord, you can create roles with fine-grained permissions.</em>
 
