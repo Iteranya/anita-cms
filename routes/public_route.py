@@ -21,6 +21,7 @@ router = APIRouter(tags=["Public"])
 @router.get("/", response_class=HTMLResponse)
 def serve_home_page(page_service: PageService = Depends(get_page_service)):
     """Serves the page tagged as 'home'."""
+    print("hello")
     page = page_service.get_first_page_by_tags(['sys:home','sys:public'])
     if not page:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Critical: Home page not configured, notify site owner.")

@@ -402,17 +402,19 @@ def get_pages_count_by_tag(db: Session, tag_name: str) -> int:
 
 # --- Aggregation and Ranking ---
 
-def get_top_forms_by_submission_count(db: Session, limit: int = 5) -> List[tuple[str, int]]:
+def get_top_forms_by_submission_count(db: Session, limit: int = 5) -> List[tuple[str, str, int]]:
     """
-    Finds the most active forms by submission count.
-    Returns a list of tuples: [(form_slug, submission_count), ...].
+    Finds the most active forms by submission count, including the form's name.
+    Returns a list of tuples: [(form_name, form_slug, submission_count), ...].
     """
     return (
         db.query(
-            models.Submission.form_slug,
+            models.Form.title,                                               
+            models.Form.slug,                                              
             func.count(models.Submission.id).label("submission_count")
         )
-        .group_by(models.Submission.form_slug)
+        .join(models.Submission, models.Form.slug == models.Submission.form_slug) 
+        .group_by(models.Form.title, models.Form.slug)                      
         .order_by(func.count(models.Submission.id).desc())
         .limit(limit)
         .all()

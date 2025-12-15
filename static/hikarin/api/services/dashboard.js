@@ -32,4 +32,8 @@ export class DashboardAPI {
     updateMe() {
         return new ApiRequest((data) => this._client._request('PUT', '/dashboard/me', { body: data }));
     }
+
+    logout(){
+        return new ApiRequest(()=>this._client._request('POST','/dashboard/logout'))
+    }
 }

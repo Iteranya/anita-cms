@@ -5,6 +5,7 @@
 export default () => ({
     // --- State ---
     isLoading: true,
+    isLoggingOut: false,
     activeTab: 'welcome', // 'welcome' | 'stats' | 'settings'
 
     stats: {
@@ -18,8 +19,9 @@ export default () => ({
         display_name: '',
         pfp_url: '',
         role: '',
-        settings: {},
-        custom: {}
+        // Initialize with expected structure to be safe
+        settings: { dark_mode: false },
+        custom: { about_me: '' }
     },
     
     // --- Profile Edit Form State ---
@@ -63,7 +65,15 @@ export default () => ({
             this.stats = statsData;
             this.user = userData;
 
-            // After fetching, populate the profile form with user data
+            // --- FIX: Normalize user data to prevent errors ---
+            // This ensures nested objects exist and have default values. It prevents
+            // errors if a new user has `null` or an empty object `{}` for these fields.
+            // The spread syntax safely handles if `this.user.settings` is null or undefined.
+            this.user.settings = { dark_mode: false, ...this.user.settings };
+            this.user.custom = { about_me: '', ...this.user.custom };
+            // --- END FIX ---
+
+            // After fetching and normalizing, populate the profile form
             this.populateProfileForm();
 
         } catch (e) {
@@ -77,15 +87,15 @@ export default () => ({
     // --- Profile Form Logic ---
 
      populateProfileForm() {
+        // This code is now safer because we know user.custom and user.settings exist
         this.profileForm.display_name = this.user.display_name || '';
         this.profileForm.pfp_url = this.user.pfp_url || '';
-        this.profileForm.settings.dark_mode = this.user.settings?.dark_mode || false;
-        this.profileForm.custom.about_me = this.user.custom?.about_me || '';
+        this.profileForm.settings.dark_mode = this.user.settings.dark_mode || false;
+        this.profileForm.custom.about_me = this.user.custom.about_me || '';
         this.pfpPreviewUrl = null; 
     },
 
     async saveProfile() {
-        // Construct the full payload including the new fields
         const payload = {
             display_name: this.profileForm.display_name,
             pfp_url: this.profileForm.pfp_url,
@@ -96,8 +106,12 @@ export default () => ({
         try {
             const updatedUser = await this.$api.dashboard.updateMe().execute(payload);
             
-            this.user = updatedUser; // Update main user object
-            this.populateProfileForm(); // Re-sync form state
+            // The API response should also be normalized just in case
+            this.user = updatedUser;
+            this.user.settings = { dark_mode: false, ...this.user.settings };
+            this.user.custom = { about_me: '', ...this.user.custom };
+
+            this.populateProfileForm();
             
             Alpine.store('notifications').success('Profile Updated', 'Your changes have been saved.');
         } catch(e) {
@@ -110,7 +124,6 @@ export default () => ({
         const file = event.target.files[0];
         if (!file) return;
 
-        // 1. Client-Side Validation
         const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
         if (!allowedTypes.includes(file.type)) {
             Alpine.store('notifications').error('Invalid File Type', 'Please select a JPG, PNG, GIF, or WEBP image.');
@@ -123,39 +136,42 @@ export default () => ({
             return;
         }
 
-        // 2. Generate Instant Preview
-        // Revoke the old preview URL if it exists to prevent memory leaks
         if (this.pfpPreviewUrl) {
             URL.revokeObjectURL(this.pfpPreviewUrl);
         }
         this.pfpPreviewUrl = URL.createObjectURL(file);
 
-        // 3. Trigger the actual upload
         this.uploadProfilePicture(file);
     },
 
-    /**
-     * Performs the API call to upload the file.
-     * @param {File} file The validated file object to upload.
-     */
     async uploadProfilePicture(file) {
         this.isUploadingPfp = true;
         try {
             const res = await this.$api.media.upload().execute([file]);
             
             if (res.files && res.files.length > 0) {
-                // On success, update the form's URL with the permanent one
                 this.profileForm.pfp_url = '/media/' + res.files[0].saved_as;
-                // The preview will now be replaced by the official URL if the user saves
             } else {
                  throw new Error("Upload response did not contain file data.");
             }
         } catch (err) {
             Alpine.store('notifications').error('Upload Failed', err.message || 'The image could not be uploaded.');
-            // On failure, clear the preview so the user isn't confused
             this.pfpPreviewUrl = null;
         } finally {
             this.isUploadingPfp = false;
+        }
+    },
+
+    async logout() {
+        this.isLoggingOut = true;
+        try {
+            await this.$api.dashboard.logout().execute();
+            window.location.href = '/auth/login'; 
+        } catch (e) {
+            console.error("Logout failed:", e);
+            Alpine.store('notifications').error('Logout Failed', 'Could not log out. Please try again.');
+        } finally {
+            this.isLoggingOut = false;
         }
     },
 

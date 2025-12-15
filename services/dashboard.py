@@ -37,7 +37,8 @@ class DashboardService:
         # transform this into a more API-friendly list of dictionaries.
         top_forms_raw = crud.get_top_forms_by_submission_count(self.db, limit=5)
         top_forms_formatted = [
-            {"slug": slug, "count": count} for slug, count in top_forms_raw
+            {"name": name, "slug": slug, "count": count} 
+            for name, slug, count in top_forms_raw  # <-- Unpack all three items
         ]
 
         top_tags_raw = crud.get_top_tags_by_page_usage(self.db, limit=10)
