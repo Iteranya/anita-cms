@@ -52,6 +52,8 @@ def serve_blog_post(slug: str, page_service: PageService = Depends(get_page_serv
         return HTMLResponse(content=page.html, status_code=200)
     else: # Patch, markdown_template will retrieve page from client side, will fix later
         return HTMLResponse(content=markdown_template.html, status_code=200)
+    
+
 
 
 # ==========================================

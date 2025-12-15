@@ -6,6 +6,7 @@ import { MediaAPI } from './services/media.js';
 import { PagesAPI } from './services/pages.js';
 import { UsersAPI } from './services/users.js';
 import { FileAPI } from './services/files.js';
+import { DashboardAPI } from './services/dashboard.js';
 
 export class HikarinApi {
     constructor(baseUrl = '') {
@@ -17,6 +18,7 @@ export class HikarinApi {
         this.pages = new PagesAPI(this);
         this.users = new UsersAPI(this);
         this.files = new FileAPI(this); 
+        this.dashboard = new DashboardAPI(this);
     }
 
     async _request(method, endpoint, options = {}) {

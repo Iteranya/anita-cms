@@ -133,6 +133,8 @@ class UserBase(BaseModel):
     pfp_url: Optional[str] = None
     role: str = "viewer"
     disabled: bool = False
+    settings: Optional[dict] = None
+    custom: Optional[dict] = None
 
 class UserCreate(UserBase):
     username: str
@@ -143,6 +145,8 @@ class UserUpdate(UserBase):
     pfp_url: Optional[str] = None
     role: Optional[str] = None
     disabled: Optional[bool] = None
+    settings: Optional[dict] = None
+    custom: Optional[dict] = None
 
 class User(UserBase):
     """The User model returned by the API (never includes the password)."""
@@ -237,3 +241,41 @@ class UploadResult(BaseModel):
     status: str
     total: int
     files: List[UploadedFileReport]
+
+
+
+class DashboardCoreCounts(BaseModel):
+    pages: int
+    forms: int
+    submissions: int
+    users: int
+    tags: int
+
+class DashboardPageStats(BaseModel):
+    public_count: int
+    blog_posts_count: int
+
+class DashboardActivityItem(BaseModel):
+    # Can be used for both tags and forms
+    name: str  # for tags
+    slug: str | None = None # for forms
+    count: int
+
+class DashboardActivity(BaseModel):
+    top_forms_by_submission: List[DashboardActivityItem]
+    top_tags_on_pages: List[DashboardActivityItem]
+
+class DashboardRecentItems(BaseModel):
+    newest_pages: List[Page] # Assumes you have a 'Page' Pydantic schema
+    latest_updates: List[Page]
+    latest_submissions: List[Submission] # Assumes you have a 'Submission' schema
+
+class DashboardStats(BaseModel):
+    """The complete response model for the dashboard statistics endpoint."""
+    core_counts: DashboardCoreCounts
+    page_stats: DashboardPageStats
+    activity: DashboardActivity
+    recent_items: DashboardRecentItems
+
+    class Config:
+        from_attributes = True 

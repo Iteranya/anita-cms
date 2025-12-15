@@ -104,7 +104,7 @@ def require_permission(permission: str):
 def optional_user(
     access_token: Optional[str] = Cookie(None),
     auth_service: AuthService = Depends(get_auth_service)
-) -> Optional[schemas.CurrentUser]: # <--- CHANGED: Return type is now the optional Pydantic schema
+) -> Optional[schemas.CurrentUser]: 
     """
     FastAPI dependency that provides the user model if authenticated,
     but does not raise an error if not. Returns None for anonymous users
