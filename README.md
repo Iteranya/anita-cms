@@ -190,10 +190,6 @@ Anita is designed with a simple, foundational architecture in mind. No black box
 
 ---
 
-<details>
-<summary><strong>Chapter 3: The Tech Stack</strong></summary>
-<br>
-
 <table>
 <tbody>
   <tr>
@@ -202,7 +198,7 @@ Anita is designed with a simple, foundational architecture in mind. No black box
     </td>
     <td>
       <strong>Anita</strong><br/>
-      See that? My frontend runs on AlpineJS, my SPA Admin Page uses HTMX, and everything uses the Hikarin JS middleware!
+      See that? My frontend runs on AlpineJS, my SPA Admin Page uses HTMX, and everything uses the Hikarin Framework
     </td>
   </tr>
   <tr>
@@ -211,7 +207,7 @@ Anita is designed with a simple, foundational architecture in mind. No black box
     </td>
     <td>
       <strong>Hikarin</strong><br/>
-      Hello~
+      Hello~ I'm not a framework
     </td>
   </tr>
   <tr>
@@ -229,7 +225,7 @@ Anita is designed with a simple, foundational architecture in mind. No black box
     </td>
     <td>
       <strong>Hikarin</strong><br/>
-      Hi, I'm middleware. I make calls to the server so your front end doesn't have to!
+      Hi, that's a misunderstanding Technically speaking, it is an Application Entry Point (Bootstrapper) that implements a Service Layer pattern. Just a folder with JS in it and the web framework thing is still under work, which is different?
     </td>
   </tr>
   <tr>
@@ -239,6 +235,15 @@ Anita is designed with a simple, foundational architecture in mind. No black box
     <td>
       <strong>Anita</strong><br/>
       Indeed! As for the Backend it uses FastAPI with strict Pydantic schemas and SQLAlchemy ORM. Data Integrity is paramount see? So no worries about SQL Injection, all your data is safe with me!
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/hikarin_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Hikarin Avatar"/>
+    </td>
+    <td>
+      <strong>Hikarin</strong><br/>
+      ... ok ...
     </td>
   </tr>
 </tbody>
@@ -591,22 +596,36 @@ Eh, not really, but it's a start~
 Also CSP Headers, we hard code applying CSP Headers
 
 ### Password? Auth? Role Escalation?
+
 Thankfully, Anita uses Attribute Based Access Control
+
 It's sophisticated
+
 And a lot like discord server's ABAC
+
 (also copies discord's ui)
+
 JWT and such for out
-(CSRF under work,  it's tricky)
+
+CSRF works with Samesite cookie and blocking old browser request
+
+(sorry iphone user
 
 ### Overall Security?
 Eh... How do I say this...
+
 It's more secure than Wordpress
+
 And since it's very small and very simple in architecture
-Implementing safety feature like CSRF does not require total rewrite
+
 And as you can see from `requirements.txt` there's really not much chance for Supply of Chain Attacks
+
 Unlike your local node modules, python depencies are sane
+
 So... Yeah
+
 Also of course, it'll get safer with every patch and update
+
 Fun~
 
 ---
@@ -716,16 +735,25 @@ python main.py
 
 ## Roadmap
 
-- [ ] Implement Advanced Tag Based Search and Filtering System
-- [ ] Implement Advanced Page Metric Sorting System
-- [ ] Implement Better Dashboard (Profile Page, maybe?)
-- [ ] Docker Integration
-- [ ] Better Test Coverage
-- [ ] Per Page CSP Header Control
-- [ ] Per Page Finetuned Bleach Control
-- [ ] CSRF Protection
-- [ ] Better Aina Prompt Engineering
-- [ ] Git on Asta
+TODO
+
+- Editing HTML should be exclusive to Aina
+- Editing Markdown should be exclusive to Asta
+- Mitochondria Is The Powerhouse of Cell
+- Bleach Is Not Implemented Properly Yet (<script> tags should be forbidden)
+- CSP Is Not Forced Yet (should be configured per-page basis)
+- HikarinJS Is Still Opt-in (should be default for all ai generated site)
+- Default Pages Still Uses <script> (Should use HikarinJS Instead)
+- System Page Tags Are Still Manual (Should be abstracted with switches / panel)
+- Form Page Tags Are Still Manual (Should be abstracted with switches / panel)
+- No Tags and Sort Filter Yet
+- No Darkmode Yet (seriously?)
+- Submission Sanitization Coverage Is Tricky (Due to no code collection backend)
+- Pay Yozzun For Anita's Artwork
+- Asta and Aina doesn't save their own prompt/configuration
+- Better test coverage
+- More graceful form seeding (currently don't exist, actually)
+
 
 ---
 
