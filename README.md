@@ -7,7 +7,7 @@
 <tbody>
   <tr>
     <td width="52" valign="top" style="padding-right: 10px;">
-      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="480" height="480" style="border-radius: 50%;" alt="Anita Avatar"/>
     </td>
     <td>
       <strong>Anita</strong><br/>
