@@ -333,6 +333,155 @@ You know what they say, a picture is worth a thousand words...
 
 ---
 
+## The Cool Part (No Code Backend)
+
+Suppose you want a dynamic page to list your restaurant menu, setup price, and everything in between.
+
+Well, you can use the Forms/Collection to create a 'menu-collection', you define fields here~
+
+And then once finished there, you add security. Only admin can modify this form but anyone can see the content of it
+
+Then you go to Aina and ask her to make you an `menu_admin_page` to manage the menu 
+
+Then ask Aina to make the `our-menu` page for public and then link that to the main site
+
+Congratulations, you have achieved dynamic webapp creation!
+
+Have fun then~
+
+---
+
+<details>
+<summary><strong>Intermission: The Selling Point</strong></summary>
+<br>
+
+<table>
+<tbody>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      Mmmm, I want more emphasis here.
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
+    </td>
+    <td>
+      <strong>Artes</strong><br/>
+      Huh?
+    </td>
+  </tr>
+    <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      It's good, but it can be better!!!
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
+    </td>
+    <td>
+      <strong>Artes</strong><br/>
+      I mean...
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      NO, listen, it's... I dunno, this is the main selling point of me.
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
+    </td>
+    <td>
+      <strong>Artes</strong><br/>
+      Not the AI?
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      NOT THE AI!!!
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
+    </td>
+    <td>
+      <strong>Artes</strong><br/>
+      Okay, okay, geez...
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      But... yeah, this is good enough... I guess.<br/><br/>
+      Ah wait! There's no screenshot!
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
+    </td>
+    <td>
+      <strong>Artes</strong><br/>
+      I think a screenshot of the AI using this feature would explain it better.
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      Uuu... I don't want to be compared with those Vibe Coded AI Apps out there...
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
+    </td>
+    <td>
+      <strong>Artes</strong><br/>
+      You're not?
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      YOU'RE NOT HELPING!!!
+    </td>
+  </tr>
+</tbody>
+</table>
+
+</details>
+
+---
+
 ## The AI Part
 
 Okay, look, listen, I hate AI slop as much as you do. But until the Hikarin Web Builder is finished, we have to do with what we got. Or if you're comfortable, you can code AlpineJS and Tailwind from scratch.
