@@ -1,5 +1,6 @@
 # file: auth/dependencies.py
 
+import os
 from typing import Optional
 from fastapi import Depends, HTTPException, Request, status, Cookie
 from sqlalchemy.orm import Session
@@ -10,27 +11,39 @@ from data.database import get_db
 from data import schemas
 from fastapi_csrf_protect import CsrfProtect
 
+from pydantic_settings import BaseSettings
+
+# Define a Pydantic settings class to load the secret
+class CsrfSettings(BaseSettings):
+    secret_key: str = os.getenv("CSRF_SECRET", "pleasereadthemedocs") # Load from environment
+
+# This decorator tells the library where to get its configuration
+@CsrfProtect.load_config
+def get_csrf_config():
+    """Loads the CSRF secret key from the environment variables."""
+    return CsrfSettings()
+
 def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
     """Dependency to get an instance of AuthService with a DB session."""
     user_service = UserService(db)
     return AuthService(user_service)
 
-def csrf_protect_dependency(
-    request: Request, 
-    csrf_protect: CsrfProtect = Depends()
-):
+async def csrf_protect(request: Request, csrf_protect: CsrfProtect = Depends()):
     """
-    A dependency that enforces CSRF protection on state-changing methods.
-    
-    It checks the request method. If it's a "safe" method (GET, HEAD, OPTIONS),
-    it does nothing. For all other methods (POST, PUT, DELETE, PATCH), it
-    validates the CSRF token. This dependency should be applied at the router level
-    for all protected API endpoints.
+    A global dependency that enforces CSRF protection on all state-changing methods.
     """
-    safe_methods = {"GET", "HEAD", "OPTIONS"}
-    
-    if request.method.upper() not in safe_methods:
-        csrf_protect.validate_csrf_in_request()
+    # We only want to validate for methods that can change state.
+    if request.method in ("POST", "PUT", "PATCH", "DELETE"):
+        try:
+            # The validate_csrf method MUST be awaited
+            await csrf_protect.validate_csrf(request)
+        except Exception as e:
+            # Raise a proper HTTP exception if validation fails
+            raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"CSRF Token Error, Please Logout And Login Again: {e}",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 def get_current_user(

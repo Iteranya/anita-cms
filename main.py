@@ -19,8 +19,9 @@ sys.path.append(str(Path(__file__).resolve().parent))
 
 # Now that the path is set, we can use absolute imports
 from data import crud, database
+from src.dependencies import csrf_protect
 # Import all your route modules
-from routes import (
+from routes import (  # noqa: E402
     admin_route,
     aina_route,
     asta_route,
@@ -34,6 +35,8 @@ from routes import (
     config_route,
     dashboard_route
 )
+
+
 
 # --- Pre-startup Checks ---
 if not os.getenv("JWT_SECRET"):
@@ -89,6 +92,7 @@ app.add_middleware(
     allow_headers=[
         "Content-Type",
         "Authorization",
+        "X-CSRF-Token"
     ],
 )
 
@@ -99,7 +103,9 @@ app.mount("/uploads", StaticFiles(directory=BASE_DIR / "uploads"), name="uploads
 
 # --- API Router Organization ---
 
-api_router = APIRouter()
+api_router = APIRouter(
+    dependencies=[Depends(csrf_protect)]
+)
 
 api_router.include_router(admin_route.router, tags=["Admin"])
 api_router.include_router(dashboard_route.router, tags = ["Dashboard"])
@@ -111,12 +117,11 @@ api_router.include_router(forms_route.router, tags=["Forms"])
 api_router.include_router(file_route.router, tags=["Files"])
 api_router.include_router(roles_route.router, tags=["Roles"])
 api_router.include_router(pages_route.router, tags=["Pages"]) 
-api_router.include_router(auth_route.router, tags=["Authentication"]) 
-api_router.include_router(public_route.router, tags=["Public"])   
-
 
 # Finally, include the versioned API router in the main app
 app.include_router(api_router)
+app.include_router(auth_route.router, tags=["Authentication"]) 
+app.include_router(public_route.router, tags=["Public"])
 
 
 # --- Main Entry Point for Uvicorn ---

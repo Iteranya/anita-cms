@@ -1,6 +1,6 @@
 # file: routers/dashboard.py
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from typing import List, Set
 
@@ -132,7 +132,4 @@ def update_yourself(
     Update a user's details (role, display name, etc.).
     Note: This endpoint does NOT handle password changes.
     """
-    if not user:
-        raise HTTPException(status_code=401, detail="Thou Art Not Logged In")
-    
     return user_service.update_user(username=user.username, user_update=update_data)
