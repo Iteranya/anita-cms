@@ -125,7 +125,10 @@ The better question is, 'When is Anita'?
 -   When you want a portfolio website
 -   A little corner of the web that is yours
 -   A neat shop, catalogue, or gallery page
+-   Information Page for Local School or even City
+-   Low to Medium Traffic Website
 -   Literally Anything Wordpress Can Offer You
+-   Okay maybe wordpress without the ecosystem
 
 **Is Anita designed to replace wordpress?**
 
@@ -182,7 +185,7 @@ Anita is designed with a simple, foundational architecture in mind. No black box
 | Layer      | Technology                                    |
 | :--------- | :-------------------------------------------- |
 | **Backend**  | FastAPI & SQLAlchemy                          |
-| **Middleware** | Hikarin Web Framework (Custom Made By Yours Truly)          |
+| **Middleware** | Hikarin Web Framework (Custom Made By Yours Truly, Built On Top Of AlpineJS)          |
 | **Frontend**   | Tailwind, AlpineJS & HTMX                     |
 
 ---
@@ -332,7 +335,7 @@ You know what they say, a picture is worth a thousand words...
 
 ## The AI Part
 
-Okay, look, listen, I hate AI slop as much as you do. But until the Hikarin Web Builder is finished, we have to do with what we got. It's either that, or code AlpineJS and Tailwind from scratch.
+Okay, look, listen, I hate AI slop as much as you do. But until the Hikarin Web Builder is finished, we have to do with what we got. Or if you're comfortable, you can code AlpineJS and Tailwind from scratch.
 
 #### Aina AI Page Builder
 <p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/aina-ai.png" alt="Aina AI" width="700"></p>
