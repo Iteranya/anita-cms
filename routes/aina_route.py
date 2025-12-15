@@ -113,3 +113,4 @@ async def api_get_all_routes(db: Session = Depends(get_db)):
     """
     service = WebsiteBuilderService(db)
     return service.get_full_context_routes()
+

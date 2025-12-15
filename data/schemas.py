@@ -43,9 +43,10 @@ class PageBase(BaseModel):
 class PageCreate(PageBase):
     slug: str
 
-class PageUpdate(PageBase):
-    # All fields are optional for updating
+class PageUpdate(PageBase): # All fields are optional for updating 
     title: Optional[str] = None
+
+    model_config = ConfigDict(extra="ignore")
 
 class Page(PageBase):
     slug: str
@@ -58,6 +59,21 @@ class Page(PageBase):
         return flatten_tags_to_strings(v)
 
     model_config = ConfigDict(from_attributes=True)
+
+class PageUpdateHTML(BaseModel):
+    html: str
+    custom: Optional[Dict[str, Any]] = None
+    tags: Optional[List[str]] = None
+
+    model_config = ConfigDict(extra="ignore")
+
+class PageMarkdownUpdate(BaseModel):
+    markdown: str
+    custom: Optional[Dict[str, Any]] = None
+    tags: Optional[List[str]] = None
+    
+    model_config = ConfigDict(extra="ignore")
+
 
 # --- Form Schemas ---
 
