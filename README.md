@@ -190,10 +190,6 @@ Anita is designed with a simple, foundational architecture in mind. No black box
 
 ---
 
-<details>
-<summary><strong>Chapter 3: The Tech Stack</strong></summary>
-<br>
-
 <table>
 <tbody>
   <tr>
@@ -202,7 +198,7 @@ Anita is designed with a simple, foundational architecture in mind. No black box
     </td>
     <td>
       <strong>Anita</strong><br/>
-      See that? My frontend runs on AlpineJS, my SPA Admin Page uses HTMX, and everything uses the Hikarin JS middleware!
+      See that? My frontend runs on AlpineJS, my SPA Admin Page uses HTMX, and everything uses the Hikarin Framework
     </td>
   </tr>
   <tr>
@@ -211,7 +207,7 @@ Anita is designed with a simple, foundational architecture in mind. No black box
     </td>
     <td>
       <strong>Hikarin</strong><br/>
-      Hello~
+      Hello~ I'm not a framework
     </td>
   </tr>
   <tr>
@@ -229,7 +225,7 @@ Anita is designed with a simple, foundational architecture in mind. No black box
     </td>
     <td>
       <strong>Hikarin</strong><br/>
-      Hi, I'm middleware. I make calls to the server so your front end doesn't have to!
+      Hi, that's a misunderstanding Technically speaking, it is an Application Entry Point (Bootstrapper) that implements a Service Layer pattern. Just a folder with JS in it and the web framework thing is still under work, which is different?
     </td>
   </tr>
   <tr>
@@ -239,6 +235,15 @@ Anita is designed with a simple, foundational architecture in mind. No black box
     <td>
       <strong>Anita</strong><br/>
       Indeed! As for the Backend it uses FastAPI with strict Pydantic schemas and SQLAlchemy ORM. Data Integrity is paramount see? So no worries about SQL Injection, all your data is safe with me!
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/hikarin_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Hikarin Avatar"/>
+    </td>
+    <td>
+      <strong>Hikarin</strong><br/>
+      ... ok ...
     </td>
   </tr>
 </tbody>
