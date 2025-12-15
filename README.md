@@ -482,7 +482,7 @@ Have fun then~
 
 ---
 
-## The AI Part
+## The AI Part...
 
 Okay, look, listen, I hate AI slop as much as you do. But until the Hikarin Web Builder is finished, we have to do with what we got. Or if you're comfortable, you can code AlpineJS and Tailwind from scratch.
 
@@ -542,6 +542,72 @@ Okay, look, listen, I hate AI slop as much as you do. But until the Hikarin Web 
 </table>
 
 </details>
+---
+
+## Security
+
+Is Anita Secure???
+
+Let's do the checklist then...
+
+Ahem..
+
+### Transparent Architecture
+Listen, Anita is not a black box
+Seriously
+You look at main.py and main.js inside static/hikarin and suddenly 
+"Oh, so that's how it works"
+
+There's no build step, there is no magic library that does something and spits out something
+It's just FastAPI request
+With properly defined Schema and Model that you can find in data/
+
+### Data Integrity
+SQLAlchemy 
+Pydantic
+
+### XSS, Malicious AI Prompt, Bad Theme
+Okay, okay, I admit...
+Bleach is still under work (probably finished by the end of this week)
+Okay?
+But Hikarin is already integrated nicely
+Basically it's an interface built on top of Alpine JS
+
+It makes it so that all client side code does NOT communicate with routes
+They go through pre-defined API
+Integrated with AlpineJS
+All other scripts will be cleaned up
+
+This way, AI don't hallucinate much because we feed them info on how to use the API with Alpine JS
+
+The end result is a single HTML page with no <script> tags
+
+Does it fix *all* problem?
+
+Eh, not really, but it's a start~
+
+...
+
+Also CSP Headers, we hard code applying CSP Headers
+
+### Password? Auth? Role Escalation?
+Thankfully, Anita uses Attribute Based Access Control
+It's sophisticated
+And a lot like discord server's ABAC
+(also copies discord's ui)
+JWT and such for out
+(CSRF under work,  it's tricky)
+
+### Overall Security?
+Eh... How do I say this...
+It's more secure than Wordpress
+And since it's very small and very simple in architecture
+Implementing safety feature like CSRF does not require total rewrite
+And as you can see from `requirements.txt` there's really not much chance for Supply of Chain Attacks
+Unlike your local node modules, python depencies are sane
+So... Yeah
+Also of course, it'll get safer with every patch and update
+Fun~
 
 ---
 
