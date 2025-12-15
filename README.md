@@ -41,7 +41,7 @@
 
     
 <p align="center">
-  <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anitacms.png" alt="Anita CMS Logo" width="128">
+  <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anitacms.png" alt="Anita CMS Logo" width="512">
   <br><br>
   <a href="https://www.gnu.org/licenses/agpl-3.0">
     <img src="https://img.shields.io/badge/License-AGPL_v3-blue.svg" alt="License: AGPL v3">
@@ -125,7 +125,10 @@ The better question is, 'When is Anita'?
 -   When you want a portfolio website
 -   A little corner of the web that is yours
 -   A neat shop, catalogue, or gallery page
+-   Information Page for Local School or even City
+-   Low to Medium Traffic Website
 -   Literally Anything Wordpress Can Offer You
+-   Okay maybe wordpress without the ecosystem
 
 **Is Anita designed to replace wordpress?**
 
@@ -182,7 +185,7 @@ Anita is designed with a simple, foundational architecture in mind. No black box
 | Layer      | Technology                                    |
 | :--------- | :-------------------------------------------- |
 | **Backend**  | FastAPI & SQLAlchemy                          |
-| **Middleware** | Hikarin (Custom Made By Yours Truly)          |
+| **Middleware** | Hikarin Web Framework (Custom Made By Yours Truly, Built On Top Of AlpineJS)          |
 | **Frontend**   | Tailwind, AlpineJS & HTMX                     |
 
 ---
@@ -330,9 +333,158 @@ You know what they say, a picture is worth a thousand words...
 
 ---
 
-## The AI Part
+## The Cool Part (No Code Backend)
 
-Okay, look, listen, I hate AI slop as much as you do. But until the Hikarin Web Builder is finished, we have to do with what we got. It's either that, or code AlpineJS and Tailwind from scratch.
+Suppose you want a dynamic page to list your restaurant menu, setup price, and everything in between.
+
+Well, you can use the Forms/Collection to create a 'menu-collection', you define fields here~
+
+And then once finished there, you add security. Only admin can modify this form but anyone can see the content of it
+
+Then you go to Aina and ask her to make you an `menu_admin_page` to manage the menu 
+
+Then ask Aina to make the `our-menu` page for public and then link that to the main site
+
+Congratulations, you have achieved dynamic webapp creation!
+
+Have fun then~
+
+---
+
+<details>
+<summary><strong>Intermission: The Selling Point</strong></summary>
+<br>
+
+<table>
+<tbody>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      Mmmm, I want more emphasis here.
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
+    </td>
+    <td>
+      <strong>Artes</strong><br/>
+      Huh?
+    </td>
+  </tr>
+    <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      It's good, but it can be better!!!
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
+    </td>
+    <td>
+      <strong>Artes</strong><br/>
+      I mean...
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      NO, listen, it's... I dunno, this is the main selling point of me.
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
+    </td>
+    <td>
+      <strong>Artes</strong><br/>
+      Not the AI?
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      NOT THE AI!!!
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
+    </td>
+    <td>
+      <strong>Artes</strong><br/>
+      Okay, okay, geez...
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      But... yeah, this is good enough... I guess.<br/><br/>
+      Ah wait! There's no screenshot!
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
+    </td>
+    <td>
+      <strong>Artes</strong><br/>
+      I think a screenshot of the AI using this feature would explain it better.
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      Uuu... I don't want to be compared with those Vibe Coded AI Apps out there...
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
+    </td>
+    <td>
+      <strong>Artes</strong><br/>
+      You're not?
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      YOU'RE NOT HELPING!!!
+    </td>
+  </tr>
+</tbody>
+</table>
+
+</details>
+
+---
+
+## The AI Part...
+
+Okay, look, listen, I hate AI slop as much as you do. But until the Hikarin Web Builder is finished, we have to do with what we got. Or if you're comfortable, you can code AlpineJS and Tailwind from scratch.
 
 #### Aina AI Page Builder
 <p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/aina-ai.png" alt="Aina AI" width="700"></p>
@@ -390,6 +542,72 @@ Okay, look, listen, I hate AI slop as much as you do. But until the Hikarin Web 
 </table>
 
 </details>
+---
+
+## Security
+
+Is Anita Secure???
+
+Let's do the checklist then...
+
+Ahem..
+
+### Transparent Architecture
+Listen, Anita is not a black box
+Seriously
+You look at main.py and main.js inside static/hikarin and suddenly 
+"Oh, so that's how it works"
+
+There's no build step, there is no magic library that does something and spits out something
+It's just FastAPI request
+With properly defined Schema and Model that you can find in data/
+
+### Data Integrity
+SQLAlchemy 
+Pydantic
+
+### XSS, Malicious AI Prompt, Bad Theme
+Okay, okay, I admit...
+Bleach is still under work (probably finished by the end of this week)
+Okay?
+But Hikarin is already integrated nicely
+Basically it's an interface built on top of Alpine JS
+
+It makes it so that all client side code does NOT communicate with routes
+They go through pre-defined API
+Integrated with AlpineJS
+All other scripts will be cleaned up
+
+This way, AI don't hallucinate much because we feed them info on how to use the API with Alpine JS
+
+The end result is a single HTML page with no <script> tags
+
+Does it fix *all* problem?
+
+Eh, not really, but it's a start~
+
+...
+
+Also CSP Headers, we hard code applying CSP Headers
+
+### Password? Auth? Role Escalation?
+Thankfully, Anita uses Attribute Based Access Control
+It's sophisticated
+And a lot like discord server's ABAC
+(also copies discord's ui)
+JWT and such for out
+(CSRF under work,  it's tricky)
+
+### Overall Security?
+Eh... How do I say this...
+It's more secure than Wordpress
+And since it's very small and very simple in architecture
+Implementing safety feature like CSRF does not require total rewrite
+And as you can see from `requirements.txt` there's really not much chance for Supply of Chain Attacks
+Unlike your local node modules, python depencies are sane
+So... Yeah
+Also of course, it'll get safer with every patch and update
+Fun~
 
 ---
 
