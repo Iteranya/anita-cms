@@ -1,0 +1,18 @@
+TODO
+UNSAFE FOR ENTERPRISE USE UNTIL THESE ARE FINISHED
+
+- Editing HTML should be exclusive to Aina
+- Editing Markdown should be exclusive to Asta
+- CSRF Token Protection Isn't Implemented Yet
+- Mitochondria Is The Powerhouse of Cell
+- Bleach Is Not Implemented Properly Yet (<script> tags should be forbidden)
+- CSP Is Not Forced Yet (should be configured per-page basis)
+- HikarinJS Is Still Opt-in (should be default for all ai generated site)
+- Default Pages Still Uses <script> (Should use HikarinJS Instead)
+- System Page Tags Are Still Manual (Should be abstracted with switches / panel)
+- Form Page Tags Are Still Manual (Should be abstracted with switches / panel)
+- No Tags and Sort Filter Yet
+- No Darkmode Yet (seriously?)
+- Submission Sanitization not yet implemented
+- Pay Yozzun For Anita's Artwork
+- Asta and Aina doesn't save their own prompt/configuration
