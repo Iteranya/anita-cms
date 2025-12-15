@@ -41,7 +41,7 @@
 
     
 <p align="center">
-  <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/logo.png" alt="Anita CMS Logo" width="128">
+  <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anitacms.png" alt="Anita CMS Logo" width="128">
   <br><br>
   [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
   [![Python](https://img.shields.io/badge/Python-3.10+-yellow.svg)](https://www.python.org/)
