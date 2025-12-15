@@ -121,11 +121,6 @@ async def sync_media_to_remote(
         raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Copyparty integration is not configured.")
 
     try:
-        # Since sync involves network IO and could take time, 
-        # we can either await it (blocking response) or run it in background.
-        # For small folders, awaiting is fine for immediate feedback.
-        # For large folders, use background_tasks.add_task(media_service.sync_to_copyparty)
-        
         # Here we wait for the result to return the report
         report = media_service.sync_to_copyparty()
         return report

@@ -19,6 +19,7 @@
     <!-- Tailwind Config -->
     <script>
         tailwind.config = {
+            darkMode: 'class', 
             theme: {
                 extend: {
                     fontFamily: { sans: ['Nunito', 'sans-serif'] },
@@ -29,12 +30,17 @@
             }
         }
     </script>
+
     <style>
         [x-cloak] { display: none !important; }
-        /* Simple Fade for Swaps */
         #app-content { transition: opacity 0.2s ease-in-out; }
         .htmx-swapping { opacity: 0; }
         .htmx-settling { opacity: 1; }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
     </style>
 </head>
 

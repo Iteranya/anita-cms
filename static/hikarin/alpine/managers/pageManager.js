@@ -135,12 +135,8 @@ async save() {
 
             try {
                 if(this.mode === 'create') {
-                    // Create takes 1 argument (data)
-                    // Correct: .create().execute(payload)
                     await this.$api.pages.create().execute(payload);
                 } else {
-                    // Update takes 2 arguments (slug, data)
-                    // ERROR WAS HERE: We must pass args to execute(), not update()
                     await this.$api.pages.update().execute(this.targetSlug, payload);
                 }
 

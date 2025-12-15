@@ -1,6 +1,6 @@
 # file: data/models.py
 
-from sqlalchemy import Column, Integer, String, Text, JSON, ForeignKey, Boolean, Table
+from sqlalchemy import Column, Index, Integer, String, Text, JSON, ForeignKey, Boolean, Table
 from sqlalchemy.orm import relationship
 from .database import Base
 
@@ -89,6 +89,8 @@ class User(Base):
     display_name = Column(String)
     pfp_url = Column(String)
     disabled = Column(Boolean, nullable=False, default=False)
+    settings = Column(JSON)
+    custom = Column(JSON)
 
 
 class Setting(Base):
@@ -102,3 +104,14 @@ class Role(Base):
     
     role_name = Column(String, primary_key=True)
     permissions = Column("permissions_json", JSON, nullable=False)
+
+class PageMetric(Base):
+    __tablename__ = "page_metrics"
+
+    page_id = Column(ForeignKey("pages.id"), primary_key=True)
+    key = Column(String, primary_key=True)   # "likes", "views", "shares"
+    value = Column(Integer, nullable=False)
+
+    __table_args__ = (
+        Index("idx_metric_key_value", "key", "value"),
+    )

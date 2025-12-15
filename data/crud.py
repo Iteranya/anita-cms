@@ -62,7 +62,6 @@ def get_or_create_tags(db: Session, tag_list: List[str]) -> List[models.Tag]:
 
     return final_tags
 
-# ... [parse_search_query and apply_tag_filters remain unchanged] ...
 def parse_search_query(query_str: str):
     if not query_str:
         return [], []
@@ -360,6 +359,95 @@ def delete_role(db: Session, role_name: str) -> bool:
         db.commit()
         return True
     return False
+
+
+# ==========================================
+# --- DASHBOARD & STATS FUNCTIONS ---
+# ==========================================
+
+def get_total_pages_count(db: Session) -> int:
+    """Returns the total number of pages in the database."""
+    return db.query(func.count(models.Page.id)).scalar()
+
+def get_total_forms_count(db: Session) -> int:
+    """Returns the total number of forms in the database."""
+    return db.query(func.count(models.Form.id)).scalar()
+
+def get_total_submissions_count(db: Session) -> int:
+    """Returns the total number of submissions in the database."""
+    return db.query(func.count(models.Submission.id)).scalar()
+
+def get_total_users_count(db: Session) -> int:
+    """Returns the total number of users in the database."""
+    return db.query(func.count(models.User.username)).scalar()
+
+def get_total_tags_count(db: Session) -> int:
+    """Returns the total number of unique tags in the database."""
+    return db.query(func.count(models.Tag.id)).scalar()
+
+# --- Specific Counts ---
+
+def get_pages_count_by_tag(db: Session, tag_name: str) -> int:
+    """
+    Counts pages associated with a specific tag name.
+    The tag_name is automatically formatted for lookup.
+    """
+    formatted_tag = format_tag_for_db(tag_name)
+    return (
+        db.query(func.count(models.Page.id))
+        .join(models.Page.tags)
+        .filter(models.Tag.name == formatted_tag)
+        .scalar()
+    )
+
+# --- Aggregation and Ranking ---
+
+def get_top_forms_by_submission_count(db: Session, limit: int = 5) -> List[tuple[str, int]]:
+    """
+    Finds the most active forms by submission count.
+    Returns a list of tuples: [(form_slug, submission_count), ...].
+    """
+    return (
+        db.query(
+            models.Submission.form_slug,
+            func.count(models.Submission.id).label("submission_count")
+        )
+        .group_by(models.Submission.form_slug)
+        .order_by(func.count(models.Submission.id).desc())
+        .limit(limit)
+        .all()
+    )
+
+def get_top_tags_by_page_usage(db: Session, limit: int = 10) -> List[tuple[str, int]]:
+    """
+    Finds the most frequently used tags on Pages.
+    Returns a list of tuples: [(tag_name, use_count), ...].
+    """
+    return (
+        db.query(
+            models.Tag.name,
+            func.count(models.Page.id).label("use_count")
+        )
+        .join(models.Page.tags)
+        .group_by(models.Tag.name)
+        .order_by(func.count(models.Page.id).desc())
+        .limit(limit)
+        .all()
+    )
+
+# --- Recent Activity Lists ---
+
+def get_recent_pages(db: Session, limit: int = 5) -> List[models.Page]:
+    """Returns the N most recently created pages."""
+    return db.query(models.Page).order_by(models.Page.created.desc()).limit(limit).all()
+
+def get_recently_updated_pages(db: Session, limit: int = 5) -> List[models.Page]:
+    """Returns the N most recently updated pages."""
+    return db.query(models.Page).order_by(models.Page.updated.desc()).limit(limit).all()
+
+def get_recent_submissions(db: Session, limit: int = 5) -> List[models.Submission]:
+    """Returns the N most recent submissions."""
+    return db.query(models.Submission).order_by(models.Submission.created.desc()).limit(limit).all()
 
 def seed_default_roles(db: Session, json_path: str = "default_roles.json"):
     if db.query(models.Role).count() == 0:

@@ -31,7 +31,8 @@ from routes import (
     pages_route, 
     public_route,
     roles_route,
-    config_route
+    config_route,
+    dashboard_route
 )
 
 # --- Pre-startup Checks ---
@@ -98,11 +99,10 @@ app.mount("/uploads", StaticFiles(directory=BASE_DIR / "uploads"), name="uploads
 
 # --- API Router Organization ---
 
-# This is the main router for your entire API, prefixed for versioning
 api_router = APIRouter()
 
-# Include all protected routes into the protected_router
 api_router.include_router(admin_route.router, tags=["Admin"])
+api_router.include_router(dashboard_route.router, tags = ["Dashboard"])
 api_router.include_router(config_route.router, tags=["Config"])
 api_router.include_router(aina_route.router, tags=["Aina"])
 api_router.include_router(asta_route.router, tags=["Asta"])
@@ -113,6 +113,7 @@ api_router.include_router(roles_route.router, tags=["Roles"])
 api_router.include_router(pages_route.router, tags=["Pages"]) 
 api_router.include_router(auth_route.router, tags=["Authentication"]) 
 api_router.include_router(public_route.router, tags=["Public"])   
+
 
 # Finally, include the versioned API router in the main app
 app.include_router(api_router)
