@@ -43,12 +43,19 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anitacms.png" alt="Anita CMS Logo" width="128">
   <br><br>
-  [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-  [![Python](https://img.shields.io/badge/Python-3.10+-yellow.svg)](https://www.python.org/)
-  [![FastAPI](https://img.shields.io/badge/Framework-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
-  [![SQLAlchemy](https://img.shields.io/badge/ORM-SQLAlchemy-red.svg)](https://www.sqlalchemy.org/)
+  <a href="https://www.gnu.org/licenses/agpl-3.0">
+    <img src="https://img.shields.io/badge/License-AGPL_v3-blue.svg" alt="License: AGPL v3">
+  </a>
+  <a href="https://www.python.org/">
+    <img src="https://img.shields.io/badge/Python-3.10+-yellow.svg" alt="Python">
+  </a>
+  <a href="https://fastapi.tiangolo.com/">
+    <img src="https://img.shields.io/badge/Framework-FastAPI-009688.svg" alt="FastAPI">
+  </a>
+  <a href="https://www.sqlalchemy.org/">
+    <img src="https://img.shields.io/badge/ORM-SQLAlchemy-red.svg" alt="SQLAlchemy">
+  </a>
 </p>
-
 <h1 align="center">Anita CMS - The No-Code Hybrid Content Management System</h1>
 
 ---
