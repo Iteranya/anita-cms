@@ -182,7 +182,7 @@ Anita is designed with a simple, foundational architecture in mind. No black box
 | Layer      | Technology                                    |
 | :--------- | :-------------------------------------------- |
 | **Backend**  | FastAPI & SQLAlchemy                          |
-| **Middleware** | Hikarin (Custom Made By Yours Truly)          |
+| **Middleware** | Hikarin Web Framework (Custom Made By Yours Truly)          |
 | **Frontend**   | Tailwind, AlpineJS & HTMX                     |
 
 ---
