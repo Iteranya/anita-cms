@@ -15,7 +15,7 @@ def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
     user_service = UserService(db)
     return AuthService(user_service)
 
-def csrf_protect_dependency(
+def csrf_protect_dependency( # This should be called 'Support Older Browser' Feature Instead of CSRF Feature
     request: Request, 
     csrf_protect: CsrfProtect = Depends()
 ):
