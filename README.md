@@ -716,16 +716,26 @@ python main.py
 
 ## Roadmap
 
-- [ ] Implement Advanced Tag Based Search and Filtering System
-- [ ] Implement Advanced Page Metric Sorting System
-- [ ] Implement Better Dashboard (Profile Page, maybe?)
-- [ ] Docker Integration
-- [ ] Better Test Coverage
-- [ ] Per Page CSP Header Control
-- [ ] Per Page Finetuned Bleach Control
-- [ ] CSRF Protection
-- [ ] Better Aina Prompt Engineering
-- [ ] Git on Asta
+TODO
+
+- Editing HTML should be exclusive to Aina
+- Editing Markdown should be exclusive to Asta
+- CSRF Token Protection Isn't Implemented Yet
+- Mitochondria Is The Powerhouse of Cell
+- Bleach Is Not Implemented Properly Yet (<script> tags should be forbidden)
+- CSP Is Not Forced Yet (should be configured per-page basis)
+- HikarinJS Is Still Opt-in (should be default for all ai generated site)
+- Default Pages Still Uses <script> (Should use HikarinJS Instead)
+- System Page Tags Are Still Manual (Should be abstracted with switches / panel)
+- Form Page Tags Are Still Manual (Should be abstracted with switches / panel)
+- No Tags and Sort Filter Yet
+- No Darkmode Yet (seriously?)
+- Submission Sanitization not yet implemented
+- Pay Yozzun For Anita's Artwork
+- Asta and Aina doesn't save their own prompt/configuration
+- Better test coverage
+- More graceful form seeding (currently don't exist, actually)
+
 
 ---
 
@@ -750,7 +760,7 @@ python main.py
     </td>
     <td>
       <strong>Anita</strong><br/>
-      Wait! Okay, look, let's focus on umm... CSP Header Control and Finetuned Bleach Control.
+      Wh-what? But... but... You've been working on me for like... months!
     </td>
   </tr>
     <tr>
@@ -759,7 +769,7 @@ python main.py
     </td>
     <td>
       <strong>Artes</strong><br/>
-      Well someone's security conscious.
+      Usually it takes years to develop a CMS not months...
     </td>
   </tr>
   <tr>
@@ -768,7 +778,7 @@ python main.py
     </td>
     <td>
       <strong>Anita</strong><br/>
-      Oh no, it just looks really cool in the UI and is technically impressive.
+      Right... Ummm... And...
     </td>
   </tr>
   <tr>
@@ -777,7 +787,7 @@ python main.py
     </td>
     <td>
       <strong>Artes</strong><br/>
-      What about prompt engineering on Aina?
+      Yes, the Hikarin Website Builder is still ways away
     </td>
   </tr>
   <tr>
@@ -786,7 +796,7 @@ python main.py
     </td>
     <td>
       <strong>Anita</strong><br/>
-      *shrug*
+      Can't you fix all of these tomorrow?
     </td>
   </tr>
   <tr>
@@ -795,7 +805,7 @@ python main.py
     </td>
     <td>
       <strong>Artes</strong><br/>
-      You have a good AI integration, be proud of it.
+      No!!!
     </td>
   </tr>
   <tr>
@@ -804,7 +814,7 @@ python main.py
     </td>
     <td>
       <strong>Anita</strong><br/>
-      Bad marketing, people hate AI and I put all my cards on the Hikarin Website Builder.
+      Well... Next year is too long!!! 
     </td>
   </tr>
   <tr>
@@ -822,7 +832,7 @@ python main.py
     </td>
     <td>
       <strong>Anita</strong><br/>
-      Yep, good luck! I'm counting on you!!!
+      Counterpoint, you have AI, and you're a master architecture!!!
     </td>
   </tr>
   <tr>
@@ -831,7 +841,7 @@ python main.py
     </td>
     <td>
       <strong>Artes</strong><br/>
-      Anyway, license.
+      ...
     </td>
   </tr>
 </tbody>
