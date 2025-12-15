@@ -16,3 +16,5 @@ UNSAFE FOR ENTERPRISE USE UNTIL THESE ARE FINISHED
 - Submission Sanitization not yet implemented
 - Pay Yozzun For Anita's Artwork
 - Asta and Aina doesn't save their own prompt/configuration
+- Better test coverage
+- More graceful form seeding (currently don't exist, actually)
