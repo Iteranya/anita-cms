@@ -736,25 +736,35 @@ python main.py
 
 ## Roadmap
 
-TODO
-
-- Editing HTML should be exclusive to Aina
-- Editing Markdown should be exclusive to Asta
+- Editing HTML Route should be exclusive to Aina
+- Editing Markdown Route should be exclusive to Asta
 - Mitochondria Is The Powerhouse of Cell
-- Bleach Is Not Implemented Properly Yet (<script> tags should be forbidden)
-- CSP Is Not Forced Yet (should be configured per-page basis)
+- ~~ Bleach Is Not Implemented Properly Yet~~ Done! (With ammonia, bleach is deprecated)
+- Granular per-page CSP Configuration (Currently Global CSP, but ideally should be configured per-page basis)
 - HikarinJS Is Still Opt-in (should be default for all ai generated site)
 - Default Pages Still Uses <script> (Should use HikarinJS Instead)
 - System Page Tags Are Still Manual (Should be abstracted with switches / panel)
-- Form Page Tags Are Still Manual (Should be abstracted with switches / panel)
+- ~~Form Page Tags Are Still Manual (Should be abstracted with switches / panel)~~ Done! RBAC Control on Forms!
 - No Tags and Sort Filter Yet
 - No Darkmode Yet (seriously?)
-- Submission Sanitization Coverage Is Tricky (Due to no code collection backend)
+- ~~Submission Sanitization not yet implemented~~ Done! (With ammonia, bleach is deprecated)
 - Pay Yozzun For Anita's Artwork
 - Asta and Aina doesn't save their own prompt/configuration
 - Better test coverage
-- More graceful form seeding (currently don't exist, actually)
+- More graceful Form Seeding (currently don't exist, actually, only page, roles and config for now)
+- Category and Tags are the same (should be separated)
 
+Terrible Ideas That Won't Go Away
+
+- Let Every User Bring Their Own Admin Page
+- Anita AI Chatbot on Dashboard
+- Rewrite Everything In Go
+- Rewrite Everything In Rust
+- Export to SSG Button (HOW!?!?)
+- Let Every User Bring Their Own API Key (Encrypting Each One Is Gonna Be A Bitch)
+- Hikarin Website Builder To Replace Aina (Note: Hikarin Website Builder Does Not Exist Yet)
+- Discord Integration (WHY!?!?)
+- Make Domain Specific Language For Themes and Plugins (Lol, Lmao, Pffft)
 
 ---
 
