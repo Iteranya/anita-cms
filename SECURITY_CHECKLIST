@@ -2,10 +2,9 @@ TODO
 
 - ~~Editing HTML should be exclusive to Aina~~
 - ~~Editing Markdown should be exclusive to Asta~~
-- CSRF Token Protection Isn't Implemented Yet (Uses strict samesite cookie for now and block weird browsers)
 - Mitochondria Is The Powerhouse of Cell
 - ~~ Bleach Is Not Implemented Properly Yet~~ Done! (With ammonia, bleach is deprecated)
-- CSP Configuration (should be configured per-page basis)
+- CSP Configuration Is Still Global (should be configured per-page basis)
 - HikarinJS Is Still Opt-in (should be default for all ai generated site)
 - Default Pages Still Uses <script> (Should use HikarinJS Instead)
 - System Page Tags Are Still Manual (Should be abstracted with switches / panel)
@@ -21,7 +20,7 @@ TODO
 
 Terrible Ideas That Won't Go Away
 
-- Let Every User Bring Their Own Admin Page
+- Let Every User Bring Their Own Admin Page (:skull:)
 - Anita AI Chatbot on Dashboard
 - Rewrite Everything In Go
 - Rewrite Everything In Rust

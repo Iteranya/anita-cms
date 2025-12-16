@@ -16,6 +16,7 @@ import fileManager from './alpine/managers/fileManager.js';
 import submissionManager from './alpine/managers/submissionManager.js';
 import adminShell from './alpine/managers/adminShell.js';
 import dashboardManager from './alpine/managers/dashboardManager.js';
+import authManager from './alpine/managers/authManager.js';
 
 // 3. Initialize API
 const hikarinApi = new HikarinApi();
@@ -36,6 +37,7 @@ Alpine.data('configManager', configManager);
 Alpine.data('fileManager', fileManager);
 Alpine.data('submissionManager', submissionManager);
 Alpine.data('dashboardManager',dashboardManager)
+Alpine.data('authManager',authManager)
 Alpine.data('adminShell', adminShell);
 
 // 6. Make Alpine available globally (optional, useful for debugging in console)

@@ -3,289 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anita CMS - System Setup</title>
+    <title>Anita CMS – System Setup</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
-    
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Nunito', 'sans-serif'],
-                    },
+                    fontFamily: { sans: ['Nunito', 'sans-serif'] },
                     colors: {
                         anita: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            200: '#bae6fd',
-                            300: '#7dd3fc',
-                            400: '#38bdf8',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            700: '#0369a1',
-                            800: '#075985',
-                            900: '#0c4a6e',
+                            50:'#f0f9ff',100:'#e0f2fe',200:'#bae6fd',300:'#7dd3fc',
+                            400:'#38bdf8',500:'#0ea5e9',600:'#0284c7',
+                            700:'#0369a1',800:'#075985',900:'#0c4a6e'
                         }
                     }
                 }
             }
         }
     </script>
-    
+
+    <!-- Your Alpine ESM entry -->
+    <script type="module" src="/static/hikarin/main.js"></script>
+
     <style>
-        html { scroll-behavior: smooth; }
-
         @keyframes float {
-            0% { transform: translate(0px, 0px); }
-            33% { transform: translate(30px, -50px); }
-            66% { transform: translate(-20px, 20px); }
-            100% { transform: translate(0px, 0px); }
+            0% { transform: translate(0,0); }
+            33% { transform: translate(30px,-50px); }
+            66% { transform: translate(-20px,20px); }
+            100% { transform: translate(0,0); }
         }
-        
-        .animate-blob {
-            animation: float 10s infinite ease-in-out;
-        }
-
+        .animate-blob { animation: float 10s infinite ease-in-out; }
         .glass-panel {
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255,255,255,.85);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 10px 40px rgba(14, 165, 233, 0.15);
+            border: 1px solid rgba(255,255,255,.6);
+            box-shadow: 0 10px 40px rgba(14,165,233,.15);
         }
-
         .blob {
-            position: absolute;
-            filter: blur(80px);
-            z-index: -1;
-            opacity: 0.7;
-            border-radius: 50%;
+            position:absolute; filter:blur(80px); opacity:.7; border-radius:50%;
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen w-full flex items-center justify-center relative overflow-hidden">
 
-    <!-- Background Blobs -->
-    <div class="blob bg-anita-400 w-96 h-96 top-0 left-0 -translate-x-1/4 -translate-y-1/4 animate-blob"></div>
-    <div class="blob bg-indigo-300 w-80 h-80 bottom-0 right-0 translate-x-1/4 translate-y-1/4 animate-blob" style="animation-delay: 2s;"></div>
-    <div class="blob bg-cyan-200 w-64 h-64 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-blob" style="animation-delay: 4s;"></div>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center overflow-hidden font-sans">
 
-    <!-- Container -->
-    <div class="w-full max-w-lg px-4 z-10">
-        
-        <!-- Loading Overlay (Initial Check) -->
-        <div id="initial-loader" class="fixed inset-0 z-50 bg-slate-50 flex flex-col items-center justify-center transition-opacity duration-500">
-            <img src="/media/anita.jpg" class="h-16 w-16 rounded-full animate-bounce mb-4 border-2 border-anita-400" alt="Logo">
-            <p class="text-slate-500 font-bold animate-pulse">Initializing System...</p>
+<!-- Background blobs -->
+<div class="blob bg-anita-400 w-96 h-96 top-0 left-0 -translate-x-1/4 -translate-y-1/4 animate-blob"></div>
+<div class="blob bg-indigo-300 w-80 h-80 bottom-0 right-0 translate-x-1/4 translate-y-1/4 animate-blob"></div>
+<div class="blob bg-cyan-200 w-64 h-64 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-blob"></div>
+
+<div class="w-full max-w-lg px-4 z-10">
+
+    <div
+        x-data="authManager"
+        x-init="mode='setup'; init()"
+        x-ref="card"
+        class="glass-panel rounded-3xl p-8 sm:p-12 shadow-2xl relative"
+    >
+
+        <!-- Initial Loader -->
+        <div
+            x-show="loading && !success && !error"
+            class="absolute inset-0 bg-slate-50/90 flex flex-col items-center justify-center rounded-3xl z-20"
+        >
+            <img
+  src="/media/anita.jpg"
+  class="h-24 w-auto max-w-[6rem] object-contain mx-auto mb-4
+         rounded-full border-4 border-white shadow-lg"
+/>
+            <p class="font-bold text-slate-500 animate-pulse">Initializing System…</p>
         </div>
 
-        <!-- Glass Card -->
-        <div class="glass-panel rounded-3xl p-8 sm:p-12 shadow-2xl relative">
-            
-            <!-- Header -->
-            <div class="text-center mb-8">
-                <div class="relative inline-block mb-4">
-                    <div class="absolute inset-0 bg-anita-400 rounded-full blur-lg opacity-40"></div>
-                    <img src="/media/anita.jpg" alt="Anita CMS" class="relative h-24 w-24 rounded-full border-4 border-white shadow-lg object-cover">
-                    <div class="absolute bottom-0 right-0 bg-anita-500 text-white text-xs font-bold px-2 py-1 rounded-full border-2 border-white shadow-sm">
-                        SETUP
-                    </div>
-                </div>
-                <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">Welcome to Anita CMS</h1>
-                <p class="text-slate-500 mt-2">Create your <span class="text-anita-600 font-bold">Admin Account</span> to get started.</p>
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <img
+  src="/media/anita.jpg"
+  class="h-24 w-auto max-w-[6rem] object-contain mx-auto mb-4
+         rounded-full border-4 border-white shadow-lg"
+/>
+            <h1 class="text-3xl font-extrabold">Welcome to Anita CMS</h1>
+            <p class="text-slate-500 mt-2">
+                Create your <span class="text-anita-600 font-bold">Admin Account</span>
+            </p>
+        </div>
+
+        <!-- Alert -->
+        <div
+            x-show="error || success"
+            x-transition
+            class="mb-6 p-4 rounded-xl border flex gap-3"
+            :class="error
+                ? 'bg-red-50 border-red-100 text-red-600'
+                : 'bg-green-50 border-green-100 text-green-600'"
+        >
+            <i class="fas mt-0.5"
+               :class="error ? 'fa-exclamation-triangle' : 'fa-check-circle'"></i>
+            <div class="text-sm">
+                <span class="font-bold block"
+                      x-text="error ? 'Installation Failed' : 'Setup Complete'"></span>
+                <span
+                    x-text="error || 'Admin account created. Redirecting to login…'">
+                </span>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form
+            @submit.prevent="setup"
+            class="space-y-6"
+            :class="{ 'opacity-70 pointer-events-none': loading }"
+        >
+
+            <input
+                type="text"
+                placeholder="Admin Username"
+                x-model="username"
+                required
+                class="w-full px-4 py-3 rounded-xl border font-bold"
+            >
+
+            <input
+                type="password"
+                placeholder="Master Password (min 8 chars)"
+                x-model="password"
+                minlength="8"
+                required
+                class="w-full px-4 py-3 rounded-xl border"
+            >
+
+            <input
+                type="password"
+                placeholder="Confirm Password"
+                x-model="confirmPassword"
+                minlength="8"
+                required
+                class="w-full px-4 py-3 rounded-xl border"
+            >
+
+            <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 text-xs text-blue-700 flex gap-2">
+                <i class="fas fa-info-circle mt-0.5"></i>
+                This account has full administrative access and cannot be undone.
             </div>
 
-            <!-- Notifications -->
-            <div id="alert-box" class="hidden mb-6 p-4 rounded-xl border flex items-start gap-3">
-                <i id="alert-icon" class="fas mt-0.5"></i>
-                <div class="text-sm">
-                    <span id="alert-title" class="font-bold block"></span>
-                    <span id="alert-msg"></span>
-                </div>
-            </div>
+            <button
+                type="submit"
+                :disabled="loading"
+                class="w-full bg-gradient-to-r from-anita-600 to-anita-500 text-white font-bold py-4 rounded-xl flex justify-center gap-2 text-lg"
+                :class="success && 'bg-green-500'"
+            >
+                <template x-if="!loading && !success">
+                    <span class="flex gap-2">
+                        <i class="fas fa-rocket"></i>
+                        Complete Setup
+                    </span>
+                </template>
 
-            <!-- Form -->
-            <form id="setup-form" class="space-y-6">
-                
-                <!-- Admin Username -->
-                <div>
-                    <label for="username" class="block text-sm font-bold text-slate-700 mb-2 ml-1">Admin Username</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <i class="fas fa-crown text-anita-500"></i>
-                        </div>
-                        <input type="text" id="username" name="username" required 
-                            class="w-full pl-11 pr-4 py-3.5 bg-white/60 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-anita-400 focus:border-transparent transition-all placeholder-slate-400 text-slate-800 font-bold shadow-sm"
-                            placeholder="admin">
-                    </div>
-                </div>
+                <template x-if="loading">
+                    <span class="flex gap-2">
+                        <i class="fas fa-circle-notch fa-spin"></i>
+                        Configuring System…
+                    </span>
+                </template>
 
-                <!-- Password -->
-                <div>
-                    <label for="password" class="block text-sm font-bold text-slate-700 mb-2 ml-1">Master Password</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <i class="fas fa-key text-slate-400"></i>
-                        </div>
-                        <input type="password" id="password" name="password" required minlength="8"
-                            class="w-full pl-11 pr-4 py-3.5 bg-white/60 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-anita-400 focus:border-transparent transition-all placeholder-slate-400 text-slate-800 font-medium shadow-sm"
-                            placeholder="Min. 8 characters">
-                    </div>
-                </div>
-
-                <!-- Confirm Password -->
-                <div>
-                    <label for="confirm_password" class="block text-sm font-bold text-slate-700 mb-2 ml-1">Confirm Password</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <i class="fas fa-check-circle text-slate-400"></i>
-                        </div>
-                        <input type="password" id="confirm_password" name="confirm_password" required minlength="8"
-                            class="w-full pl-11 pr-4 py-3.5 bg-white/60 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-anita-400 focus:border-transparent transition-all placeholder-slate-400 text-slate-800 font-medium shadow-sm"
-                            placeholder="Re-enter password">
-                    </div>
-                </div>
-
-                <!-- Info Box -->
-                <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 flex gap-3 items-center">
-                    <i class="fas fa-info-circle text-blue-500 text-lg"></i>
-                    <p class="text-xs text-blue-700">This account will have full administrative access. You cannot undo this action once completed.</p>
-                </div>
-
-                <!-- Button -->
-                <button type="submit" id="submit-btn" class="w-full bg-gradient-to-r from-anita-600 to-anita-500 hover:from-anita-700 hover:to-anita-600 text-white font-bold py-4 px-4 rounded-xl shadow-xl shadow-anita-200 transform transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-anita-500 flex justify-center items-center gap-2 text-lg">
-                    <span id="btn-text">Complete Setup</span>
-                    <i id="btn-icon" class="fas fa-rocket"></i>
-                    <i id="btn-loader" class="fas fa-circle-notch fa-spin hidden"></i>
-                </button>
-            </form>
-        </div>
-        
-        <!-- Footer -->
-        <div class="text-center mt-8 text-xs text-slate-400 font-semibold">
-            Anita CMS &bull; Installation Wizard
-        </div>
+                <template x-if="success">
+                    <span class="flex gap-2">
+                        <i class="fas fa-check"></i>
+                        Success
+                    </span>
+                </template>
+            </button>
+        </form>
     </div>
 
-    <script>
-        const form = document.getElementById('setup-form');
-        const submitBtn = document.getElementById('submit-btn');
-        const btnText = document.getElementById('btn-text');
-        const btnIcon = document.getElementById('btn-icon');
-        const btnLoader = document.getElementById('btn-loader');
-        const alertBox = document.getElementById('alert-box');
-        
-        // --- 1. Security Check on Load ---
-        // We verify if the system is already set up. If so, redirect to login immediately.
-        window.addEventListener('DOMContentLoaded', async () => {
-            const initialLoader = document.getElementById('initial-loader');
-            try {
-                const res = await fetch('/auth/check-setup');
-                if(res.ok) {
-                    const data = await res.json();
-                    if (data.initialized) {
-                        // System is already set up, redirect to login
-                        window.location.href = '/login';
-                        return;
-                    }
-                }
-            } catch (e) {
-                console.error("Setup check failed", e);
-            }
-            // If not initialized (or check fails in a non-critical way), show the form
-            setTimeout(() => {
-                initialLoader.style.opacity = '0';
-                setTimeout(() => initialLoader.remove(), 500);
-            }, 800);
-        });
+    <div class="text-center mt-8 text-xs text-slate-400 font-semibold">
+        Anita CMS • Installation Wizard
+    </div>
+</div>
 
-        // --- 2. Helper Functions ---
-        function showAlert(type, title, message) {
-            const alertIcon = document.getElementById('alert-icon');
-            const alertTitle = document.getElementById('alert-title');
-            const alertMsg = document.getElementById('alert-msg');
-
-            alertBox.className = `mb-6 p-4 rounded-xl border flex items-start gap-3 ${type === 'error' ? 'bg-red-50 border-red-100 text-red-600' : 'bg-green-50 border-green-100 text-green-600'}`;
-            
-            alertIcon.className = type === 'error' ? 'fas fa-exclamation-triangle mt-0.5' : 'fas fa-check-circle mt-0.5';
-            
-            alertTitle.textContent = title;
-            alertMsg.textContent = message;
-            alertBox.classList.remove('hidden');
-
-            if (type === 'error') {
-                 // Shake effect
-                 const card = document.querySelector('.glass-panel');
-                 card.classList.add('animate-[shake_0.5s_ease-in-out]');
-                 setTimeout(() => card.classList.remove('animate-[shake_0.5s_ease-in-out]'), 500);
-            }
-        }
-
-        function setLoading(isLoading) {
-            if (isLoading) {
-                submitBtn.disabled = true;
-                btnText.textContent = 'Configuring System...';
-                btnIcon.classList.add('hidden');
-                btnLoader.classList.remove('hidden');
-                form.classList.add('opacity-70', 'pointer-events-none');
-            } else {
-                submitBtn.disabled = false;
-                btnText.textContent = 'Complete Setup';
-                btnIcon.classList.remove('hidden');
-                btnLoader.classList.add('hidden');
-                form.classList.remove('opacity-70', 'pointer-events-none');
-            }
-        }
-
-        // --- 3. Form Submission ---
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            alertBox.classList.add('hidden');
-            
-            // Client Validation
-            const p1 = document.getElementById('password').value;
-            const p2 = document.getElementById('confirm_password').value;
-
-            if (p1 !== p2) {
-                showAlert('error', 'Password Error', 'The passwords provided do not match.');
-                return;
-            }
-
-            setLoading(true);
-
-            const formData = new FormData(form);
-
-            try {
-                const response = await fetch('/auth/setup', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    showAlert('success', 'Setup Complete!', 'Admin account created. Redirecting to login...');
-                    submitBtn.className = 'w-full bg-green-500 text-white font-bold py-4 px-4 rounded-xl shadow-lg flex justify-center items-center gap-2 text-lg transition-all';
-                    btnText.textContent = 'Success!';
-                    btnLoader.classList.add('hidden');
-                    btnIcon.className = 'fas fa-check';
-                    btnIcon.classList.remove('hidden');
-
-                    setTimeout(() => {
-                        window.location.href = '/auth/login';
-                    }, 2000);
-                } else {
-                    // Handle API errors (e.g. system already initialized race condition)
-                    throw new Error(result.detail || 'Setup failed. Please try again.');
-                }
-
-            } catch (error) {
-                setLoading(false);
-                showAlert('error', 'Installation Failed', error.message);
-            }
-        });
-    </script>
 </body>
 </html>
