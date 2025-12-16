@@ -179,7 +179,7 @@ class WebsiteBuilderService:
         Streams a generated website from the AI using the 'Aina' persona
         and provided context.
         """
-        user_prompt = f"{instruction}"
+        user_prompt = f"{context}\n\n{instruction}"
         messages = [
             {"role":"user", "content":user_prompt}
         ]

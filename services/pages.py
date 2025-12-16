@@ -54,15 +54,44 @@ class PageService:
         
     def update_existing_page(self, slug: str, page_update_data: schemas.PageUpdate) -> models.Page:
         """
-        Updates an existing page.
+        Updates an existing page using the generic PageUpdate schema.
         """
-        # First, ensure the page exists.
+        # Ensure the page exists
         db_page = self.get_page_by_slug(slug)
         
-        # Call the CRUD function to perform the update.
+        # FIX: Pass the Pydantic model directly. Do not .model_dump() here.
         updated_page = crud.update_page(self.db, slug=db_page.slug, page_update=page_update_data)
         
         return updated_page
+
+
+    def update_existing_page_markdown(
+        self, slug: str, page_update_data: schemas.PageMarkdownUpdate
+    ) -> models.Page:
+        """
+        Updates only Markdown fields of an existing page.
+        """
+        db_page = self.get_page_by_slug(slug)
+
+        # FIX: Pass the Pydantic model directly. Do not .model_dump() here.
+        updated_page = crud.update_page(self.db, slug=db_page.slug, page_update=page_update_data)
+        return updated_page
+
+
+    def update_existing_page_html(
+        self, slug: str, page_update_data: schemas.PageUpdateHTML
+    ) -> models.Page:
+        """
+        Updates only HTML fields of an existing page.
+        """
+        db_page = self.get_page_by_slug(slug)
+
+        # FIX: Pass the Pydantic model directly. Do not .model_dump() here.
+        # The CRUD layer (data/crud.py) expects a Pydantic model to call .model_dump() on it.
+        updated_page = crud.update_page(self.db, slug=db_page.slug, page_update=page_update_data)
+        return updated_page
+
+
 
     def delete_page_by_slug(self, slug: str):
         """
@@ -85,7 +114,6 @@ class PageService:
         Retrieves all pages containing a specific tag by calling the efficient
         CRUD function that filters in the database.
         """
-        # This is now simpler and much more performant!
         return crud.get_pages_by_tag(self.db, tag=tag)
     
     def get_pages_by_author(self,author:str) -> List[models.Page]:
@@ -115,7 +143,6 @@ class PageService:
         Retrieves the most recent page with a specific tag by calling the
         efficient CRUD function.
         """
-        # This is also simpler and more performant.
         return crud.get_first_page_by_tags(self.db, tag=tag)
 
     def get_first_page_by_tag(self, tag: str) -> Optional[models.Page]:
@@ -123,5 +150,4 @@ class PageService:
         Retrieves the most recent page with a specific tag by calling the
         efficient CRUD function.
         """
-        # This is also simpler and more performant.
         return crud.get_first_page_by_tag(self.db, tag=tag)

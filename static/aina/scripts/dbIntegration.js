@@ -39,7 +39,7 @@ export async function getProject(slug) {
  * @returns {Promise<Object>} Updated project data
  */
 export async function updateProject(slug, projectData) {
-  const response = await fetch(`${API_BASE_URL}/page/${slug}`, {
+  const response = await fetch(`${API_BASE_URL}/page/${slug}/html`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',

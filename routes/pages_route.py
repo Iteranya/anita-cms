@@ -223,3 +223,66 @@ def delete_page(
         return Response(status_code=status.HTTP_204_NO_CONTENT)
 
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied")
+
+@router.put("/{slug}/markdown", response_model=schemas.Page)
+def update_page_markdown(
+    slug: str,
+    page_update: schemas.PageMarkdownUpdate,
+    page_service: PageService = Depends(get_page_service),
+    user_service: UserService = Depends(get_user_service),
+    user: CurrentUser = Depends(dep.get_current_user),
+):
+    db_page = page_service.get_page_by_slug(slug)
+    if not db_page:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found")
+
+    permissions = set(user_service.get_user_permissions(user.username))
+    has_master_permission = "*" in permissions or "page:update" in permissions
+    is_author = db_page.author == user.username
+    is_blog_page = is_tag_in_db_page(db_page.tags, "sys:blog")
+    has_blog_rights = is_blog_page and ("blog:update" in permissions or is_author)
+
+    if not (has_master_permission or has_blog_rights):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied")
+
+    # Preserve system tags if user isn't master
+    if page_update.tags is not None and not has_master_permission:
+        preserved_system_tags = [tag.name for tag in db_page.tags if tag.name.startswith("sys:")]
+        new_descriptive_tags = [tag for tag in page_update.tags if not tag.startswith("sys:")]
+        page_update.tags = preserved_system_tags + new_descriptive_tags
+
+    logger.info(f"User '{user.username}' updating MARKDOWN for page '{slug}'")
+
+    return page_service.update_existing_page_markdown(slug=slug, page_update_data=page_update)
+
+
+@router.put("/{slug}/html", response_model=schemas.Page)
+def update_page_html(
+    slug: str,
+    page_update: schemas.PageUpdateHTML,
+    page_service: PageService = Depends(get_page_service),
+    user_service: UserService = Depends(get_user_service),
+    user: CurrentUser = Depends(dep.get_current_user),
+):
+    db_page = page_service.get_page_by_slug(slug)
+    if not db_page:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found")
+
+    permissions = set(user_service.get_user_permissions(user.username))
+    has_master_permission = "*" in permissions or "page:update" in permissions
+    is_author = db_page.author == user.username
+    is_blog_page = is_tag_in_db_page(db_page.tags, "sys:blog")
+    has_blog_rights = is_blog_page and ("blog:update" in permissions or is_author)
+
+    if not (has_master_permission or has_blog_rights):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied")
+
+    # Preserve system tags if user isn't master
+    if page_update.tags is not None and not has_master_permission:
+        preserved_system_tags = [tag.name for tag in db_page.tags if tag.name.startswith("sys:")]
+        new_descriptive_tags = [tag for tag in page_update.tags if not tag.startswith("sys:")]
+        page_update.tags = preserved_system_tags + new_descriptive_tags
+
+    logger.info(f"User '{user.username}' updating HTML for page '{slug}'")
+
+    return page_service.update_existing_page_html(slug=slug, page_update_data=page_update)
