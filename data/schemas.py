@@ -49,7 +49,7 @@ def flatten_tags_to_strings(v: Any) -> List[str]:
 class PageBase(BaseModel):
     title: str
     content: Optional[str] = None
-    markdown: Optional[str] = None
+    markdown: Optional[str] = None # Bleached Until Per-Page CSP Configuration Is Implemented
     html: Optional[str] = None  # EXEMPTED
     tags: Optional[List[str]] = []
     thumb: Optional[str] = None
