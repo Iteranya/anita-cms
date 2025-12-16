@@ -189,7 +189,8 @@ Anita is designed with a simple, foundational architecture in mind. No black box
 | **Frontend**   | Tailwind, AlpineJS & HTMX                     |
 
 ---
-
+<details>
+  <summary> The Tech Stack </summary>
 <table>
 <tbody>
   <tr>
