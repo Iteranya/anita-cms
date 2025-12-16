@@ -5,7 +5,6 @@ export default () =>  ({
         // Data
         users: [],
         roles: [], // Array of objects
-        
         // Selection State (for Roles Split Pane)
         selectedRole: null, 
 

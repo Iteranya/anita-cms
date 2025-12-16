@@ -1,7 +1,7 @@
 TODO
 
-- Editing HTML should be exclusive to Aina
-- Editing Markdown should be exclusive to Asta
+- ~~Editing HTML should be exclusive to Aina~~
+- ~~Editing Markdown should be exclusive to Asta~~
 - CSRF Token Protection Isn't Implemented Yet (Uses strict samesite cookie for now and block weird browsers)
 - Mitochondria Is The Powerhouse of Cell
 - ~~ Bleach Is Not Implemented Properly Yet~~ Done! (With ammonia, bleach is deprecated)
@@ -18,3 +18,15 @@ TODO
 - Better test coverage
 - More graceful Form Seeding (currently don't exist, actually, only page, roles and config for now)
 - Category and Tags are the same (should be separated)
+
+Terrible Ideas That Won't Go Away
+
+- Let Every User Bring Their Own Admin Page
+- Anita AI Chatbot on Dashboard
+- Rewrite Everything In Go
+- Rewrite Everything In Rust
+- Export to SSG Button (HOW!?!?)
+- Let Every User Bring Their Own API Key (Encrypting Each One Is Gonna Be A Bitch)
+- Hikarin Website Builder To Replace Aina (Note: Hikarin Website Builder Does Not Exist Yet)
+- Discord Integration (WHY!?!?)
+- Make Domain Specific Language For Themes and Plugins (Lol, Lmao, Pffft)

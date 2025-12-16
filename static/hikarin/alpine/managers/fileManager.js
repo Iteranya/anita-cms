@@ -28,7 +28,7 @@ export default () => ({
                         slug: "file-data",
                         title: "File Registry",
                         description: "Registry for documents and generic files",
-                        tags: ["system", "read"],
+                        tags: ["editor:create","editor:read", "editor:delete", "editor:update"],
                         schema: { fields: [
                             { name: "saved_filename", label: "Filename", type: "text" },
                             { name: "friendly_name", label: "Title", type: "text" },

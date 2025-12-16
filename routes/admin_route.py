@@ -48,10 +48,8 @@ def render_no_cache_html(file_path: str, is_partial: bool):
     #I'll add CSP Later
     #response.headers["Content-Security-Policy"] = ADMIN_CSP
     
-    # CRITICAL: Tell the browser "This URL returns different things based on headers"
     response.headers["Vary"] = "HX-Request"
     
-    # # CRITICAL: Nuclear option for caching. Never store, never cache.
     # response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     # response.headers["Pragma"] = "no-cache"
     # response.headers["Expires"] = "0"

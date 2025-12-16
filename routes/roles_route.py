@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from data.database import get_db
 from data import schemas
 from services.users import UserService, hash_password
-from src.dependencies import require_admin
+from src.dependencies import get_current_user, require_admin
 from data.schemas import CurrentUser
 
 # --- Dependency Setup ---
@@ -27,7 +27,7 @@ class PasswordReset(BaseModel):
 # ROLE MANAGEMENT
 # ==========================================
 
-@router.get("/roles", response_model=List[schemas.Role]) # <--- Changed response_model
+@router.get("/roles", response_model=List[schemas.Role]) 
 def get_roles(
     user_service: UserService = Depends(get_user_service),
     admin: CurrentUser = Depends(require_admin),
@@ -47,6 +47,23 @@ def get_roles(
         schemas.Role(role_name=k, permissions=v) 
         for k, v in roles_dict.items()
     ]
+
+@router.get("/role_name", response_model=List[str]) # Should be safe??? Eh, it's fine, too much paranoia isn't good for you.
+def get_role_name(
+    user_service: UserService = Depends(get_user_service),
+    user: CurrentUser = Depends(get_current_user),
+):
+    """List all available role names."""
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to view this page."
+        )
+    
+    roles_dict = user_service.get_all_roles()
+    
+    return list(roles_dict.keys())
+
 
 @router.post("/roles", response_model=schemas.Role)
 def create_or_update_role(

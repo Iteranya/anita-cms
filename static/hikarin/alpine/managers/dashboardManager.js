@@ -43,6 +43,8 @@ export default () => ({
 
     async init() {
         // Watch for changes to the user's dark mode setting and apply it globally.
+        await this.ensureFileSchema()
+        await this.ensureMediaSchema()
         this.$watch('user.settings.dark_mode', (isDark) => {
             if (isDark) {
                 document.documentElement.classList.add('dark');
@@ -51,8 +53,56 @@ export default () => ({
             }
         });
 
+
         await this.refresh();
     },
+
+    async ensureMediaSchema() {
+            try {
+                await this.$api.collections.get('media-data').execute();
+            } catch (e) {
+                if (e.status === 404) {
+                    console.log("Initializing Media Schema...");
+                    const payload = {
+                        slug: "media-data",
+                        title: "Media Metadata",
+                        description: "System metadata for uploaded files",
+                        tags: ["editor:create","editor:read", "editor:delete", "editor:update"],
+                        schema: { fields: [
+                            { name: "saved_filename", label: "Filename", type: "text" },
+                            { name: "friendly_name", label: "Title", type: "text" },
+                            { name: "description", label: "Desc", type: "textarea" },
+                            { name: "public_link", label: "Link", type: "text" }
+                        ]}
+                    };
+                    await this.$api.collections.create(payload).execute();
+                }
+            }
+        },
+
+    async ensureFileSchema() {
+            try {
+                await this.$api.collections.get('file-data').execute();
+            } catch (e) {
+                if (e.status === 404) {
+                    const payload = {
+                        slug: "file-data",
+                        title: "File Registry",
+                        description: "Registry for documents and generic files",
+                        tags: ["editor:create","editor:read", "editor:delete", "editor:update"],
+                        schema: { fields: [
+                            { name: "saved_filename", label: "Filename", type: "text" },
+                            { name: "friendly_name", label: "Title", type: "text" },
+                            { name: "description", label: "Desc", type: "textarea" },
+                            { name: "extension", label: "Ext", type: "text" },
+                            { name: "size", label: "Size", type: "text" },
+                            { name: "public_link", label: "Link", type: "text" }
+                        ]}
+                    };
+                    await this.$api.collections.create(payload).execute();
+                }
+            }
+        },
 
     async refresh() {
         this.isLoading = true;
