@@ -574,9 +574,19 @@ Pydantic
 
 ### XSS, Malicious AI Prompt, Bad Theme
 Okay, okay, I admit...
-Bleach is still under work (probably finished by the end of this week)
-Okay?
-But Hikarin is already integrated nicely
+Bleaching everything
+Including keys
+Is peak paranoia
+
+But better safe than sorry and unfortunately, Anita is designed to be input safe, not output safe
+
+We don't sanitize our output because
+
+So we salt Pydantic
+
+Also we use Ammonia, it's written in rust so it's faster (theoretically)
+
+Oh Hikarin is already integrated nicely
 Basically it's an interface built on top of Alpine JS
 
 It makes it so that all client side code does NOT communicate with routes
@@ -739,7 +749,7 @@ python main.py
 - Editing HTML Route should be exclusive to Aina
 - Editing Markdown Route should be exclusive to Asta
 - Mitochondria Is The Powerhouse of Cell
-- ~~ Bleach Is Not Implemented Properly Yet~~ Done! (With ammonia, bleach is deprecated)
+- ~~Bleach Is Not Implemented Properly Yet~~ Done! (With ammonia, bleach is deprecated)
 - Granular per-page CSP Configuration (Currently Global CSP, but ideally should be configured per-page basis)
 - HikarinJS Is Still Opt-in (should be default for all ai generated site)
 - Default Pages Still Uses <script> (Should use HikarinJS Instead)
