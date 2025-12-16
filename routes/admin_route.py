@@ -13,6 +13,25 @@ router = APIRouter(tags=["Admin SPA"])
 
 ADMIN_DIR = "static/admin"
 SPA_VIEWS = {"dashboard", "page", "users", "forms", "files", "media", "config"}
+ADMIN_CSP = (
+"default-src 'self'; "
+"script-src 'self' 'unsafe-eval'"
+"https://cdn.tailwindcss.com "
+"https://unpkg.com "
+"https://cdn.jsdelivr.net; "
+"style-src 'self' 'unsafe-eval'"
+"https://fonts.googleapis.com "
+"https://cdnjs.cloudflare.com "
+"https://cdn.tailwindcss.com; "
+"font-src 'self' "
+"https://fonts.gstatic.com "
+"https://cdnjs.cloudflare.com; "
+"img-src 'self' data:; "
+"connect-src 'self'; "
+"frame-ancestors 'none'; "
+"base-uri 'self'; "
+"form-action 'self';"
+)
 
 def render_no_cache_html(file_path: str, is_partial: bool):
     """
@@ -26,14 +45,16 @@ def render_no_cache_html(file_path: str, is_partial: bool):
         content = f.read()
 
     response = HTMLResponse(content)
+    #I'll add CSP Later
+    #response.headers["Content-Security-Policy"] = ADMIN_CSP
     
     # CRITICAL: Tell the browser "This URL returns different things based on headers"
     response.headers["Vary"] = "HX-Request"
     
-    # CRITICAL: Nuclear option for caching. Never store, never cache.
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Pragma"] = "no-cache"
-    response.headers["Expires"] = "0"
+    # # CRITICAL: Nuclear option for caching. Never store, never cache.
+    # response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    # response.headers["Pragma"] = "no-cache"
+    # response.headers["Expires"] = "0"
     
     return response
 

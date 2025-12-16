@@ -66,7 +66,7 @@ async def login_for_access_token(
     # The service now takes the Pydantic User model directly
     access_token = auth_service.create_access_token(
         user=user, 
-        exp=expires_in
+        expires_delta=expires_in
     )
 
     # Calculate max_age for the cookie

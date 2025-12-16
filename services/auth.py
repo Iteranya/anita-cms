@@ -1,8 +1,8 @@
 import os
-from datetime import datetime, timedelta
-from typing import Optional, Dict
+from datetime import datetime, timedelta, timezone
+from typing import Optional, Dict, Any
+import jwt  
 from fastapi import HTTPException, status
-from jose import JWTError, jwt
 from services.users import UserService, verify_password
 from data.schemas import User 
 
@@ -18,73 +18,72 @@ class AuthService:
 
     def authenticate_user(self, username: str, password: str) -> Optional[User]:
         """
-        Authenticates a user by checking credentials against the database via UserService.
-        Returns the Pydantic User model on success, otherwise None.
+        Authenticates a user by checking credentials against the database.
         """
         try:
             user = self.user_service.get_user_by_username(username)
         except HTTPException as e:
             if e.status_code == 404:
-                return None # User not found
+                return None 
             raise e
 
         if not verify_password(password, user.hashed_password):
-            return None # Invalid password
+            return None 
 
         if user.disabled:
-            return None # Disabled user
+            return None 
 
-        return User.from_orm(user) # Return Pydantic model
+        # Pydantic v2 uses model_validate instead of from_orm
+        return User.model_validate(user)
 
-    def create_access_token(self, user: User, exp) -> str:
-            """
-            Creates a new JWT access token for a given user.
-            """
-            if not exp:
-                expires_delta = timedelta(minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES)
-            else:
-                expires_delta = exp
-            expire = datetime.utcnow() + expires_delta
-            
-            # Data to be encoded in the token's payload
-            to_encode = {
-                "username": user.username,
-                "role": user.role,
-                "display_name": user.display_name,
-                "exp": expire
-            }
-            
-            encoded_jwt = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
-            return encoded_jwt
-
-    def decode_access_token(self, token: str) -> Optional[Dict]:
+    def create_access_token(self, user: User, expires_delta: Optional[timedelta] = None) -> str:
         """
-        Decodes a JWT token, validates its signature, and checks if the user
-        it belongs to still exists and is active in the database.
-        Returns the payload if valid, otherwise None.
+        Creates a new JWT access token using PyJWT.
+        """
+        if expires_delta:
+            expire = datetime.now(timezone.utc) + expires_delta
+        else:
+            expire = datetime.now(timezone.utc) + timedelta(minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES)
+        
+        # PyJWT handles datetime serialization automatically in the 'exp' claim
+        to_encode = {
+            "username": user.username,
+            "role": user.role,
+            "display_name": user.display_name,
+            "exp": expire
+        }
+        
+        # PyJWT encode returns a string (in v2+), whereas Jose returned bytes sometimes depending on version
+        encoded_jwt = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
+        return encoded_jwt
+
+    def decode_access_token(self, token: str) -> Optional[Dict[str, Any]]:
+        """
+        Decodes a JWT token using PyJWT logic.
         """
         try:
-            # First, decode the token to check its signature and expiration
+            # SECURITY: Always pass algorithms as a list to prevent confusion attacks
             payload = jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
+            
             username: str = payload.get("username")
             if username is None:
-                # Token is malformed if it lacks a username
                 return None
-        except JWTError:
-            # Token is invalid (bad signature, expired, etc.)
+                
+        except jwt.ExpiredSignatureError:
+            # Specific exception for expired tokens
+            return None
+        except jwt.InvalidTokenError:
+            # Catch-all for other JWT errors (malformed, bad signature, etc)
             return None
 
+        # Double-check DB (Stateful check for immediate banning)
         try:
             user = self.user_service.get_user_by_username(username=username)
-            # Also check if the user account has been disabled since the token was issued
             if user.disabled:
                 return None
         except HTTPException as e:
-            # If the UserService raises a 404, the user does not exist.
             if e.status_code == status.HTTP_404_NOT_FOUND:
                 return None
-            # Re-raise any other unexpected HTTP exceptions
             raise e
         
-        # If all checks pass, the token is valid for an existing, active user.
         return payload

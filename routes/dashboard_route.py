@@ -124,13 +124,13 @@ def get_user(
 
 @router.put("/me", response_model=schemas.User)
 def update_yourself(
-    update_data: schemas.UserUpdate,
+    update_data: schemas.MeUpdate,
     user_service: UserService = Depends(get_user_service),
     user: schemas.CurrentUser = Depends(get_current_user),
 ):
     """
-    Update a user's details (role, display name, etc.).
-    Note: This endpoint does NOT handle password changes.
+    Update a user's details (display name, etc.).
+    Note: This endpoint does NOT update role
     """
     if not user:
         raise HTTPException(status_code=401, detail="Thou Art Not Logged In")

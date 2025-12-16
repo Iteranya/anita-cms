@@ -7,3 +7,4 @@ TODO
 - [ ] Add Git Integration on Asta Markdown Editor (for history only, no pull, push, version control stuff)
 - [ ] Add CSP Setting on Aina's Routes and Site
 - [ ] Export to SSG Button (optionally add github token for quick push)
+- [ ] Make Domain Specific Language for Theme and Plugin

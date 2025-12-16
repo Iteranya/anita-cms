@@ -1,23 +1,36 @@
 # file: services/users.py
 
 from typing import List, Dict
+import bcrypt
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
-from passlib.context import CryptContext
 
 from data import crud, schemas, models
 
-# --- Password Hashing Setup ---
-# This creates a context for hashing and verifying passwords using the bcrypt algorithm.
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# --- Password Hashing Setup (Replaces Passlib) ---
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verifies a plain-text password against a hashed one."""
-    return pwd_context.verify(plain_password, hashed_password)
+    """
+    Verifies a plain-text password against a hashed one using strict bcrypt.
+    """
+    # bcrypt.checkpw requires bytes, not strings.
+    # We must encode the input strings to utf-8 bytes.
+    password_bytes = plain_password.encode('utf-8')
+    hash_bytes = hashed_password.encode('utf-8')
+    
+    return bcrypt.checkpw(password_bytes, hash_bytes)
 
 def hash_password(password: str) -> str:
-    """Hashes a plain-text password."""
-    return pwd_context.hash(password)
+    """
+    Hashes a plain-text password using bcrypt.
+    Returns the hash as a string for database storage.
+    """
+    password_bytes = password.encode('utf-8')
+    salt = bcrypt.gensalt()
+    hashed_bytes = bcrypt.hashpw(password_bytes, salt)
+    
+    # Decode back to utf-8 string so it can be saved in the SQL Text/String column
+    return hashed_bytes.decode('utf-8')
 
 # --- Service Class ---
 
@@ -65,10 +78,12 @@ class UserService:
         # Hash the password before storage.
         hashed_pw = hash_password(user_in.password)
 
-        # Create the user data object for the CRUD layer, replacing the plain password
-        # with the hashed password.
+        # Create the user data object for the CRUD layer.
+        # Pydantic v2: Use model_dump instead of dict
+        user_data_dict = user_in.model_dump(exclude={"password"})
+        
         user_create_data = schemas.UserCreate(
-            **user_in.dict(exclude={"password"}), # Exclude plain password
+            **user_data_dict,
             hashed_password=hashed_pw
         )
         
@@ -89,7 +104,8 @@ class UserService:
             )
 
         # Get the update data from the Pydantic model.
-        update_data = user_update.dict(exclude_unset=True)
+        # Pydantic v2: Use model_dump instead of dict
+        update_data = user_update.model_dump(exclude_unset=True)
 
         # Update the user model's attributes.
         for key, value in update_data.items():
@@ -163,32 +179,16 @@ class UserService:
     def get_user_permissions(self, username: str) -> List[str]:
         """
         Gets a list of all permissions for a specific user.
-
-        Args:
-            username: The username of the user to check.
-
-        Returns:
-            A list of permission strings. Returns an empty list if the user
-            does not exist, their role doesn't exist, or their role has no permissions.
         """
-        # Step 1: Find the user without raising an exception on failure.
-        # We use the CRUD function directly to get None instead of a 404.
         user = crud.get_user_by_username(self.db, username=username)
         if not user:
             return []
 
-        # Step 2: Get the user's role name.
         user_role_name = user.role
         if not user_role_name:
             return []
 
-        # Step 3: Get the dictionary of all roles and their permissions.
-        # We can reuse the existing service method for this.
         all_roles_with_permissions = self.get_all_roles()
-
-        # Step 4: Look up the permissions for the user's role.
-        # The .get() method safely handles cases where the role might not be in the dict,
-        # returning our specified default value (an empty list).
         permissions = all_roles_with_permissions.get(user_role_name, [])
         
         return permissions

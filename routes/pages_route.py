@@ -161,29 +161,38 @@ def update_page(
     user_service: UserService = Depends(get_user_service),
     user: CurrentUser = Depends(dep.get_current_user),
 ):
-    # db_page is a SQLALCHEMY MODEL (tags are objects)
     db_page = page_service.get_page_by_slug(slug)
     if not db_page:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found")
 
     permissions = set(user_service.get_user_permissions(user.username))
 
-    # --- Permission Context ---
-    is_author = db_page.author == user.username
-    is_blog_page = is_tag_in_db_page(db_page.tags, "sys:blog")
     
-    has_full_rights = "*" in permissions or "page:update" in permissions
+    # Check for a "master" permission that allows managing any page.
+    has_master_permission = "*" in permissions or "page:update" in permissions
+
+    # If the user is trying to update tags AND they lack the master permission...
+    if page_update.tags is not None and not has_master_permission:
+        
+        # 1. Preserve existing protected tags from the database object.
+        preserved_system_tags = [
+            tag.name for tag in db_page.tags if tag.name.startswith("sys:")
+        ]
+        
+        # 2. Filter the user's input to get only the descriptive tags.
+        new_descriptive_tags = [
+            tag for tag in page_update.tags if not tag.startswith("sys:")
+        ]
+        
+        # 3. Overwrite the user's tag list with the safe, merged list.
+        page_update.tags = preserved_system_tags + new_descriptive_tags
+    
+    is_blog_page = is_tag_in_db_page(db_page.tags, "sys:blog")
+    is_author = db_page.author == user.username
     has_blog_rights = is_blog_page and ("blog:update" in permissions or is_author)
 
-    if not (has_full_rights or has_blog_rights):
+    if not (has_master_permission or has_blog_rights):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied")
-
-    if not has_full_rights:
-
-        page_update.type = db_page.type
-
-        if page_update.tags is not None:
-             page_update.tags = ensure_tag_in_schema(page_update.tags, "sys:blog")
 
     logger.info(f"User '{user.username}' updating page '{slug}'")
     return page_service.update_existing_page(slug=slug, page_update_data=page_update)

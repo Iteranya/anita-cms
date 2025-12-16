@@ -139,6 +139,8 @@ Or better yet, you can actually hack this thing!!! Create something that is more
 
 (Ah, also, A-GPL-3 License, so you need to share that too~ :3)
 
+Edit: Added RBAC, I need a life
+
 # An Ecosystem of Built on Sharing
 
 Look, I have no grand dream or anything (except maybe the death of Wordpress), but I do want this project to grow beyond what I'm capable of.
@@ -154,3 +156,4 @@ Which is cool!? RIGHT!??!!
 ...
 
 I need to sleep, holy shit...
+
