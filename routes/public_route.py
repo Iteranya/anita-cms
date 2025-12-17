@@ -41,7 +41,7 @@ def serve_any_post(slug: str, main:str,page_service: PageService = Depends(get_p
     """Serves a single page."""
     print(main + slug)
     page = page_service.get_page_by_slug(slug) # Service handles 404 if slug doesn't exist
-    markdown_template = page_service.get_first_page_by_tags(['sys:blog-template','any:read'])
+    markdown_template = page_service.get_first_page_by_tags(['sys:template','any:read'])
     print(markdown_template)
     if not page.tags or not {f'main:{main}', 'any:read'}.issubset(tag.name for tag in page.tags):
         print("Page with the slug" +slug + "Not found")

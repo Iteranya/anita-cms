@@ -3,9 +3,6 @@
     <!-- TOP NAV / HEADER -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-30 px-6 py-4 flex items-center justify-between shadow-sm">
         <div class="flex items-center gap-4">
-            <div class="bg-indigo-600 text-white w-10 h-10 rounded-lg flex items-center justify-center shadow-indigo-200 shadow-md">
-                <i class="fas fa-sitemap text-lg"></i>
-            </div>
             <div>
                 <h1 class="text-xl font-bold text-slate-800 leading-tight">Pages & Structure</h1>
                 <p class="text-xs text-slate-500 font-medium">Manage site hierarchy and content</p>
@@ -104,6 +101,12 @@
                     <template x-if="page.tags.includes('sys:home')">
                         <span class="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-bold">Home</span>
                     </template>
+                    <template x-if="page.tags.includes('sys:template')">
+                        <span class="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-bold">Template</span>
+                    </template>
+                    <template x-if="page.tags.includes('any:read')">
+                        <span class="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-bold">Public</span>
+                    </template>
                 </div>
                 
                 <!-- Hover Menu (Prevent Drag on Click) -->
@@ -130,11 +133,6 @@
                 <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                     <span x-text="page.type"></span>
                 </div>
-                <!-- Link needs mousedown.stop so you can click it without dragging -->
-                <a @mousedown.stop :href="`/${page.type === 'markdown' ? 'asta' : 'aina'}/?slug=${page.slug}`" 
-                   class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 group/link cursor-pointer">
-                    Edit <i class="fas fa-arrow-right transform group-hover/link:translate-x-1 transition"></i>
-                </a>
             </div>
 
         </div>
@@ -180,102 +178,146 @@
                 <button @click="modalOpen = false" class="text-slate-400 hover:text-red-500"><i class="fas fa-times text-xl"></i></button>
             </div>
 
-            <!-- Tabs Navigation -->
-            <div class="px-6 border-b border-slate-200 bg-white">
-                <nav class="flex space-x-6 -mb-px">
-                    <button @click="activeTab = 'general'" :class="{ 'border-indigo-500 text-indigo-600 font-bold': activeTab === 'general', 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300': activeTab !== 'general' }" class="whitespace-nowrap py-3 px-1 border-b-2 text-sm transition-colors">General</button>
-                    <button @click="activeTab = 'content'" :class="{ 'border-indigo-500 text-indigo-600 font-bold': activeTab === 'content', 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300': activeTab !== 'content' }" class="whitespace-nowrap py-3 px-1 border-b-2 text-sm transition-colors">Content</button>
-                    <button @click="activeTab = 'settings'" :class="{ 'border-indigo-500 text-indigo-600 font-bold': activeTab === 'settings', 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300': activeTab !== 'settings' }" class="whitespace-nowrap py-3 px-1 border-b-2 text-sm transition-colors">Permissions</button>
-                </nav>
+            <!-- Page Settings Form -->
+<!-- Page Settings Form -->
+<div class="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
+    <div class="max-w-4xl mx-auto space-y-12">
+
+        <!-- Section 1: Page Details -->
+        <div class="space-y-8">
+            <!-- Page Title -->
+            <div>
+                <label for="pageTitle" class="block text-sm font-medium text-slate-500">Page Title</label>
+                <input 
+                    id="pageTitle" 
+                    type="text" 
+                    x-model="form.title" 
+                    @input="handleTitleInput" 
+                    class="mt-1 block w-full bg-transparent border-0 p-0 text-xl font-bold text-slate-900 placeholder:text-slate-400 focus:ring-0" 
+                    placeholder="My Awesome New Page"
+                >
             </div>
 
-            <!-- Body (Tab Content) -->
-            <div class="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-6">
+            <!-- URL Slug -->
+            <div>
+                <label for="pageSlug" class="block text-sm font-medium text-slate-500">URL Slug</label>
+                <div class="mt-1">
+                    <input 
+                        id="pageSlug" 
+                        type="text" 
+                        x-model="form.slug" 
+                        :disabled="mode === 'edit'" 
+                        class="w-full rounded-md border-transparent bg-slate-100 px-3 py-2 font-mono text-sm text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:text-slate-500"
+                    >
+                    <p class="text-xs text-slate-500 mt-2">Generated from the title. Cannot be changed after creation.</p>
+                </div>
+            </div>
+            
+            <!-- Page Description (Content) -->
+            <div>
+                <label for="pageContent" class="block text-sm font-medium text-slate-500">Description</label>
+                <textarea 
+                    id="pageContent" 
+                    x-model="form.content" 
+                    rows="2" 
+                    class="mt-1 block w-full bg-transparent border-0 p-0 text-slate-600 placeholder:text-slate-400 focus:ring-0" 
+                    placeholder="A brief summary for search engines and page listings."
+                ></textarea>
+            </div>
+        </div>
+
+        <hr class="border-slate-200">
+
+        <!-- Section 2: Status & Visibility -->
+        <div class="space-y-5">
+            <div>
+                <h2 class="text-xl font-bold text-slate-800">Status & Visibility</h2>
+                <p class="text-sm text-slate-500 mt-1">Control how and where this page appears.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 
-                <!-- TAB 1: General -->
-                <div x-show="activeTab === 'general'" class="space-y-6 animate-fade-in-fast">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        <div class="col-span-1 sm:col-span-2">
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Page Title</label>
-                            <input type="text" x-model="form.title" @input="handleTitleInput" class="w-full form-input font-bold text-lg">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">URL Slug</label>
-                            <input type="text" x-model="form.slug" :disabled="mode === 'edit'" class="w-full form-input disabled:bg-slate-100 disabled:text-slate-500 font-mono text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Page Category / Group</label>
-                            <input type="text" x-model="form.category" @input="handleCategoryInput" placeholder="e.g., blog, projects" class="w-full form-input font-mono text-sm">
-                        </div>
+                <!-- Public Access Toggle -->
+                <label class="flex items-center p-4 bg-white border border-slate-200 rounded-lg hover:border-slate-300 transition cursor-pointer">
+                    <input type="checkbox" x-model="form.isPublic" class="sr-only peer">
+                    <div class="w-10 h-6 bg-slate-300 rounded-full peer-checked:bg-green-500 transition-colors relative">
+                        <div class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform transform peer-checked:translate-x-4"></div>
                     </div>
-                    <div class="relative py-2">
-                        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
-                        <div class="relative flex justify-center"><span class="px-3 bg-white text-xs font-bold text-slate-400 uppercase tracking-wider">Page Status</span></div>
+                    <div class="ml-4 flex-1">
+                        <p class="font-semibold text-slate-700">Public Access</p>
+                        <p class="text-xs text-slate-500">Allow anyone to view this page.</p>
                     </div>
-                    <div class="space-y-4">
-                        <label class="flex items-center p-4 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100/70 transition cursor-pointer">
-                            <input type="checkbox" x-model="form.isPublic" class="sr-only peer">
-                            <div class="w-10 h-6 bg-slate-300 rounded-full peer-checked:bg-green-500 transition-colors relative">
-                                <div class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform transform peer-checked:translate-x-4"></div>
-                            </div>
-                            <div class="ml-4">
-                                <p class="font-bold text-slate-700">Public Access</p>
-                                <p class="text-xs text-slate-500">Allows anyone to view this page via its URL.</p>
-                            </div>
-                        </label>
-                        <label class="flex items-center p-4 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100/70 transition cursor-pointer">
-                            <input type="checkbox" x-model="form.isTemplate" class="sr-only peer">
-                            <div class="w-10 h-6 bg-slate-300 rounded-full peer-checked:bg-green-500 transition-colors relative">
-                                <div class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform transform peer-checked:translate-x-4"></div>
-                            </div>
-                            <div class="ml-4">
-                                <p class="font-bold text-slate-700">Template</p>
-                                <p class="text-xs text-slate-500">Mark This Page As Template.</p>
-                            </div>
-                        </label>
-                        <label class="flex items-center p-4 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100/70 transition cursor-pointer">
-                            <input type="checkbox" x-model="form.isHome" class="sr-only peer">
-                            <div class="w-10 h-6 bg-slate-300 rounded-full peer-checked:bg-blue-500 transition-colors relative">
-                                <div class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform transform peer-checked:translate-x-4"></div>
-                            </div>
-                            <div class="ml-4">
-                                <p class="font-bold text-slate-700">Set as Site Homepage</p>
-                                <p class="text-xs text-slate-500">This page will be served at your site's main `/` URL.</p>
-                            </div>
-                        </label>
-                    </div>
-                </div>
+                </label>
 
-                <!-- TAB 2: Permissions and Security -->
-                <div x-show="activeTab === 'settings'" class="space-y-4 animate-fade-in-fast">
-                    <h4 class="font-bold text-slate-800">Role-Based Access Control</h4>
-                    <div class="overflow-x-auto bg-slate-50 border border-slate-200 rounded-lg">
-                        <table class="min-w-full text-sm">
-                            <thead class="bg-slate-100 text-slate-500">
-                                <tr>
-                                    <th class="text-left font-bold uppercase p-3">Role</th>
-                                    <th class="text-center font-bold uppercase p-3">Create</th>
-                                    <th class="text-center font-bold uppercase p-3">Read</th>
-                                    <th class="text-center font-bold uppercase p-3">Update</th>
-                                    <th class="text-center font-bold uppercase p-3">Delete</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200">
-                                <template x-for="role in roles" :key="role">
-                                    <tr>
-                                        <td class="p-3 font-mono font-bold text-slate-700 capitalize" x-text="role"></td>
-                                        <!-- Note: Added checks to ensure form.permissions[role] exists -->
-                                        <td class="p-3 text-center"><input type="checkbox" x-if="form.permissions[role]" x-model="form.permissions[role].create" class="form-checkbox"></td>
-                                        <td class="p-3 text-center"><input type="checkbox" x-if="form.permissions[role]" x-model="form.permissions[role].read" class="form-checkbox"></td>
-                                        <td class="p-3 text-center"><input type="checkbox" x-if="form.permissions[role]" x-model="form.permissions[role].update" class="form-checkbox"></td>
-                                        <td class="p-3 text-center"><input type="checkbox" x-if="form.permissions[role]" x-model="form.permissions[role].delete" class="form-checkbox"></td>
-                                    </tr>
-                                </template>
-                            </tbody>
-                        </table>
+                <!-- Template Toggle -->
+                <label class="flex items-center p-4 bg-white border border-slate-200 rounded-lg hover:border-slate-300 transition cursor-pointer">
+                    <input type="checkbox" x-model="form.isTemplate" class="sr-only peer">
+                    <div class="w-10 h-6 bg-slate-300 rounded-full peer-checked:bg-indigo-500 transition-colors relative">
+                        <div class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform transform peer-checked:translate-x-4"></div>
                     </div>
-                </div>
+                    <div class="ml-4 flex-1">
+                        <p class="font-semibold text-slate-700">Make it a Template</p>
+                        <p class="text-xs text-slate-500">Use this page as a blueprint for new pages.</p>
+                    </div>
+                </label>
+
+                <!-- Homepage Toggle -->
+                <label class="flex items-center p-4 bg-white border border-slate-200 rounded-lg hover:border-slate-300 transition cursor-pointer col-span-1 md:col-span-2">
+                    <input type="checkbox" x-model="form.isHome" class="sr-only peer">
+                    <div class="w-10 h-6 bg-slate-300 rounded-full peer-checked:bg-blue-500 transition-colors relative">
+                        <div class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform transform peer-checked:translate-x-4"></div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <p class="font-semibold text-slate-700">Set as Site Homepage</p>
+                        <p class="text-xs text-slate-500">This page will be served at your site's main `/` URL.</p>
+                    </div>
+                </label>
             </div>
+        </div>
+        
+        <hr class="border-slate-200">
+
+        <!-- Section 3: Role-Based Access Control -->
+        <div class="space-y-4">
+            <div>
+                <h2 class="text-xl font-bold text-slate-800">Permissions</h2>
+                <p class="text-sm text-slate-500 mt-1">Control which user roles can perform actions on this page.</p>
+            </div>
+            <div class="overflow-x-auto border border-slate-200 rounded-lg">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="text-left font-semibold text-slate-600 uppercase p-3 tracking-wider">Role</th>
+                            <th class="text-center font-semibold text-slate-600 uppercase p-3 tracking-wider">Create</th>
+                            <th class="text-center font-semibold text-slate-600 uppercase p-3 tracking-wider">Read</th>
+                            <th class="text-center font-semibold text-slate-600 uppercase p-3 tracking-wider">Update</th>
+                            <th class="text-center font-semibold text-slate-600 uppercase p-3 tracking-wider">Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 bg-white">
+                        <template x-for="role in roles" :key="role">
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="p-3 font-mono font-medium text-slate-700 capitalize" x-text="role"></td>
+                                <td class="p-3 text-center">
+                                    <input type="checkbox" x-if="form.permissions[role]" x-model="form.permissions[role].create" class="form-checkbox rounded text-indigo-600 focus:ring-indigo-500">
+                                </td>
+                                <td class="p-3 text-center">
+                                    <input type="checkbox" x-if="form.permissions[role]" x-model="form.permissions[role].read" class="form-checkbox rounded text-indigo-600 focus:ring-indigo-500">
+                                </td>
+                                <td class="p-3 text-center">
+                                    <input type="checkbox" x-if="form.permissions[role]" x-model="form.permissions[role].update" class="form-checkbox rounded text-indigo-600 focus:ring-indigo-500">
+                                </td>
+                                <td class="p-3 text-center">
+                                    <input type="checkbox" x-if="form.permissions[role]" x-model="form.permissions[role].delete" class="form-checkbox rounded text-indigo-600 focus:ring-indigo-500">
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
 
             <!-- Footer -->
             <div class="px-6 py-4 bg-slate-50/70 border-t border-slate-100 flex justify-end gap-3 rounded-b-2xl">

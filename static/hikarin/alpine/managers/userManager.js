@@ -22,70 +22,62 @@ export default () =>  ({
 
         // Static Data: Permission Categories
         permCategories: [
-            {
-                name: 'Administrator',
-                perms: [
-                    { key: '*', label: 'Administrator', desc: 'Grants full unrestricted access to all system features, settings, content, and tools.' }
+    {
+        name: 'Administrator',
+        perms: [
+            { key: '*', label: 'Administrator', desc: 'Grants full unrestricted access to all system features, settings, content, and tools.' }
+        ]
+    },
+    {
+        name: 'Forms & Submissions',
+        perms: [
+            { key: 'form:create', label: 'Create Forms', desc: 'Allows creating new forms, including defining fields, settings, and behavior.' },
+            { key: 'form:read', label: 'View Forms', desc: 'Allows viewing existing forms and their configuration.' },
+            { key: 'form:update', label: 'Edit Forms', desc: 'Allows editing or modifying existing forms and their settings.' },
+            { key: 'form:delete', label: 'Delete Forms', desc: 'Allows deleting forms entirely from the system.' },
+            
+            { key: 'submission:create', label: 'Create Submissions (Override)', desc: 'Allows creating form submissions even when the form’s own access rules would normally prevent it.' },
+            { key: 'submission:read', label: 'View Submissions (Override)', desc: 'Allows viewing any form submissions regardless of the form’s internal permission rules.' },
+            { key: 'submission:update', label: 'Edit Submissions (Override)', desc: 'Allows editing any form submission even if role-based or form-level rules would normally block it.' },
+            { key: 'submission:delete', label: 'Delete Submissions (Override)', desc: 'Allows deleting any form submission regardless of the form’s access restrictions.' }
+        ]
+    },
+    {
+        name: 'Media Library',
+        perms: [
+            { key: 'media:create', label: 'Upload Media', desc: 'Allows uploading new media files into the media library.' },
+            { key: 'media:read', label: 'View Media Library', desc: 'Allows browsing and viewing all items in the media library.' },
+            { key: 'media:update', label: 'Edit Media Metadata', desc: 'Allows editing media details such as titles, descriptions, and tags.' },
+            { key: 'media:delete', label: 'Delete Media', desc: 'Allows permanently deleting media files from the library.' }
+        ]
+    },
+    {
+        name: 'Pages & Content',
+        perms: [
+            { key: 'page:create', label: 'Create Pages (System)', desc: 'Allows creating new pages anywhere in the CMS.' },
+            { key: 'page:read', label: 'View Pages (System)', desc: 'Allows viewing all pages within the CMS, overriding any page-specific restrictions.' },
+            { key: 'page:update', label: 'Edit Pages (System)', desc: 'Allows modifying any page’s content, metadata, and settings.' },
+            { key: 'page:delete', label: 'Delete Pages (System)', desc: 'Allows deleting any page from the CMS.' }
+        ]
+    },
+    {
+        name: 'System & AI Editors',
+        perms: [
+            { key: 'config:read', label: 'View System Config', desc: 'Allows viewing system configuration values without exposing sensitive secrets.' },
+            { key: 'config:update', label: 'Edit System Config', desc: 'Allows editing or updating system configuration values.' },
 
-                ]
-            },
-            {
-                name: 'Forms & Submissions',
-                perms: [
-                    { key: 'form:create', label: 'Create Forms', desc: 'Allows creating new forms, including defining fields, settings, and behavior.' },
-{ key: 'form:read', label: 'View Forms', desc: 'Allows viewing existing forms and their configuration.' },
-{ key: 'form:update', label: 'Edit Forms', desc: 'Allows editing or modifying existing forms and their settings.' },
-{ key: 'form:delete', label: 'Delete Forms', desc: 'Allows deleting forms entirely from the system.' },
+            { key: 'html:create', label: 'Set Page Type to HTML', desc: 'Grants the ability to mark a page’s content type as HTML.' },
+            { key: 'html:read', label: 'Access Aina (HTML Editor)', desc: 'Grants the ability to open and use the Aina HTML editor.' },
+            { key: 'html:update', label: 'Save in Aina (HTML Editor)', desc: 'Grants the ability to save changes made within the Aina editor.' },
+            { key: 'html:delete', label: 'Delete HTML Page Content', desc: 'Unused, I just like symmetry.' },
 
-{ key: 'submission:create', label: 'Create Submissions (Override)', desc: 'Allows creating form submissions even when the form’s own access rules would normally prevent it.' },
-{ key: 'submission:read', label: 'View Submissions (Override)', desc: 'Allows viewing any form submissions regardless of the form’s internal permission rules.' },
-{ key: 'submission:update', label: 'Edit Submissions (Override)', desc: 'Allows editing any form submission even if role-based or form-level rules would normally block it.' },
-{ key: 'submission:delete', label: 'Delete Submissions (Override)', desc: 'Allows deleting any form submission regardless of the form’s access restrictions.' },
-
-                ]
-            },
-            {
-                name: 'Media Library',
-                perms: [
-                    { key: 'media:create', label: 'Upload Media', desc: 'Allows uploading new media files into the media library.' },
-{ key: 'media:read', label: 'View Media Library', desc: 'Allows browsing and viewing items in the media library.' },
-{ key: 'media:update', label: 'Edit Media Metadata', desc: 'Allows editing media details such as titles, descriptions, and tags.' },
-{ key: 'media:delete', label: 'Delete Media', desc: 'Allows permanently deleting media files from the library.' },
-
-                ]
-            },
-            {
-                name: 'Blog System',
-                perms: [
-                  { key: 'blog:create', label: 'Create Posts', desc: 'Allows writing and publishing new blog posts.' },
-{ key: 'blog:read', label: 'Read Posts', desc: 'Allows access to view all blog posts in the system.' },
-{ key: 'blog:update', label: 'Edit Posts', desc: 'Allows modifying existing blog posts.' },
-{ key: 'blog:delete', label: 'Delete Posts', desc: 'Allows deleting blog posts permanently.' },
-
-                ]
-            },
-            {
-                name: 'Pages & Content',
-                perms: [
-                    { key: 'page:create', label: 'Create Pages', desc: 'Allows creating new pages in the CMS.' },
-{ key: 'page:read', label: 'View Pages', desc: 'Allows viewing all pages within the CMS.' },
-{ key: 'page:update', label: 'Edit Pages', desc: 'Allows modifying page content, metadata, and settings.' },
-{ key: 'page:delete', label: 'Delete Pages', desc: 'Allows deleting pages from the CMS.' },
-
-                ]
-            },
-            {
-                name: 'System & AI',
-                perms: [
-                  { key: 'config:read', label: 'View Config', desc: 'Allows viewing system configuration values without exposing sensitive secrets.' },
-{ key: 'config:update', label: 'Edit Config', desc: 'Allows editing or updating system configuration values.' },
-
-{ key: 'aina', label: 'Access Aina (HTML AI)', desc: 'Allows using Aina, the HTML-based AI assistant.' },
-{ key: 'asta', label: 'Access Asta (Markdown AI)', desc: 'Allows using Asta, the Markdown Editor.' },
-
-                ]
-            }
-        ],
+            { key: 'markdown:create', label: 'Set Page Type to Markdown', desc: 'Grants the ability to mark a page’s content type as Markdown.' },
+            { key: 'markdown:read', label: 'Access Asta (Markdown Editor)', desc: 'Grants the ability to open and use the Asta Markdown editor.' },
+            { key: 'markdown:update', label: 'Save in Asta (Markdown Editor)', desc: 'Grants the ability to save changes made within the Asta editor.' },
+            { key: 'markdown:delete', label: 'Delete Markdown Page Content', desc: 'Unusued, I just like symmetry.' }
+        ]
+    }
+],
 
         async init() {
             await this.refresh();
