@@ -12,7 +12,7 @@ from src.dependencies import optional_user
 router = APIRouter(tags=["Admin SPA"])
 
 ADMIN_DIR = "static/admin"
-SPA_VIEWS = {"dashboard", "page", "users", "forms", "files", "media", "config"}
+SPA_VIEWS = {"dashboard", "page", "structure", "users", "forms", "files", "media", "config"}
 ADMIN_CSP = (
 "default-src 'self'; "
 "script-src 'self' 'unsafe-eval'"

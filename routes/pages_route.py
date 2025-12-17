@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, status
-from typing import List, Optional
+from typing import List, Optional, Set
 from sqlalchemy.orm import Session
 
 from data.database import get_db
 from data import schemas
-from data.schemas import CurrentUser, Page
+from data.schemas import CurrentUser
 from services.pages import PageService
 from services.users import UserService
 from src import dependencies as dep
@@ -18,34 +18,27 @@ def get_page_service(db: Session = Depends(get_db)) -> PageService:
 def get_user_service(db: Session = Depends(get_db)) -> UserService:
     return UserService(db)
 
+router = APIRouter(prefix="/page", tags=["Pages"])
+
 # --- Helper Logic ---
 
-def is_tag_in_db_page(db_page_tags: List, tag_name: str) -> bool:
-    """
-    Checks if a tag exists in a list of SQLALCHEMY OBJECTS.
-    Used when inspecting existing data from the database.
-    """
-    if not db_page_tags:
-        return False
-    # Checks t.name because these are DB objects
-    return any(t.name == tag_name for t in db_page_tags)
+def get_tag_names(db_tags) -> Set[str]:
+    """Extract string names from SQLAlchemy tag objects."""
+    if not db_tags:
+        return set()
+    return {t.name for t in db_tags}
 
-def ensure_tag_in_schema(tags_list: List[str], tag_name: str) -> List[str]:
+def check_type_permission(permissions: List[str], page_type: str, action: str):
     """
-    Ensures a tag string exists in a list of STRINGS.
-    Used when manipulating Pydantic input schemas (PageCreate/Update).
+    Validates if user has specific editor permissions (Aina vs Asta).
+    e.g. check_type_permission(perms, 'html', 'create') looks for 'html:create'
     """
-    if tags_list is None:
-        tags_list = []
+    required_perm = f"{page_type}:{action}"
     
-    if tag_name not in tags_list:
-        tags_list.append(tag_name)
-    
-    return tags_list
-
-# --- Router Definition ---
-
-router = APIRouter(prefix="/page", tags=["Pages"])
+    # Check for specific permission OR super-admin wildcard
+    if "*" in permissions or required_perm in permissions:
+        return True
+    return False
 
 # ----------------------------------------------------
 # 📄 PAGES CRUD
@@ -58,32 +51,37 @@ def create_page(
     user_service: UserService = Depends(get_user_service),  
     user: CurrentUser = Depends(dep.get_current_user),  
 ):
+    # 0. Enforce Default Type
+    # If type is None or empty, default to 'markdown'
+    if not page_in.type:
+        page_in.type = "markdown"
+
     permissions = user_service.get_user_permissions(user.username)
     
-    can_create_any = "*" in permissions or "page:create" in permissions
-    can_create_blog = "blog:create" in permissions
-
-    if can_create_any:
-        # User is admin or page creator, no modification needed
-        pass
-    elif can_create_blog:
-        # Restricted Blog Creator:
-        # 1. Force type to markdown
-        page_in.type = "markdown"
-        # 2. Force 'sys:blog' tag (Input is List[str], so we append string)
-        page_in.tags = ensure_tag_in_schema(page_in.tags, "sys:blog")
+    # 1. Base Page Permission
+    can_create_page = "*" in permissions or "page:create" in permissions
+    
+    # 2. Type Specific Permission (Aina vs Asta)
+    if page_in.type == "markdown":
+        can_create_type = True
     else:
+        can_create_type = check_type_permission(permissions, page_in.type, "create")
+
+    if not can_create_page:
+        raise HTTPException(status_code=403, detail="You do not have permission to create pages.")
+        
+    if not can_create_type:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to create a page."
+            status_code=403, 
+            detail=f"You do not have permission to create {page_in.type} pages."
         )
 
     page_in.author = user.username
-    logger.info(f"{user.username} created page: {page_in.slug}")
+    logger.info(f"User {user.username} creating {page_in.type} page: {page_in.slug}")
     return page_service.create_new_page(page_data=page_in)
 
 
-@router.get("/list", response_model=List[Page])
+@router.get("/list", response_model=List[schemas.PageData])
 def list_pages(
     skip: int = 0,
     limit: int = 100,
@@ -91,32 +89,30 @@ def list_pages(
     user_service: UserService = Depends(get_user_service),
     user: Optional[CurrentUser] = Depends(dep.optional_user),
 ):
-    """
-    Lists pages. Pushes filtering to the service layer.
-    """
-    permissions = set()
-    if user:
-        permissions = set(user_service.get_user_permissions(user.username))
-
-    # 1. Admin / Full Read
-    if "*" in permissions or "page:read" in permissions:
-        return page_service.get_all_pages(skip=skip, limit=limit)
+    # Standard listing (Read access logic)
+    all_pages = page_service.get_all_pages(skip=skip, limit=limit)
     
-    # 2. Blog Reader
-    if "blog:read" in permissions:
-        # Filter by string tags
-        return page_service.get_pages_by_tags(
-            tags=["sys:blog", "sys:public"], 
-            skip=skip, 
-            limit=limit
-        )
+    user_permissions = []
+    user_role = "anon"
+    if user:
+        user_permissions = user_service.get_user_permissions(user.username)
+        user_role = user.role
 
-    # 3. Public / Anonymous
-    return page_service.get_pages_by_tag(
-        tag="sys:public", 
-        skip=skip, 
-        limit=limit
-    )
+    if "*" in user_permissions or "page:read" in user_permissions:
+        return all_pages
+
+    accessible_pages = []
+    for page in all_pages:
+        tag_names = get_tag_names(page.tags)
+        
+        is_public = "any:read" in tag_names
+        role_allowed = f"{user_role}:read" in tag_names
+        is_author = user and page.author == user.username
+
+        if is_public or role_allowed or is_author:
+            accessible_pages.append(page)
+
+    return accessible_pages
 
 
 @router.get("/{slug}", response_model=schemas.Page)
@@ -126,31 +122,30 @@ def get_page(
     user_service: UserService = Depends(get_user_service),
     user: Optional[CurrentUser] = Depends(dep.optional_user),
 ):
-    # Returns DB Object (with tag objects)
     page = page_service.get_page_by_slug(slug)
     if not page:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found")
+        raise HTTPException(status_code=404, detail="Page not found")
 
-    # 1. Check Public Access (using helper for DB objects)
-    if is_tag_in_db_page(page.tags, "sys:public"):
+    tag_names = get_tag_names(page.tags)
+    
+    # 1. Public Access (No type check needed just to view the website)
+    if "any:read" in tag_names:
         return page
 
-    # 2. Authentication Required
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required")
+        raise HTTPException(status_code=401, detail="Authentication required")
 
-    permissions = set(user_service.get_user_permissions(user.username))
+    user_permissions = user_service.get_user_permissions(user.username)
+    
+    # 2. Access Rights
+    is_admin = "*" in user_permissions or "page:read" in user_permissions
+    role_allowed = f"{user.role}:read" in tag_names
+    is_author = page.author == user.username
 
-    # 3. Check Permissions
-    can_read_all = "*" in permissions or "page:read" in permissions
-    # Check if page has sys:blog tag (checking DB objects)
-    is_blog_page = is_tag_in_db_page(page.tags, "sys:blog")
-    can_read_blog = "blog:read" in permissions and is_blog_page
-
-    if can_read_all or can_read_blog:
+    if is_admin or role_allowed or is_author:
         return page
 
-    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+    raise HTTPException(status_code=404, detail="Page not found")
 
 
 @router.put("/{slug}", response_model=schemas.Page)
@@ -161,38 +156,48 @@ def update_page(
     user_service: UserService = Depends(get_user_service),
     user: CurrentUser = Depends(dep.get_current_user),
 ):
+    """
+    Updates page metadata or content.
+    Checks BOTH page ownership/tags AND editor capability (Aina/Asta).
+    """
     db_page = page_service.get_page_by_slug(slug)
     if not db_page:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found")
+        raise HTTPException(status_code=404, detail="Page not found")
 
-    permissions = set(user_service.get_user_permissions(user.username))
+    tag_names = get_tag_names(db_page.tags)
+    user_permissions = user_service.get_user_permissions(user.username)
 
-    
-    # Check for a "master" permission that allows managing any page.
-    has_master_permission = "*" in permissions or "page:update" in permissions
-
-    # If the user is trying to update tags AND they lack the master permission...
-    if page_update.tags is not None and not has_master_permission:
-        
-        # 1. Preserve existing protected tags from the database object.
-        preserved_system_tags = [
-            tag.name for tag in db_page.tags if tag.name.startswith("sys:")
-        ]
-        
-        # 2. Filter the user's input to get only the descriptive tags.
-        new_descriptive_tags = [
-            tag for tag in page_update.tags if not tag.startswith("sys:")
-        ]
-        
-        # 3. Overwrite the user's tag list with the safe, merged list.
-        page_update.tags = preserved_system_tags + new_descriptive_tags
-    
-    is_blog_page = is_tag_in_db_page(db_page.tags, "sys:blog")
+    # 1. Access Rights (Can I touch this page?)
+    is_admin = "*" in user_permissions or "page:update" in user_permissions
     is_author = db_page.author == user.username
-    has_blog_rights = is_blog_page and ("blog:update" in permissions or is_author)
+    role_allowed = f"{user.role}:update" in tag_names
+    is_open_update = "any:update" in tag_names
 
-    if not (has_master_permission or has_blog_rights):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied")
+    has_access_right = (is_admin or is_author or role_allowed or is_open_update)
+
+    if not has_access_right:
+        raise HTTPException(status_code=403, detail="Permission denied for this page.")
+
+    # 2. Capability Rights (Can I use this editor?)
+    # We check the CURRENT page type.
+    can_edit_current_type = check_type_permission(user_permissions, db_page.type, "update")
+
+    if not can_edit_current_type:
+         raise HTTPException(
+            status_code=403, 
+            detail=f"You lack permission to update {db_page.type} content."
+        )
+
+    # 3. Type Change Check (Edge Case)
+    # If the user is trying to switch types (e.g. Markdown -> HTML)
+    if page_update.type and page_update.type != db_page.type:
+        # User needs permission to CREATE the new type
+        can_create_new_type = check_type_permission(user_permissions, page_update.type, "create")
+        if not can_create_new_type:
+            raise HTTPException(
+                status_code=403, 
+                detail=f"You lack permission to change page type to {page_update.type}."
+            )
 
     logger.info(f"User '{user.username}' updating page '{slug}'")
     return page_service.update_existing_page(slug=slug, page_update_data=page_update)
@@ -209,20 +214,33 @@ def delete_page(
     if not db_page:
         return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-    permissions = set(user_service.get_user_permissions(user.username))
-    
+    tag_names = get_tag_names(db_page.tags)
+    user_permissions = user_service.get_user_permissions(user.username)
+
+    # 1. Access Rights
+    is_admin = "*" in user_permissions or "page:delete" in user_permissions
     is_author = db_page.author == user.username
-    is_admin = "*" in permissions or "page:delete" in permissions
+    role_allowed = f"{user.role}:delete" in tag_names
+
+    if not (is_admin or is_author or role_allowed):
+        raise HTTPException(status_code=403, detail="Permission denied")
+
+    # 2. Capability Rights (Physically Impossible But Nice To Have)
+    can_delete_type = check_type_permission(user_permissions, db_page.type, "delete")
     
-    is_blog_page = is_tag_in_db_page(db_page.tags, "sys:blog")
-    can_delete_blog = "blog:delete" in permissions and is_blog_page
+    if not can_delete_type:
+        raise HTTPException(
+            status_code=403, 
+            detail=f"You lack permission to delete {db_page.type} pages."
+        )
 
-    if is_author or is_admin or can_delete_blog:
-        logger.info(f"{user.username} deleted page: {slug}")
-        page_service.delete_page_by_slug(slug)
-        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    logger.info(f"User {user.username} deleted page: {slug}")
+    page_service.delete_page_by_slug(slug)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied")
+# ----------------------------------------------------
+# ✏️ SPECIALIZED UPDATES
+# ----------------------------------------------------
 
 @router.put("/{slug}/markdown", response_model=schemas.Page)
 def update_page_markdown(
@@ -234,24 +252,32 @@ def update_page_markdown(
 ):
     db_page = page_service.get_page_by_slug(slug)
     if not db_page:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found")
+        raise HTTPException(status_code=404, detail="Page not found")
+    
+    # 1. Check if page is actually markdown (Sanity check)
+    if db_page.type != "markdown":
+         raise HTTPException(status_code=400, detail="Endpoint only for markdown pages.")
 
-    permissions = set(user_service.get_user_permissions(user.username))
-    has_master_permission = "*" in permissions or "page:update" in permissions
-    is_author = db_page.author == user.username
-    is_blog_page = is_tag_in_db_page(db_page.tags, "sys:blog")
-    has_blog_rights = is_blog_page and ("blog:update" in permissions or is_author)
+    tag_names = get_tag_names(db_page.tags)
+    user_permissions = user_service.get_user_permissions(user.username)
 
-    if not (has_master_permission or has_blog_rights):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied")
+    # 2. Access Rights
+    authorized_access = (
+        "*" in user_permissions or 
+        "page:update" in user_permissions or 
+        db_page.author == user.username or 
+        f"{user.role}:update" in tag_names or
+        "any:update" in tag_names
+    )
 
-    # Preserve system tags if user isn't master
-    if page_update.tags is not None and not has_master_permission:
-        preserved_system_tags = [tag.name for tag in db_page.tags if tag.name.startswith("sys:")]
-        new_descriptive_tags = [tag for tag in page_update.tags if not tag.startswith("sys:")]
-        page_update.tags = preserved_system_tags + new_descriptive_tags
+    if not authorized_access:
+        raise HTTPException(status_code=403, detail="Permission denied")
 
-    logger.info(f"User '{user.username}' updating MARKDOWN for page '{slug}'")
+    # 3. Capability Rights (Asta Access)
+    can_update_markdown = check_type_permission(user_permissions, "markdown", "update")
+    
+    if not can_update_markdown:
+        raise HTTPException(status_code=403, detail="Missing 'markdown:update' permission.")
 
     return page_service.update_existing_page_markdown(slug=slug, page_update_data=page_update)
 
@@ -266,23 +292,31 @@ def update_page_html(
 ):
     db_page = page_service.get_page_by_slug(slug)
     if not db_page:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found")
+        raise HTTPException(status_code=404, detail="Page not found")
 
-    permissions = set(user_service.get_user_permissions(user.username))
-    has_master_permission = "*" in permissions or "page:update" in permissions
-    is_author = db_page.author == user.username
-    is_blog_page = is_tag_in_db_page(db_page.tags, "sys:blog")
-    has_blog_rights = is_blog_page and ("blog:update" in permissions or is_author)
+    # 1. Check if page is actually html
+    if db_page.type != "html":
+         raise HTTPException(status_code=400, detail="Endpoint only for html pages.")
 
-    if not (has_master_permission or has_blog_rights):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied")
+    tag_names = get_tag_names(db_page.tags)
+    user_permissions = user_service.get_user_permissions(user.username)
 
-    # Preserve system tags if user isn't master
-    if page_update.tags is not None and not has_master_permission:
-        preserved_system_tags = [tag.name for tag in db_page.tags if tag.name.startswith("sys:")]
-        new_descriptive_tags = [tag for tag in page_update.tags if not tag.startswith("sys:")]
-        page_update.tags = preserved_system_tags + new_descriptive_tags
+    # 2. Access Rights
+    authorized_access = (
+        "*" in user_permissions or 
+        "page:update" in user_permissions or 
+        db_page.author == user.username or 
+        f"{user.role}:update" in tag_names or
+        "any:update" in tag_names
+    )
 
-    logger.info(f"User '{user.username}' updating HTML for page '{slug}'")
+    if not authorized_access:
+        raise HTTPException(status_code=403, detail="Permission denied")
+    
+    # 3. Capability Rights (Aina Access)
+    can_update_html = check_type_permission(user_permissions, "html", "update")
+    
+    if not can_update_html:
+        raise HTTPException(status_code=403, detail="Missing 'html:update' permission.")
 
     return page_service.update_existing_page_html(slug=slug, page_update_data=page_update)

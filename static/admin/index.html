@@ -82,6 +82,14 @@
                 <span class="ml-3 font-medium whitespace-nowrap" x-show="sidebarOpen">Pages</span>
             </a>
 
+            <!-- Structure -->
+            <a href="/admin/structure" hx-target="#app-content" hx-swap="innerHTML"
+               class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
+               :class="isActive('/admin/structure') ? 'bg-anita-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800 hover:text-white'">
+                <i class="fas fa-sitemap w-6 text-center text-lg"></i>
+                <span class="ml-3 font-medium whitespace-nowrap" x-show="sidebarOpen">Structure</span>
+            </a>
+
             <!-- Forms -->
             <a href="/admin/forms" hx-target="#app-content" hx-swap="innerHTML"
                class="flex items-center px-3 py-2.5 rounded-lg transition-colors group"
