@@ -140,16 +140,20 @@ media_read = require_permission("media:read") # List all media perm, by default,
 media_update = require_permission("media:update") # Media Meta Data Edit
 media_delete = require_permission("media:delete")
 
-blog_create = require_permission("blog:create")
-blog_read = require_permission("blog:read")
-blog_update = require_permission("blog:update")
-blog_delete = require_permission("blog:delete")
-
 config_access = require_permission("config:read") # Does not show keys
 config_edit = require_permission("config:update")
 
-aina_access = require_permission("aina") # Access Aina AI, manipulation follows page crud perms
-asta_access = require_permission("asta") # Access Asta AI, manipulation follows blog crud perms
+# Aina Access
+html_create = require_permission("html:create") # The Ability To Mark Page Type As HTML
+html_read = require_permission("html:read") # The Ability To Open Aina Editor
+html_update = require_permission("html:update") # The Ability To Save Aina Editor
+html_delete = require_permission("html:delete") # Physically Impossible But Nice To Have
+
+# Asta Access
+markdown_create = require_permission("markdown:create") # The Ability To Mark Page Type As Markdown
+markdown_read = require_permission("markdown:read") # The Ability To Open Asta Editor
+markdown_update = require_permission("markdown:update")# The Ability To Save Asta Editor
+markdown_delete = require_permission("markdown:delete") # Physically Impossible But Nice To Have
 
 # Managing Blog Does NOT Require These Permissions 
 # These are system level access to all pages in the CMS

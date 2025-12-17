@@ -48,7 +48,7 @@ def flatten_tags_to_strings(v: Any) -> List[str]:
 
 class PageBase(BaseModel):
     title: str
-    content: Optional[str] = None
+    content: Optional[str] = None # THIS IS JUST DESCRIPTION, page 'content' is inside markdown/html, this contains only short description, like, a sentence or two
     markdown: Optional[str] = None # Bleached Until Per-Page CSP Configuration Is Implemented
     html: Optional[str] = None  # EXEMPTED
     tags: Optional[List[str]] = []
@@ -112,6 +112,11 @@ class PageMarkdownUpdate(BaseModel):
     @classmethod
     def bleach_custom_dict(cls, v): return sanitize_recursively(v)
     model_config = ConfigDict(extra="ignore")
+
+class PageData(Page):
+    # Overwrite these fields to exclude them from the JSON response
+    html: Optional[str] = Field(default=None, exclude=True)
+    markdown: Optional[str] = Field(default=None, exclude=True)
 
 
 # --- Form Schemas ---

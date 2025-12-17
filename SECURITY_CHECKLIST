@@ -18,7 +18,7 @@ TODO
 - Better test coverage
 - More graceful Form Seeding (currently don't exist, actually, only page, roles and config for now)
 ~~- Category and Tags are the same (should be separated)~~ Cats and Tags, see below
-- Sandbox Aina properly (Dummy Browser, Dummy Database, Dummy Dynamic API... Do I really have to???)
+- Sandbox Aina properly (Dummy Browser, Dummy Database, Dummy Dynamic API... Goddammit, I'll add disclaimers for now)
 - ~~Add the cats~~
 - ~~Get rid of the cats and refactor the entire fucking database to have label (system) and tag (public) instead of tag (system) and cat(public)~~ (won't fix, weird naming convention, deal with it)
 
@@ -33,6 +33,3 @@ Terrible Ideas That Won't Go Away
 - Hikarin Website Builder To Replace Aina (Note: Hikarin Website Builder Does Not Exist Yet)
 - Discord Integration (For... I'm not sure for what... But it'll be cool)
 - Make Domain Specific Language For Themes and Plugins (Lol, Lmao, Pffft)
-
-
-Help triage this pls

@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
-from typing import List
 from data.database import get_db
 from data import schemas
 from services.pages import PageService
@@ -11,8 +10,6 @@ def get_page_service(db: Session = Depends(get_db)) -> PageService:
     return PageService(db)
 
 router = APIRouter(tags=["Public"])
-
-# TODO: Database Optimization
 
 # ==========================================
 # 🖼️ HTML SERVING ROUTES
@@ -42,10 +39,12 @@ def serve_top_level_page(slug: str, page_service: PageService = Depends(get_page
 @router.get("/{main}/{slug}", response_class=HTMLResponse)
 def serve_any_post(slug: str, main:str,page_service: PageService = Depends(get_page_service)):
     """Serves a single page."""
+    print(main + slug)
     page = page_service.get_page_by_slug(slug) # Service handles 404 if slug doesn't exist
-    markdown_template = page_service.get_first_page_by_tags(['sys:template','any:read'])
-
+    markdown_template = page_service.get_first_page_by_tags(['sys:blog-template','any:read'])
+    print(markdown_template)
     if not page.tags or not {f'main:{main}', 'any:read'}.issubset(tag.name for tag in page.tags):
+        print("Page with the slug" +slug + "Not found")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found.")
     if page.type == 'html':
         return HTMLResponse(content=page.html, status_code=200)

@@ -102,7 +102,6 @@ export default () => ({
         return perms;
     },
 
-    // CORRECTED: Parses tags like 'editor:read'
     parsePermissionsFromTags(tags = []) {
         const perms = this.getEmptyPermissions();
         tags.forEach(tag => {
@@ -121,7 +120,6 @@ export default () => ({
         return perms;
     },
 
-    // CORRECTED: Formats tags to 'editor:read'
     formatPermissionsToTags() {
         const tags = [];
         // Handle 'any' permissions
