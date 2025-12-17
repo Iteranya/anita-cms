@@ -1,5 +1,5 @@
 {
   "admin": ["*"],
-  "editor": ["blog:create", "blog:update", "blog:read", "media:upload"],
+  "editor": ["media:upload", "page:create"],
   "viewer": ["page:read"]
 }
