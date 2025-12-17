@@ -22,7 +22,7 @@ router = APIRouter(tags=["Public"])
 def serve_home_page(page_service: PageService = Depends(get_page_service)):
     """Serves the page tagged as 'home'."""
     print("hello")
-    page = page_service.get_first_page_by_tags(['sys:home','sys:public'])
+    page = page_service.get_first_page_by_tags(['sys:home','any:read'])
     if not page:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Critical: Home page not configured, notify site owner.")
 
@@ -30,24 +30,22 @@ def serve_home_page(page_service: PageService = Depends(get_page_service)):
     return HTMLResponse(content=page.html, status_code=200)
 
 
-@router.get("/blog", response_class=HTMLResponse)
-def serve_blog_index(page_service: PageService = Depends(get_page_service)):
-    """Serves the page tagged as 'blog-home' as the main blog index."""
-    page = page_service.get_first_page_by_tags(['sys:blog-home','sys:public'])
+@router.get("/{slug}", response_class=HTMLResponse)
+def serve_top_level_page(slug: str, page_service: PageService = Depends(get_page_service)):
+    """Serves the top level page"""
+    page = page_service.get_first_page_by_tags([f'main:{slug}','any:read'])
     if not page:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Critical: Blog index page not found, notify site owner")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found")
 
     return HTMLResponse(content=page.html, status_code=200)
-
-
-@router.get("/blog/{slug}", response_class=HTMLResponse)
-def serve_blog_post(slug: str, page_service: PageService = Depends(get_page_service)):
-    """Serves a single blog post page."""
-    page = page_service.get_page_by_slug(slug) # Service handles 404 if slug doesn't exist
-    markdown_template = page_service.get_first_page_by_tags(['sys:blog-template','sys:public'])
     
-    # Ensure this endpoint only serves pages with the 'sys:blog' tag
-    if not page.tags or not {'sys:blog', 'sys:public'}.issubset(tag.name for tag in page.tags):
+@router.get("/{main}/{slug}", response_class=HTMLResponse)
+def serve_any_post(slug: str, main:str,page_service: PageService = Depends(get_page_service)):
+    """Serves a single page."""
+    page = page_service.get_page_by_slug(slug) # Service handles 404 if slug doesn't exist
+    markdown_template = page_service.get_first_page_by_tags(['sys:template','any:read'])
+
+    if not page.tags or not {f'main:{main}', 'any:read'}.issubset(tag.name for tag in page.tags):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found.")
     if page.type == 'html':
         return HTMLResponse(content=page.html, status_code=200)
@@ -61,41 +59,25 @@ def serve_blog_post(slug: str, page_service: PageService = Depends(get_page_serv
 # 🚀 PUBLIC API ROUTES
 # ==========================================
 
-
-@router.get("/api/blog", response_model=List[schemas.Page])
-def api_list_blog_pages(page_service: PageService = Depends(get_page_service)):
-    """
-    API endpoint to get a list of all pages tagged with both 'sys:blog' and 'sys:public'.
-    The response is automatically serialized by FastAPI based on the Pydantic schema.
-    """
-
-    all_blog_pages = page_service.get_pages_by_tags(["sys:blog","sys:public"])
-    for blog in all_blog_pages:
-        blog.html = ""
-        blog.markdown=""
-    
-    return all_blog_pages
-
-
-@router.get("/api/blog/{slug}", response_model=schemas.Page)
-def api_get_blog_page(slug: str, page_service: PageService = Depends(get_page_service)):
-    """
-    API endpoint to get a single public blog page by its slug.
-    """
-    page = page_service.get_page_by_slug(slug)
-    
-    if not page.tags or not {'sys:blog', 'sys:public'}.issubset(tag.name for tag in page.tags):
-         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found in this category.")
-
-    return page
-
-@router.get("/{slug}", response_class=HTMLResponse)
+@router.get("/api/{slug}", response_class=schemas.Page)
 def serve_generic_page(slug: str, page_service: PageService = Depends(get_page_service)):
     """
     Serves a generic top-level page by its slug.
     This acts as a catch-all for any slug not matched by other routes.
     """
     page = page_service.get_page_by_slug(slug)
-    if not page.tags or not {'sys:main', 'sys:public'}.issubset(tag.name for tag in page.tags):
+    if not page.tags or not {f'main:{slug}', 'any:read'}.issubset(tag.name for tag in page.tags):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found in this category.")
-    return HTMLResponse(content=page.html, status_code=200)
+    return page
+
+@router.get("/api/{main}/{slug}", response_model=schemas.Page)
+def api_get_any_page(main:str, slug: str, page_service: PageService = Depends(get_page_service)):
+    """
+    API endpoint to get a single public page by its slug.
+    """
+    page = page_service.get_page_by_slug(slug)
+    
+    if not page.tags or not {f'main:{main}', 'any:read'}.issubset(tag.name for tag in page.tags):
+         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found in this category.")
+
+    return page
