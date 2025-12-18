@@ -20,7 +20,7 @@
     </td>
     <td>
       <strong>Artes</strong><br/>
-      We're live, and... ACTION!
+      Live as in read me? Yes. Live as in production? No.
     </td>
   </tr>
     <tr>
