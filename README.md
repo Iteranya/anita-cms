@@ -60,6 +60,61 @@
 
 ---
 
+## What Is Anita?
+
+Anita is a tool you use to create a website.
+
+Anita is a self-hosted, hybrid CMS designed to be the "lite" alternative to WordPress/Wix/Squarespace/Drupal/Joomla/Directus/EveryCMSUnderTheSun. She is built for people who want a portfolio, a gallery, a shop, or a blog, but don't want to deal with complex databases or expensive server costs. 
+
+(Note: She still can't replace SSG, sorry)
+
+I call Anita Hybrid because:
+
+- She handles the Backend: You define the data, she builds the API.
+- She helps with the Frontend: She includes an AI Page Builder (Aina) and Markdown Editor (Asta).
+
+## The "One-File" Wonder
+
+*The ultimate portable CMS.*
+
+Most CMSs require a database server, a file server, and a config file. Moving them is a nightmare.
+
+Anita stores EVERYTHING in a single file.
+
+- Want to backup your site? Copy anita.db to Google Drive.
+- Want to move servers? git pull the repo, paste your anita.db, and you're live.
+- Need to scale? Since it uses SQLAlchemy, you can switch to PostgreSQL with one config change if you ever hit 1 million users (but for 99% of us, SQLite is faster).
+
+This is *not* an exaggeration, yes, your entire site, this includes your custom home page and blog page and everything in between. Your configurations, your users, your roles, it's all in a single .db file.
+
+## Runs on a Potato
+
+*I'm broke so I know what 'broke hosting' is like*
+
+Because Anita is built on FastAPI (Python), it's comical how lightweight she is
+- Low RAM Usage: Unlike Java or Node apps, she sips memory.
+- Low CPU Usage: Ideal for the cheapest VPS tier ($3-5/mo) or even a Raspberry Pi.
+- No Build Step: No compiling assets on the server. Just run and go.
+- No Database Overhead: SQLite runs natively in Python and it's literally just a single file
+
+If you're a freelancer, you can host a dozen instance of Anita in a single server. (Given you handle CI/CD yourself, but that's another thing entirely)
+
+## The "No-Code" Backend
+
+The coolest part. No black magic, just logic.
+
+Usually, if you want a dynamic "Menu" page for a restaurant, you have to code a database model and an API route.
+
+With Anita, you just do this:
+- Open the Dashboard: Go to the "Collections" tab.
+- Create a Form: Name it cafe-menu.
+- Add Fields: Add a "Text Field" for the Dish Name and a "Number Field" for the Price.
+- Check the boxes for access permissions
+- Done.
+
+Anita automatically generates the database table inside anita.db and creates a secure API endpoint. The AI is now aware of the api route and you can ask the AI to create a working menu page. Or you can simply code your own front end with Alpine and Tailwind.
+
+
 <details>
 <summary><strong>Chapter 1: The Introduction</strong></summary>
 <br>
@@ -108,7 +163,34 @@
     </td>
     <td>
       <strong>Anita</strong><br/>
-      Artes! We can't say that on the github repo, look, just... Get to the next part!
+      Artes! We can't say that on the github repo!
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      Ahem, what Artes means is that, he created me as an effort to save the internet! To create a place made for the people, but they people! No longer shackled by-
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
+    </td>
+    <td>
+      <strong>Artes</strong><br/>
+      I don't give a shit about saving the Internet, I just want to see Wordpress and NodeJS Dead
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      WE CAN'T SAY THAT ON A PUBLIC REPO!!! Cut, Cut!
     </td>
   </tr>
 </tbody>
@@ -185,8 +267,12 @@ Anita is designed with a simple, foundational architecture in mind. No black box
 | Layer      | Technology                                    |
 | :--------- | :-------------------------------------------- |
 | **Backend**  | FastAPI & SQLAlchemy                          |
-| **Middleware** | Hikarin Web Framework (Custom Made By Yours Truly, Built On Top Of AlpineJS)          |
 | **Frontend**   | Tailwind, AlpineJS & HTMX                     |
+| **Utility**   | Hikarin Framework                   |
+
+Yes, that's all of them, seriously... 
+
+Checkout requirements.txt if you want to see more.
 
 ---
 <details>
@@ -244,7 +330,7 @@ Anita is designed with a simple, foundational architecture in mind. No black box
     </td>
     <td>
       <strong>Hikarin</strong><br/>
-      ... ok ...
+      And... you're not listening to me... okay then... not hurt or anything...
     </td>
   </tr>
 </tbody>
@@ -253,6 +339,115 @@ Anita is designed with a simple, foundational architecture in mind. No black box
 </details>
 
 ---
+
+##  Is it Safe?
+
+Short answer: Yes. 
+Long answer: We have trust issues.
+
+- Transparent Architecture: No hidden binaries. What you see in main.py is what runs.
+- Input Sanitization: We use Ammonia (Rust-based) to scrub every input.
+- Discord-Style Permissions: We use ABAC. You can set exactly who can see or edit your cafe-menu.
+- No <script> Tags: We bleach anything resembling script *before* they touch the database.
+
+<details>
+  <summary> About Security </summary>
+<table>
+<tbody>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      Nee... Artes, don't you think the current security policy a little bit... Excessive? 
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
+    </td>
+    <td>
+      <strong>Artes</strong><br/>
+      Alpha, remember?
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      You bleached the json keys... ***The Keys***
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
+    </td>
+    <td>
+      <strong>Artes</strong><br/>
+      I'll make it optional and configurable per-form and per-submission
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      That's not... Recursively go through the custom json field and nuking every html object is *not* security, that's a cry for help
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
+    </td>
+    <td>
+      <strong>Artes</strong><br/>
+      Should I escape string instead??
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      Well... Look... Why's the paranoia? Who hurt you dev?
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
+    </td>
+    <td>
+      <strong>Artes</strong><br/>
+      Aina, Aina hurt me, I don't trust Aina to write a secure HTML
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      And you think bleaching the database is the right move?
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
+    </td>
+    <td>
+      <strong>Artes</strong><br/>
+      It's temporary, don't worry, I'll figure out per-page CSP and Form/Submission security through Hikarin. Oh and drag and drop website builder with GrapeJS.
+    </td>
+  </tr>
+</tbody>
+</table>
+
+</details>
 
 ## The Admin Page
 
