@@ -7,7 +7,7 @@ TODO
 - CSP Configuration Is Still Globally Strict (should be configurable per-page basis)
 - HikarinJS Is Still Opt-in (should be default for all ai generated site)
 - Default Pages Still Uses <script> (Should use HikarinJS Instead)
-- System Page Tags Are Still Manual (Should be abstracted with switches / panel)
+- ~~System Page Tags Are Still Manual (Should be abstracted with switches / panel)~~ Done! With site tree and structure thingy!
 - ~~Form Page Tags Are Still Manual (Should be abstracted with switches / panel)~~ Done! With amazing RBAC Panel
 - ~~User Roles and Perms Are Still Manual (Should be abstracted with switches / panel)~~ Done! Discord Flavored ABAC Panel~
 - No Tags and Sort Filter Yet

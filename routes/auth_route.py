@@ -132,7 +132,6 @@ async def setup_admin_account(
 
     # Create the first user (Admin) using the UserService
     # The service handles password hashing and validation.
-    print("Making admin creds")
     admin_user_data = schemas.UserCreateWithPassword(
         username=username,
         password=password,

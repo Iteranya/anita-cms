@@ -16,10 +16,11 @@ router = APIRouter(tags=["Public"])
 # 🖼️ HTML SERVING ROUTES
 # ==========================================
 
+# TODO: Add slowapi for rate limit (not everyone set this up in Caddy/Nginx)
+
 @router.get("/", response_class=HTMLResponse)
 def serve_home_page(page_service: PageService = Depends(get_page_service)):
     """Serves the page tagged as 'home'."""
-    print("hello")
     page = page_service.get_first_page_by_tags(['sys:home','any:read'])
     if not page:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Critical: Home page not configured, notify site owner.")
@@ -64,7 +65,6 @@ def api_search_pages_by_tags(
     All provided tags must be present on the page.
     """
     tags.append("any:read")
-    print(tags)
     pages = page_service.get_pages_by_tags(tags)
 
     return pages
@@ -106,9 +106,7 @@ def serve_any_post(slug: str, main:str,page_service: PageService = Depends(get_p
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found.")
     page = page_service.get_page_by_slug(slug) # Service handles 404 if slug doesn't exist
     markdown_template = page_service.get_first_page_by_tags(['sys:template','any:read'])
-    print(markdown_template)
     if not page.tags or not {f'main:{main}', 'any:read'}.issubset(tag.name for tag in page.tags):
-        print("Page with the slug" +slug + "Not found")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found.")
     if page.type == 'html':
         return HTMLResponse(content=page.html, status_code=200)
