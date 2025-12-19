@@ -57,6 +57,7 @@
   </a>
 </p>
 <h1 align="center">Anita CMS - The No-Code Hybrid Content Management System</h1>
+<h2 align="center">Alpha Release</h2>
 
 ---
 
@@ -534,155 +535,6 @@ You know what they say, a picture is worth a thousand words...
 
 ---
 
-## The Cool Part (No Code Backend)
-
-Suppose you want a dynamic page to list your restaurant menu, setup price, and everything in between.
-
-Well, you can use the Forms/Collection to create a 'menu-collection', you define fields here~
-
-And then once finished there, you add security. Only admin can modify this form but anyone can see the content of it
-
-Then you go to Aina and ask her to make you an `menu_admin_page` to manage the menu 
-
-Then ask Aina to make the `our-menu` page for public and then link that to the main site
-
-Congratulations, you have achieved dynamic webapp creation!
-
-Have fun then~
-
----
-
-<details>
-<summary><strong>Intermission: The Selling Point</strong></summary>
-<br>
-
-<table>
-<tbody>
-  <tr>
-    <td width="52" valign="top" style="padding-right: 10px;">
-      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
-    </td>
-    <td>
-      <strong>Anita</strong><br/>
-      Mmmm, I want more emphasis here.
-    </td>
-  </tr>
-  <tr>
-    <td width="52" valign="top" style="padding-right: 10px;">
-      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
-    </td>
-    <td>
-      <strong>Artes</strong><br/>
-      Huh?
-    </td>
-  </tr>
-    <tr>
-    <td width="52" valign="top" style="padding-right: 10px;">
-      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
-    </td>
-    <td>
-      <strong>Anita</strong><br/>
-      It's good, but it can be better!!!
-    </td>
-  </tr>
-  <tr>
-    <td width="52" valign="top" style="padding-right: 10px;">
-      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
-    </td>
-    <td>
-      <strong>Artes</strong><br/>
-      I mean...
-    </td>
-  </tr>
-  <tr>
-    <td width="52" valign="top" style="padding-right: 10px;">
-      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
-    </td>
-    <td>
-      <strong>Anita</strong><br/>
-      NO, listen, it's... I dunno, this is the main selling point of me.
-    </td>
-  </tr>
-  <tr>
-    <td width="52" valign="top" style="padding-right: 10px;">
-      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
-    </td>
-    <td>
-      <strong>Artes</strong><br/>
-      Not the AI?
-    </td>
-  </tr>
-  <tr>
-    <td width="52" valign="top" style="padding-right: 10px;">
-      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
-    </td>
-    <td>
-      <strong>Anita</strong><br/>
-      NOT THE AI!!!
-    </td>
-  </tr>
-  <tr>
-    <td width="52" valign="top" style="padding-right: 10px;">
-      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
-    </td>
-    <td>
-      <strong>Artes</strong><br/>
-      Okay, okay, geez...
-    </td>
-  </tr>
-  <tr>
-    <td width="52" valign="top" style="padding-right: 10px;">
-      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
-    </td>
-    <td>
-      <strong>Anita</strong><br/>
-      But... yeah, this is good enough... I guess.<br/><br/>
-      Ah wait! There's no screenshot!
-    </td>
-  </tr>
-  <tr>
-    <td width="52" valign="top" style="padding-right: 10px;">
-      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
-    </td>
-    <td>
-      <strong>Artes</strong><br/>
-      I think a screenshot of the AI using this feature would explain it better.
-    </td>
-  </tr>
-  <tr>
-    <td width="52" valign="top" style="padding-right: 10px;">
-      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
-    </td>
-    <td>
-      <strong>Anita</strong><br/>
-      Uuu... I don't want to be compared with those Vibe Coded AI Apps out there...
-    </td>
-  </tr>
-  <tr>
-    <td width="52" valign="top" style="padding-right: 10px;">
-      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
-    </td>
-    <td>
-      <strong>Artes</strong><br/>
-      You're not?
-    </td>
-  </tr>
-  <tr>
-    <td width="52" valign="top" style="padding-right: 10px;">
-      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
-    </td>
-    <td>
-      <strong>Anita</strong><br/>
-      YOU'RE NOT HELPING!!!
-    </td>
-  </tr>
-</tbody>
-</table>
-
-</details>
-
----
-
 ## The AI Part...
 
 Okay, look, listen, I hate AI slop as much as you do. But until the Hikarin Web Builder is finished, we have to do with what we got. Or if you're comfortable, you can code AlpineJS and Tailwind from scratch.
@@ -745,95 +597,22 @@ Okay, look, listen, I hate AI slop as much as you do. But until the Hikarin Web 
 </details>
 ---
 
-## Security
+## For Freelancers: The "Client-Proof" CMS
 
-Is Anita Secure???
+*Give them the keys to the car, but weld the hood shut.*
 
-Let's do the checklist then...
+Look, client clicking a glowing 'update all' button is what kept us all up at night. Or maybe even clicking the theme thinking they can change the site without you knowing. We've all been there.
 
-Ahem..
+Anita, however, allows you to "Client-Proof" the delivery.
 
-### Transparent Architecture
-Listen, Anita is not a black box
-Seriously
-You look at main.py and main.js inside static/hikarin and suddenly 
-"Oh, so that's how it works"
+Using our strict Attribute-Based Access Control (ABAC) and Security Matrix, you can curate the exact experience your client needs—and nothing more.
 
-There's no build step, there is no magic library that does something and spits out something
-It's just FastAPI request
-With properly defined Schema and Model that you can find in data/
-
-### Data Integrity
-SQLAlchemy 
-Pydantic
-
-### XSS, Malicious AI Prompt, Bad Theme
-Okay, okay, I admit...
-Bleaching everything
-Including keys
-Is peak paranoia
-
-But better safe than sorry and unfortunately, Anita is designed to be input safe, not output safe
-
-We don't sanitize our output because
-
-So we salt Pydantic
-
-Also we use Ammonia, it's written in rust so it's faster (theoretically)
-
-Oh Hikarin is already integrated nicely
-Basically it's an interface built on top of Alpine JS
-
-It makes it so that all client side code does NOT communicate with routes
-They go through pre-defined API
-Integrated with AlpineJS
-All other scripts will be cleaned up
-
-This way, AI don't hallucinate much because we feed them info on how to use the API with Alpine JS
-
-The end result is a single HTML page with no <script> tags
-
-Does it fix *all* problem?
-
-Eh, not really, but it's a start~
-
-...
-
-Also CSP Headers, we hard code applying CSP Headers
-
-### Password? Auth? Role Escalation?
-
-Thankfully, Anita uses Attribute Based Access Control
-
-It's sophisticated
-
-And a lot like discord server's ABAC
-
-(also copies discord's ui)
-
-JWT and such for out
-
-CSRF works with Samesite cookie and blocking old browser request
-
-(sorry iphone user
-
-### Overall Security?
-Eh... How do I say this...
-
-It's more secure than Wordpress
-
-And since it's very small and very simple in architecture
-
-And as you can see from `requirements.txt` there's really not much chance for Supply of Chain Attacks
-
-Unlike your local node modules, python depencies are sane
-
-So... Yeah
-
-Also of course, it'll get safer with every patch and update
-
-Fun~
-
+- The "Menu Updater" Role: Does the restaurant owner only need to change prices? Create a role that has UPDATE permission on the cafe-menu collection, but NO ACCESS to Pages, Settings, or Media. They won't even see the other buttons.
+- The "Blog Writer" Role: Give them access to Asta (Markdown) to write news, but block access to Aina (Builder) so they can't break the layout.
+- System Locks: Critical pages (like Home or 404) are protected by System Tags. Even if you give a client "Delete Page" permissions, Anita will refuse to delete a System-Tagged page.
+- Advanced: Create your client their very own custom admin page that they can use to update their menu without touching the admin panel
+- 
+Result: They feel empowered to update their content. You sleep soundly knowing they can't nuke the database.
 ---
 
 ## Installation
@@ -1052,7 +831,7 @@ Terrible Ideas That Won't Go Away
     </td>
     <td>
       <strong>Anita</strong><br/>
-      Bad marketing, people hate AI and I put all my cards on the Hikarin Website Builder.
+      Bad marketing, people hate AI and I put all my cards on the Hikarin Website Builder. Actually, why not build Hikarin on top of Grape?
     </td>
   </tr>
   <tr>
@@ -1061,7 +840,7 @@ Terrible Ideas That Won't Go Away
     </td>
     <td>
       <strong>Artes</strong><br/>
-      You know this is the same as building Elementor/Gutenberg/Wix/Squarespace from scratch, right?
+      I tried, they fought for DOM control, Hikarin is closer to Gridstack.js than Grape.js in terms of building technique, I'll have to code Hikarin from scratch or build it on top of GradeJS
     </td>
   </tr>
   <tr>
@@ -1070,7 +849,7 @@ Terrible Ideas That Won't Go Away
     </td>
     <td>
       <strong>Anita</strong><br/>
-      Yep, good luck! I'm counting on you!!!
+      Why don't you pull up standard GrapeJS integration??
     </td>
   </tr>
   <tr>
@@ -1079,7 +858,70 @@ Terrible Ideas That Won't Go Away
     </td>
     <td>
       <strong>Artes</strong><br/>
-      Anyway, license.
+      I... Don't feel like adding feature that I myself can't even use.
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      Huh??
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
+    </td>
+    <td>
+      <strong>Artes</strong><br/>
+      I never get the hang of... Well, Website builder, I don't find them intuitive, it feels... I dunno, weird... Boxes jumping around... I don't like em... I can't implement it because I don't know what the 'correct' implementation would be like, since I myself can't even use  Wix/Gutenberg/Elementor/Squarespace properly... 
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      Wow... Huh... That's... really cool actually... What makes Hikarin different from GrapeJS? Why Gridstack?
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
+    </td>
+    <td>
+      <strong>Artes</strong><br/>
+      Layers, I want to make a website builder where you drag component and you have layer, instead of putting component inside one another. Also bento-box layout, but freedom of overlapping. So it's closer to Aseprite. Nothing forces you to put component somewhere. We have Z-index. GrapeJS won't let me do that easily.
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      Because...
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/artes_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Artes Avatar"/>
+    </td>
+    <td>
+      <strong>Artes</strong><br/>
+      Gutenberg/Elementor like editor confuses me
+    </td>
+  </tr>
+  <tr>
+    <td width="52" valign="top" style="padding-right: 10px;">
+      <img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/anita_avatar.png" width="48" height="48" style="border-radius: 50%;" alt="Anita Avatar"/>
+    </td>
+    <td>
+      <strong>Anita</strong><br/>
+      Right...
     </td>
   </tr>
 </tbody>
