@@ -3,18 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Anita CMS</title>
-    
-    <!-- Tailwind CSS -->
+    <title>Anita CMS - Blog</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
     
-    <!-- Google Fonts: Nunito -->
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Tailwind Config -->
     <script>
         tailwind.config = {
             theme: {
@@ -40,152 +33,291 @@
             }
         }
     </script>
-
+    
     <style>
-        body {
-            background-color: #f8fafc; /* Slate-50 */
-        }
-        
-        .blob {
-            position: absolute;
-            filter: blur(50px);
-            z-index: -1;
-            opacity: 0.5;
-            animation: pulse-blob 8s infinite alternate;
-        }
+        /* Smooth Scrolling */
+        html { scroll-behavior: smooth; }
 
-        @keyframes pulse-blob {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.1); }
-        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #7dd3fc; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #0ea5e9; }
 
+        /* Animations */
         @keyframes float {
             0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-15px); }
             100% { transform: translateY(0px); }
         }
         
-        .animate-float {
-            animation: float 4s ease-in-out infinite;
+        .animate-float { animation: float 4s ease-in-out infinite; }
+        .animate-float-delayed { animation: float 4s ease-in-out infinite; animation-delay: 2s; }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .blob {
+            position: absolute;
+            filter: blur(60px);
+            z-index: -1;
+            opacity: 0.5;
+            border-radius: 50%;
+        }
+        
+        /* Line Clamp for excerpts */
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden text-slate-800">
+<body class="bg-slate-50 text-slate-800 font-sans relative overflow-x-hidden">
 
     <!-- Background Blobs -->
-    <div class="blob bg-anita-300 w-96 h-96 rounded-full top-0 left-0 -translate-x-1/2 -translate-y-1/2"></div>
-    <div class="blob bg-purple-300 w-80 h-80 rounded-full bottom-0 right-0 translate-x-1/3 translate-y-1/3"></div>
+    <div class="blob bg-anita-300 w-96 h-96 top-0 left-0 -translate-x-1/2 -translate-y-1/2 animate-float"></div>
+    <div class="blob bg-purple-300 w-80 h-80 bottom-0 right-0 translate-x-1/3 translate-y-1/3 animate-float-delayed"></div>
 
-    <!-- Main Card -->
-    <main class="max-w-4xl w-full bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 overflow-hidden relative">
-        
-        <!-- Decoration Bar -->
-        <div class="h-2 w-full bg-gradient-to-r from-anita-400 via-purple-400 to-pink-400"></div>
-
-        <div class="p-8 md:p-12 flex flex-col md:flex-row items-center gap-12">
-            
-            <!-- Left: Character & Welcome -->
-            <div class="md:w-5/12 text-center relative">
-                <!-- Image Wrapper -->
-                <div class="relative inline-block animate-float">
-                    <!-- Glow (matches image shape) -->
-                    <div class="absolute inset-0 bg-anita-200 rounded-2xl blur-xl opacity-50 transform translate-y-4"></div>
-                    
-                    <!-- Image: Landscape 3:2 Aspect Ratio, Rounded Box -->
-                    <img src="/media/anita.jpg" 
-                         alt="Anita Happy" 
-                         class="relative z-10 w-64 md:w-72 aspect-[3/2] object-cover rounded-2xl border-4 border-white shadow-lg mx-auto"
-                         onerror="this.src='https://ui-avatars.com/api/?name=Anita+CMS&background=0ea5e9&color=fff&size=256&rounded=false'"> 
-                </div>
-                
-                <h1 class="mt-8 text-3xl font-extrabold text-slate-900">Hello, Creator!</h1>
-                <p class="mt-2 text-slate-600 leading-relaxed">
-                    Anita is successfully installed!
-                </p>
-
-                <div class="mt-4 inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold uppercase tracking-wide">
-                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    System Online
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-panel border-b border-gray-200/50 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <a href="/" class="flex-shrink-0 flex items-center gap-3 cursor-pointer group">
+                    <img alt="Anita Logo" class="h-10 w-10 rounded-full border-2 border-anita-400 group-hover:scale-105 transition-transform" src="/media/anita.jpg"/>
+                    <span class="font-bold text-2xl text-anita-600 tracking-tight">Anita CMS</span>
+                </a>
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a class="text-gray-600 hover:text-anita-600 font-semibold transition" href="/">Home</a>
+                    <a class="text-anita-600 font-bold transition" href="#">Blog</a>
+                    <a class="text-gray-600 hover:text-anita-600 font-semibold transition" href="/#docs">Docs</a>
+                    <a class="bg-anita-500 hover:bg-anita-600 text-white px-5 py-2.5 rounded-full font-bold shadow-lg shadow-anita-200 transition transform hover:-translate-y-1" href="https://github.com/Iteranya/anita-cms" target="_blank">
+                        <i class="fab fa-github mr-2"></i> Get Anita
+                    </a>
                 </div>
             </div>
+        </div>
+    </nav>
 
-            <!-- Right: Actions -->
-            <div class="md:w-7/12 w-full">
-                
-                <div class="mb-8">
-                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-                        <i class="fas fa-rocket text-anita-500"></i> Get Started
-                    </h2>
-                    
-                    <!-- Primary Action: Setup/Admin -->
-                    <a href="/admin/" class="group block w-full bg-slate-900 hover:bg-slate-800 text-white rounded-xl p-5 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 relative overflow-hidden">
-                        <div class="flex items-center justify-between relative z-10">
-                            <div>
-                                <h3 class="font-bold text-lg">Setup Admin Account</h3>
-                                <p class="text-slate-400 text-sm">Create your user profile to secure the dashboard.</p>
-                            </div>
-                            <div class="bg-slate-700 w-10 h-10 rounded-full flex items-center justify-center group-hover:bg-anita-500 transition-colors">
-                                <i class="fas fa-arrow-right text-white"></i>
-                            </div>
-                        </div>
-                        <!-- Subtle note -->
-                        <div class="mt-2 pt-2 border-t border-slate-700 text-xs text-slate-500 font-mono">
-                            Redirection: /admin/ &rarr; /setup
-                        </div>
-                    </a>
-                </div>
+    <!-- Header Section -->
+    <header class="pt-32 pb-16 px-4">
+        <div class="max-w-7xl mx-auto text-center">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
+                Latest <span class="text-transparent bg-clip-text bg-gradient-to-r from-anita-500 to-purple-600">Updates & Thoughts</span>
+            </h1>
+            <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+                Explore tutorials, release notes, and deep dives into the lightweight world of Anita CMS.
+            </p>
+        </div>
+    </header>
 
-                <!-- Secondary Grid -->
-                <div class="grid grid-cols-2 gap-4">
-                    <!-- Blog / Frontend -->
-                    <a href="/blog" class="bg-white border border-slate-200 p-4 rounded-xl hover:border-anita-400 hover:shadow-md transition group text-left">
-                        <div class="flex items-center gap-3 mb-2">
-                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                                <i class="fas fa-globe"></i>
-                            </div>
-                            <span class="font-bold text-slate-700">The Site</span>
-                        </div>
-                        <p class="text-xs text-slate-500">View your generated frontend.</p>
-                    </a>
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 min-h-[60vh]">
+        
+        <!-- Loading State -->
+        <div id="loading-indicator" class="flex justify-center items-center py-20">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-anita-500"></div>
+        </div>
 
-                    <!-- Asta -->
-                    <a href="/asta" class="bg-white border border-slate-200 p-4 rounded-xl hover:border-purple-400 hover:shadow-md transition group text-left">
-                        <div class="flex items-center gap-3 mb-2">
-                            <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
-                                <i class="fas fa-pen-nib"></i>
-                            </div>
-                            <span class="font-bold text-slate-700">Asta Editor</span>
-                        </div>
-                        <p class="text-xs text-slate-500">Write Markdown with AI.</p>
-                    </a>
-
-                    <!-- Aina -->
-                    <a href="/aina" class="bg-white border border-slate-200 p-4 rounded-xl hover:border-pink-400 hover:shadow-md transition group text-left col-span-2">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center text-pink-600">
-                                    <i class="fas fa-layer-group"></i>
-                                </div>
-                                <span class="font-bold text-slate-700">Aina Builder</span>
-                            </div>
-                            <i class="fas fa-chevron-right text-gray-300 group-hover:text-pink-400"></i>
-                        </div>
-                    </a>
-                </div>
-
+        <!-- Error State -->
+        <div id="error-message" class="hidden text-center py-20">
+            <div class="inline-block p-4 rounded-lg bg-red-50 text-red-600 border border-red-100">
+                <i class="fas fa-exclamation-circle mb-2 text-2xl"></i>
+                <p>Oops! We couldn't load the posts right now.</p>
+                <button onclick="fetchPosts()" class="mt-4 text-sm font-bold underline">Try Again</button>
             </div>
         </div>
 
-        <!-- Footer strip -->
-        <div class="bg-slate-50 px-8 py-4 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
-            <div class="font-mono">v1.0.0 <span class="mx-2">•</span> <i class="fas fa-database mr-1"></i> SQLite</div>
-            <div>
-                <a href="https://github.com/Iteranya/anita-cms" target="_blank" class="hover:text-anita-600 transition">Docs</a>
-                <span class="mx-2">|</span>
-                Made with 💙
+        <!-- Blog Grid -->
+        <div id="blog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Posts will be injected here via JS -->
+        </div>
+
+        <!-- Empty State (Hidden by default) -->
+        <div id="empty-state" class="hidden text-center py-20 col-span-full">
+            <div class="text-slate-400">
+                <i class="fas fa-feather text-6xl mb-4 opacity-50"></i>
+                <h3 class="text-xl font-bold text-slate-600">No posts found yet</h3>
+                <p>Check back later for updates!</p>
             </div>
         </div>
     </main>
 
+    <!-- Footer -->
+    <footer class="bg-slate-950 text-slate-400 py-12 border-t border-slate-900 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8 mb-12">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center gap-2 mb-4 text-white">
+                        <img class="w-8 h-8 rounded-full" src="/media/anita.jpg" alt="Logo"/>
+                        <span class="font-bold text-xl">Anita CMS</span>
+                    </div>
+                    <p class="text-sm mb-4 max-w-xs">
+                        A lightweight, AI-assisted, hybrid content management system built for speed and creative freedom.
+                    </p>
+                    <div class="flex gap-4">
+                        <a class="hover:text-white transition" href="#"><i class="fab fa-github"></i></a>
+                        <a class="hover:text-white transition" href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4">Resources</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a class="hover:text-anita-400 transition" href="#">Documentation</a></li>
+                        <li><a class="hover:text-anita-400 transition" href="#">API Reference</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4">Hugs Accepted</h4>
+                    <pre class="text-xs font-mono text-anita-300 bg-slate-900 p-2 rounded border border-slate-800 inline-block">
+ ╭──────────────────╮
+ │  (.づ◡﹏◡)づ.    │
+ ╰──────────────────╯
+                    </pre>
+                </div>
+            </div>
+            <div class="border-t border-slate-900 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-xs">© 2025 Anita CMS. Licensed under AGPL-3.0.</p>
+                <p class="text-xs mt-2 md:mt-0">Made with 💙 and Caffeine.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Logic -->
+    <script>
+        // Formatting Utility for Dates
+        const formatDate = (dateString) => {
+            if (!dateString) return '';
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        };
+
+        // DOM Elements
+        const grid = document.getElementById('blog-grid');
+        const loader = document.getElementById('loading-indicator');
+        const errorMsg = document.getElementById('error-message');
+        const emptyMsg = document.getElementById('empty-state');
+
+        async function fetchPosts() {
+            // Reset states
+            grid.innerHTML = '';
+            loader.classList.remove('hidden');
+            errorMsg.classList.add('hidden');
+            emptyMsg.classList.add('hidden');
+
+            try {
+    const params = new URLSearchParams();
+    ['main:blog', 'any:read'].forEach(tag => {
+        params.append('tags', tag);
+    });
+
+    const response = await fetch(`/search?${params.toString()}`);
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const posts = await response.json();
+
+    loader.classList.add('hidden');
+
+    if (!posts || posts.length === 0) {
+        emptyMsg.classList.remove('hidden');
+        return;
+    }
+
+                // Render Posts
+                posts.forEach((post, index) => {
+                    const article = document.createElement('article');
+                    article.className = 'glass-panel rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-anita-100 transition-all duration-300 flex flex-col h-full transform hover:-translate-y-1';
+                    
+                    // Stagger animation delay
+                    article.style.animation = `fadeIn 0.5s ease-out forwards ${index * 0.1}s`;
+                    article.style.opacity = '0'; // Initial state for animation
+
+                    // Thumbnail Logic
+                    let thumbHtml = '';
+                    if (post.thumb) {
+                        thumbHtml = `
+                            <div class="h-48 overflow-hidden relative group">
+                                <img src="${post.thumb}" alt="${post.title}" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
+                                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            </div>
+                        `;
+                    } else {
+                        // Fallback gradient pattern if no image
+                        thumbHtml = `
+                            <div class="h-48 w-full bg-gradient-to-br from-anita-100 to-purple-100 flex items-center justify-center">
+                                <i class="fas fa-file-alt text-4xl text-anita-300/50"></i>
+                            </div>
+                        `;
+                    }
+
+                    // Tags Logic
+                    let tagsHtml = '';
+                    if (post.tags && Array.isArray(post.tags)) {
+                        tagsHtml = `<div class="flex flex-wrap gap-2 mb-3">
+                            ${post.tags.slice(0, 3).map(tag => 
+                                `<span class="px-2 py-1 text-xs font-semibold bg-anita-50 text-anita-600 rounded-md border border-anita-100">#${tag}</span>`
+                            ).join('')}
+                        </div>`;
+                    }
+
+                    article.innerHTML = `
+                        <a href="/blog/${post.slug}" class="block h-full flex flex-col">
+                            ${thumbHtml}
+                            <div class="p-6 flex-grow flex flex-col">
+                                <div class="flex items-center text-xs text-slate-500 mb-3 gap-2">
+                                    <i class="far fa-calendar-alt text-anita-400"></i>
+                                    <span>${formatDate(post.created)}</span>
+                                    ${post.author ? `<span class="mx-1">•</span><span>${post.author}</span>` : ''}
+                                </div>
+                                
+                                <h2 class="text-xl font-bold text-slate-800 mb-3 group-hover:text-anita-600 transition-colors line-clamp-2">
+                                    ${post.title}
+                                </h2>
+                                
+                                ${tagsHtml}
+                                
+                                <p class="text-slate-600 text-sm leading-relaxed mb-4 line-clamp-3 flex-grow">
+                                    ${post.content || 'No summary available.'}
+                                </p>
+                                
+                                <div class="mt-auto pt-4 border-t border-slate-100 flex items-center text-anita-600 font-bold text-sm group-hover:gap-2 transition-all">
+                                    Read Article <i class="fas fa-arrow-right ml-2"></i>
+                                </div>
+                            </div>
+                        </a>
+                    `;
+                    
+                    grid.appendChild(article);
+                });
+
+                // Add fade-in animation keyframes dynamically
+                const styleSheet = document.createElement("style");
+                styleSheet.textContent = `
+                    @keyframes fadeIn {
+                        from { opacity: 0; transform: translateY(20px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                `;
+                document.head.appendChild(styleSheet);
+
+            } catch (err) {
+                console.error("Failed to fetch blog posts:", err);
+                loader.classList.add('hidden');
+                errorMsg.classList.remove('hidden');
+            }
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', fetchPosts);
+    </script>
 </body>
 </html>

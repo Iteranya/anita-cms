@@ -107,6 +107,9 @@
                     <template x-if="page.tags.includes('any:read')">
                         <span class="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-bold">Public</span>
                     </template>
+                    <template x-if="page.tags.includes('sys:head')">
+                        <span class="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-bold">Head</span>
+                    </template>
                 </div>
                 
                 <!-- Hover Menu (Prevent Drag on Click) -->
@@ -124,7 +127,21 @@
             <div class="flex-1 pointer-events-none"> <!-- content shouldn't capture drag events -->
                 <h4 class="font-bold text-slate-800 text-base mb-1 line-clamp-1" x-text="page.title"></h4>
                 <div class="flex items-center text-xs text-slate-400 font-mono bg-slate-50 rounded px-2 py-1 w-fit max-w-full overflow-hidden">
-                    <span class="truncate" x-text="'/' + (categoryName !== 'uncategorized' ? categoryName + '/' : '') + page.slug"></span>
+                    <span class="truncate"  x-text="
+    (() => {
+      const parts = [
+        categoryName !== 'uncategorized' ? categoryName : null,
+        page.slug
+      ].filter(Boolean);
+
+      // remove duplicate consecutive segments
+      const unique = parts.filter(
+        (part, i) => i === 0 || part !== parts[i - 1]
+      );
+
+      return '/' + unique.join('/');
+    })()
+  "></span>
                 </div>
             </div>
 
@@ -269,6 +286,18 @@
                     <div class="ml-4 flex-1">
                         <p class="font-semibold text-slate-700">Set as Site Homepage</p>
                         <p class="text-xs text-slate-500">This page will be served at your site's main `/` URL.</p>
+                    </div>
+                </label>
+                
+                <!-- Head Toggle -->
+                <label class="flex items-center p-4 bg-white border border-slate-200 rounded-lg hover:border-slate-300 transition cursor-pointer col-span-1 md:col-span-2">
+                    <input type="checkbox" x-model="form.isHead" class="sr-only peer">
+                    <div class="w-10 h-6 bg-slate-300 rounded-full peer-checked:bg-blue-500 transition-colors relative">
+                        <div class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform transform peer-checked:translate-x-4"></div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <p class="font-semibold text-slate-700">Set as Top Level Page</p>
+                        <p class="text-xs text-slate-500">This page will be served at your site's `/{slug}` URL.</p>
                     </div>
                 </label>
             </div>

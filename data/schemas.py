@@ -118,6 +118,12 @@ class PageData(Page):
     html: Optional[str] = Field(default=None, exclude=True)
     markdown: Optional[str] = Field(default=None, exclude=True)
 
+class PageSeed(PageBase):
+    slug: str
+    @field_validator('slug', mode='before')
+    @classmethod
+    def bleach_slug(cls, v): return sanitize_text(v)
+
 
 # --- Form Schemas ---
 

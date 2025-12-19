@@ -192,12 +192,14 @@ export default () => ({
         this.form.isPublic = false;
         this.form.isHome = false;
         this.form.isTemplate = false;
+        this.form.isHead = false;
         this.form.permissions = this.getEmptyPermissions();
 
         tags.forEach(tag => {
             if (tag === 'any:read') { this.form.isPublic = true; return; }
             if (tag === 'sys:home') { this.form.isHome = true; return; }
             if (tag === 'sys:template') {this.form.isTemplate = true; return;}
+            if (tag === 'sys:head') {this.form.isHead = true; return;}
             if (tag.startsWith('main:')) { this.form.category = tag.split(':')[1]; return; }
 
             const parts = tag.split(':');
@@ -217,6 +219,7 @@ export default () => ({
         if (this.form.isPublic) tags.push('any:read');
         if (this.form.isHome) tags.push('sys:home');
         if (this.form.isTemplate) tags.push('sys:template');
+        if (this.form.isHead) tags.push('sys:head');
 
         Object.entries(this.form.permissions).forEach(([role, actions]) => {
             Object.entries(actions).forEach(([action, isEnabled]) => {

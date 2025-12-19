@@ -472,7 +472,7 @@ def seed_default_pages(db: Session):
             default_pages_data = json.load(f)
         for page_dict in default_pages_data:
             if not get_page(db, slug=page_dict['slug']):
-                page_schema = schemas.PageCreate(**page_dict)
+                page_schema = schemas.PageSeed(**page_dict)
                 create_page(db, page=page_schema)
                 print(f"  - Created page: '{page_dict['title']}'")
         print("✓ Default pages seeded.")

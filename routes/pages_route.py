@@ -10,6 +10,8 @@ from services.users import UserService
 from src import dependencies as dep
 from src.audit import logger
 
+# TODO: Figure out what the user can fetch *before* fetching from database for performance.
+
 # --- Dependency Setup ---
 
 def get_page_service(db: Session = Depends(get_db)) -> PageService:
