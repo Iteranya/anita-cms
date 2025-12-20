@@ -308,16 +308,6 @@ class Prompt(BaseModel):
     stop: Optional[List[str]] = None
     result: Optional[str] = None
 
-class RouteData(BaseModel):
-    name: str
-    type: str
-    description: Optional[str] = None
-    schema: Optional[Dict[str, Any]] = None
-    usage_note: Optional[str] = None
-    @field_validator('schema', mode='before')
-    @classmethod
-    def bleach_schema_dict(cls, v): return sanitize_recursively(v)
-
 class MarkdownEditRequest(BaseModel):
     global_instruction: str
     edit_instruction: str

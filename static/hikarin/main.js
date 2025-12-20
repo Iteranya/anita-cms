@@ -10,7 +10,7 @@ import notificationsStore from './alpine/stores/notifications.js';
 
 import schemaManager from './alpine/managers/schemaManager.js';
 import dataManager from './alpine/managers/dataManager.js';
-import pageManager from './alpine/managers/pageManager.js'; // <-- Your drag-and-drop logic is in here
+import pageManager from './alpine/managers/pageManager.js'; 
 import userManager from './alpine/managers/userManager.js';
 import mediaManager from './alpine/managers/mediaManager.js';
 import formManager from './alpine/managers/formManager.js';
