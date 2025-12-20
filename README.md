@@ -57,7 +57,7 @@
   </a>
 </p>
 <h1 align="center">Anita CMS - The No-Code Hybrid Content Management System</h1>
-<h2 align="center">Alpha Release</h2>
+<h3 align="center">Alpha Release: Here Be Dragons</h2>
 
 ---
 
