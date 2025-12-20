@@ -620,6 +620,7 @@ Using our strict Attribute-Based Access Control (ABAC) and Security Matrix, you 
 - Advanced: Create your client their very own custom admin page that they can use to update their menu without touching the admin panel
 - 
 Result: They feel empowered to update their content. You sleep soundly knowing they can't nuke the database.
+
 ---
 
 ## Installation
