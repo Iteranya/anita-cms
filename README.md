@@ -618,7 +618,7 @@ Using our strict Attribute-Based Access Control (ABAC) and Security Matrix, you 
 - The "Blog Writer" Role: Give them access to Asta (Markdown) to write news, but block access to Aina (Builder) so they can't break the layout.
 - System Locks: Critical pages (like Home or 404) are protected by System Tags. Even if you give a client "Delete Page" permissions, Anita will refuse to delete a System-Tagged page.
 - Advanced: Create your client their very own custom admin page that they can use to update their menu without touching the admin panel
-- 
+
 Result: They feel empowered to update their content. You sleep soundly knowing they can't nuke the database.
 
 ---
