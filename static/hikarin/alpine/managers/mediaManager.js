@@ -199,6 +199,7 @@ export default () =>  ({
             
             try {
                 // 1. Delete Physical
+                console.log(this.targetFilename) // Exists
                 await this.$api.media.delete(this.targetFilename).execute();
                 
                 // 2. Delete Metadata (if exists)
@@ -210,6 +211,29 @@ export default () =>  ({
                 this.refresh();
             } catch(e) {
                 Alpine.store('notifications').error('Error Deleting File', e); 
+            }
+        },
+
+        async batchUpload(e) {
+            const files = Array.from(e.target.files || []);
+            if (!files.length) return;
+
+            this.isUploading = true;
+
+            try {
+                // Upload all files in one go
+                await this.$api.media.upload().execute(files);
+
+                // Reset input so same files can be re-selected later
+                e.target.value = '';
+
+                // Refresh media list
+                await this.refresh();
+
+            } catch (err) {
+                Alpine.store('notifications').error('Batch Upload Failed', err);
+            } finally {
+                this.isUploading = false;
             }
         },
 

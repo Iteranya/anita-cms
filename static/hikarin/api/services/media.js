@@ -10,5 +10,9 @@ export class MediaAPI {
             return this._client._request('POST', '/media/', { body: fd });
         });
     }
-    delete() { return new ApiRequest((f) => this._client._request('DELETE', `/media/${f}`)); }
+    delete(f) {
+    return new ApiRequest(() =>
+        this._client._request('DELETE', `/media/${f}`)
+    );
+}
 }
