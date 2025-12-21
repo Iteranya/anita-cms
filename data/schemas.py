@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import nh3
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from typing import List, Optional, Dict, Any
@@ -370,3 +371,13 @@ class DashboardStats(BaseModel):
     recent_items: DashboardRecentItems
     class Config:
         from_attributes = True
+
+# --- Internal Use Schemas ---
+
+@dataclass
+class AlpineData:
+    slug:str # The Slug
+    name:str # Friendly Name
+    description:str | None # Description and usage note
+    category:str # Category
+    data:str # String containing alpine data snippet

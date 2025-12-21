@@ -2,18 +2,11 @@
 
 import re
 from typing import List
-
 from bs4 import BeautifulSoup
 from sqlalchemy.orm import Session
 
-# Import our schemas and services
-from data.schemas import RouteData
-from services.config import ConfigService
-from services.forms import FormService
-from services.pages import PageService
-
 # --- Helper Classes and Functions ---
-
+    
 def title_to_filename(title: str) -> str:
     """Converts a string into a URL-friendly slug."""
     filename = title.lower()
@@ -26,11 +19,8 @@ def title_to_filename(title: str) -> str:
 class WebsiteBuilderService:
     def __init__(self, db: Session):
         self.db = db
-        self.config_service = ConfigService(db)
-        self.form_service = FormService(db)
-        self.page_service = PageService(db)
 
-    def _generate_page_style_description(self, html: str) -> str:
+    def _generate_page_style_description(self, html: str) -> str: # Not used in AlpineData, this is for something else
         """Parses HTML to extract styling and structural elements for AI context."""
         if not html: 
             return ""
@@ -54,7 +44,7 @@ class WebsiteBuilderService:
             return f"{' '.join(components)}\n\nMake the site based on this style."
         return ""
 
-    def get_full_context_routes(self) -> List[RouteData]:
-        """Aggregates route information from forms, pages, and config."""
+    def get_full_context_routes(self) -> List[AlpineData]:
+        """Aggregates route information from forms, pages, and config, and turn them into Alpine x-data"""
         
         return None

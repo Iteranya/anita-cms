@@ -7,7 +7,7 @@ from data import schemas
 from services.forms import FormService
 from services.users import UserService
 from src.dependencies import get_current_user, optional_user
-from data.schemas import CurrentUser
+from data.schemas import AlpineData, CurrentUser
 
 # --- Dependency Setup ---
 def get_form_service(db: Session = Depends(get_db)) -> FormService:
@@ -393,3 +393,211 @@ def delete_submission(
 
     form_service.delete_submission_by_id(submission_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+def generate_form_alpine_components(form_service: FormService, db_session) -> List[AlpineData]:
+    """
+    Generates AlpineData components for every existing form in the database.
+    It creates two components per form:
+    1. A List Component (form-list-{slug})
+    2. An Editor Component (form-editor-{slug})
+    """
+    
+    # 1. Fetch all forms
+    # We use a high limit to get everything. Pagination logic might be needed for the generator 
+    # itself in a huge system, but usually adequate for schema generation.
+    forms = form_service.get_all_forms(skip=0, limit=1000)
+    
+    alpine_registry: List[AlpineData] = []
+
+    for form in forms:
+        # Extract fields from the schema safely
+        # Schema expected format: {'fields': [{'name': 'email', 'type': 'text'}, ...]}
+        schema_fields = form.schema.get('fields', []) if form.schema else []
+        
+        # --- 1. Generate List Component ---
+        list_component_slug = f"list-{form.slug}"
+        list_js = _generate_list_js(form.slug, schema_fields)
+        
+        alpine_registry.append(AlpineData(
+            slug=list_component_slug,
+            name=f"List: {form.title}",
+            description=f"Displays submissions for {form.title}",
+            category="Form Lists",
+            data=list_js
+        ))
+
+        # --- 2. Generate Editor Component ---
+        editor_component_slug = f"editor-{form.slug}"
+        editor_js = _generate_editor_js(form.slug, schema_fields)
+
+        alpine_registry.append(AlpineData(
+            slug=editor_component_slug,
+            name=f"Editor: {form.title}",
+            description=f"Create or Edit submissions for {form.title}",
+            category="Form Editors",
+            data=editor_js
+        ))
+
+    return alpine_registry
+
+
+def _generate_list_js(form_slug: str, fields: List[dict]) -> str:
+    """
+    Creates the Javascript string for the List/Table view.
+    """
+    # Create a simple header array string for reference in the JS
+    
+    return f"""export default () => ({{
+    submissions: [],
+    isLoading: false,
+    page: 0,
+    limit: 50,
+    
+    async init() {{
+        await this.refresh();
+    }},
+
+    async refresh() {{
+        this.isLoading = true;
+        try {{
+            this.submissions = await this.$api.collections.listRecords('{form_slug}', this.page, this.limit).execute();
+        }} catch(e) {{
+            console.error('Failed to load submissions', e);
+            if(Alpine.store('notifications')) Alpine.store('notifications').error('Error', 'Could not load data');
+        }} finally {{
+            this.isLoading = false;
+        }}
+    }},
+
+    async deleteSubmission(id) {{
+        if(!confirm('Are you sure you want to delete this submission?')) return;
+        
+        this.isLoading = true;
+        try {{
+            await this.$api.collections.deleteRecord('{form_slug}', id).execute();
+            if(Alpine.store('notifications')) Alpine.store('notifications').success('Deleted', 'Record removed.');
+            await this.refresh();
+        }} catch(e) {{
+            console.error(e);
+            if(Alpine.store('notifications')) Alpine.store('notifications').error('Error', 'Delete failed');
+        }} finally {{
+            this.isLoading = false;
+        }}
+    }},
+    
+    // Helper to format table cells safely
+    getValue(submission, fieldName) {{
+        return (submission.data && submission.data[fieldName] !== undefined) 
+            ? submission.data[fieldName] 
+            : '';
+    }}
+}})"""
+
+
+def _generate_editor_js(form_slug: str, fields: List[dict]) -> str:
+    """
+    Creates the Javascript string for the Create/Update view.
+    This "Hardcodes" the specific fields from the schema into the JS object.
+    """
+    
+    # 1. Initialize properties (e.g., name: '', email: '')
+    # We default to empty string.
+    properties_init = []
+    for f in fields:
+        name = f['name']
+        properties_init.append(f"{name}: ''")
+    
+    properties_str = ",\n    ".join(properties_init)
+
+    # 2. Logic to map "this.field" into the "data" payload object
+    payload_mapping = []
+    for f in fields:
+        name = f['name']
+        payload_mapping.append(f"{name}: this.{name}")
+    
+    payload_str = ",\n                ".join(payload_mapping)
+
+    # 3. Logic to populate "this.field" FROM existing data (for editing)
+    populate_logic = []
+    for f in fields:
+        name = f['name']
+        # JS safety check: if(data.field !== undefined) this.field = data.field
+        populate_logic.append(f"if(data['{name}'] !== undefined) this.{name} = data['{name}'];")
+    
+    populate_str = "\n        ".join(populate_logic)
+
+    return f"""export default (initialData = null, submissionId = null) => ({{
+    // Standard State
+    submissionId: submissionId, // If null, we are in CREATE mode
+    isEditing: false,
+    isLoading: false,
+
+    // --- Hardcoded Schema Fields ---
+    {properties_str},
+
+    init() {{
+        if (initialData) {{
+            this.loadData(initialData);
+        }}
+        
+        if (this.submissionId) {{
+             this.isEditing = true;
+        }}
+    }},
+
+    loadData(data) {{
+        // Maps incoming generic data object to hardcoded reactive properties
+        {populate_str}
+        this.isEditing = true;
+        if(data.id) this.submissionId = data.id;
+    }},
+
+    async save() {{
+        this.isLoading = true;
+        
+        // 1. Construct the 'data' dictionary expected by the backend schema
+        const submissionBody = {{
+            {payload_str}
+        }};
+
+        try {{
+            if (this.isEditing && this.submissionId) {{
+                // --- UPDATE FLOW ---
+                // Endpoint expects SubmissionUpdate: {{ data: {{ ... }} }}
+                const payload = {{ data: submissionBody }};
+                await this.$api.collections.updateRecord('{form_slug}', this.submissionId, payload).execute();
+                if(Alpine.store('notifications')) Alpine.store('notifications').success('Saved', 'Submission updated.');
+
+            }} else {{
+                // --- CREATE FLOW ---
+                // Endpoint expects SubmissionCreate: {{ form_slug: 'slug', data: {{ ... }} }}
+                const payload = {{
+                    form_slug: '{form_slug}',
+                    data: submissionBody
+                }};
+                
+                await this.$api.collections.createRecord('{form_slug}', payload).execute();
+                
+                if(Alpine.store('notifications')) Alpine.store('notifications').success('Success', 'Submission created.');
+                this.resetForm();
+            }}
+            
+            // Optional: Emit event for parent lists to refresh
+            this.$dispatch('submission-saved');
+
+        }} catch(e) {{
+            console.error(e);
+            if(Alpine.store('notifications')) Alpine.store('notifications').error('Error', 'Could not save submission.');
+        }} finally {{
+            this.isLoading = false;
+        }}
+    }},
+
+    resetForm() {{
+        this.submissionId = null;
+        this.isEditing = false;
+        // Reset hardcoded fields
+        {properties_str.replace(":", " =").replace(",", ";")}
+    }}
+}})"""
