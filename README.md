@@ -749,6 +749,7 @@ python main.py
 - Sandbox Aina properly (Dummy Browser, Dummy Database, Dummy Dynamic API... Goddammit, I'll add disclaimers for now)
 - ~~Add the cats~~
 - ~~Get rid of the cats and refactor the entire fucking database to have label (system) and tag (public) instead of tag (system) and cat(public)~~ (won't fix, weird naming convention, deal with it)
+- Proper Pagination in Admin Page (God how did I miss this???)
 
 Terrible Ideas That Won't Go Away
 
