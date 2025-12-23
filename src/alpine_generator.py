@@ -1,5 +1,5 @@
 import json
-from typing import List, Any
+from typing import List
 
 from data.schemas import AlpineData
 from services.forms import FormService
@@ -329,9 +329,17 @@ def generate_form_alpine_components(form_service: FormService) -> List[AlpineDat
     forms = form_service.get_all_forms(skip=0, limit=1000)
     alpine_registry: List[AlpineData] = []
 
+    REQUIRED_TAGS = {"any:read", "any:create"}
+
     for form in forms:
+        tag_names = {tag.name for tag in form.tags.all()}
+
+        # Skip forms without any of the required tags
+        if not tag_names.intersection(REQUIRED_TAGS):
+            continue
+
         schema_fields = form.schema.get('fields', []) if form.schema else []
-        
+
         # 1. List Component
         list_js = generate_form_list_js(form.slug, schema_fields)
         alpine_registry.append(AlpineData(
@@ -352,7 +360,6 @@ def generate_form_alpine_components(form_service: FormService) -> List[AlpineDat
             data=editor_js
         ))
 
-    return alpine_registry
 
 
 def generate_media_alpine_components(form_service: FormService) -> List[AlpineData]:

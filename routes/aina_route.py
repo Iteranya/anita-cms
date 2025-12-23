@@ -51,6 +51,8 @@ async def api_get_all_routes(db: Session = Depends(get_db)):
     (forms, media wrappers, and public utilities).
     
     Includes error handling to ensure partial success if one subsystem fails.
+
+    This is used for the dropdown menu
     """
     form_service = FormService(db)
     
