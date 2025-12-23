@@ -1,26 +1,33 @@
-
 <div
     x-data="authManager"
     x-init="mode='login'; init()"
-    class="glass-panel rounded-3xl p-8 sm:p-10 shadow-2xl relative"
+    class="glass-panel rounded-2xl p-6 sm:p-8 shadow-2xl relative
+           w-full max-w-sm mx-auto"
 >
 
     <!-- Header -->
-    <div class="text-center mb-8">
+    <div class="text-center mb-6">
         <img
-src="/media/anita.jpg"
-class="h-24 w-auto max-w-[6rem] object-contain mx-auto mb-4
-        rounded-full border-4 border-white shadow-lg"
-/>
-        <h1 class="text-3xl font-extrabold">Welcome Back</h1>
-        <p class="text-slate-500 mt-2">Sign in to continue</p>
+            src="/media/anita.jpg"
+            class="h-20 w-20 object-cover mx-auto mb-3
+                   rounded-full border-4 border-white shadow-md"
+        />
+
+        <h1 class="text-2xl font-extrabold text-slate-800">
+            Welcome back
+        </h1>
+
+        <p class="text-sm text-slate-500 mt-1">
+            Sign in to continue
+        </p>
     </div>
 
     <!-- Error -->
     <div
         x-show="error"
         x-transition
-        class="mb-6 p-4 rounded-xl border bg-red-50 border-red-100 text-red-600 flex gap-2 text-sm"
+        class="mb-5 p-3 rounded-xl border border-red-100
+               bg-red-50 text-red-600 flex gap-2 text-sm"
     >
         <i class="fas fa-exclamation-triangle mt-0.5"></i>
         <span x-text="error"></span>
@@ -29,16 +36,17 @@ class="h-24 w-auto max-w-[6rem] object-contain mx-auto mb-4
     <!-- Form -->
     <form
         @submit.prevent="login"
-        class="space-y-6"
+        class="space-y-5"
         :class="{ 'opacity-70 pointer-events-none': loading }"
     >
-
         <input
             type="text"
             placeholder="Username"
             x-model="username"
             required
-            class="w-full px-4 py-3 rounded-xl border font-semibold"
+            class="w-full px-4 py-3 rounded-xl border
+                   text-sm font-medium focus:outline-none
+                   focus:ring-2 focus:ring-anita-500/40"
         >
 
         <input
@@ -46,35 +54,48 @@ class="h-24 w-auto max-w-[6rem] object-contain mx-auto mb-4
             placeholder="Password"
             x-model="password"
             required
-            class="w-full px-4 py-3 rounded-xl border"
+            class="w-full px-4 py-3 rounded-xl border
+                   text-sm focus:outline-none
+                   focus:ring-2 focus:ring-anita-500/40"
         >
 
-        <label class="flex items-center gap-2 text-sm text-slate-600">
-            <input type="checkbox" x-model="rememberMe">
-            Remember me
-        </label>
+        <div class="flex items-center justify-between text-sm">
+            <label class="flex items-center gap-2 text-slate-600">
+                <input type="checkbox" x-model="rememberMe" class="rounded">
+                Remember me
+            </label>
+
+            <a href="/auth/forgot"
+               class="text-anita-600 hover:underline font-medium">
+                Forgot?
+            </a>
+        </div>
 
         <button
             type="submit"
             :disabled="loading"
-            class="w-full bg-gradient-to-r from-anita-600 to-anita-500 text-white font-bold py-4 rounded-xl flex justify-center gap-2 text-lg"
+            class="w-full bg-gradient-to-r from-anita-600 to-anita-500
+                   text-white font-semibold py-3 rounded-xl
+                   flex justify-center items-center gap-2
+                   text-sm shadow-lg hover:shadow-xl
+                   transition-all"
         >
             <template x-if="!loading && !success">
-                <span class="flex gap-2">
+                <span class="flex items-center gap-2">
                     <i class="fas fa-right-to-bracket"></i>
-                    Sign In
+                    Sign in
                 </span>
             </template>
 
             <template x-if="loading">
-                <span class="flex gap-2">
+                <span class="flex items-center gap-2">
                     <i class="fas fa-circle-notch fa-spin"></i>
                     Authenticating…
                 </span>
             </template>
 
             <template x-if="success">
-                <span class="flex gap-2">
+                <span class="flex items-center gap-2">
                     <i class="fas fa-check"></i>
                     Success
                 </span>

@@ -6,12 +6,32 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
 from data.database import get_db
+from services.pages import PageService
 from src.dependencies import optional_user
 
 router = APIRouter(tags=["Admin SPA"])
 
-AUTH_DIR = "static/auth"
-SPA_VIEWS = {"login","setup","register"}
+ADMIN_DIR = "static/admin"
+SPA_VIEWS = {"dashboard", "page", "structure", "users", "forms", "files", "media", "config"}
+ADMIN_CSP = (
+"default-src 'self'; "
+"script-src 'self' 'unsafe-eval'"
+"https://cdn.tailwindcss.com "
+"https://unpkg.com "
+"https://cdn.jsdelivr.net; "
+"style-src 'self' 'unsafe-eval'"
+"https://fonts.googleapis.com "
+"https://cdnjs.cloudflare.com "
+"https://cdn.tailwindcss.com; "
+"font-src 'self' "
+"https://fonts.gstatic.com "
+"https://cdnjs.cloudflare.com; "
+"img-src 'self' data:; "
+"connect-src 'self'; "
+"frame-ancestors 'none'; "
+"base-uri 'self'; "
+"form-action 'self';"
+)
 
 def render_no_cache_html(file_path: str, is_partial: bool):
     """
@@ -25,9 +45,15 @@ def render_no_cache_html(file_path: str, is_partial: bool):
         content = f.read()
 
     response = HTMLResponse(content)
+    #I'll add CSP Later
+    #response.headers["Content-Security-Policy"] = ADMIN_CSP
     
     response.headers["Vary"] = "HX-Request"
-
+    
+    # response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    # response.headers["Pragma"] = "no-cache"
+    # response.headers["Expires"] = "0"
+    
     return response
 
 @router.get("/admin")
@@ -39,7 +65,7 @@ async def view_submissions_manager(request: Request, user: dict = Depends(option
     if not user: 
         return RedirectResponse("/auth/login")
     # Use the helper to ensure this page also doesn't stick in cache strangely
-    return render_no_cache_html(os.path.join(AUTH_DIR, "submissions.html"), False)
+    return render_no_cache_html(os.path.join(ADMIN_DIR, "submissions.html"), False)
 
 @router.get("/admin/{slug}", response_class=HTMLResponse)
 async def admin_router(
@@ -55,11 +81,29 @@ async def admin_router(
     if slug in SPA_VIEWS:
         # 1. Check if it's HTMX (The Partial)
         if request.headers.get("HX-Request"):
-            view_path = os.path.join(AUTH_DIR, "views", f"{slug}.html")
+            view_path = os.path.join(ADMIN_DIR, "views", f"{slug}.html")
             return render_no_cache_html(view_path, True)
         
         # 2. Otherwise, it's the Browser (The Shell)
-        shell_path = os.path.join(AUTH_DIR, "index.html")
+        shell_path = os.path.join(ADMIN_DIR, "index.html")
         return render_no_cache_html(shell_path, False)
+
+    # --- CASE B: Dynamic Database Page ---
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    page_service = PageService(db)
+    page = page_service.get_page_by_slug(slug)
+
+    is_admin_tool = any(t.name == "sys:admin" for t in page.tags)
+    if not is_admin_tool:
+        raise HTTPException(status_code=404, detail="Page is not an admin tool")
+
+    if page.type == 'html' and page.html:
+        # We also prevent caching for dynamic tools so updates show instantly
+        return HTMLResponse(
+            content=page.html, 
+            headers={"Cache-Control": "no-store, max-age=0"}
+        )
 
     raise HTTPException(status_code=404, detail="Content not available")

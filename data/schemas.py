@@ -4,10 +4,13 @@ import re
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from typing import List, Optional, Dict, Any
 
+# Look, I know, I know, Jinja and Alpine's x-text auto escapes things
+# But I don't care
+
 # --- Regex Constants ---
 
 # Lowercase, alphanumeric, and dashes only. No spaces.
-SLUG_PATTERN = re.compile(r'^[a-z0-9-]+$')
+SLUG_PATTERN = re.compile(r'^[a-z0-9-_]+$')
 
 # --- Sanitization Utilities ---
 
@@ -75,8 +78,8 @@ def flatten_tags_to_strings(v: Any) -> List[str]:
 
 class PageBase(BaseModel):
     title: str
-    content: Optional[str] = None # Short description only
-    markdown: Optional[str] = None # Sanitized
+    content: Optional[str] = None # Short description only, not actual page content
+    markdown: Optional[str] = None # Sanitized Until Per-Page CSP is Implemented
     html: Optional[str] = None  # EXEMPTED / UNTOUCHED
     tags: Optional[List[str]] = []
     thumb: Optional[str] = None
@@ -198,7 +201,7 @@ class Form(FormBase):
 
 # --- Submission Schemas ---
 
-class SubmissionBase(BaseModel):
+class SubmissionBase(BaseModel): # Bleach Everything Until Whitelist is Implemented
     data: Dict[str, Any]
     author: Optional[str] = None
     custom: Optional[Dict[str, Any]] = {}

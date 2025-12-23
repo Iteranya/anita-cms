@@ -5,8 +5,8 @@ from fastapi import APIRouter, Depends, Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from data.database import get_db
+from data.schemas import AlpineData
 from services.aina import WebsiteBuilderService
-from data.schemas import RouteData
 
 # Import the new, decoupled authentication dependencies
 from src.dependencies import optional_user
@@ -34,7 +34,7 @@ async def get_aina_ui(request: Request, user: Optional[dict] = Depends(optional_
     )
     return HTMLResponse(content=html)
 
-@router.get("/routes", response_model=List[RouteData])
+@router.get("/routes", response_model=List[AlpineData])
 async def api_get_all_routes(db: Session = Depends(get_db)):
     """
     Provides a comprehensive list of all discoverable routes 

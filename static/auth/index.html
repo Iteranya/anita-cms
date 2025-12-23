@@ -60,19 +60,34 @@
 </head>
 
 <body 
-    class="bg-slate-100 text-slate-800 font-sans h-screen overflow-hidden flex"
+    class="relative bg-gradient-to-br from-slate-100 via-white to-slate-200 text-slate-800 font-sans h-screen overflow-hidden flex"
     x-data="authShell"
     hx-boost="true"
 >
 
+    <div class="absolute inset-0 overflow-hidden -z-10">
+        <div class="blob animate-blob bg-anita-500 w-[500px] h-[500px] top-[-100px] left-[-100px]"></div>
+        <div class="blob animate-blob bg-purple-400 w-[400px] h-[400px] bottom-[-80px] right-[-80px] animation-delay-2000"></div>
+        <div class="blob animate-blob bg-cyan-300 w-[300px] h-[300px] bottom-[20%] left-[20%] animation-delay-4000"></div>
+    </div>
+
     <!-- CONTENT AREA -->
-    <main id="app-content" class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        <!-- Initial Load Spinner -->
-        <div class="flex h-full items-center justify-center text-slate-400">
-            <i class="fas fa-circle-notch fa-spin text-3xl"></i>
+    <main
+    class="flex-1 flex items-center justify-center relative px-4 sm:px-6"
+>
+        <!-- Auth Card -->
+        <div
+            id="app-content"
+            class="glass-panel w-full max-w-sm sm:max-w-md rounded-2xl p-6 sm:p-8
+                shadow-2xl transition-all"
+        >
+            <!-- Initial Loader -->
+            <div class="flex flex-col items-center justify-center gap-4 text-slate-400">
+                <i class="fas fa-circle-notch fa-spin text-3xl text-anita-500"></i>
+                <p class="text-sm">Loading…</p>
+            </div>
         </div>
     </main>
-
 
     <!-- NOTIFICATION CONTAINER -->
     <div class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none">

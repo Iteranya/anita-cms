@@ -5,7 +5,7 @@ from typing import List
 from bs4 import BeautifulSoup
 from sqlalchemy.orm import Session
 
-from alpine_generator import generate_form_alpine_components
+from src.alpine_generator import generate_form_alpine_components
 from data.schemas import AlpineData
 
 # --- Helper Classes and Functions ---

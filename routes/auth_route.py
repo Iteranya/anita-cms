@@ -1,6 +1,6 @@
 import os
-from fastapi import APIRouter, HTTPException, status, Response, Form, Depends
-from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
+from fastapi import APIRouter, HTTPException, Request, status, Response, Form, Depends
+from fastapi.responses import HTMLResponse, RedirectResponse
 from datetime import timedelta
 from sqlalchemy.orm import Session
 from data.database import get_db 
@@ -16,6 +16,9 @@ def get_auth_service(user_service: UserService = Depends(get_user_service)) -> A
 
 # --- Router Setup ---
 router = APIRouter(tags=["Auth"])
+
+AUTH_DIR = "static/auth"
+SPA_VIEWS = {"login","setup","register"}
 
 # --- HELPERS ---
 
@@ -52,31 +55,24 @@ async def serve_auth_page(user_service: UserService = Depends(get_user_service))
     
     return RedirectResponse("/auth/login")
 
-@router.get("/auth/login")
-async def serve_login_page(user_service: UserService = Depends(get_user_service)):
-    # If no users exist, force them to setup
-    if not is_system_initialized(user_service):
-        return RedirectResponse(url="/auth/setup", status_code=status.HTTP_302_FOUND)
-    
-    return FileResponse("static/auth/login.html")
+@router.get("/auth/{slug}", response_class=HTMLResponse)
+async def auth_router(
+    slug: str, 
+    request: Request
+):
 
-@router.get("/auth/setup")
-async def serve_setup_page(user_service: UserService = Depends(get_user_service)):
-    # If no users exist, force them to setup
-    if is_system_initialized(user_service):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND
-        )
-    
-    return FileResponse("static/auth/setup.html")
+    # --- CASE A: Static SPA View ---
+    if slug in SPA_VIEWS:
+        # 1. Check if it's HTMX (The Partial)
+        if request.headers.get("HX-Request"):
+            view_path = os.path.join(AUTH_DIR, "views", f"{slug}.html")
+            return render_no_cache_html(view_path, True)
+        
+        # 2. Otherwise, it's the Browser (The Shell)
+        shell_path = os.path.join(AUTH_DIR, "index.html")
+        return render_no_cache_html(shell_path, False)
 
-@router.get("/auth/register")
-async def serve_register_page(user_service: UserService = Depends(get_user_service)):
-    # If no users exist, force them to setup
-    if not is_system_initialized(user_service):
-        return RedirectResponse(url="/auth/setup", status_code=status.HTTP_302_FOUND)
-    
-    return FileResponse("static/auth/register.html")
+    raise HTTPException(status_code=404, detail="Content not available")
 
 
 # --- ROUTES ---
