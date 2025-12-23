@@ -5,6 +5,7 @@ from typing import List
 from bs4 import BeautifulSoup
 from sqlalchemy.orm import Session
 
+from alpine_generator import generate_form_alpine_components
 from data.schemas import AlpineData
 
 # --- Helper Classes and Functions ---
@@ -48,5 +49,9 @@ class WebsiteBuilderService:
 
     def get_full_context_routes(self) -> List[AlpineData]:
         """Aggregates route information from forms, pages, and config, and turn them into Alpine x-data"""
-        
+        context = []
+        context.append(generate_form_alpine_components())
+
         return None
+    
+        

@@ -4,10 +4,8 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
-
-# Import services, schemas, and dependencies from our new architecture
 from data.database import get_db
-from src.aina import WebsiteBuilderService
+from services.aina import WebsiteBuilderService
 from data.schemas import RouteData
 
 # Import the new, decoupled authentication dependencies
