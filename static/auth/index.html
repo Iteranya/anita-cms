@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anita Admin</title>
+    <title>Anita CMS – Authentication</title>
     
     <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -37,11 +37,26 @@
         .htmx-swapping { opacity: 0; }
         .htmx-settling { opacity: 1; }
         @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
+            0% { transform: translate(0,0); }
+            33% { transform: translate(30px,-50px); }
+            66% { transform: translate(-20px,20px); }
+            100% { transform: translate(0,0); }
+        }
+        .animate-blob { animation: float 10s infinite ease-in-out; }
+        .blob {
+            position:absolute;
+            filter:blur(80px);
+            opacity:.7;
+            border-radius:50%;
+        }
+        .glass-panel {
+            background: rgba(255,255,255,.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,.6);
+            box-shadow: 0 10px 40px rgba(14,165,233,.15);
         }
     </style>
+
 </head>
 
 <body 

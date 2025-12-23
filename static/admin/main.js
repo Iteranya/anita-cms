@@ -41,8 +41,7 @@ Alpine.data('formManager', formManager);
 Alpine.data('configManager', configManager);
 Alpine.data('fileManager', fileManager);
 Alpine.data('submissionManager', submissionManager);
-Alpine.data('dashboardManager',dashboardManager)
-Alpine.data('authManager',authManager)
+Alpine.data('dashboardManager',dashboardManager);
 Alpine.data('adminShell', adminShell);
 
 // 7. Make Alpine available globally (optional, for debugging)
