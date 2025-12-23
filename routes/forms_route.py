@@ -423,7 +423,7 @@ def generate_form_alpine_components(form_service: FormService, db_session) -> Li
             slug=list_component_slug,
             name=f"List: {form.title}",
             description=f"Displays submissions for {form.title}",
-            category="Form Lists",
+            category="Collections",
             data=list_js
         ))
 
@@ -435,80 +435,89 @@ def generate_form_alpine_components(form_service: FormService, db_session) -> Li
             slug=editor_component_slug,
             name=f"Editor: {form.title}",
             description=f"Create or Edit submissions for {form.title}",
-            category="Form Editors",
+            category="Collections",
             data=editor_js
         ))
 
     return alpine_registry
 
-
 def _generate_list_js(form_slug: str, fields: List[dict]) -> str:
     """
     Creates the Javascript string for the List/Table view.
+    Registers an Alpine.data component named 'list_{form_slug}'.
     """
-    # Create a simple header array string for reference in the JS
-    
-    return f"""export default () => ({{
-    submissions: [],
-    isLoading: false,
-    page: 0,
-    limit: 50,
-    
-    async init() {{
-        await this.refresh();
-    }},
+    # Sanitize slug for JS variable usage (replace hyphens with underscores)
+    safe_slug = form_slug.replace('-', '_')
+    component_name = f"list_{safe_slug}"
 
-    async refresh() {{
-        this.isLoading = true;
-        try {{
-            this.submissions = await this.$api.collections.listRecords('{form_slug}', this.page, this.limit).execute();
-        }} catch(e) {{
-            console.error('Failed to load submissions', e);
-            if(Alpine.store('notifications')) Alpine.store('notifications').error('Error', 'Could not load data');
-        }} finally {{
-            this.isLoading = false;
-        }}
-    }},
-
-    async deleteSubmission(id) {{
-        if(!confirm('Are you sure you want to delete this submission?')) return;
+    return f"""
+document.addEventListener('alpine:init', () => {{
+    Alpine.data('{component_name}', () => ({{
+        submissions: [],
+        isLoading: false,
+        page: 0,
+        limit: 50,
         
-        this.isLoading = true;
-        try {{
-            await this.$api.collections.deleteRecord('{form_slug}', id).execute();
-            if(Alpine.store('notifications')) Alpine.store('notifications').success('Deleted', 'Record removed.');
+        async init() {{
             await this.refresh();
-        }} catch(e) {{
-            console.error(e);
-            if(Alpine.store('notifications')) Alpine.store('notifications').error('Error', 'Delete failed');
-        }} finally {{
-            this.isLoading = false;
+        }},
+
+        async refresh() {{
+            this.isLoading = true;
+            try {{
+                // Note: Ensure this.$api is available globally or via Alpine.magic
+                this.submissions = await this.$api.collections.listRecords('{form_slug}', this.page, this.limit).execute();
+            }} catch(e) {{
+                console.error('Failed to load submissions', e);
+                if(Alpine.store('notifications')) Alpine.store('notifications').error('Error', 'Could not load data');
+            }} finally {{
+                this.isLoading = false;
+            }}
+        }},
+
+        async deleteSubmission(id) {{
+            if(!confirm('Are you sure you want to delete this submission?')) return;
+            
+            this.isLoading = true;
+            try {{
+                await this.$api.collections.deleteRecord('{form_slug}', id).execute();
+                if(Alpine.store('notifications')) Alpine.store('notifications').success('Deleted', 'Record removed.');
+                await this.refresh();
+            }} catch(e) {{
+                console.error(e);
+                if(Alpine.store('notifications')) Alpine.store('notifications').error('Error', 'Delete failed');
+            }} finally {{
+                this.isLoading = false;
+            }}
+        }},
+        
+        // Helper to format table cells safely
+        getValue(submission, fieldName) {{
+            return (submission.data && submission.data[fieldName] !== undefined) 
+                ? submission.data[fieldName] 
+                : '';
         }}
-    }},
-    
-    // Helper to format table cells safely
-    getValue(submission, fieldName) {{
-        return (submission.data && submission.data[fieldName] !== undefined) 
-            ? submission.data[fieldName] 
-            : '';
-    }}
-}})"""
+    }}));
+}});
+"""
 
 
 def _generate_editor_js(form_slug: str, fields: List[dict]) -> str:
     """
     Creates the Javascript string for the Create/Update view.
-    This "Hardcodes" the specific fields from the schema into the JS object.
+    Registers an Alpine.data component named 'editor_{form_slug}'.
     """
+    # Sanitize slug
+    safe_slug = form_slug.replace('-', '_')
+    component_name = f"editor_{safe_slug}"
     
-    # 1. Initialize properties (e.g., name: '', email: '')
-    # We default to empty string.
+    # 1. Initialize properties
     properties_init = []
     for f in fields:
         name = f['name']
         properties_init.append(f"{name}: ''")
     
-    properties_str = ",\n    ".join(properties_init)
+    properties_str = ",\n        ".join(properties_init)
 
     # 2. Logic to map "this.field" into the "data" payload object
     payload_mapping = []
@@ -518,86 +527,92 @@ def _generate_editor_js(form_slug: str, fields: List[dict]) -> str:
     
     payload_str = ",\n                ".join(payload_mapping)
 
-    # 3. Logic to populate "this.field" FROM existing data (for editing)
+    # 3. Logic to populate "this.field" FROM existing data
     populate_logic = []
     for f in fields:
         name = f['name']
-        # JS safety check: if(data.field !== undefined) this.field = data.field
         populate_logic.append(f"if(data['{name}'] !== undefined) this.{name} = data['{name}'];")
     
-    populate_str = "\n        ".join(populate_logic)
+    populate_str = "\n            ".join(populate_logic)
 
-    return f"""export default (initialData = null, submissionId = null) => ({{
-    // Standard State
-    submissionId: submissionId, // If null, we are in CREATE mode
-    isEditing: false,
-    isLoading: false,
+    # 4. Logic to reset fields (Generated cleanly instead of string replacement)
+    reset_logic = []
+    for f in fields:
+        name = f['name']
+        reset_logic.append(f"this.{name} = '';")
+    
+    reset_str = "\n            ".join(reset_logic)
 
-    // --- Hardcoded Schema Fields ---
-    {properties_str},
+    return f"""
+document.addEventListener('alpine:init', () => {{
+    Alpine.data('{component_name}', (initialData = null, submissionId = null) => ({{
+        // Standard State
+        submissionId: submissionId,
+        isEditing: false,
+        isLoading: false,
 
-    init() {{
-        if (initialData) {{
-            this.loadData(initialData);
-        }}
-        
-        if (this.submissionId) {{
-             this.isEditing = true;
-        }}
-    }},
+        // --- Hardcoded Schema Fields ---
+        {properties_str},
 
-    loadData(data) {{
-        // Maps incoming generic data object to hardcoded reactive properties
-        {populate_str}
-        this.isEditing = true;
-        if(data.id) this.submissionId = data.id;
-    }},
-
-    async save() {{
-        this.isLoading = true;
-        
-        // 1. Construct the 'data' dictionary expected by the backend schema
-        const submissionBody = {{
-            {payload_str}
-        }};
-
-        try {{
-            if (this.isEditing && this.submissionId) {{
-                // --- UPDATE FLOW ---
-                // Endpoint expects SubmissionUpdate: {{ data: {{ ... }} }}
-                const payload = {{ data: submissionBody }};
-                await this.$api.collections.updateRecord('{form_slug}', this.submissionId, payload).execute();
-                if(Alpine.store('notifications')) Alpine.store('notifications').success('Saved', 'Submission updated.');
-
-            }} else {{
-                // --- CREATE FLOW ---
-                // Endpoint expects SubmissionCreate: {{ form_slug: 'slug', data: {{ ... }} }}
-                const payload = {{
-                    form_slug: '{form_slug}',
-                    data: submissionBody
-                }};
-                
-                await this.$api.collections.createRecord('{form_slug}', payload).execute();
-                
-                if(Alpine.store('notifications')) Alpine.store('notifications').success('Success', 'Submission created.');
-                this.resetForm();
+        init() {{
+            if (initialData) {{
+                this.loadData(initialData);
             }}
             
-            // Optional: Emit event for parent lists to refresh
-            this.$dispatch('submission-saved');
+            if (this.submissionId) {{
+                 this.isEditing = true;
+            }}
+        }},
 
-        }} catch(e) {{
-            console.error(e);
-            if(Alpine.store('notifications')) Alpine.store('notifications').error('Error', 'Could not save submission.');
-        }} finally {{
-            this.isLoading = false;
+        loadData(data) {{
+            {populate_str}
+            this.isEditing = true;
+            if(data.id) this.submissionId = data.id;
+        }},
+
+        async save() {{
+            this.isLoading = true;
+            
+            const submissionBody = {{
+                {payload_str}
+            }};
+
+            try {{
+                if (this.isEditing && this.submissionId) {{
+                    // --- UPDATE FLOW ---
+                    const payload = {{ data: submissionBody }};
+                    await this.$api.collections.updateRecord('{form_slug}', this.submissionId, payload).execute();
+                    if(Alpine.store('notifications')) Alpine.store('notifications').success('Saved', 'Submission updated.');
+
+                }} else {{
+                    // --- CREATE FLOW ---
+                    const payload = {{
+                        form_slug: '{form_slug}',
+                        data: submissionBody
+                    }};
+                    
+                    await this.$api.collections.createRecord('{form_slug}', payload).execute();
+                    
+                    if(Alpine.store('notifications')) Alpine.store('notifications').success('Success', 'Submission created.');
+                    this.resetForm();
+                }}
+                
+                this.$dispatch('submission-saved');
+
+            }} catch(e) {{
+                console.error(e);
+                if(Alpine.store('notifications')) Alpine.store('notifications').error('Error', 'Could not save submission.');
+            }} finally {{
+                this.isLoading = false;
+            }}
+        }},
+
+        resetForm() {{
+            this.submissionId = null;
+            this.isEditing = false;
+            // Reset hardcoded fields
+            {reset_str}
         }}
-    }},
-
-    resetForm() {{
-        this.submissionId = null;
-        this.isEditing = false;
-        // Reset hardcoded fields
-        {properties_str.replace(":", " =").replace(",", ";")}
-    }}
-}})"""
+    }}));
+}});
+"""

@@ -5,6 +5,8 @@ from typing import List
 from bs4 import BeautifulSoup
 from sqlalchemy.orm import Session
 
+from data.schemas import AlpineData
+
 # --- Helper Classes and Functions ---
     
 def title_to_filename(title: str) -> str:

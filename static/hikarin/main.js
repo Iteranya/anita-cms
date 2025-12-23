@@ -21,6 +21,7 @@ import adminShell from './alpine/managers/adminShell.js';
 import dashboardManager from './alpine/managers/dashboardManager.js';
 import authManager from './alpine/managers/authManager.js';
 import structureManager from './alpine/managers/structureManager.js';
+import publicManager from './alpine/managers/publicManager.js';
 
 // 3. Initialize API
 const hikarinApi = new HikarinApi();
@@ -47,6 +48,7 @@ Alpine.data('submissionManager', submissionManager);
 Alpine.data('dashboardManager',dashboardManager)
 Alpine.data('authManager',authManager)
 Alpine.data('adminShell', adminShell);
+Alpine.data('publicManager',publicManager)
 
 // 7. Make Alpine available globally (optional, for debugging)
 window.Alpine = Alpine;

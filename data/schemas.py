@@ -1,14 +1,33 @@
 from dataclasses import dataclass
 import nh3
+import re
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from typing import List, Optional, Dict, Any
 
+# --- Regex Constants ---
+
+# Lowercase, alphanumeric, and dashes only. No spaces.
+SLUG_PATTERN = re.compile(r'^[a-z0-9-]+$')
+
 # --- Sanitization Utilities ---
+
+def validate_slug_format(v: Any) -> str:
+    """
+    Strict validation for slugs and dict keys. 
+    Only allows lowercase a-z, 0-9, and dashes.
+    """
+    if not isinstance(v, str):
+        return v
+    
+    # If empty string is allowed, handle it, otherwise strict check
+    if len(v) > 0 and not SLUG_PATTERN.match(v):
+        raise ValueError(f"Invalid format: '{v}'. Must be lowercase, alphanumeric, and dashes only (no spaces).")
+    
+    return v
 
 def sanitize_text(v: Any) -> Any:
     """
     Strips all HTML tags and attributes from a string using nh3.
-    This is the direct replacement for the old bleach-based function.
     """
     if isinstance(v, str):
         return nh3.clean(v, tags=set(), attributes={}, strip_comments=True).strip()
@@ -16,7 +35,9 @@ def sanitize_text(v: Any) -> Any:
 
 def sanitize_recursively(value: Any) -> Any:
     """
-    Recursively traverses a dictionary or list and applies sanitize_text to all strings.
+    Recursively traverses a dictionary or list.
+    1. Values (Strings) -> Sanitized via nh3.
+    2. Keys (Strings) -> Validated as Slugs (Strict regex).
     """
     if isinstance(value, str):
         return sanitize_text(value)
@@ -25,14 +46,19 @@ def sanitize_recursively(value: Any) -> Any:
         return [sanitize_recursively(item) for item in value]
     
     if isinstance(value, dict):
-        return {
-            sanitize_text(key) if isinstance(key, str) else key: sanitize_recursively(val) 
-            for key, val in value.items()
-        }
+        new_dict = {}
+        for key, val in value.items():
+            # Validate Key (Strict Slug) - Do not bleach, just validate
+            if isinstance(key, str):
+                validate_slug_format(key)
+            
+            # Recurse on Value
+            new_dict[key] = sanitize_recursively(val)
+        return new_dict
         
     return value
 
-# --- Tag Flattening Utility (with Sanitization) ---
+# --- Tag Flattening Utility ---
 
 def flatten_tags_to_strings(v: Any) -> List[str]:
     """Converts Tag objects, sanitizes, and cleans for API output."""
@@ -49,9 +75,9 @@ def flatten_tags_to_strings(v: Any) -> List[str]:
 
 class PageBase(BaseModel):
     title: str
-    content: Optional[str] = None # THIS IS JUST DESCRIPTION, page 'content' is inside markdown/html, this contains only short description, like, a sentence or two
-    markdown: Optional[str] = None # Bleached Until Per-Page CSP Configuration Is Implemented
-    html: Optional[str] = None  # EXEMPTED
+    content: Optional[str] = None # Short description only
+    markdown: Optional[str] = None # Sanitized
+    html: Optional[str] = None  # EXEMPTED / UNTOUCHED
     tags: Optional[List[str]] = []
     thumb: Optional[str] = None
     type: Optional[str] = "page"
@@ -65,23 +91,23 @@ class PageBase(BaseModel):
 
     @field_validator('custom', mode='before')
     @classmethod
-    def bleach_custom_dict(cls, v):
+    def validate_and_bleach_dict(cls, v):
         return sanitize_recursively(v)
 
 class PageCreate(PageBase):
     slug: str
     html: None = Field(default=None, exclude=True)
     markdown: None = Field(default=None, exclude=True)
+
     @field_validator('slug', mode='before')
     @classmethod
-    def bleach_slug(cls, v): return sanitize_text(v)
+    def validate_slug(cls, v): 
+        return validate_slug_format(v)
 
 class PageUpdate(PageBase):
     title: Optional[str] = None
-
     html: None = Field(default=None, exclude=True)
     markdown: None = Field(default=None, exclude=True)
-
     model_config = ConfigDict(extra="ignore")
 
 class Page(PageBase):
@@ -94,24 +120,29 @@ class Page(PageBase):
     model_config = ConfigDict(from_attributes=True)
 
 class PageUpdateHTML(BaseModel):
-    html: str
+    html: str # EXEMPTED
     custom: Optional[Dict[str, Any]] = None
     tags: Optional[List[str]] = None
+
     @field_validator('custom', mode='before')
     @classmethod
-    def bleach_custom_dict(cls, v): return sanitize_recursively(v)
+    def validate_and_bleach_dict(cls, v): return sanitize_recursively(v)
+    
     model_config = ConfigDict(extra="ignore")
 
 class PageMarkdownUpdate(BaseModel):
     markdown: str
     custom: Optional[Dict[str, Any]] = None
     tags: Optional[List[str]] = None
+
     @field_validator('markdown', mode='before')
     @classmethod
     def bleach_markdown(cls, v): return sanitize_text(v)
+
     @field_validator('custom', mode='before')
     @classmethod
-    def bleach_custom_dict(cls, v): return sanitize_recursively(v)
+    def validate_and_bleach_dict(cls, v): return sanitize_recursively(v)
+    
     model_config = ConfigDict(extra="ignore")
 
 class PageData(Page):
@@ -123,7 +154,7 @@ class PageSeed(PageBase):
     slug: str
     @field_validator('slug', mode='before')
     @classmethod
-    def bleach_slug(cls, v): return sanitize_text(v)
+    def validate_slug(cls, v): return validate_slug_format(v)
 
 
 # --- Form Schemas ---
@@ -135,18 +166,20 @@ class FormBase(BaseModel):
     tags: Optional[List[str]] = []
     custom: Optional[Dict[str, Any]] = {}
     author: Optional[str] = None
+
     @field_validator('title', 'description', 'author', mode='before')
     @classmethod
     def bleach_form_fields(cls, v): return sanitize_text(v)
+
     @field_validator('custom', 'schema', mode='before')
     @classmethod
-    def bleach_dict_fields(cls, v): return sanitize_recursively(v)
+    def validate_and_bleach_dicts(cls, v): return sanitize_recursively(v)
 
 class FormCreate(FormBase):
     slug: str
     @field_validator('slug', mode='before')
     @classmethod
-    def bleach_slug(cls, v): return sanitize_text(v)
+    def validate_slug(cls, v): return validate_slug_format(v)
 
 class FormUpdate(FormBase):
     title: Optional[str] = None
@@ -170,29 +203,31 @@ class SubmissionBase(BaseModel):
     author: Optional[str] = None
     custom: Optional[Dict[str, Any]] = {}
     tags: Optional[List[str]] = []
+    
     @field_validator('author', mode='before')
     @classmethod
     def bleach_author(cls, v): return sanitize_text(v)
     
-    # This now properly sanitizes the main submission vectors
+    # Validates keys as slugs, recurses and bleaches values
     @field_validator('data', 'custom', mode='before')
     @classmethod
-    def bleach_submission_dicts(cls, v):
+    def validate_and_bleach_dicts(cls, v):
         return sanitize_recursively(v)
 
 class SubmissionCreate(SubmissionBase):
     form_slug: str
     @field_validator('form_slug', mode='before')
     @classmethod
-    def bleach_slug(cls, v): return sanitize_text(v)
+    def validate_slug(cls, v): return validate_slug_format(v)
 
 class SubmissionUpdate(BaseModel):
     data: Optional[Dict[str, Any]] = None
     custom: Optional[Dict[str, Any]] = None
     tags: Optional[List[str]] = None
+
     @field_validator('data', 'custom', mode='before')
     @classmethod
-    def bleach_submission_dicts(cls, v):
+    def validate_and_bleach_dicts(cls, v):
         return sanitize_recursively(v)
 
 class Submission(SubmissionBase):
@@ -215,19 +250,22 @@ class UserBase(BaseModel):
     disabled: bool = False
     settings: Optional[dict] = None
     custom: Optional[dict] = None
+    
     @field_validator('display_name', 'role', mode='before')
     @classmethod
     def bleach_user_text_fields(cls, v): return sanitize_text(v)
+
     @field_validator('settings', 'custom', mode='before')
     @classmethod
-    def bleach_user_dicts(cls, v): return sanitize_recursively(v)
+    def validate_and_bleach_dicts(cls, v): return sanitize_recursively(v)
 
 class UserCreate(UserBase):
     username: str
     hashed_password: str
+    
     @field_validator('username', mode='before')
     @classmethod
-    def bleach_username(cls, v): return sanitize_text(v)
+    def validate_username_slug(cls, v): return validate_slug_format(v)
 
 class UserUpdate(UserBase):
     display_name: Optional[str] = None
@@ -261,7 +299,7 @@ class UserCreateWithPassword(UserBase):
     display_name: str
     @field_validator('username', mode='before')
     @classmethod
-    def bleach_username(cls, v): return sanitize_text(v)
+    def validate_username_slug(cls, v): return validate_slug_format(v)
 
 # --- Setting Schemas ---
 
@@ -269,13 +307,13 @@ class SettingBase(BaseModel):
     value: Dict[str, Any]
     @field_validator('value', mode='before')
     @classmethod
-    def bleach_value_dict(cls, v): return sanitize_recursively(v)
+    def validate_and_bleach_value(cls, v): return sanitize_recursively(v)
 
 class SettingCreate(SettingBase):
     key: str
     @field_validator('key', mode='before')
     @classmethod
-    def bleach_key(cls, v): return sanitize_text(v)
+    def validate_key_slug(cls, v): return validate_slug_format(v)
 
 class Setting(SettingCreate):
     class Config: 
@@ -372,7 +410,7 @@ class DashboardStats(BaseModel):
     class Config:
         from_attributes = True
 
-# --- Internal Use Schemas ---
+# --- Internal Use Schemas Untouched By Frontend No Need For Cleaning Here ---
 
 @dataclass
 class AlpineData:
