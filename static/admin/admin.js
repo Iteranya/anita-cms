@@ -47,8 +47,7 @@ Alpine.data('submissionManager', submissionManager);
 Alpine.data('dashboardManager',dashboardManager)
 Alpine.data('authManager',authManager)
 Alpine.data('adminShell', adminShell);
-Alpine.data('publicManager',publicManager)
-Alpine.data('publicManager',publicManager)
+Alpine.data('publicManager',publicManager);
 
 // 7. Make Alpine available globally (optional, for debugging)
 window.Alpine = Alpine;
