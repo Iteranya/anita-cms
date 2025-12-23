@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 # Import services, schemas, and dependencies from our new architecture
 from data.database import get_db
-from src.asta import MarkdownService
+from services.asta import MarkdownService
 from data.schemas import MarkdownEditRequest
 
 # Import the new, decoupled authentication dependencies

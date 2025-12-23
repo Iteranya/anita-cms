@@ -1,5 +1,3 @@
-# file: services/markdown.py
-
 import re
 
 from sqlalchemy.orm import Session
