@@ -9,7 +9,7 @@ from typing import List, Optional, Dict, Any
 
 # --- Regex Constants ---
 
-# Lowercase, alphanumeric, and dashes only. No spaces.
+# Lowercase, alphanumeric, dashes, and underscore only. No spaces.
 SLUG_PATTERN = re.compile(r'^[a-z0-9-_]+$')
 
 # --- Sanitization Utilities ---
