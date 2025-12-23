@@ -1,18 +1,13 @@
 import os
 from fastapi import APIRouter, HTTPException, status, Response, Form, Depends
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from datetime import timedelta
 from sqlalchemy.orm import Session
-
-# --- New Imports for Service-Oriented Architecture ---
-# Assumes a 'database.py' file with a get_db dependency provider
 from data.database import get_db 
 from data import schemas
 from services.auth import AuthService
 from services.users import UserService
 
-# --- Dependency Setup ---
-# These functions allow FastAPI to inject service instances into our routes.
 def get_user_service(db: Session = Depends(get_db)) -> UserService:
     return UserService(db)
 
@@ -20,7 +15,7 @@ def get_auth_service(user_service: UserService = Depends(get_user_service)) -> A
     return AuthService(user_service)
 
 # --- Router Setup ---
-router = APIRouter(prefix="/auth", tags=["Auth"])
+router = APIRouter(tags=["Auth"])
 
 # --- HELPERS ---
 
@@ -31,9 +26,33 @@ def is_production() -> bool:
     """Simple check to determine if we should enforce HTTPS only cookies."""
     return os.getenv("APP_ENV", "dev").lower() in ["prod", "production"]
 
-# --- ROUTES ---
+def render_no_cache_html(file_path: str, is_partial: bool):
+    """
+    Reads the file manually and returns an HTMLResponse with 
+    AGGRESSIVE anti-caching headers.
+    """
+    if not os.path.exists(file_path):
+        return HTMLResponse("View not found", status_code=404)
+        
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
 
-@router.get("/login")
+    response = HTMLResponse(content)
+    
+    response.headers["Vary"] = "HX-Request"
+
+    return response
+
+# --- VIEWS ---
+
+@router.get("/auth")
+async def serve_auth_page(user_service: UserService = Depends(get_user_service)):
+    if not is_system_initialized(user_service):
+        return RedirectResponse(url="/auth/setup", status_code=status.HTTP_302_FOUND)
+    
+    return RedirectResponse("/auth/login")
+
+@router.get("/auth/login")
 async def serve_login_page(user_service: UserService = Depends(get_user_service)):
     # If no users exist, force them to setup
     if not is_system_initialized(user_service):
@@ -41,7 +60,28 @@ async def serve_login_page(user_service: UserService = Depends(get_user_service)
     
     return FileResponse("static/auth/login.html")
 
-@router.post("/login")
+@router.get("/auth/setup")
+async def serve_setup_page(user_service: UserService = Depends(get_user_service)):
+    # If no users exist, force them to setup
+    if is_system_initialized(user_service):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND
+        )
+    
+    return FileResponse("static/auth/setup.html")
+
+@router.get("/auth/register")
+async def serve_register_page(user_service: UserService = Depends(get_user_service)):
+    # If no users exist, force them to setup
+    if not is_system_initialized(user_service):
+        return RedirectResponse(url="/auth/setup", status_code=status.HTTP_302_FOUND)
+    
+    return FileResponse("static/auth/register.html")
+
+
+# --- ROUTES ---
+
+@router.post("/auth/login")
 async def login_for_access_token(
     response: Response,
     username: str = Form(...),
@@ -88,22 +128,13 @@ async def login_for_access_token(
     
     return {"status": "success", "role": user.role}
 
-@router.post("/logout")
+@router.post("/auth/logout")
 async def logout(response: Response):
     response.delete_cookie("access_token")
     return {"status": "success"}
 
-@router.get("/setup")
-async def serve_setup_page(user_service: UserService = Depends(get_user_service)):
-    # If no users exist, force them to setup
-    if is_system_initialized(user_service):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND
-        )
-    
-    return FileResponse("static/auth/setup.html")
 
-@router.post("/setup")
+@router.post("/auth/setup")
 async def setup_admin_account(
     username: str = Form(...),
     password: str = Form(...),
@@ -149,7 +180,7 @@ async def setup_admin_account(
         "message": "Admin account created successfully. You may now login."
     }
 
-@router.get("/check-setup")
+@router.get("/auth/check-setup")
 async def check_setup(user_service: UserService = Depends(get_user_service)):
     """
     Client-side helper to check if the app needs to run the setup flow.
@@ -158,15 +189,9 @@ async def check_setup(user_service: UserService = Depends(get_user_service)):
         "initialized": is_system_initialized(user_service)
     }
 
-@router.get("/register")
-async def serve_register_page(user_service: UserService = Depends(get_user_service)):
-    # If no users exist, force them to setup
-    if not is_system_initialized(user_service):
-        return RedirectResponse(url="/auth/setup", status_code=status.HTTP_302_FOUND)
-    
-    return FileResponse("static/auth/register.html")
 
-@router.post("/register", status_code=status.HTTP_201_CREATED)
+
+@router.post("/auth/register", status_code=status.HTTP_201_CREATED)
 async def register_user(
     username: str = Form(...),
     password: str = Form(...),
