@@ -36,6 +36,7 @@ export default () =>  ({
                         description: "System metadata for uploaded files",
                         tags: ["editor:create","editor:read", "editor:delete", "editor:update"],
                         schema: { fields: [
+                            { name: "slug", label: "Slug", type: "text" },
                             { name: "saved_filename", label: "Filename", type: "text" },
                             { name: "friendly_name", label: "Title", type: "text" },
                             { name: "description", label: "Desc", type: "textarea" },
@@ -127,10 +128,11 @@ export default () =>  ({
                 // 1. Upload File
                 const res = await this.$api.media.upload().execute([this.uploadFile]);
                 const savedFile = res.files[0];
-                
+                const slugified = slugify(this.uploadMeta.title);
                 // 2. Register Metadata
                 const payload = {
                     data: {
+                        slug: slugified,
                         saved_filename: savedFile.saved_as,
                         friendly_name: this.uploadMeta.title,
                         description: this.uploadMeta.description,

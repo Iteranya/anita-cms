@@ -4,16 +4,17 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
+from src.alpine_generator import generate_form_alpine_components, generate_media_alpine_components, generate_public_alpine_components
 from data.database import get_db
 from data.schemas import AlpineData
-from services.aina import WebsiteBuilderService
 
 # Import the new, decoupled authentication dependencies
+from services.forms import FormService
 from src.dependencies import optional_user
 
-router = APIRouter(prefix="/aina", tags=["Aina Website Builder"])
+router = APIRouter(tags=["Aina Website Builder"])
 
-@router.get("/", response_class=HTMLResponse)
+@router.get("/aina", response_class=HTMLResponse)
 async def get_aina_ui(request: Request, user: Optional[dict] = Depends(optional_user)):
     """Serves the static HTML for the Aina UI."""
     if not user:
@@ -34,12 +35,47 @@ async def get_aina_ui(request: Request, user: Optional[dict] = Depends(optional_
     )
     return HTMLResponse(content=html)
 
+
+
+
+
+
+
+
+
+
 @router.get("/routes", response_model=List[AlpineData])
 async def api_get_all_routes(db: Session = Depends(get_db)):
     """
     Provides a comprehensive list of all discoverable routes 
-    (forms, pages, etc.) by calling the WebsiteBuilderService.
+    (forms, media wrappers, and public utilities).
+    
+    Includes error handling to ensure partial success if one subsystem fails.
     """
-    service = WebsiteBuilderService(db)
-    return service.get_full_context_routes()
+    form_service = FormService(db)
+    
+    all_routes: List[AlpineData] = []
+    
+    # 1. Generate Components for Dynamic Forms (List & Editor views)
+    try:
+        form_components = generate_form_alpine_components(form_service)
+        all_routes.extend(form_components)
+    except Exception as e:
+        print(f"Error generating form components: {e}")
+        # Log the error but continue so other routes still load
+    
+    # 2. Generate Components for Media items
+    try:
+        media_components = generate_media_alpine_components(form_service)
+        all_routes.extend(media_components)
+    except Exception as e:
+        print(f"Error generating media components: {e}")
+    
+    # 3. Generate Static Public Utility Components (Search, Content Loader)
+    try:
+        public_components = generate_public_alpine_components()
+        all_routes.extend(public_components)
+    except Exception as e:
+        print(f"Error generating public components: {e}")
 
+    return all_routes

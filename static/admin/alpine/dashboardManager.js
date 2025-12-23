@@ -69,6 +69,7 @@ export default () => ({
                         description: "System metadata for uploaded files",
                         tags: ["editor:create","editor:read", "editor:delete", "editor:update"],
                         schema: { fields: [
+                            {name: "slug", label: "Slug", type: "text"},
                             { name: "saved_filename", label: "Filename", type: "text" },
                             { name: "friendly_name", label: "Title", type: "text" },
                             { name: "description", label: "Desc", type: "textarea" },

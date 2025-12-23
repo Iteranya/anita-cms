@@ -1,16 +1,32 @@
-from typing import List
+import json
+from typing import List, Any
 
 from data.schemas import AlpineData
 from services.forms import FormService
 
+# --- Helpers ---
 
-def generate_list_js(form_slug: str, fields: List[dict]) -> str:
+def _get_js_safe_slug(slug: str) -> str:
+    """Replaces hyphens with underscores to ensure valid JS variable names."""
+    return slug.replace('-', '_')
+
+def _get_default_value(field_type: str) -> str:
+    """Returns a JS literal for the default value based on field type."""
+    if field_type == 'checkbox' or field_type == 'boolean':
+        return 'false'
+    if field_type == 'number':
+        return 'null'
+    if field_type == 'json' or field_type == 'tags':
+        return '[]'
+    return "''" # Default string
+
+# --- Generators ---
+
+def generate_form_list_js(form_slug: str, fields: List[dict]) -> str:
     """
     Creates the Javascript string for the List/Table view.
-    Registers an Alpine.data component named 'list_{form_slug}'.
     """
-    # Sanitize slug for JS variable usage (replace hyphens with underscores)
-    safe_slug = form_slug.replace('-', '_')
+    safe_slug = _get_js_safe_slug(form_slug)
     component_name = f"list_{safe_slug}"
 
     return f"""
@@ -18,8 +34,10 @@ document.addEventListener('alpine:init', () => {{
     Alpine.data('{component_name}', () => ({{
         submissions: [],
         isLoading: false,
-        page: 0,
+        page: 1,
         limit: 50,
+        totalItems: 0,
+        totalPages: 0,
         
         async init() {{
             await this.refresh();
@@ -28,8 +46,11 @@ document.addEventListener('alpine:init', () => {{
         async refresh() {{
             this.isLoading = true;
             try {{
-                // Note: Ensure this.$api is available globally or via Alpine.magic
-                this.submissions = await this.$api.collections.listRecords('{form_slug}', this.page, this.limit).execute();
+                // Expects response format: {{ items: [], totalItems: 0, totalPages: 0 }}
+                const response = await this.$api.collections.listRecords('{form_slug}', this.page, this.limit).execute();
+                this.submissions = response.items || response; 
+                this.totalItems = response.totalItems || 0;
+                this.totalPages = response.totalPages || 0;
             }} catch(e) {{
                 console.error('Failed to load submissions', e);
                 if(Alpine.store('notifications')) Alpine.store('notifications').error('Error', 'Could not load data');
@@ -54,35 +75,48 @@ document.addEventListener('alpine:init', () => {{
             }}
         }},
         
-        // Helper to format table cells safely
         getValue(submission, fieldName) {{
             return (submission.data && submission.data[fieldName] !== undefined) 
                 ? submission.data[fieldName] 
                 : '';
+        }},
+
+        nextPage() {{
+            if(this.page < this.totalPages) {{
+                this.page++;
+                this.refresh();
+            }}
+        }},
+
+        prevPage() {{
+            if(this.page > 1) {{
+                this.page--;
+                this.refresh();
+            }}
         }}
     }}));
 }});
 """
 
 
-def generate_editor_js(form_slug: str, fields: List[dict]) -> str:
+def generate_form_editor_js(form_slug: str, fields: List[dict]) -> str:
     """
     Creates the Javascript string for the Create/Update view.
-    Registers an Alpine.data component named 'editor_{form_slug}'.
     """
-    # Sanitize slug
-    safe_slug = form_slug.replace('-', '_')
+    safe_slug = _get_js_safe_slug(form_slug)
     component_name = f"editor_{safe_slug}"
     
-    # 1. Initialize properties
+    # 1. Initialize properties with type awareness
     properties_init = []
     for f in fields:
         name = f['name']
-        properties_init.append(f"{name}: ''")
+        f_type = f.get('type', 'text')
+        default_val = _get_default_value(f_type)
+        properties_init.append(f"{name}: {default_val}")
     
     properties_str = ",\n        ".join(properties_init)
 
-    # 2. Logic to map "this.field" into the "data" payload object
+    # 2. Logic to map "this.field" into the payload
     payload_mapping = []
     for f in fields:
         name = f['name']
@@ -98,39 +132,41 @@ def generate_editor_js(form_slug: str, fields: List[dict]) -> str:
     
     populate_str = "\n            ".join(populate_logic)
 
-    # 4. Logic to reset fields (Generated cleanly instead of string replacement)
+    # 4. Logic to reset fields
     reset_logic = []
     for f in fields:
         name = f['name']
-        reset_logic.append(f"this.{name} = '';")
+        f_type = f.get('type', 'text')
+        default_val = _get_default_value(f_type)
+        reset_logic.append(f"this.{name} = {default_val};")
     
     reset_str = "\n            ".join(reset_logic)
 
     return f"""
 document.addEventListener('alpine:init', () => {{
-    Alpine.data('{component_name}', (initialData = null, submissionId = null) => ({{
-        // Standard State
-        submissionId: submissionId,
+    Alpine.data('{component_name}', (initialData = null) => ({{
+        // State
+        submissionId: null,
         isEditing: false,
         isLoading: false,
 
-        // --- Hardcoded Schema Fields ---
+        // --- Schema Fields ---
         {properties_str},
 
         init() {{
             if (initialData) {{
                 this.loadData(initialData);
             }}
-            
-            if (this.submissionId) {{
-                this.isEditing = true;
-            }}
         }},
 
         loadData(data) {{
+            // Unwrap data if it comes wrapped in a 'data' property (common in some CMSs)
+            const flatData = data.data ? data.data : data;
+            
             {populate_str}
-            this.isEditing = true;
+            
             if(data.id) this.submissionId = data.id;
+            this.isEditing = true;
         }},
 
         async save() {{
@@ -142,13 +178,13 @@ document.addEventListener('alpine:init', () => {{
 
             try {{
                 if (this.isEditing && this.submissionId) {{
-                    // --- UPDATE FLOW ---
+                    // --- UPDATE ---
                     const payload = {{ data: submissionBody }};
                     await this.$api.collections.updateRecord('{form_slug}', this.submissionId, payload).execute();
                     if(Alpine.store('notifications')) Alpine.store('notifications').success('Saved', 'Submission updated.');
 
                 }} else {{
-                    // --- CREATE FLOW ---
+                    // --- CREATE ---
                     const payload = {{
                         form_slug: '{form_slug}',
                         data: submissionBody
@@ -173,52 +209,143 @@ document.addEventListener('alpine:init', () => {{
         resetForm() {{
             this.submissionId = null;
             this.isEditing = false;
-            // Reset hardcoded fields
             {reset_str}
         }}
     }}));
 }});
 """
 
+def generate_media_component(public_link:str, slug:str) -> str:
+    # Ensure safe JS string
+    safe_slug = _get_js_safe_slug(slug)
+    return f"""
+document.addEventListener('alpine:init', () => {{
+    Alpine.data('{safe_slug}', () => ({{
+        mediaUrl: '{public_link}',
+        copyToClipboard() {{
+            navigator.clipboard.writeText(this.mediaUrl);
+            if(Alpine.store('notifications')) Alpine.store('notifications').info('Copied', 'URL copied to clipboard');
+        }}
+    }}));
+}});
+"""
+
+def generate_public_search_js(component_name: str, default_tags: List[str]) -> str:
+    """
+    Generates the JS for a public search component.
+    """
+    # Serialize tags to valid JS array string
+    tags_js = json.dumps(default_tags)
+
+    return f"""
+document.addEventListener('alpine:init', () => {{
+    Alpine.data('{component_name}', () => ({{
+        
+        // Search Data
+        searchResults: [],    
+        searchQuery: '',         
+        defaultTags: {tags_js},
+        
+        // UI State
+        isLoading: false,
+        error: null,          
+
+        async init() {{
+            // If default tags exist, perform an initial search
+            if (this.defaultTags.length > 0) {{
+                await this.search(this.defaultTags);
+            }}
+        }},
+
+        /**
+         * Search by tags.
+         * explicitTags: Array of strings (optional)
+         */
+        async search(explicitTags = null) {{
+            this.isLoading = true;
+            this.error = null;
+            
+            let tags = [];
+
+            if (Array.isArray(explicitTags)) {{
+                tags = explicitTags;
+            }} else {{
+                // Parse input model
+                const rawInput = (this.searchQuery || '').trim();
+                if (rawInput.length > 0) {{
+                    tags = rawInput.split(',').map(t => t.trim()).filter(t => t.length > 0);
+                }}
+            }}
+
+            try {{
+                this.searchResults = await this.$api.public.search(tags).execute();
+            }} catch (e) {{
+                console.error('Search failed:', e);
+                this.error = 'Unable to fetch results.';
+                this.searchResults = []; 
+            }} finally {{
+                this.isLoading = false;
+            }}
+        }},
+
+        clear() {{
+            this.searchQuery = '';
+            this.searchResults = [];
+            this.error = null;
+        }}
+    }}));
+}});
+"""
+
+def generate_public_content_js(component_name: str) -> str:
+    """
+    Generates a generic content fetcher for the public site.
+    """
+    return f"""
+document.addEventListener('alpine:init', () => {{
+    Alpine.data('{component_name}', () => ({{
+        content: null,
+        isLoading: false,
+        error: null,
+
+        async loadBySlug(slug) {{
+            this.isLoading = true;
+            this.error = null;
+            try {{
+                this.content = await this.$api.public.getContent(slug).execute();
+            }} catch (e) {{
+                this.error = 'Content not found';
+            }} finally {{
+                this.isLoading = false;
+            }}
+        }}
+    }}));
+}});
+"""
+
+# --- Registry Generators ---
 
 def generate_form_alpine_components(form_service: FormService) -> List[AlpineData]:
-    """
-    Generates AlpineData components for every existing form in the database.
-    It creates two components per form:
-    1. A List Component (form-list-{slug})
-    2. An Editor Component (form-editor-{slug})
-    """
-    
-    # 1. Fetch all forms
-    # We use a high limit to get everything. Pagination logic might be needed for the generator 
-    # itself in a huge system, but usually adequate for schema generation.
     forms = form_service.get_all_forms(skip=0, limit=1000)
-    
     alpine_registry: List[AlpineData] = []
 
     for form in forms:
-        # Extract fields from the schema safely
-        # Schema expected format: {'fields': [{'name': 'email', 'type': 'text'}, ...]}
         schema_fields = form.schema.get('fields', []) if form.schema else []
         
-        # --- 1. Generate List Component ---
-        list_component_slug = f"list-{form.slug}"
-        list_js = generate_list_js(form.slug, schema_fields)
-        
+        # 1. List Component
+        list_js = generate_form_list_js(form.slug, schema_fields)
         alpine_registry.append(AlpineData(
-            slug=list_component_slug,
+            slug=f"list-{form.slug}",
             name=f"List: {form.title}",
             description=f"Displays submissions for {form.title}",
             category="Collections",
             data=list_js
         ))
 
-        # --- 2. Generate Editor Component ---
-        editor_component_slug = f"editor-{form.slug}"
-        editor_js = generate_editor_js(form.slug, schema_fields)
-
+        # 2. Editor Component
+        editor_js = generate_form_editor_js(form.slug, schema_fields)
         alpine_registry.append(AlpineData(
-            slug=editor_component_slug,
+            slug=f"editor-{form.slug}",
             name=f"Editor: {form.title}",
             description=f"Create or Edit submissions for {form.title}",
             category="Collections",
@@ -227,3 +354,59 @@ def generate_form_alpine_components(form_service: FormService) -> List[AlpineDat
 
     return alpine_registry
 
+
+def generate_media_alpine_components(form_service: FormService) -> List[AlpineData]:
+    # Assuming 'media-data' is the internal form slug for media
+    all_media = form_service.get_submissions_for_form("media-data")
+    alpine_registry: List[AlpineData] = []
+
+    for media in all_media:
+        # Check keys exist to prevent crashes
+        if not media.data or 'slug' not in media.data:
+            continue
+            
+        slug = media.data['slug']
+        public_link = media.data.get('public_link', '')
+        friendly_name = media.data.get('friendly_name', slug)
+        description = media.data.get('description', '')
+
+        alpine_registry.append(AlpineData(
+            slug=slug,
+            name=f"Media: {friendly_name}",
+            description=f"{description}",
+            category="Media",
+            data=generate_media_component(public_link, slug)
+        ))
+
+    return alpine_registry
+
+
+def generate_public_alpine_components() -> List[AlpineData]:
+    """
+    Generates standard public-facing components like Search, Page Loaders, etc.
+    """
+    alpine_registry: List[AlpineData] = []
+
+    # 1. Public Search Component
+    # This component can be dropped into any page to enable tag-based search
+    search_js = generate_public_search_js("public_search", default_tags=[])
+    alpine_registry.append(AlpineData(
+        slug="public-search",
+        name="Public Search",
+        description="Search content by tags or query string",
+        category="Public",
+        data=search_js
+    ))
+
+    # 2. Public Content Loader
+    # A generic component to fetch individual content items by slug
+    content_js = generate_public_content_js("public_content")
+    alpine_registry.append(AlpineData(
+        slug="public-content",
+        name="Public Content Loader",
+        description="Fetch specific page content by slug asynchronously",
+        category="Public",
+        data=content_js
+    ))
+
+    return alpine_registry
