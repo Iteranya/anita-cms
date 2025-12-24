@@ -46,12 +46,3 @@ class WebsiteBuilderService:
         if components: 
             return f"{' '.join(components)}\n\nMake the site based on this style."
         return ""
-
-    def get_full_context_routes(self) -> List[AlpineData]:
-        """Aggregates route information from forms, pages, and config, and turn them into Alpine x-data"""
-        context = []
-        context.append(generate_form_alpine_components())
-
-        return None
-    
-        

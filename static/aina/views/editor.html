@@ -1,0 +1,88 @@
+<div class="h-full flex flex-col bg-[#1e1e1e] text-[#cccccc]" 
+     x-data="editorManager('current-slug', { 
+         html: '', 
+         css: '' 
+     })"
+>
+    <!-- TOP BAR -->
+    <div class="h-10 bg-[#252526] border-b border-[#3e3e42] flex items-center px-4 justify-between shrink-0">
+        <div class="text-sm font-bold tracking-wide flex items-center gap-2">
+            <span class="text-[#007acc]">IDE</span> 
+            <span class="text-gray-500">/</span> 
+            <span x-text="slug" class="font-mono text-xs text-gray-300"></span>
+        </div>
+        
+        <div class="flex gap-2">
+            <!-- 1. RUN: Saves Source to DB -> Fetches from DB -> Renders Preview -->
+            <button @click="syncAndRender()" 
+                    class="bg-[#2d2d2d] hover:bg-[#3d3d3d] border border-gray-600 text-white text-xs font-bold px-3 py-1.5 rounded flex items-center gap-2 transition disabled:opacity-50"
+                    :disabled="isProcessing"
+                    title="Save source code & refresh preview">
+                <i class="fas" :class="isProcessing ? 'fa-circle-notch fa-spin' : 'fa-play'"></i>
+                <span x-text="isProcessing ? 'Syncing...' : 'Run'"></span>
+            </button>
+
+            <!-- 2. DEPLOY: Compiles HTML -> Saves to 'html' field in DB -->
+            <button @click="deployHtml()" 
+                    class="bg-[#0e639c] hover:bg-[#1177bb] text-white text-xs font-bold px-3 py-1.5 rounded flex items-center gap-2 transition disabled:opacity-50"
+                    :disabled="isProcessing"
+                    title="Compile and save to public HTML">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span>Deploy</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN WORKSPACE -->
+    <div class="flex-1 flex overflow-hidden">
+        
+        <!-- LEFT: EDITORS -->
+        <div class="w-2/5 flex flex-col border-r border-[#3e3e42]">
+            
+            <!-- HTML Pane -->
+            <div class="flex-1 flex flex-col min-h-0">
+                <div class="bg-[#252526] px-4 py-2 text-xs font-bold border-b border-[#3e3e42] flex justify-between items-center select-none">
+                    <span>HTML (Body)</span>
+                    <span class="text-[10px] font-normal text-gray-500">Locked: &lt;head&gt;</span>
+                </div>
+                <div x-ref="htmlEditor" class="flex-1"></div>
+            </div>
+
+            <!-- CSS Pane -->
+            <div class="h-[35%] flex flex-col border-t border-[#3e3e42] min-h-[150px]">
+                <div class="bg-[#252526] px-4 py-2 text-xs font-bold border-b border-[#3e3e42] flex justify-between items-center select-none">
+                    <span>CSS</span>
+                    <span class="text-[10px] font-normal text-gray-500">Supports @apply</span>
+                </div>
+                <div x-ref="cssEditor" class="flex-1"></div>
+            </div>
+        </div>
+
+        <!-- RIGHT: PREVIEW -->
+        <div class="flex-1 flex flex-col bg-white min-w-0">
+            <!-- Browser Chrome Mockup -->
+            <div class="bg-[#f0f0f0] p-2 border-b border-gray-300 flex items-center gap-2 text-xs text-gray-500 select-none">
+                <div class="flex gap-1.5 mr-2">
+                    <div class="w-2.5 h-2.5 rounded-full bg-[#ff5f56]"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-[#27c93f]"></div>
+                </div>
+                <div class="flex-1 bg-white px-3 py-0.5 rounded border border-gray-200 flex items-center justify-between text-gray-400 font-mono text-[11px]">
+                    <div class="flex items-center">
+                        <i class="fas fa-lock text-[9px] mr-1.5"></i> 
+                        <span x-text="'/page/' + slug"></span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <div class="w-1.5 h-1.5 rounded-full" :class="isProcessing ? 'bg-yellow-400 animate-pulse' : 'bg-green-500'"></div>
+                        <span x-text="statusText"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <iframe x-ref="previewFrame" 
+                    class="flex-1 w-full h-full border-none block bg-white" 
+                    sandbox="allow-scripts allow-same-origin">
+            </iframe>
+        </div>
+    </div>
+</div>

@@ -124,4 +124,4 @@ if __name__ == "__main__":
     # Get port from command-line argument, default to 5469
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 5469
     print(f"Starting server on http://127.0.0.1:{port}")
-    uvicorn.run("main:app", host="127.0.0.1", port=port, reload=True)
+    uvicorn.run("main:app", host="127.0.0.1", port=port)

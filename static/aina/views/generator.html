@@ -1,0 +1,134 @@
+<!-- GENERATOR PARTIAL -->
+<div class="h-full flex overflow-hidden bg-[#1e1e1e] text-[#cccccc]" 
+     x-data="generatorManager('{{ slug }}')"
+     x-init="init()">
+
+    <!-- LEFT SIDEBAR: Categories -->
+    <div class="w-64 bg-[#252526] border-r border-[#3e3e42] flex flex-col shrink-0">
+        <!-- Header -->
+        <div class="p-3 border-b border-[#3e3e42] flex items-center justify-between">
+            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Library</span>
+            <button @click="fetchRoutes()" class="text-gray-500 hover:text-white transition" title="Refresh">
+                <i class="fas fa-sync-alt text-xs" :class="isLoading ? 'fa-spin' : ''"></i>
+            </button>
+        </div>
+
+        <!-- Category List -->
+        <div class="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+            <button @click="activeCategory = 'All'"
+                    :class="activeCategory === 'All' ? 'bg-[#37373d] text-white' : 'text-gray-400 hover:text-gray-200'"
+                    class="w-full text-left px-3 py-2 rounded-sm text-xs font-bold transition flex justify-between items-center group">
+                <span>All Items</span>
+                <span class="text-[9px] bg-[#1e1e1e] px-1.5 py-0.5 rounded opacity-60 group-hover:opacity-100 transition" x-text="routes.length"></span>
+            </button>
+            
+            <template x-for="(items, catName) in categories" :key="catName">
+                <button @click="activeCategory = catName"
+                        :class="activeCategory === catName ? 'bg-[#37373d] text-white' : 'text-gray-400 hover:text-gray-200'"
+                        class="w-full text-left px-3 py-2 rounded-sm text-xs font-bold transition flex justify-between items-center group">
+                    <span x-text="catName"></span>
+                    <span class="text-[9px] bg-[#1e1e1e] px-1.5 py-0.5 rounded opacity-60 group-hover:opacity-100 transition" x-text="items.length"></span>
+                </button>
+            </template>
+        </div>
+        
+        <!-- Instructions -->
+        <div class="p-3 border-t border-[#3e3e42] text-[10px] text-gray-500">
+            <div class="flex items-center gap-2 mb-1">
+                <i class="fas fa-info-circle"></i> <span>How to use:</span>
+            </div>
+            <ol class="list-decimal list-inside text-gray-400 space-y-1 pl-1">
+                <li>Select components</li>
+                <li>Save Script</li>
+                <li>Copy Tag</li>
+                <li>Switch to IDE & Paste</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 flex flex-col bg-[#1e1e1e] relative min-w-0">
+        
+        <!-- TOOLBAR -->
+        <div class="h-12 border-b border-[#3e3e42] flex items-center px-4 gap-4 bg-[#1e1e1e] shrink-0">
+            <!-- Search -->
+            <div class="relative flex-1 max-w-lg">
+                <i class="fas fa-search absolute left-2.5 top-2.5 text-gray-500 text-xs"></i>
+                <input type="text" x-model="searchQuery" 
+                       placeholder="Search components..." 
+                       class="w-full bg-[#252526] border border-[#3e3e42] text-white text-xs rounded-sm pl-8 pr-2 py-1.5 focus:outline-none focus:border-[#007acc] placeholder-gray-600 transition">
+            </div>
+
+            <div class="flex-1"></div>
+
+            <div class="text-xs text-gray-500 mr-2">
+                <span class="font-bold text-[#007acc]" x-text="selectedSlugs.size"></span> active
+            </div>
+
+            <!-- Save Button -->
+            <button @click="applyChanges()" 
+                    :disabled="isLoading"
+                    class="bg-[#0e639c] hover:bg-[#1177bb] disabled:opacity-50 text-white text-xs font-bold px-4 py-1.5 rounded-sm flex items-center gap-2 transition shadow-md">
+                <i class="fas" :class="isLoading ? 'fa-circle-notch fa-spin' : 'fa-save'"></i>
+                <span x-text="isLoading ? 'Saving...' : 'Update Script'"></span>
+            </button>
+        </div>
+
+        <!-- COMPONENT GRID -->
+        <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
+            <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
+                
+                <template x-for="route in visibleRoutes" :key="route.slug">
+                    <div class="bg-[#252526] border border-[#3e3e42] rounded-sm overflow-hidden group hover:border-[#007acc] transition flex flex-col relative h-44"
+                         :class="isSelected(route.slug) ? 'ring-1 ring-[#007acc] border-[#007acc]' : ''">
+                        
+                        <!-- Checkbox -->
+                        <div class="absolute top-2 left-2 z-20">
+                            <input type="checkbox" 
+                                   class="w-4 h-4 rounded-sm bg-[#1e1e1e] border-gray-500 text-[#007acc] focus:ring-0 focus:ring-offset-0 cursor-pointer shadow-sm"
+                                   :checked="isSelected(route.slug)"
+                                   @change="toggleComponent(route.slug)">
+                        </div>
+
+                        <!-- Card Body -->
+                        <template x-if="isMedia(route)">
+                            <div class="flex-1 bg-black flex items-center justify-center overflow-hidden relative select-none">
+                                <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#444 1px, transparent 1px); background-size: 10px 10px;"></div>
+                                <img :src="extractUrl(route.data)" class="w-full h-full object-contain opacity-80 group-hover:opacity-100 transition relative z-10">
+                                <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 to-transparent p-2 pt-6 z-20">
+                                    <div class="text-[10px] font-bold text-white truncate" x-text="route.name.replace('Media: ', '')"></div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template x-if="!isMedia(route)">
+                            <div class="flex-1 p-3 flex flex-col justify-between select-none">
+                                <div>
+                                    <div class="flex justify-end mb-2">
+                                        <div class="bg-[#2d2d2d] p-1.5 rounded text-gray-500 group-hover:text-[#007acc] transition">
+                                            <i class="fas fa-code"></i>
+                                        </div>
+                                    </div>
+                                    <div class="text-xs font-bold text-gray-200 line-clamp-2 leading-tight" x-text="route.name"></div>
+                                    <div class="text-[10px] text-gray-500 mt-1 line-clamp-3 leading-relaxed" x-text="route.description || 'No description provided.'"></div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Copy Button -->
+                        <button @click="copySnippet(route)" 
+                                class="bg-[#2d2d2d] hover:bg-[#3d3d3d] border-t border-[#3e3e42] text-white text-[10px] font-bold py-2 flex justify-center items-center gap-1.5 transition z-10">
+                            <i class="fas fa-copy text-gray-500"></i>
+                            <span>Copy Tag</span>
+                        </button>
+                    </div>
+                </template>
+
+                <div x-show="visibleRoutes.length === 0" class="col-span-full py-12 text-center text-gray-600">
+                    <i class="fas fa-search text-2xl mb-2"></i>
+                    <p class="text-xs">No components found.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

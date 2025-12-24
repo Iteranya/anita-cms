@@ -1,5 +1,6 @@
 # file: api/aina.py
 
+import os
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -13,6 +14,24 @@ from services.forms import FormService
 from src.dependencies import optional_user
 
 router = APIRouter(tags=["Aina Website Builder"])
+
+
+def render_no_cache_html(file_path: str, is_partial: bool):
+    """
+    Reads the file manually and returns an HTMLResponse with 
+    AGGRESSIVE anti-caching headers.
+    """
+    if not os.path.exists(file_path):
+        return HTMLResponse("View not found", status_code=404)
+        
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    response = HTMLResponse(content)
+    
+    response.headers["Vary"] = "HX-Request"
+
+    return response
 
 @router.get("/aina", response_class=HTMLResponse)
 async def get_aina_ui(request: Request, user: Optional[dict] = Depends(optional_user)):
@@ -35,16 +54,7 @@ async def get_aina_ui(request: Request, user: Optional[dict] = Depends(optional_
     )
     return HTMLResponse(content=html)
 
-
-
-
-
-
-
-
-
-
-@router.get("/routes", response_model=List[AlpineData])
+@router.get("/aina/routes", response_model=List[AlpineData])
 async def api_get_all_routes(db: Session = Depends(get_db)):
     """
     Provides a comprehensive list of all discoverable routes 
