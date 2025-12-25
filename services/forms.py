@@ -120,7 +120,7 @@ class FormService:
         # If validation passes, create the submission.
         return crud.create_submission(self.db, submission=submission_data)
 
-    def get_submissions_for_form(self, form_slug: str, skip: int, limit: int) -> List[models.Submission]:
+    def get_submissions_for_form(self, form_slug: str, skip: int = 0, limit: int = 100) -> List[models.Submission]:
         """
         Retrieves all submissions for a specific form.
         """

@@ -1,34 +1,29 @@
-
-// 1. Import Alpine and the Sort plugin from their ESM builds
+// 1. Import Alpine and Plugins
 import Alpine from 'https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/module.esm.js';
-import sort from 'https://cdn.jsdelivr.net/npm/@alpinejs/sort@latest/dist/module.esm.js'; // <-- Correct ESM import
+import sort from 'https://cdn.jsdelivr.net/npm/@alpinejs/sort@latest/dist/module.esm.js';
 
-// 2. Import Hikarin API and Managers
+// 2. Import Managers
 import { HikarinApi } from '../hikarin/api/client.js';
-import notificationsStore from '../hikarin/alpine/notifications.js'
-
+import notificationsStore from '../hikarin/alpine/notifications.js';
 import authShell from './alpine/authShell.js';
 import authManager from './alpine/authManager.js';
+
 // 3. Initialize API
 const hikarinApi = new HikarinApi();
 
-// 4. Register the Sort plugin with Alpine
-// This MUST be done before Alpine.start()
+// 4. Register Plugins
 Alpine.plugin(sort);
 
 // 5. Register Magic & Store
 Alpine.magic('api', () => hikarinApi);
 Alpine.store('notifications', notificationsStore);
 
-// 6. Register Components (x-data providers)
-Alpine.data('authManager',authManager)
+// 6. Register Components
+Alpine.data('authManager', authManager);
 Alpine.data('authShell', authShell);
 
-// 7. Make Alpine available globally (optional, for debugging)
+// 7. Global Debugging (Optional)
 window.Alpine = Alpine;
 
-// 8. START ALPINE
-// This single call initializes Alpine and all registered plugins.
+// 8. Start Alpine
 Alpine.start();
-
-console.log("Hikarin JS: Modules loaded and Alpine started correctly.");

@@ -1,115 +1,62 @@
-
 <div
     x-data="authManager"
     x-init="mode='register'; init()"
-    class="glass-panel rounded-3xl p-8 sm:p-10 shadow-2xl relative"
+    class="glass-panel rounded-3xl p-8 sm:p-10 shadow-2xl w-full"
 >
-
-    <!-- Header -->
-    <div class="text-center mb-8">
-        <img
-            src="/media/anita.jpg"
-            class="h-24 w-auto max-w-[6rem] object-contain mx-auto mb-4
-                    rounded-full border-4 border-white shadow-lg"
-        >
-        <h1 class="text-3xl font-extrabold">Create Account</h1>
-        <p class="text-slate-500 mt-2">Join the Anita CMS universe</p>
+    <div class="text-center mb-6">
+        <h1 class="text-2xl font-bold text-slate-800">Create Account</h1>
+        <p class="text-slate-500 text-sm mt-1">Join the Anita CMS platform</p>
     </div>
 
     <!-- Alert -->
-    <div
-        x-show="error || success"
-        x-transition
-        class="mb-6 p-4 rounded-xl border flex gap-3 text-sm"
-        :class="error
-            ? 'bg-red-50 border-red-100 text-red-600'
-            : 'bg-green-50 border-green-100 text-green-600'"
-    >
-        <i
-            class="fas mt-0.5"
-            :class="error ? 'fa-exclamation-circle' : 'fa-check-circle'"
-        ></i>
-        <div>
-            <span class="font-bold block"
-                    x-text="error ? 'Registration Failed' : 'Success'"></span>
-            <span x-text="error || 'Account created! Redirecting to login…'"></span>
+    <div x-show="error" x-collapse class="mb-6">
+        <div class="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl text-sm flex items-center gap-3">
+            <i class="fas fa-exclamation-circle"></i>
+            <span x-text="error"></span>
+        </div>
+    </div>
+    
+    <div x-show="success" x-collapse class="mb-6">
+        <div class="bg-green-50 border border-green-100 text-green-700 px-4 py-3 rounded-xl text-sm flex items-center gap-3">
+            <i class="fas fa-check-circle"></i>
+            <span>Account created! Redirecting...</span>
         </div>
     </div>
 
-    <!-- Form -->
-    <form
-        @submit.prevent="register"
-        class="space-y-6"
-        :class="{ 'opacity-70 pointer-events-none': loading }"
-    >
+    <form @submit.prevent="register" class="space-y-4">
+        
+        <div class="relative group">
+            <i class="fas fa-id-card absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" x-model="displayName" placeholder="Display Name" class="w-full pl-11 pr-4 py-3.5 rounded-xl border border-slate-200 bg-white/50 focus:bg-white focus:ring-2 focus:ring-anita-500/20 focus:border-anita-500 outline-none transition-all">
+        </div>
 
-        <input
-            type="text"
-            placeholder="Display Name"
-            x-model="displayName"
-            class="w-full px-4 py-3 rounded-xl border font-semibold"
+        <div class="relative group">
+            <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" x-model="username" required placeholder="Username *" class="w-full pl-11 pr-4 py-3.5 rounded-xl border border-slate-200 bg-white/50 focus:bg-white focus:ring-2 focus:ring-anita-500/20 focus:border-anita-500 outline-none transition-all">
+        </div>
+
+        <div class="relative group">
+            <i class="fas fa-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="password" x-model="password" required minlength="8" placeholder="Password (min 8 chars) *" class="w-full pl-11 pr-4 py-3.5 rounded-xl border border-slate-200 bg-white/50 focus:bg-white focus:ring-2 focus:ring-anita-500/20 focus:border-anita-500 outline-none transition-all">
+        </div>
+
+        <div class="relative group">
+            <i class="fas fa-check-double absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="password" x-model="confirmPassword" required minlength="8" placeholder="Confirm Password *" class="w-full pl-11 pr-4 py-3.5 rounded-xl border border-slate-200 bg-white/50 focus:bg-white focus:ring-2 focus:ring-anita-500/20 focus:border-anita-500 outline-none transition-all">
+        </div>
+
+        <button 
+            type="submit" 
+            :disabled="loading || success"
+            class="w-full bg-gradient-to-r from-anita-600 to-anita-500 hover:from-anita-500 hover:to-anita-400 text-white font-bold py-3.5 rounded-xl shadow-lg mt-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
         >
-
-        <input
-            type="text"
-            placeholder="Username *"
-            x-model="username"
-            required
-            class="w-full px-4 py-3 rounded-xl border font-semibold"
-        >
-
-        <input
-            type="password"
-            placeholder="Password (min 8 chars) *"
-            x-model="password"
-            minlength="8"
-            required
-            class="w-full px-4 py-3 rounded-xl border"
-        >
-
-        <input
-            type="password"
-            placeholder="Confirm Password *"
-            x-model="confirmPassword"
-            minlength="8"
-            required
-            class="w-full px-4 py-3 rounded-xl border"
-        >
-
-        <button
-            type="submit"
-            :disabled="loading"
-            class="w-full bg-gradient-to-r from-anita-600 to-anita-500
-                    text-white font-bold py-4 rounded-xl flex justify-center gap-2 text-lg"
-            :class="success && 'bg-green-500'"
-        >
-            <template x-if="!loading && !success">
-                <span class="flex gap-2">
-                    <i class="fas fa-user-plus"></i>
-                    Create Account
-                </span>
-            </template>
-
-            <template x-if="loading">
-                <span class="flex gap-2">
-                    <i class="fas fa-circle-notch fa-spin"></i>
-                    Creating Account…
-                </span>
-            </template>
-
-            <template x-if="success">
-                <span class="flex gap-2">
-                    <i class="fas fa-check"></i>
-                    Success
-                </span>
-            </template>
+            <span x-show="!loading && !success">Create Account</span>
+            <span x-show="loading"><i class="fas fa-circle-notch fa-spin mr-2"></i> Processing...</span>
+            <span x-show="success"><i class="fas fa-check mr-2"></i> Done</span>
         </button>
     </form>
 
-    <!-- Footer -->
-    <div class="mt-8 text-center border-t pt-6 text-sm text-slate-500">
-        Already have an account?
-        <a href="/auth/login" class="font-bold text-anita-600">Sign In</a>
+    <div class="mt-6 pt-6 border-t border-slate-200/60 text-center text-sm text-slate-500">
+        Already have an account? <a href="/auth/login" hx-boost="true" class="text-anita-600 font-bold hover:underline">Sign In</a>
     </div>
-
 </div>

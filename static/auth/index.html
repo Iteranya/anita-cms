@@ -9,14 +9,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Core JS -->
     <script defer src="https://unpkg.com/htmx.org@1.9.10"></script>
     
-    <!-- Middleware -->
-    
-
-    <!-- Tailwind Config -->
     <script>
         tailwind.config = {
             darkMode: 'class', 
@@ -33,128 +27,93 @@
 
     <style>
         [x-cloak] { display: none !important; }
-        #app-content { transition: opacity 0.2s ease-in-out; }
-        .htmx-swapping { opacity: 0; }
-        .htmx-settling { opacity: 1; }
+        
+        /* Smooth Fade for HTMX Swaps */
+        #app-content { opacity: 1; transition: opacity 0.3s ease; }
+        .htmx-swapping #app-content { opacity: 0; }
+        .htmx-settling #app-content { opacity: 1; }
+
         @keyframes float {
-            0% { transform: translate(0,0); }
+            0%, 100% { transform: translate(0,0); }
             33% { transform: translate(30px,-50px); }
             66% { transform: translate(-20px,20px); }
-            100% { transform: translate(0,0); }
         }
         .animate-blob { animation: float 10s infinite ease-in-out; }
-        .blob {
-            position:absolute;
-            filter:blur(80px);
-            opacity:.7;
-            border-radius:50%;
-        }
+        .blob { position:absolute; filter:blur(90px); opacity:0.6; border-radius:50%; }
+        
+        /* Modern Glass Panel */
         .glass-panel {
-            background: rgba(255,255,255,.85);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,.6);
-            box-shadow: 0 10px 40px rgba(14,165,233,.15);
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.8);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
         }
     </style>
-
 </head>
 
 <body 
-    class="relative bg-gradient-to-br from-slate-100 via-white to-slate-200 text-slate-800 font-sans h-screen overflow-hidden flex"
+    class="relative bg-slate-50 text-slate-800 font-sans h-screen w-screen overflow-hidden flex flex-col items-center justify-center"
     x-data="authShell"
-    hx-boost="true"
+    x-cloak
 >
 
+    <!-- Background Ambience -->
     <div class="absolute inset-0 overflow-hidden -z-10">
-        <div class="blob animate-blob bg-anita-500 w-[500px] h-[500px] top-[-100px] left-[-100px]"></div>
-        <div class="blob animate-blob bg-purple-400 w-[400px] h-[400px] bottom-[-80px] right-[-80px] animation-delay-2000"></div>
-        <div class="blob animate-blob bg-cyan-300 w-[300px] h-[300px] bottom-[20%] left-[20%] animation-delay-4000"></div>
+        <div class="blob animate-blob bg-anita-400 w-[600px] h-[600px] -top-32 -left-32"></div>
+        <div class="blob animate-blob bg-purple-300 w-[500px] h-[500px] -bottom-32 -right-32 animation-delay-2000"></div>
     </div>
 
-    <!-- CONTENT AREA -->
-    <main
-    class="flex-1 flex items-center justify-center relative px-4 sm:px-6"
->
-        <!-- Auth Card -->
-        <div
-            id="app-content"
-            class="glass-panel w-full max-w-sm sm:max-w-md rounded-2xl p-6 sm:p-8
-                shadow-2xl transition-all"
-        >
-            <!-- Initial Loader -->
-            <div class="flex flex-col items-center justify-center gap-4 text-slate-400">
-                <i class="fas fa-circle-notch fa-spin text-3xl text-anita-500"></i>
-                <p class="text-sm">Loading…</p>
+    <!-- MAIN CARD WRAPPER -->
+    <!-- We give this a fixed min-height to prevent jumping during swaps -->
+    <main class="w-full max-w-md px-4 relative z-10">
+        
+        <div id="app-content" class="w-full transition-all duration-300">
+            <!-- 
+                Initial Loading State (Replaced by HTMX immediately).
+                We keep the glass panel class here so the shape exists before content loads.
+             -->
+            <div class="glass-panel rounded-3xl p-10 flex flex-col items-center justify-center min-h-[400px]">
+                <i class="fas fa-circle-notch fa-spin text-4xl text-anita-500 mb-4"></i>
+                <p class="text-slate-500 font-medium">Initializing...</p>
             </div>
         </div>
+
     </main>
 
-    <!-- NOTIFICATION CONTAINER -->
+    <!-- NOTIFICATIONS -->
     <div class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none">
         <template x-for="note in $store.notifications.items" :key="note.id">
             <div 
                 x-show="true"
                 x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                x-transition:enter-start="opacity-0 translate-y-4 scale-95"
                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
                 x-transition:leave="transition ease-in duration-200"
-                x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-                x-transition:leave-end="opacity-0 translate-x-10 scale-95"
-                class="pointer-events-auto w-80 shadow-2xl rounded-xl overflow-hidden border border-slate-100 flex items-stretch transform"
-                :class="{
-                    'bg-white': true
-                }"
+                x-transition:leave-end="opacity-0 translate-x-4 scale-95"
+                class="pointer-events-auto w-80 shadow-xl rounded-xl overflow-hidden bg-white border border-slate-100 flex items-stretch ring-1 ring-black/5"
             >
-                <!-- Color Strip & Icon -->
-                <div class="w-12 flex items-center justify-center flex-shrink-0"
+                <div class="w-1.5"
                      :class="{
-                        'bg-green-500 text-white': note.type === 'success',
-                        'bg-red-500 text-white': note.type === 'error',
-                        'bg-blue-500 text-white': note.type === 'info'
-                     }">
-                    <i class="fas text-lg"
-                       :class="{
-                           'fa-check': note.type === 'success',
-                           'fa-exclamation-triangle': note.type === 'error',
-                           'fa-info-circle': note.type === 'info'
-                       }"></i>
-                </div>
-
-                <!-- Content -->
-                <div class="flex-1 p-3 bg-white/95 backdrop-blur-sm">
+                        'bg-green-500': note.type === 'success',
+                        'bg-red-500': note.type === 'error',
+                        'bg-blue-500': note.type === 'info'
+                     }"></div>
+                
+                <div class="flex-1 p-4">
                     <div class="flex justify-between items-start">
                         <h4 class="text-sm font-bold text-slate-800" x-text="note.title"></h4>
-                        <button @click="$store.notifications.remove(note.id)" class="text-slate-400 hover:text-slate-600 text-xs">
+                        <button @click="$store.notifications.remove(note.id)" class="text-slate-400 hover:text-slate-600">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
-                    <p class="text-xs text-slate-500 mt-1 leading-relaxed" x-text="note.message"></p>
+                    <p class="text-xs text-slate-500 mt-1" x-text="note.message"></p>
                 </div>
             </div>
         </template>
     </div>
     
-    <!-- INITIAL LOADER: If direct visit, load that view immediately -->
+    <!-- ES Module Entry Point -->
     <script type="module" src="/static/auth/main.js"></script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // 1. Determine where we are
-        const path = window.location.pathname;
-        
-        // 2. Are we in a sub-page of admin? (e.g. /admin/users)
-        if(path.includes('/auth')) {
-            
-            console.log("Hikarin: Restoring view for", path);
-
-            const antiCacheUrl = path + "?t=" + Date.now();
-            
-            htmx.ajax('GET', antiCacheUrl, {
-                target: '#app-content', 
-                swap: 'innerHTML'
-            });
-        }
-    });
-</script>
 </body>
 </html>

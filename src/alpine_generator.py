@@ -332,7 +332,7 @@ def generate_form_alpine_components(form_service: FormService) -> List[AlpineDat
     REQUIRED_TAGS = {"any:read", "any:create"}
 
     for form in forms:
-        tag_names = {tag.name for tag in form.tags.all()}
+        tag_names = {tag.name for tag in form.tags}
 
         # Skip forms without any of the required tags
         if not tag_names.intersection(REQUIRED_TAGS):
@@ -364,19 +364,22 @@ def generate_form_alpine_components(form_service: FormService) -> List[AlpineDat
 
 def generate_media_alpine_components(form_service: FormService) -> List[AlpineData]:
     # Assuming 'media-data' is the internal form slug for media
-    all_media = form_service.get_submissions_for_form("media-data")
+    all_media = form_service.get_submissions_for_form("media-data", 0, 100)
     alpine_registry: List[AlpineData] = []
 
     for media in all_media:
         # Check keys exist to prevent crashes
         if not media.data or 'slug' not in media.data:
+            print(media)
+            print(media.data)
             continue
+        
             
         slug = media.data['slug']
         public_link = media.data.get('public_link', '')
         friendly_name = media.data.get('friendly_name', slug)
         description = media.data.get('description', '')
-
+        print(slug)
         alpine_registry.append(AlpineData(
             slug=slug,
             name=f"Media: {friendly_name}",

@@ -1,29 +1,33 @@
 export default (slug) => ({
-    // Core Data
+    // --- Core Data ---
     slug: slug,
     isLoading: false,
     routes: [],
     categories: {},
     selectedSlugs: new Set(),
 
-    // UI State (Moved from HTML)
+    // --- UI State ---
     activeCategory: 'All',
     searchQuery: '',
-    
+    autosaveStatus: 'Ready',
+    saveTimeout: null,
+
     async init() {
+        if (!this.slug) {
+            console.error("Error: Slug is missing.");
+            return;
+        }
         await this.fetchRoutes();
         await this.loadCurrentState();
     },
 
     // --- Data Fetching ---
-
     async fetchRoutes() {
         this.isLoading = true;
         try {
-            const data = await this.$api.aina.getRoutes().send();
+            const data = await this.$api.aina.getRoutes().execute();
             this.routes = data;
             
-            // Group by category
             this.categories = data.reduce((acc, item) => {
                 const cat = item.category || 'Uncategorized';
                 if (!acc[cat]) acc[cat] = [];
@@ -32,7 +36,6 @@ export default (slug) => ({
             }, {});
         } catch (error) {
             console.error("Generator load error", error);
-            if(this.$store.notifications) this.$store.notifications.add({ type: 'error', message: 'Failed to load library' });
         } finally {
             this.isLoading = false;
         }
@@ -40,52 +43,57 @@ export default (slug) => ({
 
     async loadCurrentState() {
         try {
-            const response = await this.$api.aina.get(this.slug).send();
+            const response = await this.$api.aina.get(this.slug).execute();
             const currentScript = response.custom?.builder?.script || "";
             
-            this.routes.forEach(route => {
-                const safeSlug = route.slug.replace(/-/g, '_');
-                // Check if the unique function definition exists in the script
-                if (currentScript.includes(`'${safeSlug}'`) || 
-                    currentScript.includes(`"${safeSlug}"`) || 
-                    currentScript.includes(`list_${safeSlug.replace('list_', '')}`)) {
-                    this.selectedSlugs.add(route.slug);
+            this.selectedSlugs.clear();
+
+            // Regex: // [AINA:slug]
+            const regex = /\/\/ \[AINA:([^\]]+)\]/g;
+            let match;
+            
+            while ((match = regex.exec(currentScript)) !== null) {
+                const foundSlug = match[1];
+                if (this.routes.some(r => r.slug === foundSlug)) {
+                    this.selectedSlugs.add(foundSlug);
                 }
-            });
-        } catch (e) {
-            console.log("No existing script found");
+            }
+            this.selectedSlugs = new Set(this.selectedSlugs); // Reactivity trigger
+        } catch (e) { 
+            console.log("No existing script found", e); 
         }
     },
 
-    // --- Computed Logic (The "Getter") ---
-
-    get visibleRoutes() {
+    // --- Getters (Standard) ---
+    get filteredItems() {
         let items = this.routes;
-        
-        // 1. Filter by Category
-        if (this.activeCategory !== 'All') {
+        if (this.activeCategory !== 'All' && this.activeCategory !== 'Media') {
             items = items.filter(r => (r.category || 'Uncategorized') === this.activeCategory);
         }
-        
-        // 2. Filter by Search Query
         if (this.searchQuery) {
             const q = this.searchQuery.toLowerCase();
             items = items.filter(r => r.name.toLowerCase().includes(q));
         }
-        
         return items;
     },
 
+    get codeRoutes() { return this.filteredItems.filter(r => !this.isMedia(r)); },
+    get mediaRoutes() { 
+        let items = this.routes.filter(r => this.isMedia(r));
+        if (this.searchQuery) items = items.filter(r => r.name.toLowerCase().includes(this.searchQuery.toLowerCase()));
+        return items;
+    },
+    get activeComponentsList() { return this.routes.filter(r => this.selectedSlugs.has(r.slug)); },
+
     // --- Helpers ---
-
-    isMedia(route) {
-        return route.data && route.data.includes('mediaUrl');
+    
+    // [ADDED THIS HELPER] - This was missing and caused your error
+    isSelected(slug) {
+        return this.selectedSlugs.has(slug);
     },
 
-    extractUrl(jsString) {
-        const match = jsString.match(/mediaUrl:\s*'([^']+)'/); 
-        return match ? match[1] : null; 
-    },
+    isMedia(route) { return route.data && route.data.includes('mediaUrl'); },
+    extractUrl(jsString) { const match = jsString.match(/mediaUrl:\s*'([^']+)'/); return match ? match[1] : null; },
 
     toggleComponent(slug) {
         if (this.selectedSlugs.has(slug)) {
@@ -93,54 +101,55 @@ export default (slug) => ({
         } else {
             this.selectedSlugs.add(slug);
         }
+        this.selectedSlugs = new Set(this.selectedSlugs); // Reactivity fix
+        this.triggerAutosave();
     },
 
-    isSelected(slug) {
-        return this.selectedSlugs.has(slug);
-    },
+    // --- Autosave Logic ---
 
-    // --- Actions ---
+    triggerAutosave() {
+        this.autosaveStatus = 'Saving...';
+        if (this.saveTimeout) clearTimeout(this.saveTimeout);
+
+        this.saveTimeout = setTimeout(() => {
+            this.applyChanges();
+        }, 1000);
+    },
 
     async applyChanges() {
-        this.isLoading = true;
-        
-        // 1. Compile Script
         const selectedRoutes = this.routes.filter(r => this.selectedSlugs.has(r.slug));
         let fullScript = `/**\n * Auto-Generated by Aina\n * Updated: ${new Date().toISOString()}\n */\n\n`;
         
         selectedRoutes.forEach(route => {
+            fullScript += `// [AINA:${route.slug}]\n`;
             fullScript += `// --- ${route.name} ---\n`;
-            fullScript += route.data + "\n\n";
+            fullScript += route.data.trim();
+            fullScript += `\n// [/AINA:${route.slug}]\n\n`;
         });
 
-        // 2. Send to Server
-        const payload = {
-            custom: {
-                builder: {
-                    script: fullScript
-                }
-            }
-        };
-
         try {
-            await this.$api.aina.updateHTML(this.slug, payload);
-            this.$store.notifications.add({ type: 'success', message: 'Script updated in Database.' });
-        } catch (error) {
-            console.error("Script save error:", error);
-            this.$store.notifications.add({ type: 'error', message: 'Failed to save script.' });
-        } finally {
-            this.isLoading = false;
-        }
-    },
+            const currentData = await this.$api.aina.get(this.slug).execute();
+            const existingBuilder = currentData.custom?.builder || {};
 
-    copySnippet(route) {
-        let componentName = route.slug.replace(/-/g, '_');
-        if (route.slug.startsWith('list-')) componentName = 'list_' + route.slug.replace('list-', '').replace(/-/g, '_');
-        if (route.slug.startsWith('editor-')) componentName = 'editor_' + route.slug.replace('editor-', '').replace(/-/g, '_');
-        
-        const tag = `<div x-data="${componentName}"></div>`;
-        
-        navigator.clipboard.writeText(tag);
-        this.$store.notifications.add({ type: 'info', message: 'Tag copied to clipboard' });
+            const payload = {
+                custom: {
+                    builder: {
+                        ...existingBuilder,
+                        script: fullScript
+                    }
+                }
+            };
+
+            await this.$api.aina.updateHTML().execute(this.slug, payload);
+
+            this.autosaveStatus = 'Saved';
+            setTimeout(() => { 
+                if(this.autosaveStatus === 'Saved') this.autosaveStatus = 'Ready'; 
+            }, 2000);
+
+        } catch (error) {
+            console.error("Generator Save Failed:", error);
+            this.autosaveStatus = 'Error';
+        }
     }
 });

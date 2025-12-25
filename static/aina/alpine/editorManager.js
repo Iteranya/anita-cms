@@ -48,7 +48,7 @@ export default (slug, initialData = {}) => ({
         const userHtml = this.editors.html.getValue();
         const userCss = this.editors.css.getValue();
 
-        const currentScript = (await this.$api.aina.get(this.slug).send())?.custom?.builder?.script || "";
+        const currentScript = (await this.$api.aina.get(this.slug).execute())?.custom?.builder?.script || "";
 
         // Payload only updates the builder source data
         const payload = {
@@ -64,7 +64,7 @@ export default (slug, initialData = {}) => ({
 
         try {
             // 1. Save Source to Server
-            await this.$api.pages.updateHTML(this.slug, payload);
+            await this.$api.aina.updateHTML().execute(this.slug, payload);
             
             // 2. Fetch Truth & Render
             await this.fetchAndRender();
@@ -89,7 +89,7 @@ export default (slug, initialData = {}) => ({
     async deployHtml() {
         this.isProcessing = true;
         this.statusText = 'Deploying...';
-        const response = await this.$api.aina.get(this.slug).send();
+        const response = await this.$api.aina.get(this.slug).execute();
         const builderData = response.custom?.builder || {};
         const script = builderData.script || ""
 
@@ -105,7 +105,7 @@ export default (slug, initialData = {}) => ({
         };
 
         try {
-            await this.$api.aina.updateHTML(this.slug, payload);
+            await this.$api.aina.updateHTML().execute(this.slug, payload);
             
             this.$store.notifications.add({
                 type: 'success',
@@ -129,7 +129,7 @@ export default (slug, initialData = {}) => ({
     async fetchAndRender() {
         try {
             // 1. GET request (Single Source of Truth)
-            const response = await this.$api.aina.get(this.slug).send();
+            const response = await this.$api.aina.get(this.slug).execute();
             
             // 2. Extract Data (fallback to current editor values if server is empty/new)
             const builderData = response.custom?.builder || {};
@@ -154,7 +154,7 @@ export default (slug, initialData = {}) => ({
      * Helper to combine Head, Style, and Body
      */
     compilePage(htmlContent, cssContent, jsContent) {
-        return `<!DOCTYPE html>
+        const result = `<!DOCTYPE html>
 <html>
     <head>
         ${this.sysConfig.head}
@@ -166,6 +166,8 @@ export default (slug, initialData = {}) => ({
         ${jsContent}
         </script>
     </body>
-</html>`;
+</html>`
+        console.log(result)
+        return result;
     }
 });

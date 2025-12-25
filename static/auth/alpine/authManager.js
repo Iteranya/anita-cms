@@ -1,7 +1,4 @@
 export default () => ({
-    // --------------------
-    // STATE
-    // --------------------
     username: '',
     password: '',
     confirmPassword: '',
@@ -11,36 +8,54 @@ export default () => ({
     loading: false,
     error: null,
     success: false,
+    mode: 'login',
 
-    mode: 'login', // login | register | setup
-
-    // --------------------
-    // INIT
-    // --------------------
     async init() {
-        // Auto-detect setup state if relevant
-        if (this.mode === 'login' || this.mode === 'register') {
+        // Only run setup check if we are on login/register pages
+        // to prevent infinite loops if the check fails
+        if (['login', 'register'].includes(this.mode)) {
             try {
+                // We use a silent check (no global loader overlay)
                 const res = await this.$api.auth.checkSetup().run();
                 if (!res.initialized) {
+                    console.warn("System not initialized. Redirecting to setup.");
                     window.location.href = '/auth/setup';
                 }
-            } catch (_) {}
+            } catch (err) {
+                console.error("Setup check failed", err);
+            }
         }
     },
 
-    // --------------------
-    // ACTIONS
-    // --------------------
     async login() {
-        return this._wrap(async () => {
-            await this.$api.auth
+        this.error = null;
+        this.loading = true;
+        
+        try {
+            const res = await this.$api.auth
                 .login(this.username, this.password, this.rememberMe)
                 .execute();
 
-            this._redirect('/');
-        });
+            // Store notification if needed or just redirect
+            this.success = true;
+            
+            // Artificial delay for UX (so they see the success state)
+            setTimeout(() => {
+                window.location.href = '/'; 
+            }, 500);
+
+        } catch (err) {
+            this.error = err.detail?.detail || "Invalid credentials";
+            this.password = ''; // clear password on fail
+        } finally {
+            this.loading = false;
+        }
     },
+    
+    
+    // --------------------
+    // ACTIONS
+    // --------------------
 
     async register() {
         return this._wrap(async () => {

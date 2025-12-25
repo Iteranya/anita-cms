@@ -31,8 +31,8 @@ def is_production() -> bool:
 
 def render_no_cache_html(file_path: str, is_partial: bool):
     """
-    Reads the file manually and returns an HTMLResponse with 
-    AGGRESSIVE anti-caching headers.
+    Reads file and adds headers to prevent caching issues between 
+    partial (HTMX) and full (Browser) requests.
     """
     if not os.path.exists(file_path):
         return HTMLResponse("View not found", status_code=404)
@@ -41,9 +41,9 @@ def render_no_cache_html(file_path: str, is_partial: bool):
         content = f.read()
 
     response = HTMLResponse(content)
-    
-    response.headers["Vary"] = "HX-Request"
-
+    # Crucial: Tell browser the response differs based on HX-Request header
+    response.headers["Vary"] = "HX-Request" 
+    response.headers["Cache-Control"] = "no-store, max-age=0"
     return response
 
 # --- VIEWS ---
@@ -56,23 +56,21 @@ async def serve_auth_page(user_service: UserService = Depends(get_user_service))
     return RedirectResponse("/auth/login")
 
 @router.get("/auth/{slug}", response_class=HTMLResponse)
-async def auth_router(
-    slug: str, 
-    request: Request
-):
+async def auth_router(slug: str, request: Request):
+    
+    # Check if valid view
+    if slug not in SPA_VIEWS:
+        raise HTTPException(status_code=404, detail="Page not found")
 
-    # --- CASE A: Static SPA View ---
-    if slug in SPA_VIEWS:
-        # 1. Check if it's HTMX (The Partial)
-        if request.headers.get("HX-Request"):
-            view_path = os.path.join(AUTH_DIR, "views", f"{slug}.html")
-            return render_no_cache_html(view_path, True)
-        
-        # 2. Otherwise, it's the Browser (The Shell)
-        shell_path = os.path.join(AUTH_DIR, "index.html")
-        return render_no_cache_html(shell_path, False)
-
-    raise HTTPException(status_code=404, detail="Content not available")
+    # 1. HTMX Request -> Return just the <div x-data...> Partial
+    if request.headers.get("HX-Request"):
+        view_path = os.path.join(AUTH_DIR, "views", f"{slug}.html")
+        return render_no_cache_html(view_path, True)
+    
+    # 2. Browser Request -> Return the Shell (index.html)
+    # The Shell will then JS-fetch the content for {slug}
+    shell_path = os.path.join(AUTH_DIR, "index.html")
+    return render_no_cache_html(shell_path, False)
 
 
 # --- ROUTES ---

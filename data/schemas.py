@@ -123,15 +123,14 @@ class Page(PageBase):
     model_config = ConfigDict(from_attributes=True)
 
 class PageUpdateHTML(BaseModel):
-    html: str # EXEMPTED
+    html: Optional[str] = None
     custom: Optional[Dict[str, Any]] = None
     tags: Optional[List[str]] = None
 
     @field_validator('custom', mode='before')
     @classmethod
-    def validate_and_bleach_dict(cls, v): return sanitize_recursively(v)
-    
-    model_config = ConfigDict(extra="ignore")
+    def validate_custom(cls, v):
+        return v
 
 class PageMarkdownUpdate(BaseModel):
     markdown: str
@@ -232,7 +231,7 @@ class SubmissionUpdate(BaseModel):
     @classmethod
     def validate_and_bleach_dicts(cls, v):
         return sanitize_recursively(v)
-
+    
 class Submission(SubmissionBase):
     id: int
     form_slug: str

@@ -8,16 +8,18 @@ import { HikarinApi } from '../hikarin/api/client.js';
 import notificationsStore from '../hikarin/alpine/notifications.js';
 import ainaShell from './alpine/ainaShell.js';
 import editorManager from './alpine/editorManager.js';
+import generatorManager from './alpine/generatorManager.js'
 
 // ==========================================
 // ACE CONFIGURATION & SERVICE
 // ==========================================
 
 // Critical: Tell Ace where to fetch workers/themes/modes dynamically
-const ACE_CDN = "https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/";
+const ACE_CDN = "https://cdn.jsdelivr.net/npm/ace-builds@1.32.7/src-min-noconflict/";
 ace.config.set('basePath', ACE_CDN);
 ace.config.set('modePath', ACE_CDN);
 ace.config.set('themePath', ACE_CDN);
+ace.config.set('workerPath', ACE_CDN); // Add this too for syntax checking
 
 // Global Helper to init editors cleanly in Alpine components
 window.AceService = {
@@ -51,6 +53,7 @@ Alpine.store('notifications', notificationsStore);
 
 Alpine.data('ainaShell', ainaShell);
 Alpine.data('editorManager', editorManager);
+Alpine.data('generatorManager', generatorManager)
 
 // Make Alpine global for debugging
 window.Alpine = Alpine;

@@ -7,9 +7,9 @@
     
     <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script defer src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <script type="module" src="/static/aina/main.js"></script>
+    
     <!-- Tailwind Config for Dark Mode IDE -->
     <script>
         tailwind.config = {
@@ -51,7 +51,7 @@
         
         <!-- Left: Back & Title -->
         <div class="flex items-center gap-4 w-64">
-            <a href="/admin/pages" class="text-gray-400 hover:text-white transition">
+            <a href="/admin/page" hx-boost="false" class="text-gray-400 hover:text-white transition">
                 <i class="fas fa-arrow-left"></i>
             </a>
             <div class="text-sm font-bold tracking-wide flex items-center gap-2">
@@ -121,6 +121,7 @@
     
 
     <!-- Restore View Logic (Same as Admin) -->
+    <script type="module" src="/static/aina/main.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const path = window.location.pathname;

@@ -7,7 +7,7 @@ from data import schemas
 from services.forms import FormService
 from services.users import UserService
 from src.dependencies import get_current_user, optional_user
-from data.schemas import AlpineData, CurrentUser
+from data.schemas import AlpineData, CurrentUser, SubmissionBase
 
 # --- Dependency Setup ---
 def get_form_service(db: Session = Depends(get_db)) -> FormService:
@@ -22,9 +22,6 @@ router = APIRouter(prefix="/forms", tags=["Form"])
 # 🧱 MODELS
 # ----------------------------------------------------
 
-class SubmissionBody(BaseModel):
-    data: Dict[str, Any]
-    custom: Optional[Dict[str, Any]] = {}
 
 # ----------------------------------------------------
 # 🧩 FORMS CRUD
@@ -165,7 +162,7 @@ def get_all_tags(
 @router.post("/{slug}/submit", response_model=schemas.Submission, status_code=status.HTTP_201_CREATED)
 def submit_form(
     slug: str,
-    submission_body: SubmissionBody,
+    submission_body: SubmissionBase,
     form_service: FormService = Depends(get_form_service),
     user_service: UserService = Depends(get_user_service),  
     user: CurrentUser = Depends(optional_user),
