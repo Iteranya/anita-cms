@@ -92,11 +92,6 @@ class PageBase(BaseModel):
     def bleach_text_fields(cls, v):
         return sanitize_text(v)
 
-    @field_validator('custom', mode='before')
-    @classmethod
-    def validate_and_bleach_dict(cls, v):
-        return sanitize_recursively(v)
-
 class PageCreate(PageBase):
     slug: str
     html: None = Field(default=None, exclude=True)
@@ -126,11 +121,6 @@ class PageUpdateHTML(BaseModel):
     html: Optional[str] = None
     custom: Optional[Dict[str, Any]] = None
     tags: Optional[List[str]] = None
-
-    @field_validator('custom', mode='before')
-    @classmethod
-    def validate_custom(cls, v):
-        return v
 
 class PageMarkdownUpdate(BaseModel):
     markdown: str

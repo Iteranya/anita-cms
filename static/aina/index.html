@@ -63,22 +63,32 @@
 
         <!-- Center: TABS (The "Sidebar" Logic) -->
         <nav class="flex bg-ide-bg rounded p-0.5 border border-ide-border" x-data>
-            
+    
             <!-- EDITOR TAB -->
             <a href="/aina/editor/{{ slug }}" 
-               hx-target="#app-content" 
-               hx-swap="innerHTML"
-               class="px-6 py-1 text-xs font-bold rounded-sm transition flex items-center gap-2 cursor-pointer"
-               :class="window.location.pathname.includes('/editor/') ? 'bg-[#37373d] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'">
+            hx-target="#app-content" 
+            hx-swap="innerHTML"
+            @click="$store.ainaState.isSaving && ($event.preventDefault(), $store.notifications.add({ type: 'error', message: 'Please wait for changes to save.' }))"
+            class="px-6 py-1 text-xs font-bold rounded-sm transition flex items-center gap-2 cursor-pointer"
+            :class="{
+                'bg-[#37373d] text-white shadow-sm': window.location.pathname.includes('/editor/'),
+                'text-gray-500 hover:text-gray-300': !window.location.pathname.includes('/editor/'),
+                'opacity-50 cursor-not-allowed': $store.ainaState.isSaving
+            }">
                 <i class="fas fa-code"></i> IDE
             </a>
 
             <!-- GENERATOR TAB -->
             <a href="/aina/generator/{{ slug }}" 
-               hx-target="#app-content" 
-               hx-swap="innerHTML"
-               class="px-6 py-1 text-xs font-bold rounded-sm transition flex items-center gap-2 cursor-pointer"
-               :class="window.location.pathname.includes('/generator/') ? 'bg-[#37373d] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'">
+            hx-target="#app-content" 
+            hx-swap="innerHTML"
+            @click="$store.ainaState.isSaving && ($event.preventDefault(), $store.notifications.add({ type: 'error', message: 'Please wait for changes to save.' }))"
+            class="px-6 py-1 text-xs font-bold rounded-sm transition flex items-center gap-2 cursor-pointer"
+            :class="{
+                'bg-[#37373d] text-white shadow-sm': window.location.pathname.includes('/generator/'),
+                'text-gray-500 hover:text-gray-300': !window.location.pathname.includes('/generator/'),
+                'opacity-50 cursor-not-allowed': $store.ainaState.isSaving
+            }">
                 <i class="fas fa-cubes"></i> Generator
             </a>
             

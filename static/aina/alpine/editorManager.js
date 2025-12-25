@@ -48,9 +48,10 @@ export default (slug, initialData = {}) => ({
         const userHtml = this.editors.html.getValue();
         const userCss = this.editors.css.getValue();
 
+        // 1. Network Call (Get Script) - We still need this to mix in generator data
         const currentScript = (await this.$api.aina.get(this.slug).execute())?.custom?.builder?.script || "";
 
-        // Payload only updates the builder source data
+        // 2. Network Call (Save in Background!)
         const payload = {
             custom: {
                 builder: {
@@ -61,24 +62,23 @@ export default (slug, initialData = {}) => ({
                 }
             }
         };
+        
+        // START saving, but don't await it for the preview!
+        const savePromise = this.$api.aina.updateHTML().execute(this.slug, payload);
 
+        // 3. Render IMMEDIATELY using local variables
+        const finalHtml = this.compilePage(userHtml, userCss, currentScript);
+        this.$refs.previewFrame.srcdoc = finalHtml;
+        
+        // Now await the save just to update the "Saved" status text
         try {
-            // 1. Save Source to Server
-            await this.$api.aina.updateHTML().execute(this.slug, payload);
-            
-            // 2. Fetch Truth & Render
-            await this.fetchAndRender();
-            
-            this.statusText = 'Preview Updated';
-            setTimeout(() => this.statusText = 'Live Preview', 2000);
-
-        } catch (error) {
-            console.error("Sync error:", error);
-            this.$store.notifications.add({ type: 'error', message: 'Failed to sync preview.' });
-            this.statusText = 'Error';
-        } finally {
-            this.isProcessing = false;
+            await savePromise;
+            this.statusText = 'Saved';
+        } catch (e) {
+            this.statusText = 'Save Failed';
         }
+        
+        this.isProcessing = false;
     },
 
     /**
@@ -137,6 +137,14 @@ export default (slug, initialData = {}) => ({
             const content = builderData.content || this.editors.html.getValue();
             const style = builderData.style || this.editors.css.getValue();
             const script = builderData.script || ""
+
+            if (content) {
+                this.editors.html.setValue(content, -1);
+            }
+                
+            if (style) {
+                this.editors.css.setValue(style, -1);
+            }
 
             // 3. Compile everything together
             const finalHtml = this.compilePage(content, style, script);

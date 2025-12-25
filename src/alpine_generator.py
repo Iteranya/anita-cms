@@ -221,11 +221,7 @@ def generate_media_component(public_link:str, slug:str) -> str:
     return f"""
 document.addEventListener('alpine:init', () => {{
     Alpine.data('{safe_slug}', () => ({{
-        mediaUrl: '{public_link}',
-        copyToClipboard() {{
-            navigator.clipboard.writeText(this.mediaUrl);
-            if(Alpine.store('notifications')) Alpine.store('notifications').info('Copied', 'URL copied to clipboard');
-        }}
+        mediaUrl: '{public_link}'
     }}));
 }});
 """

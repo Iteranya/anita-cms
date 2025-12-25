@@ -108,6 +108,9 @@ export default (slug) => ({
     // --- Autosave Logic ---
 
     triggerAutosave() {
+        // 1. Lock the UI immediately
+        this.$store.ainaState.isSaving = true; 
+        
         this.autosaveStatus = 'Saving...';
         if (this.saveTimeout) clearTimeout(this.saveTimeout);
 
@@ -143,6 +146,7 @@ export default (slug) => ({
             await this.$api.aina.updateHTML().execute(this.slug, payload);
 
             this.autosaveStatus = 'Saved';
+            this.$store.ainaState.isSaving = false; 
             setTimeout(() => { 
                 if(this.autosaveStatus === 'Saved') this.autosaveStatus = 'Ready'; 
             }, 2000);

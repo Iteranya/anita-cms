@@ -50,6 +50,9 @@ Alpine.plugin(sort);
 
 Alpine.magic('api', () => hikarinApi);
 Alpine.store('notifications', notificationsStore);
+Alpine.store('ainaState', {
+    isSaving: false
+});
 
 Alpine.data('ainaShell', ainaShell);
 Alpine.data('editorManager', editorManager);
