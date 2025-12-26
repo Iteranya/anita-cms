@@ -82,7 +82,7 @@ export default (slug, initialData = {}) => ({
         this.isProcessing = false;
     },
 
-    async getPrompt() {
+    async getPrompt() { // Unused by editor, it's just here for people who wanna vibe code their own frontend, literally just 'copy' button.
         // Use current editor values so the prompt reflects unsaved changes
         const userHtml = this.editors.html.getValue();
         const userCss = this.editors.css.getValue();

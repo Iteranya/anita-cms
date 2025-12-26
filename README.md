@@ -754,7 +754,7 @@ python main.py
 
 Terrible Ideas That Won't Go Away
 
-- Let Every User Bring Their Own Admin Page (:skull:)
+- ~~Let Every User Bring Their Own Admin Page (Actually good idea, but like, CUSTOM Admin Page, not replacing Dashboard)~~ Actually implemented, lmao
 - Anita AI Chatbot on Dashboard
 - Rewrite Everything In Go
 - Rewrite Everything In Rust

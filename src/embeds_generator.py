@@ -4,8 +4,6 @@ from typing import List
 from data.schemas import AlpineData
 from services.forms import FormService
 
-# NOTE: These codes do NOT run during runtime, it is used by Aina Web Creator to create safe scripts to interact with Backend, changes here does not affect saved pages.
-# NOTE: So no, the bug you're looking for is not here.
 # --- Helpers ---
 
 def _get_js_safe_slug(slug: str) -> str:

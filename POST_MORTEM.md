@@ -139,13 +139,13 @@ Or better yet, you can actually hack this thing!!! Create something that is more
 
 (Ah, also, A-GPL-3 License, so you need to share that too~ :3)
 
-Edit: Added RBAC, I need a life
+Edit: Added RBAC, I need a life, Anita now has ABAC, RBAC, and that tag object thing. Why am I doing this to myself?
 
 # An Ecosystem of Built on Sharing
 
 Look, I have no grand dream or anything (except maybe the death of Wordpress), but I do want this project to grow beyond what I'm capable of.
 
-Maybe rewrite the front end in proper javascript framework, while keeping the core simplicty intact.
+~~Maybe rewrite the front end in proper javascript framework, while keeping the core simplicty intact.~~ Edit: Never, Alpine + HTMX is all I need.
 
 The point is that I want to see this grow into something that really have everyone, not just make their own website, but also teach them a thing or two about website development.
 
@@ -155,5 +155,31 @@ Which is cool!? RIGHT!??!!
 
 ...
 
-I need to sleep, holy shit...
+I need to sleep, holy shit..
+
+# EDIT: THE AI REMOVAL UPDATE
+
+HAHAHAHAHAHA!!! I DID IT I FUCKING DID IT!!!
+
+NO MORE AI!!! FUCK YOU ALLL!!!!!!!!!! WOOOOOOOOOOOOOOOOOOOOOOO
+
+I have integrated Aina with Ace Editor, do some funky metaprogramming, and created PLUGINS, that you can just CLICK inside the...
+
+*drumroll*
+
+**Aina Server Integrated Development Environment!!!**
+
+You go to Aina, you got three tabs:
+
+Tab 1: Generator -> You click on selection of data from backend you want to access (auto populates your forms and custom collections and media files)
+
+Tab 2: Editor -> You have an editor to write HTML and Tailwind and Alpine stuff... You also got another editor to write CSS!!!
+
+Tab 3: Setting -> Switches to setup your own CSP Headers and Meta and Head and such!! SECURITY FTW WOOOOO!!!
+
+Also Asta is now Milkdown now, which is nice...
+
+...
+
+NOW STOP USING WORDPRESS REEEEEEEEEEEEEEEE-
 

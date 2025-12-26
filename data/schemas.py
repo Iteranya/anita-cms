@@ -80,12 +80,12 @@ class PageBase(BaseModel):
     title: str
     content: Optional[str] = None # Short description only, not actual page content
     markdown: Optional[str] = None # Sanitized Until Per-Page CSP is Implemented
-    html: Optional[str] = None  # EXEMPTED / UNTOUCHED
+    html: Optional[str] = None  # EXEMPTED / UNTOUCHED / LITERALLY THE ENTIRE SITE
     tags: Optional[List[str]] = []
     thumb: Optional[str] = None
     type: Optional[str] = "page"
     author: Optional[str] = None
-    custom: Optional[Dict[str, Any]] = {}
+    custom: Optional[Dict[str, Any]] = {} # Exempted These Are For Aina To Use
     
     @field_validator('title', 'content', 'markdown', 'author', 'thumb', 'type', mode='before')
     @classmethod
@@ -411,3 +411,13 @@ class AlpineData:
     description:str | None # Description and usage note
     category:str # Category
     data:str # String containing alpine data snippet
+
+@dataclass
+class EmbedData:
+    slug:str # The Slug
+    name:str # Friendly Name
+    description:str | None # Description and usage note
+    category:str # Category
+    data:str # String containing embed data snippet
+
+# WHY IS IT IDENTICAL!?!?!
