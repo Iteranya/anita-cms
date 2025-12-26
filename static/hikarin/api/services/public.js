@@ -9,7 +9,18 @@ export class PublicAPI {
      * @param {string[]} tags - Array of strings
      */
     search(tags) { 
-        return new ApiRequest(() => this._client._request('GET', `/search`, { query: { tags } })); 
+        // 1. Manually construct the query string
+        // FastAPI expects: ?tags=val1&tags=val2
+        const params = new URLSearchParams();
+        if (Array.isArray(tags)) {
+            tags.forEach(tag => params.append('tags', tag));
+        }
+
+        const queryString = params.toString();
+        const url = queryString ? `/search?${queryString}` : '/search';
+
+        // 2. Pass the fully formed URL to the request handler
+        return new ApiRequest(() => this._client._request('GET', url)); 
     }
 
     /**

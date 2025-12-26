@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
@@ -57,15 +57,21 @@ def api_get_any_page(main:str, slug: str, page_service: PageService = Depends(ge
 
 @router.get("/search", response_model=list[schemas.PageData])
 def api_search_pages_by_tags(
-    tags: List[str] = Query(..., description="List of tags to filter pages by"),
+    # Changed "..." to "None" to make it optional
+    tags: Optional[List[str]] = Query(None, description="List of tags to filter pages by"),
     page_service: PageService = Depends(get_page_service),
 ):
     """
     Search pages by tags.
     All provided tags must be present on the page.
+    If no tags are provided, returns all pages with 'any:read'.
     """
-    tags.append("any:read")
-    pages = page_service.get_pages_by_tags(tags)
+    # Initialize as empty list if no tags were provided to prevent crashing on .append()
+    search_tags = tags if tags is not None else []
+    print(search_tags)
+    search_tags.append("any:read")
+    
+    pages = page_service.get_pages_by_tags(search_tags)
 
     return pages
 

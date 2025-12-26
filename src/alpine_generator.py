@@ -235,47 +235,52 @@ def generate_public_search_js(component_name: str, default_tags: List[str]) -> s
 
     return f"""
 document.addEventListener('alpine:init', () => {{
-    Alpine.data('{component_name}', () => ({{
+    // Add 'initialTags' as a parameter here ----v
+    Alpine.data('{component_name}', (initialTags = {tags_js}) => ({{
         
-        // Search Data
         searchResults: [],    
         searchQuery: '',         
-        defaultTags: {tags_js},
+        defaultTags: initialTags, // Initialize with the passed tags
         
-        // UI State
         isLoading: false,
         error: null,          
 
         async init() {{
-            // If default tags exist, perform an initial search
+            // This runs automatically ONCE. 
+            // Since defaultTags is now set via the constructor, this will work!
             if (this.defaultTags.length > 0) {{
                 await this.search(this.defaultTags);
             }}
         }},
 
-        /**
-         * Search by tags.
-         * explicitTags: Array of strings (optional)
-         */
         async search(explicitTags = null) {{
             this.isLoading = true;
             this.error = null;
             
-            let tags = [];
+            // 1. Start with the default tags as the base
+            let tags = [...this.defaultTags]; 
 
             if (Array.isArray(explicitTags)) {{
+                // If specific tags are passed (like during init), use them
                 tags = explicitTags;
             }} else {{
-                // Parse input model
+                // 2. If the user typed something, APPEND those tags to the defaults
                 const rawInput = (this.searchQuery || '').trim();
                 if (rawInput.length > 0) {{
-                    tags = rawInput.split(',').map(t => t.trim()).filter(t => t.length > 0);
+                    const userTags = rawInput.split(',')
+                        .map(t => t.trim())
+                        .filter(t => t.length > 0);
+                    
+                    // Merge defaults with user tags, ensuring no duplicates
+                    tags = [...new Set([...tags, ...userTags])];
                 }}
             }}
 
             try {{
+                // Now 'tags' contains both the hidden defaults (main:blog) 
+                // AND the user's search terms.
                 this.searchResults = await this.$api.public.search(tags).execute();
-            }} catch (e) {{
+            }} catch (e){{
                 console.error('Search failed:', e);
                 this.error = 'Unable to fetch results.';
                 this.searchResults = []; 
@@ -395,7 +400,7 @@ def generate_public_alpine_components() -> List[AlpineData]:
 
     # 1. Public Search Component
     # This component can be dropped into any page to enable tag-based search
-    search_js = generate_public_search_js("public_search", default_tags=[])
+    search_js = generate_public_search_js("public_search", default_tags=["any:read", "main:blog"])
     alpine_registry.append(AlpineData(
         slug="public-search",
         name="Public Search",

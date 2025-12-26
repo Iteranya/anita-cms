@@ -4,14 +4,23 @@ import time
 import logging
 from typing import List, Set
 from PIL import Image
-import requests # Requires: pip install requests
+import requests 
+
+
+#TODO: Swap Pillow with pyvips also, cherry pick the branch with the one where I keep invisibility in images
+
 
 # Custom exceptions for the service layer
-class MediaServiceError(Exception): pass
-class InvalidFileNameError(MediaServiceError): pass
-class FileNotFoundError(MediaServiceError): pass
-class ImageProcessingError(MediaServiceError): pass
-class CopypartyError(MediaServiceError): pass
+class MediaServiceError(Exception): 
+    pass
+class InvalidFileNameError(MediaServiceError): 
+    pass
+class FileNotFoundError(MediaServiceError): 
+    pass
+class ImageProcessingError(MediaServiceError): 
+    pass
+class CopypartyError(MediaServiceError): 
+    pass
 
 # Logger configuration
 logger = logging.getLogger("MediaService")

@@ -3,28 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anita Admin</title>
+    <title>Aina IDE - {{ slug }}</title>
     
     <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Core JS -->
     <script defer src="https://unpkg.com/htmx.org@1.9.10"></script>
     
-    <!-- Middleware -->
-    
-
-    <!-- Tailwind Config -->
+    <!-- Tailwind Config for Dark Mode IDE -->
     <script>
         tailwind.config = {
-            darkMode: 'class', 
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Nunito', 'sans-serif'] },
                     colors: {
-                        anita: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7', 900: '#0c4a6e' }
+                        ide: { 
+                            bg: '#1e1e1e', 
+                            panel: '#252526', 
+                            border: '#3e3e42',
+                            accent: '#007acc'
+                        }
                     }
                 }
             }
@@ -33,96 +30,123 @@
 
     <style>
         [x-cloak] { display: none !important; }
-        #app-content { transition: opacity 0.2s ease-in-out; }
-        .htmx-swapping { opacity: 0; }
-        .htmx-settling { opacity: 1; }
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
+        /* VS Code style scrollbars */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #1e1e1e; }
+        ::-webkit-scrollbar-thumb { background: #424242; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4f4f4f; }
+        
+        .htmx-swapping { opacity: 0; transition: opacity 0.1s ease-out; }
     </style>
 </head>
 
 <body 
-    class="bg-slate-100 text-slate-800 font-sans h-screen overflow-hidden flex"
-    x-data="ainaShell"
+    class="bg-ide-bg text-[#cccccc] font-sans h-screen overflow-hidden flex flex-col"
+    x-data="astaShell"
     hx-boost="true"
 >
+
+    <!-- TOP NAVIGATION BAR (Replaces Sidebar) -->
+    <header class="h-10 bg-ide-panel border-b border-ide-border flex items-center justify-between px-4 shrink-0 select-none z-50">
+        
+        <!-- Left: Back & Title -->
+        <div class="flex items-center gap-4 w-64">
+            <a href="/admin/page" hx-boost="false" class="text-gray-400 hover:text-white transition">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="text-sm font-bold tracking-wide flex items-center gap-2">
+                <span class="text-ide-accent">Asta</span> 
+                <span class="text-gray-600">/</span> 
+                <span class="font-mono text-xs text-gray-300">{{ slug }}</span>
+            </div>
+        </div>
+
+        <!-- Center: TABS (The "Sidebar" Logic) -->
+        <nav class="flex bg-ide-bg rounded p-0.5 border border-ide-border" x-data>
+    
+            <!-- EDITOR TAB -->
+            <a href="/asta/editor/{{ slug }}" 
+            hx-target="#app-content" 
+            hx-swap="innerHTML"
+            @click="$store.ainaState.isSaving && ($event.preventDefault(), $store.notifications.add({ type: 'error', message: 'Please wait for changes to save.' }))"
+            class="px-6 py-1 text-xs font-bold rounded-sm transition flex items-center gap-2 cursor-pointer"
+            :class="{
+                'bg-[#37373d] text-white shadow-sm': window.location.pathname.includes('/editor/'),
+                'text-gray-500 hover:text-gray-300': !window.location.pathname.includes('/editor/'),
+                'opacity-50 cursor-not-allowed': $store.ainaState.isSaving
+            }">
+                <i class="fas fa-code"></i> IDE
+            </a>
+
+            <!-- GENERATOR TAB -->
+            <a href="/aina/generator/{{ slug }}" 
+            hx-target="#app-content" 
+            hx-swap="innerHTML"
+            @click="$store.ainaState.isSaving && ($event.preventDefault(), $store.notifications.add({ type: 'error', message: 'Please wait for changes to save.' }))"
+            class="px-6 py-1 text-xs font-bold rounded-sm transition flex items-center gap-2 cursor-pointer"
+            :class="{
+                'bg-[#37373d] text-white shadow-sm': window.location.pathname.includes('/generator/'),
+                'text-gray-500 hover:text-gray-300': !window.location.pathname.includes('/generator/'),
+                'opacity-50 cursor-not-allowed': $store.ainaState.isSaving
+            }">
+                <i class="fas fa-cubes"></i> Generator
+            </a>
+            
+        </nav>
+
+        <!-- Right: Status/User -->
+        <div class="w-64 flex justify-end">
+            <!-- Optional Actions -->
+        </div>
+    </header>
 
     <!-- CONTENT AREA -->
     <main id="app-content" class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         <!-- Initial Load Spinner -->
-        <div class="flex h-full items-center justify-center text-slate-400">
+        <div class="flex h-full items-center justify-center text-gray-500">
             <i class="fas fa-circle-notch fa-spin text-3xl"></i>
         </div>
     </main>
-    <!-- NOTIFICATION CONTAINER -->
+
+    <!-- NOTIFICATION CONTAINER (Shared) -->
     <div class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none">
         <template x-for="note in $store.notifications.items" :key="note.id">
-            <div 
-                x-show="true"
-                x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 translate-y-2 scale-95"
-                x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                x-transition:leave="transition ease-in duration-200"
-                x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-                x-transition:leave-end="opacity-0 translate-x-10 scale-95"
-                class="pointer-events-auto w-80 shadow-2xl rounded-xl overflow-hidden border border-slate-100 flex items-stretch transform"
-                :class="{
-                    'bg-white': true
-                }"
-            >
-                <!-- Color Strip & Icon -->
-                <div class="w-12 flex items-center justify-center flex-shrink-0"
-                     :class="{
-                        'bg-green-500 text-white': note.type === 'success',
-                        'bg-red-500 text-white': note.type === 'error',
-                        'bg-blue-500 text-white': note.type === 'info'
-                     }">
-                    <i class="fas text-lg"
-                       :class="{
-                           'fa-check': note.type === 'success',
-                           'fa-exclamation-triangle': note.type === 'error',
-                           'fa-info-circle': note.type === 'info'
-                       }"></i>
+            <div x-show="true" class="pointer-events-auto w-80 shadow-2xl rounded overflow-hidden border border-ide-border flex items-stretch bg-ide-panel text-white">
+                <div class="w-10 flex items-center justify-center flex-shrink-0"
+                     :class="note.type === 'error' ? 'bg-red-600' : 'bg-green-600'">
+                    <i class="fas" :class="note.type === 'error' ? 'fa-exclamation' : 'fa-check'"></i>
                 </div>
-
-                <!-- Content -->
-                <div class="flex-1 p-3 bg-white/95 backdrop-blur-sm">
-                    <div class="flex justify-between items-start">
-                        <h4 class="text-sm font-bold text-slate-800" x-text="note.title"></h4>
-                        <button @click="$store.notifications.remove(note.id)" class="text-slate-400 hover:text-slate-600 text-xs">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <p class="text-xs text-slate-500 mt-1 leading-relaxed" x-text="note.message"></p>
+                <div class="flex-1 p-3">
+                    <div class="text-xs font-bold" x-text="note.title || (note.type === 'error' ? 'Error' : 'Success')"></div>
+                    <div class="text-[11px] text-gray-400 mt-0.5" x-text="note.message"></div>
                 </div>
+                <button @click="$store.notifications.remove(note.id)" class="px-3 text-gray-500 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
         </template>
     </div>
     
-    <!-- INITIAL LOADER: If direct visit, load that view immediately -->
-    <script type="module" src="/static/hikarin/aina.js"></script>
+    <!-- Alpine Modules -->
+    
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // 1. Determine where we are
-        const path = window.location.pathname;
-        
-        // 2. Are we in a sub-page of admin? (e.g. /admin/users)
-        if(path.includes('/aina') && path.length > 7) {
+    <!-- Restore View Logic (Same as Admin) -->
+    <script type="module" src="/static/aina/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const path = window.location.pathname;
             
-            console.log("Hikarin: Restoring view for", path);
-
-            const antiCacheUrl = path + "?t=" + Date.now();
-            
-            htmx.ajax('GET', antiCacheUrl, {
-                target: '#app-content', 
-                swap: 'innerHTML'
-            });
-        }
-    });
-</script>
+            // If we are at the root shell but the URL points to a sub-view (editor or generator)
+            // Trigger HTMX to load that content immediately.
+            if(path.includes('/aina/')) {
+                console.log("Aina: Restoring view for", path);
+                const antiCacheUrl = path + "?t=" + Date.now();
+                htmx.ajax('GET', antiCacheUrl, {
+                    target: '#app-content', 
+                    swap: 'innerHTML'
+                });
+            }
+        });
+    </script>
 </body>
 </html>

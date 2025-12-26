@@ -108,27 +108,45 @@
             <br>
 
             <template x-for="item in activeComponentsList" :key="item.slug">
-                <div class="mb-6 group relative pl-4 border-l-2 border-[#3e3e42] hover:border-[#007acc] transition-colors">
+                <!-- Wrap each item in its own local collapse state -->
+                <div x-data="{ isCollapsed: false }" 
+                    class="mb-6 group relative pl-4 border-l-2 border-[#3e3e42] hover:border-[#007acc] transition-colors">
                     
-                    <!-- Start Marker (Visual Only - helps user understand structure) -->
-                    <div class="text-[#569cd6] text-xs select-none opacity-50 mb-1" x-text="'// [AINA:' + item.slug + ']'"></div>
-                    
-                    <!-- Readable Header -->
-                    <div class="flex items-center gap-2 text-[#6a9955] font-bold mb-1">
-                        <span x-text="'// --- ' + item.name + ' ---'"></span>
+                    <!-- Toggle Header (Markers + Name) -->
+                    <div @click="isCollapsed = !isCollapsed" class="cursor-pointer select-none group/header">
+                        
+                        <!-- Start Marker with Chevron -->
+                        <div class="text-[#569cd6] text-xs opacity-50 mb-1 flex items-center gap-2">
+                            <i class="fas fa-chevron-down transition-transform duration-200" 
+                            :class="isCollapsed ? '-rotate-90' : ''"></i>
+                            <span x-text="'// [AINA:' + item.slug + ']'"></span>
+                            <span x-show="isCollapsed" class="text-[10px] bg-[#3e3e42] px-1 rounded text-gray-400">... hidden</span>
+                        </div>
+                        
+                        <!-- Readable Header -->
+                        <div class="flex items-center gap-2 text-[#6a9955] font-bold mb-1 group-hover/header:brightness-125">
+                            <span x-text="'// --- ' + item.name + ' ---'"></span>
+                        </div>
                     </div>
 
-                    <!-- Code Content -->
-                    <pre class="text-[#d4d4d4] whitespace-pre-wrap break-words font-mono" x-text="item.data.trim()"></pre>
-                    
-                    <!-- End Marker -->
-                    <div class="text-[#569cd6] text-xs select-none opacity-50 mt-1" x-text="'// [/AINA:' + item.slug + ']'"></div>
+                    <!-- Collapsible Content -->
+                    <div x-show="!isCollapsed" 
+                        x-transition:enter="transition ease-out duration-150"
+                        x-transition:enter-start="opacity-0 -translate-y-2"
+                        x-transition:enter-end="opacity-100 translate-y-0">
+                        
+                        <!-- Code Content -->
+                        <pre class="text-[#d4d4d4] whitespace-pre-wrap break-words font-mono mt-2" x-text="item.data.trim()"></pre>
+                        
+                        <!-- End Marker -->
+                        <div class="text-[#569cd6] text-xs select-none opacity-50 mt-1" x-text="'// [/AINA:' + item.slug + ']'"></div>
+                    </div>
 
-                    <!-- Floating Remove Button (Absolute to the block) -->
-                    <button @click="toggleComponent(item.slug)" 
+                    <!-- Floating Remove Button (use .stop to prevent toggling collapse when deleting) -->
+                    <button @click.stop="toggleComponent(item.slug)" 
                             class="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition 
-                                   text-xs bg-[#252526] hover:bg-red-900/50 text-gray-400 hover:text-white 
-                                   border border-[#3e3e42] hover:border-red-500 px-2 py-1 rounded shadow-lg">
+                                text-xs bg-[#252526] hover:bg-red-900/50 text-gray-400 hover:text-white 
+                                border border-[#3e3e42] hover:border-red-500 px-2 py-1 rounded shadow-lg">
                         <i class="fas fa-trash-alt mr-1"></i> Remove
                     </button>
                 </div>

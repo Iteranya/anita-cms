@@ -72,7 +72,7 @@ Anita is a self-hosted, hybrid CMS designed to be the "lite" alternative to Word
 I call Anita Hybrid because:
 
 - She handles the Backend: You define the data, she builds the API.
-- She helps with the Frontend: She includes an AI Page Builder (Aina) and Markdown Editor (Asta).
+- She helps with the Frontend: She includes an Integrated IDE (Aina) and Markdown Editor (Asta).
 
 ## The "One-File" Wonder
 
@@ -113,7 +113,7 @@ With Anita, you just do this:
 - Check the boxes for access permissions
 - Done.
 
-Anita automatically generates the database table inside anita.db and creates a secure API endpoint. The AI is now aware of the api route and you can ask the AI to create a working menu page. Or you can simply code your own front end with Alpine and Tailwind.
+Anita automatically generates a secure API endpoint. The IDE is now aware of the api route and you can easily inject the required scripts (no code required), then you can simply code your own front end with Alpine and Tailwind through Aina IDE.
 
 
 <details>
@@ -542,17 +542,19 @@ You know what they say, a picture is worth a thousand words...
 
 ---
 
-## The AI Part...
+## The AI Part... SIKE! THERE IS NO AI!!!
 
-Okay, look, listen, I hate AI slop as much as you do. But until the Hikarin Web Builder is finished, we have to do with what we got. Or if you're comfortable, you can code AlpineJS and Tailwind from scratch.
+While Aina used to be a Deepsite Clone, this is no longer the case!
 
-#### Aina AI Page Builder
-<p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/aina-ai.png" alt="Aina AI" width="700"></p>
-<em>You see that??? No hallucinating routes, no hallucinating stock images. You pick what data you want AI to access. You pick what media you want AI to add. The prompt result is right there. You can use the API integration or just copy that prompt and use any other AI you like.</em>
+Introducing, Aina Integrated Web IDE!!!
 
-#### Asta Markdown Editor
-<p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/asta-markdown-editor.png" alt="Asta Markdown Editor" width="700"></p>
-<em>It's a markdown Editor. ... Might remove AI later and replace it with git for versioning and proper ctrl+z.</em>
+#### Aina Backend Generator
+<p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/aina-generator.png" alt="Aina Backend Generator" width="700"></p>
+<em>Browse through the libraries of pre-made alpine component and integrated it into your website! Everything is toggleable with just a click  *and* it is completely safe! The alpine components are designed to interact with Aina Database, aware of all your pages and custom collections too!</em>
+
+#### Aina Frontend Generator
+<p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/aina-editor.png" alt="Aina Frontend IDE" width="700"></p>
+<em>Forget about coding logic and focus on UI and presentation! With Tailwind, Awesome Fonts, and AlpineJS baked in, you have everything you need to create a gorgeous site!</em>
 
 ---
 
@@ -568,7 +570,7 @@ Okay, look, listen, I hate AI slop as much as you do. But until the Hikarin Web 
     </td>
     <td>
       <strong>Anita</strong><br/>
-      Okay, AI is no longer a first-class citizen, this is good, phew.
+      NO MORE AI LET'S GOOOO!!!
     </td>
   </tr>
   <tr>
@@ -577,7 +579,7 @@ Okay, look, listen, I hate AI slop as much as you do. But until the Hikarin Web 
     </td>
     <td>
       <strong>Artes</strong><br/>
-      Hmm... You know if this were any other project, being AI Powered is a selling point.
+      Hmm... There's still AI integration there
     </td>
   </tr>
     <tr>
@@ -586,7 +588,7 @@ Okay, look, listen, I hate AI slop as much as you do. But until the Hikarin Web 
     </td>
     <td>
       <strong>Anita</strong><br/>
-      It's not! Shut up! We need to get the Hikarin Web Builder ready ASAP.
+      Eh???
     </td>
   </tr>
   <tr>
@@ -595,7 +597,7 @@ Okay, look, listen, I hate AI slop as much as you do. But until the Hikarin Web 
     </td>
     <td>
       <strong>Artes</strong><br/>
-      I'm still gonna use AI...
+      Yeah, there's a copy-prompt button there, for you to copy paste to any AI of your choosing. Comes with  Prompt Engineering to. Perfect if you can't code html/alpine/css to save your life. That's the only ai integrated feature left.
     </td>
   </tr>
 </tbody>
@@ -821,7 +823,7 @@ Terrible Ideas That Won't Go Away
     </td>
     <td>
       <strong>Anita</strong><br/>
-      *shrug*
+      How about making Ghost-like Editor on Asta!?
     </td>
   </tr>
   <tr>
@@ -830,7 +832,7 @@ Terrible Ideas That Won't Go Away
     </td>
     <td>
       <strong>Artes</strong><br/>
-      You have a good AI integration, be proud of it.
+      Ghost Editor... You want me to code a better markdown editor than Ghost? THE Ghost???
     </td>
   </tr>
   <tr>
@@ -839,7 +841,7 @@ Terrible Ideas That Won't Go Away
     </td>
     <td>
       <strong>Anita</strong><br/>
-      Bad marketing, people hate AI and I put all my cards on the Hikarin Website Builder. Actually, why not build Hikarin on top of Grape?
+      EXACTLY!!! Oh and a proper drag and drop page builder instead of coding manually Front End IDE!!! You can use like... GrapeJS!!!
     </td>
   </tr>
   <tr>

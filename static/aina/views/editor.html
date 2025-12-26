@@ -5,34 +5,41 @@
          css: '' 
      })"
 >
-    <!-- TOP BAR -->
     <div class="h-10 bg-[#252526] border-b border-[#3e3e42] flex items-center px-4 justify-between shrink-0">
-        <div class="text-sm font-bold tracking-wide flex items-center gap-2">
-            <span class="text-[#007acc]">IDE</span> 
-            <span class="text-gray-500">/</span> 
-            <span x-text="slug" class="font-mono text-xs text-gray-300"></span>
-        </div>
-        
-        <div class="flex gap-2">
-            <!-- 1. RUN: Saves Source to DB -> Fetches from DB -> Renders Preview -->
-            <button @click="syncAndRender()" 
-                    class="bg-[#2d2d2d] hover:bg-[#3d3d3d] border border-gray-600 text-white text-xs font-bold px-3 py-1.5 rounded flex items-center gap-2 transition disabled:opacity-50"
-                    :disabled="isProcessing"
-                    title="Save source code & refresh preview">
-                <i class="fas" :class="isProcessing ? 'fa-circle-notch fa-spin' : 'fa-play'"></i>
-                <span x-text="isProcessing ? 'Syncing...' : 'Run'"></span>
-            </button>
-
-            <!-- 2. DEPLOY: Compiles HTML -> Saves to 'html' field in DB -->
-            <button @click="deployHtml()" 
-                    class="bg-[#0e639c] hover:bg-[#1177bb] text-white text-xs font-bold px-3 py-1.5 rounded flex items-center gap-2 transition disabled:opacity-50"
-                    :disabled="isProcessing"
-                    title="Compile and save to public HTML">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <span>Deploy</span>
-            </button>
-        </div>
+    <div class="text-sm font-bold tracking-wide flex items-center gap-2">
+        <span class="text-[#007acc]">IDE</span> 
+        <span class="text-gray-500">/</span> 
+        <span x-text="slug" class="font-mono text-xs text-gray-300"></span>
     </div>
+    
+    <div class="flex gap-2">
+        <!-- NEW: COPY PROMPT BUTTON -->
+        <button @click="copyPrompt()" 
+                class="bg-[#3e3e42] hover:bg-[#4e4e52] text-gray-300 text-xs font-bold px-3 py-1.5 rounded flex items-center gap-2 transition"
+                title="Copy context for AI Prompt">
+            <i class="fas" :class="copiedPrompt ? 'fa-check text-green-400' : 'fa-terminal'"></i>
+            <span x-text="copiedPrompt ? 'Copied!' : 'Copy Prompt'"></span>
+        </button>
+
+        <!-- 1. RUN -->
+        <button @click="syncAndRender()" 
+                class="bg-[#2d2d2d] hover:bg-[#3d3d3d] border border-gray-600 text-white text-xs font-bold px-3 py-1.5 rounded flex items-center gap-2 transition disabled:opacity-50"
+                :disabled="isProcessing"
+                title="Save source code & refresh preview">
+            <i class="fas" :class="isProcessing ? 'fa-circle-notch fa-spin' : 'fa-play'"></i>
+            <span x-text="isProcessing ? 'Syncing...' : 'Run'"></span>
+        </button>
+
+        <!-- 2. DEPLOY -->
+        <button @click="deployHtml()" 
+                class="bg-[#0e639c] hover:bg-[#1177bb] text-white text-xs font-bold px-3 py-1.5 rounded flex items-center gap-2 transition disabled:opacity-50"
+                :disabled="isProcessing"
+                title="Compile and save to public HTML">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <span>Deploy</span>
+        </button>
+    </div>
+</div>
 
     <!-- MAIN WORKSPACE -->
     <div class="flex-1 flex overflow-hidden">
