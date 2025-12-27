@@ -1,31 +1,11 @@
 import json
 from typing import List
 
-from data.crud.tags import get_main_tags
 from data.schemas import AlpineData
 from services.forms import FormService
+from services.tags import TagService
 
-# NOTE: Abstract this somehow...
-# NOTE: Also main:blog is hardcoded, that's wrong, it should generate based on the existing group tags.
-# NOTE: Also why am I doing this???
-
-# AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-
-# Okay, slow down, slow the fuck down...
-
-# Breathe...
-
-# Now...
-
-# ...
-
-# This is just a complex piece of module, you've made a compiler before, this is easy, just... 
-
-# Tell Python to write Javascript, simple
-
-# And fit that to the whole architecture...
-
-# ... AI can't save me now, god...
+# TODO: Abstract this somehow...
 
 # --- Helpers ---
 
@@ -412,7 +392,7 @@ def generate_media_alpine_components(form_service: FormService) -> List[AlpineDa
 
     return alpine_registry
 
-def generate_public_alpine_components() -> List[AlpineData]:
+def generate_public_alpine_components(tag_service: TagService) -> List[AlpineData]:
     """
     Generates standard public-facing components like Search, Page Loaders, etc.
     """
@@ -431,6 +411,7 @@ def generate_public_alpine_components() -> List[AlpineData]:
 
     # 2. Public Content Loader
     # A generic component to fetch individual content items by slug
+    # Personally I don't use it but someone else might
     content_js = generate_public_content_js("public_content")
     alpine_registry.append(AlpineData(
         slug="public-content",
@@ -441,15 +422,19 @@ def generate_public_alpine_components() -> List[AlpineData]:
     ))
 
     # 3. Public Page Group Loader Component
-    
-    tag_group = get_main_tags()
+    # This is the thing you use to get like, blog pages...    
+    tag_group = tag_service.get_main_tag()
     for tag in tag_group:
-        search_js = generate_public_search_js("public_search", default_tags=["any:read", tag])
+        alpine_data = generate_public_search_js(
+            f"{tag.removeprefix('main:')}_component",
+            default_tags=["any:read", tag]
+        )
+
         alpine_registry.append(AlpineData(
-            slug="public-search",
-            name="Public Search",
+            slug=tag.removeprefix("main:"),
+            name=f"{tag.removeprefix('main:')} List Component",
             description="Search content by tags or query string",
             category="Public",
-            data=search_js
+            data=alpine_data
         ))
     return alpine_registry

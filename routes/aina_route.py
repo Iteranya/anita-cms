@@ -5,6 +5,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
 # Data & Logic
+from services.tags import TagService
 from src.alpine_generator import generate_form_alpine_components, generate_media_alpine_components, generate_public_alpine_components
 from data.database import get_db
 from data.schemas import AlpineData
@@ -55,6 +56,7 @@ async def api_get_all_routes(db: Session = Depends(get_db)):
     API Endpoint: Provides the list of components for the Generator.
     """
     form_service = FormService(db)
+    tag_service = TagService(db)
     all_routes: List[AlpineData] = []
     
     # 1. Form Components
@@ -71,7 +73,7 @@ async def api_get_all_routes(db: Session = Depends(get_db)):
     
     # 3. Public Utils
     try:
-        all_routes.extend(generate_public_alpine_components())
+        all_routes.extend(generate_public_alpine_components(tag_service))
     except Exception as e:
         print(f"Error generating public components: {e}")
 
