@@ -145,7 +145,7 @@ Edit: Added RBAC, I need a life, Anita now has ABAC, RBAC, and that tag object t
 
 Look, I have no grand dream or anything (except maybe the death of Wordpress), but I do want this project to grow beyond what I'm capable of.
 
-~~Maybe rewrite the front end in proper javascript framework, while keeping the core simplicty intact.~~ Edit: Never, Alpine + HTMX is all I need.
+~~Maybe rewrite the front end in proper javascript framework, while keeping the core simplicty intact.~~ Edit: Never, Alpine + HTMX is all I need. Fuck NodeJS.
 
 The point is that I want to see this grow into something that really have everyone, not just make their own website, but also teach them a thing or two about website development.
 

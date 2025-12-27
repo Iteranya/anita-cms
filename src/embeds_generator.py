@@ -4,6 +4,9 @@ from typing import List
 from data.schemas import AlpineData
 from services.forms import FormService
 
+# AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
+
 # --- Helpers ---
 
 def _get_js_safe_slug(slug: str) -> str:
@@ -360,8 +363,6 @@ def generate_form_alpine_components(form_service: FormService) -> List[AlpineDat
             category="Collections",
             data=editor_js
         ))
-
-
 
 def generate_media_alpine_components(form_service: FormService) -> List[AlpineData]:
     # Assuming 'media-data' is the internal form slug for media

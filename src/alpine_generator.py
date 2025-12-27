@@ -1,11 +1,32 @@
 import json
 from typing import List
 
+from data.crud.tags import get_main_tags
 from data.schemas import AlpineData
 from services.forms import FormService
 
-# NOTE: These codes do NOT run during runtime, it is used by Aina Web Creator to create safe scripts to interact with Backend, changes here does not affect saved pages.
-# NOTE: So no, the bug you're looking for is not here.
+# NOTE: Abstract this somehow...
+# NOTE: Also main:blog is hardcoded, that's wrong, it should generate based on the existing group tags.
+# NOTE: Also why am I doing this???
+
+# AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
+# Okay, slow down, slow the fuck down...
+
+# Breathe...
+
+# Now...
+
+# ...
+
+# This is just a complex piece of module, you've made a compiler before, this is easy, just... 
+
+# Tell Python to write Javascript, simple
+
+# And fit that to the whole architecture...
+
+# ... AI can't save me now, god...
+
 # --- Helpers ---
 
 def _get_js_safe_slug(slug: str) -> str:
@@ -363,8 +384,6 @@ def generate_form_alpine_components(form_service: FormService) -> List[AlpineDat
             data=editor_js
         ))
 
-
-
 def generate_media_alpine_components(form_service: FormService) -> List[AlpineData]:
     # Assuming 'media-data' is the internal form slug for media
     all_media = form_service.get_submissions_for_form("media-data", 0, 100)
@@ -393,7 +412,6 @@ def generate_media_alpine_components(form_service: FormService) -> List[AlpineDa
 
     return alpine_registry
 
-
 def generate_public_alpine_components() -> List[AlpineData]:
     """
     Generates standard public-facing components like Search, Page Loaders, etc.
@@ -402,7 +420,7 @@ def generate_public_alpine_components() -> List[AlpineData]:
 
     # 1. Public Search Component
     # This component can be dropped into any page to enable tag-based search
-    search_js = generate_public_search_js("public_search", default_tags=["any:read", "main:blog"])
+    search_js = generate_public_search_js("public_search", default_tags=["any:read"])
     alpine_registry.append(AlpineData(
         slug="public-search",
         name="Public Search",
@@ -422,4 +440,16 @@ def generate_public_alpine_components() -> List[AlpineData]:
         data=content_js
     ))
 
+    # 3. Public Page Group Loader Component
+    
+    tag_group = get_main_tags()
+    for tag in tag_group:
+        search_js = generate_public_search_js("public_search", default_tags=["any:read", tag.name]) # tag.name because ORM
+        alpine_registry.append(AlpineData(
+            slug="public-search",
+            name="Public Search",
+            description="Search content by tags or query string",
+            category="Public",
+            data=search_js
+        ))
     return alpine_registry
