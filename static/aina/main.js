@@ -9,6 +9,7 @@ import notificationsStore from '../hikarin/alpine/notifications.js';
 import ainaShell from './alpine/ainaShell.js';
 import editorManager from './alpine/editorManager.js';
 import generatorManager from './alpine/generatorManager.js'
+import settingManager from './alpine/settingManager.js';
 
 // ==========================================
 // ACE CONFIGURATION & SERVICE
@@ -57,6 +58,7 @@ Alpine.store('ainaState', {
 Alpine.data('ainaShell', ainaShell);
 Alpine.data('editorManager', editorManager);
 Alpine.data('generatorManager', generatorManager)
+Alpine.data('settingManager',settingManager)
 
 // Make Alpine global for debugging
 window.Alpine = Alpine;

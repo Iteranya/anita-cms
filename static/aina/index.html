@@ -94,6 +94,21 @@
                 <i class="fas fa-code"></i> IDE
             </a>
 
+            <!-- SETTING TAB -->
+            <a href="/aina/setting/{{ slug }}" 
+            hx-target="#app-content" 
+            hx-swap="innerHTML"
+            hx-push-url="true"
+            @click="$store.ainaState.isSaving && ($event.preventDefault(), $store.notifications.add({ type: 'error', message: 'Wait for save.' }))"
+            class="px-6 py-1 text-xs font-bold rounded-sm transition flex items-center gap-2 cursor-pointer"
+            :class="{
+                'bg-[#37373d] text-white shadow-sm': isActive('/setting/'),
+                'text-gray-500 hover:text-gray-300': !isActive('/setting/'),
+                'opacity-50 cursor-not-allowed': $store.ainaState.isSaving
+            }">
+                <i class="fas fa-shield-alt"></i> Setting
+            </a>
+
         </nav>
 
         <!-- Right: Status/User -->

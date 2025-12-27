@@ -16,7 +16,7 @@ router = APIRouter(tags=["Aina Website Builder"])
 # TODO: Use Patch instead of Put to remove race condition in the web builder
 # --- CONFIG ---
 AINA_DIR = "static/aina"
-ALLOWED_VIEWS = {"editor", "generator"}
+ALLOWED_VIEWS = {"editor", "generator", "setting"}
 
 # --- HELPERS ---
 

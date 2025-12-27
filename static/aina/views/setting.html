@@ -1,0 +1,184 @@
+<div 
+    x-data="settingManager('{{ slug }}')" 
+    class="flex flex-col h-full bg-ide-bg text-gray-300"
+    x-init="init()"
+>
+    <!-- TOP TOOLBAR -->
+    <div class="h-14 border-b border-ide-border bg-ide-panel px-6 flex items-center justify-between shrink-0">
+        <div>
+            <h1 class="text-lg font-bold text-white tracking-tight">Project Settings</h1>
+            <p class="text-xs text-gray-500">Manage Head, CDNs, and Security Policies</p>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <!-- Save Indicator -->
+            <span class="text-xs font-mono transition-colors duration-300"
+                  :class="{
+                      'text-green-400': saveStatus === 'Saved',
+                      'text-yellow-400': saveStatus === 'Saving...',
+                      'text-red-400': saveStatus === 'Error',
+                      'text-gray-500': saveStatus === 'Ready'
+                  }"
+                  x-text="saveStatus">
+            </span>
+
+            <!-- Save Button -->
+            <button 
+                @click="saveHead"
+                :disabled="isSaving || isLoading"
+                class="bg-ide-accent hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold px-4 py-2 rounded shadow-sm transition-colors flex items-center gap-2"
+            >
+                <i class="fas fa-save" :class="isSaving ? 'fa-spin' : ''"></i>
+                <span>Save Config</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT GRID -->
+    <div class="flex-1 flex overflow-hidden relative">
+        
+        <!-- LOADING OVERLAY -->
+        <div x-show="isLoading" class="absolute inset-0 z-20 bg-ide-bg/80 flex items-center justify-center backdrop-blur-sm">
+            <div class="text-ide-accent flex flex-col items-center gap-3">
+                <i class="fas fa-circle-notch fa-spin text-3xl"></i>
+                <span class="text-xs font-mono uppercase tracking-widest">Parsing HTML...</span>
+            </div>
+        </div>
+
+        <!-- LEFT COLUMN: CONTROLS -->
+        <div class="w-1/2 overflow-y-auto p-6 space-y-8 border-r border-ide-border custom-scrollbar">
+            
+            <template x-for="group in definitions" :key="group.category">
+                <div class="bg-ide-panel border border-ide-border rounded-lg overflow-hidden animate-fade-in">
+                    
+                    <!-- Group Header -->
+                    <div class="px-4 py-3 border-b border-ide-border bg-[#2d2d2d] flex items-center gap-2">
+                        <i class="fas fa-shield-alt text-xs text-ide-accent" x-show="group.isSecurity"></i>
+                        <i class="fas fa-layer-group text-xs text-gray-500" x-show="!group.isSecurity"></i>
+                        <span class="text-sm font-bold text-gray-200" x-text="group.category"></span>
+                    </div>
+
+                    <div class="p-4 space-y-5">
+                        <template x-for="item in group.items" :key="item.id">
+                            <div>
+                                
+                                <!-- TYPE: BOOLEAN TOGGLE -->
+                                <template x-if="item.type === 'boolean'">
+                                    <div class="flex items-start justify-between group">
+                                        <div class="pr-4">
+                                            <div class="text-sm font-medium text-gray-300 group-hover:text-white transition-colors" x-text="item.label"></div>
+                                            <div class="text-[11px] text-gray-500 leading-tight mt-1" x-text="item.desc"></div>
+                                            <!-- Identifier Tag -->
+                                            <div class="mt-1">
+                                                <span class="text-[10px] font-mono bg-ide-bg px-1.5 py-0.5 rounded text-gray-600 border border-ide-border" x-text="'Matches: ' + item.identifyingPart"></span>
+                                            </div>
+                                        </div>
+
+                                        <button 
+                                            @click="toggleModule(item.id)"
+                                            class="w-11 h-6 rounded-full relative transition-colors duration-200 shrink-0 focus:outline-none focus:ring-1 focus:ring-ide-accent"
+                                            :class="isModuleActive(item.id) ? 'bg-ide-accent' : 'bg-[#3e3e42]'"
+                                        >
+                                            <div class="absolute top-1 left-1 bg-white w-4 h-4 rounded-full shadow-md transition-transform duration-200"
+                                                 :class="isModuleActive(item.id) ? 'translate-x-5' : 'translate-x-0'"></div>
+                                        </button>
+                                    </div>
+                                </template>
+
+                                <!-- TYPE: CSP MASTER SWITCH -->
+                                <template x-if="item.type === 'master_switch'">
+                                    <div class="flex items-center justify-between border-b border-ide-border pb-4 mb-2">
+                                        <div>
+                                            <div class="text-sm font-bold text-red-400" x-text="item.label"></div>
+                                            <div class="text-[11px] text-gray-500" x-text="item.desc"></div>
+                                        </div>
+                                        <button 
+                                            @click="toggleCSP()"
+                                            class="w-11 h-6 rounded-full relative transition-colors duration-200 shrink-0"
+                                            :class="cspState.enabled ? 'bg-red-600' : 'bg-[#3e3e42]'"
+                                        >
+                                            <div class="absolute top-1 left-1 bg-white w-4 h-4 rounded-full shadow-md transition-transform duration-200"
+                                                 :class="cspState.enabled ? 'translate-x-5' : 'translate-x-0'"></div>
+                                        </button>
+                                    </div>
+                                </template>
+
+                                <!-- TYPE: LIST INPUT (Depends on CSP Enabled) -->
+                                <template x-if="item.type === 'list'">
+                                    <div x-show="cspState.enabled" x-transition.opacity class="pl-4 border-l-2 border-ide-border ml-1 mt-3">
+                                        <label class="block text-xs font-semibold text-gray-400 mb-1" x-text="item.label"></label>
+                                        
+                                        <!-- Add Input -->
+                                        <div class="flex relative">
+                                            <input type="text" 
+                                                class="w-full bg-[#1e1e1e] border border-ide-border rounded px-2 py-1.5 text-xs text-gray-300 focus:border-ide-accent focus:outline-none placeholder-gray-600 font-mono"
+                                                :placeholder="item.placeholder"
+                                                @keydown.enter.prevent="addCspDomain(item.id, $event.target.value); $event.target.value = ''"
+                                                @keydown.tab.prevent="addCspDomain(item.id, $event.target.value); $event.target.value = ''"
+                                            >
+                                            <div class="absolute right-2 top-1.5 text-[10px] text-gray-600 pointer-events-none">
+                                                Press Enter
+                                            </div>
+                                        </div>
+
+                                        <!-- Domain Tags -->
+                                        <div class="flex flex-wrap gap-2 mt-2">
+                                            <!-- Empty State -->
+                                            <div x-show="cspState.rules[item.id].length === 0" class="text-[10px] text-gray-600 italic">
+                                                No custom domains (default 'self' only)
+                                            </div>
+                                            
+                                            <!-- Tags -->
+                                            <template x-for="(domain, idx) in cspState.rules[item.id]" :key="idx">
+                                                <div class="bg-[#3e3e42] text-gray-200 text-[10px] font-mono px-2 py-1 rounded flex items-center gap-2 group hover:bg-[#4e4e52] transition-colors border border-transparent hover:border-gray-500">
+                                                    <span x-text="domain"></span>
+                                                    <button @click="removeCspDomain(item.id, idx)" class="text-gray-400 hover:text-red-400">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Bottom Spacer -->
+            <div class="h-12"></div>
+        </div>
+
+        <!-- RIGHT COLUMN: PREVIEW -->
+        <div class="w-1/2 flex flex-col border-l border-ide-border bg-[#1e1e1e]">
+            <div class="h-8 bg-[#252526] border-b border-ide-border flex items-center px-4 justify-between">
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">Generated &lt;head&gt;</span>
+                <span class="text-[10px] text-gray-600 font-mono">Read-Only Preview</span>
+            </div>
+            
+            <div class="flex-1 relative group">
+                <textarea 
+                    readonly 
+                    class="w-full h-full bg-[#1e1e1e] text-[#9cdcfe] font-mono text-xs p-4 resize-none focus:outline-none leading-relaxed custom-scrollbar selection:bg-[#264f78]"
+                    x-text="previewString"
+                ></textarea>
+                
+                <!-- Copy Overlay -->
+                <button 
+                    @click="navigator.clipboard.writeText(previewString); $store.notifications.add({type:'success', message:'Copied HTML'})"
+                    class="absolute top-4 right-4 bg-ide-panel border border-ide-border text-gray-400 hover:text-white px-3 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+
+            <!-- Hint Box -->
+            <div class="p-4 bg-[#252526] border-t border-ide-border text-[11px] text-gray-400">
+                <p class="mb-1"><i class="fas fa-info-circle text-ide-accent mr-1"></i> <strong>How it works:</strong></p>
+                <p>This panel parses the existing HTML string in the database. When you click save, it completely reconstructs the <code>&lt;head&gt;</code> based on the toggles above and overwrites the raw string.</p>
+            </div>
+        </div>
+    </div>
+</div>
