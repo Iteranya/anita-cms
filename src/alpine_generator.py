@@ -7,6 +7,11 @@ from services.tags import TagService
 
 # TODO: Abstract this somehow...
 
+# These are generators to create the drag and drop component in Aina
+# These DOES NOT run in runtime
+# I repeat, THESE CODES DOES NOT RUN ON RUNTIME
+# These are just component for the drag and drop backend builder
+
 # --- Helpers ---
 
 def _get_js_safe_slug(slug: str) -> str:
@@ -405,7 +410,7 @@ def generate_public_alpine_components(tag_service: TagService) -> List[AlpineDat
         slug="public-search",
         name="Public Search",
         description="Search content by tags or query string",
-        category="Public",
+        category="Pages",
         data=search_js
     ))
 
@@ -417,7 +422,7 @@ def generate_public_alpine_components(tag_service: TagService) -> List[AlpineDat
         slug="public-content",
         name="Public Content Loader",
         description="Fetch specific page content by slug asynchronously",
-        category="Public",
+        category="Pages",
         data=content_js
     ))
 
@@ -434,7 +439,7 @@ def generate_public_alpine_components(tag_service: TagService) -> List[AlpineDat
             slug=tag.removeprefix("main:"),
             name=f"{tag.removeprefix('main:')} List Component",
             description="Search content by tags or query string",
-            category="Public",
+            category="Pages",
             data=alpine_data
         ))
     return alpine_registry
