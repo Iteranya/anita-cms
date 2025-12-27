@@ -1,98 +1,116 @@
 # file: api/asta.py
 
-from typing import Optional
+import os
+from typing import List, Optional
 from fastapi import APIRouter, Depends, Request, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse, JSONResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
 # Import services, schemas, and dependencies from our new architecture
 from data.database import get_db
-from services.asta import MarkdownService
-from data.schemas import MarkdownEditRequest
+from embeds_generator import generate_media_embeds, generate_page_embeds
+from data.schemas import EmbedData
 
 # Import the new, decoupled authentication dependencies
-from src.dependencies import optional_user, get_current_user
+from services.forms import FormService
+from services.pages import PageService
+from src.dependencies import optional_user
 
 router = APIRouter(prefix="/asta", tags=["Asta Markdown Editor"])
 
-@router.get("/", response_class=HTMLResponse)
-async def get_asta_ui(request: Request, user: Optional[dict] = Depends(optional_user)):
-    """Serves the static HTML for the Asta UI."""
-    if not user:
-        return RedirectResponse(url="/auth/login", status_code=302)
+# --- CONFIG ---
+AINA_DIR = "static/asta"
+ALLOWED_VIEWS = {"editor", "generator", "setting"}
+
+# --- HELPERS ---
+
+def render_view(file_path: str, context: dict = None):
+    """
+    Reads the HTML file and performs simple string replacement (templating).
+    Adds anti-caching headers for HTMX.
+    """
+    if not os.path.exists(file_path):
+        # Fallback or Error
+        print(f"File not found: {file_path}")
+        raise HTTPException(status_code=404, detail="View template not found")
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # Simple Templating: Replace {{ key }} with value
+    if context:
+        for key, value in context.items():
+            placeholder = f"{{{{ {key} }}}}" # {{ key }}
+            content = content.replace(placeholder, str(value))
+
+    response = HTMLResponse(content)
     
-    template_path = "static/asta/index.html"
-    try:
-        with open(template_path, "r", encoding="utf-8") as f:
-            html = f.read()
-    except FileNotFoundError:
-        raise HTTPException(status_code=500, detail="Asta UI file (index.html) not found.")
-        
-    # Inject slug from query params, same as original logic
-    slug = request.query_params.get("slug", "")
-    html = html.replace(
-        '<div id="slug-container" style="display: none;" data-slug=""></div>', 
-        f'<div id="slug-container" style="display: none;" data-slug="{slug}">{slug}</div>'
-    )
-    return HTMLResponse(content=html)
+    # Crucial for HTMX to know the history stack might change
+    response.headers["Vary"] = "HX-Request"
+    response.headers["Cache-Control"] = "no-store, max-age=0"
 
-@router.post("/edit-text")
-async def edit_text(
-    edit_request: MarkdownEditRequest, # Use Pydantic model for automatic validation
-    user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    return response
+
+
+# --- ROUTES ---
+
+@router.get("/asta/routes", response_model=List[EmbedData])
+async def api_get_all_routes(db: Session = Depends(get_db)):
+    """
+    API Endpoint: Provides the list of components for the Generator.
+    """
+    page_service = PageService(db)
+    form_service = FormService(db)
+    all_routes: List[EmbedData] = []
+    
+    # 1. Page Components
+    try:
+        all_routes.extend(generate_page_embeds(page_service))
+    except Exception as e:
+        print(f"Error generating form components: {e}")
+    
+    # 2. Media Components
+    try:
+        all_routes.extend(generate_media_embeds(form_service))
+    except Exception as e:
+        print(f"Error generating media components: {e}")
+
+    return all_routes
+
+
+@router.get("/aina/{view_type}/{slug}", response_class=HTMLResponse)
+async def aina_router(
+    view_type: str, 
+    slug: str, 
+    request: Request, 
+    user: Optional[dict] = Depends(optional_user)
 ):
     """
-    Receives a markdown editing task, processes it with the AI via the
-    MarkdownService, and returns the edited text.
+    The Main Router for the IDE.
+    Handles Shell vs Partial rendering based on HTMX headers.
     """
-    try:
-        markdown_service = MarkdownService(db)
-        edited_content = await markdown_service.edit_markdown(edit_request)
-        return JSONResponse(content={"edited_content": edited_content})
-    except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
+    # 1. Auth Check
+    if not user:
+        return RedirectResponse(url=f"/auth/login?next=/aina/{view_type}/{slug}", status_code=302)
 
-@router.post("/generate-doc")
-async def generate_doc(
-    request: Request,
-    user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Generates a complete markdown document using the MarkdownService.
-    """
-    try:
-        data = await request.json()
-        context = data.get("current_markdown", "")
-        instruction = data.get("prompt", "")
-        
-        markdown_service = MarkdownService(db)
-        result = await markdown_service.generate_markdown(context=context, instruction=instruction)
-        
-        return JSONResponse(content={"result": result})
-    except Exception as e:
-         return JSONResponse(content={"error": str(e)}, status_code=500)
+    # 2. Validate View Type
+    if view_type not in ALLOWED_VIEWS:
+        raise HTTPException(status_code=404, detail="Invalid View Type")
 
-@router.post("/generate-doc-stream")
-async def generate_doc_stream(
-    request: Request,
-    user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Streams a generated markdown document using the MarkdownService.
-    """
-    try:
-        data = await request.json()
-        context = data.get("current_markdown", "")
-        instruction = data.get("prompt", "")
+    # 3. Prepare Context for Templating
+    context = {
+        "slug": slug
+    }
 
-        markdown_service = MarkdownService(db)
-        
-        return StreamingResponse(
-            markdown_service.stream_markdown(context=context, instruction=instruction), 
-            media_type="text/plain"
-        )
-    except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
+    # --- CASE A: HTMX Request (The Partial) ---
+    # The user clicked a tab inside the shell. Return ONLY the content.
+    if request.headers.get("HX-Request"):
+        view_path = os.path.join(AINA_DIR, "views", f"{view_type}.html")
+        return render_view(view_path, context)
+
+    # --- CASE B: Browser Request (The Shell) ---
+    # The user refreshed the page or typed the URL. Return the Shell.
+    # The Shell will use the URL to highlight the correct tab, but 
+    # we need to inject the slug into the shell's header/nav as well.
+    shell_path = os.path.join(AINA_DIR, "index.html")
+    return render_view(shell_path, context)

@@ -1,15 +1,17 @@
-from typing import List, Optional, Any
-from dataclasses import dataclass
-
+from typing import List
 # Assuming these imports exist based on your environment
-from data.schemas import EmbedData, PageBase 
+from data.models import Page
+from data.schemas import EmbedData, PageBase
+from services.forms import FormService
+from services.pages import PageService 
 # from services.forms import FormService # If you need to type hint the service
 
 # --- Helpers ---
 
 def _escape_html(text: str) -> str:
     """Basic HTML escaping for attributes."""
-    if not text: return ""
+    if not text: 
+        return ""
     return text.replace('"', '&quot;').replace("'", "&#39;")
 
 # --- HTML Generators (Pages) ---
@@ -67,66 +69,55 @@ def generate_media_markdown(url: str, alt: str) -> str:
 
 # --- Registry Generators ---
 
-def generate_page_embeds(pages: List[Any]) -> List[EmbedData]:
+def generate_page_embeds(page_service:PageService) -> List[EmbedData]:
     """
     Generates embeds for Pages.
     Expects 'pages' to be a list of DB objects with .slug and .data attributes.
     """
     embed_registry: List[EmbedData] = []
-    
+    pages:List[Page] = page_service.get_pages_by_tag("any:read") # TODO: Make this filter only markdown-type page
     for item in pages:
-        slug = getattr(item, 'slug', None)
-        page_data_raw = getattr(item, 'data', {})
+        slug = item.slug
         
-        if not slug: continue
-
-        # Map raw data to PageBase
-        page = PageBase(
-            title=page_data_raw.get('title', 'Untitled'),
-            content=page_data_raw.get('content', ''), # Short desc
-            tags=page_data_raw.get('tags', []),
-            thumb=page_data_raw.get('thumb', None),
-            type=page_data_raw.get('type', 'page'),
-            author=page_data_raw.get('author', None),
-            custom=page_data_raw.get('custom', {})
-        )
+        if not slug: 
+            continue
 
         # 1. Visual Card
         embed_registry.append(EmbedData(
             slug=f"page-card-{slug}",
-            name=f"Page Card: {page.title}",
-            description=f"Visual link card for {page.title}",
+            name=f"Page Card: {item.title}",
+            description=f"Visual link card for {item.title}",
             category="Pages",
-            data=generate_card_embed_html(page, slug)
+            data=generate_card_embed_html(item, slug)
         ))
 
         # 2. Iframe
         embed_registry.append(EmbedData(
             slug=f"page-frame-{slug}",
-            name=f"Page Frame: {page.title}",
+            name=f"Page Frame: {item.title}",
             description="Embed full page via Iframe",
             category="Pages",
-            data=generate_iframe_embed_html(page, slug)
+            data=generate_iframe_embed_html(item, slug)
         ))
         
         # 3. Simple Link
         embed_registry.append(EmbedData(
             slug=f"page-link-{slug}",
-            name=f"Page Link: {page.title}",
+            name=f"Page Link: {item.title}",
             description="Simple text hyperlink",
             category="Pages",
-            data=generate_link_embed_html(page, slug)
+            data=generate_link_embed_html(item, slug)
         ))
 
     return embed_registry
 
-def generate_media_embeds(media_items: List[Any]) -> List[EmbedData]:
+def generate_media_embeds(form_service:FormService) -> List[EmbedData]:
     """
     Generates embeds for Media items (Images, etc).
     Expects 'media_items' to be a list of DB objects from the 'media-data' form.
     """
     embed_registry: List[EmbedData] = []
-
+    media_items = form_service.get_submissions_for_form("media-data")
     for media in media_items:
         # Safety checks
         if not media.data or 'slug' not in media.data:
