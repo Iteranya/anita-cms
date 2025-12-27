@@ -83,7 +83,7 @@ class PageBase(BaseModel):
     html: Optional[str] = None  # EXEMPTED / UNTOUCHED / LITERALLY THE ENTIRE SITE
     tags: Optional[List[str]] = []
     thumb: Optional[str] = None
-    type: Optional[str] = "page"
+    type: Optional[str] = "markdown"
     author: Optional[str] = None
     custom: Optional[Dict[str, Any]] = {} # Exempted These Are For Aina To Use
     
