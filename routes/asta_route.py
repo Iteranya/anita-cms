@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 # Import services, schemas, and dependencies from our new architecture
 from data.database import get_db
-from embeds_generator import generate_media_embeds, generate_page_embeds
+from src.embeds_generator import generate_media_embeds, generate_page_embeds
 from data.schemas import EmbedData
 
 # Import the new, decoupled authentication dependencies

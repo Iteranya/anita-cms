@@ -141,21 +141,25 @@ Or better yet, you can actually hack this thing!!! Create something that is more
 
 Edit: Added RBAC, I need a life, Anita now has ABAC, RBAC, and that tag object thing. Why am I doing this to myself?
 
-# An Ecosystem of Built on Sharing
+# React? Svelte?
 
-Look, I have no grand dream or anything (except maybe the death of Wordpress), but I do want this project to grow beyond what I'm capable of.
+NEVER!!!
 
-~~Maybe rewrite the front end in proper javascript framework, while keeping the core simplicty intact.~~ Edit: Never, Alpine + HTMX is all I need. Fuck NodeJS.
+Alpine + HTMX is all I need. Fuck NodeJS. ***I hate magic***
 
-The point is that I want to see this grow into something that really have everyone, not just make their own website, but also teach them a thing or two about website development.
+The only front end debugging tool I need and ever want is Right Click, View Page Source and Inspect Element. 
 
-I mean, you literally start with index.html, style.css, and script.js. And you can edit those and the CMS will show it. It's a perfect learning tool to learn the core fundamentals of Web Development.
+AS GOD INTENDED
 
-Which is cool!? RIGHT!??!!
+YOU THINK OBFUSCATION DOES SHIT TOWARDS YOUR SITE SECURITY?!?!?
+
+BOTS DON'T GIVE A SHIT ABOUT OBFUSCATION, THEY SEE CVE REPORT AND START SPAMMING THE WHOLE GODDAMN INTERNET!!!!
 
 ...
 
-I need to sleep, holy shit..
+Ahem, anyway...
+
+That is all, thank you
 
 # EDIT: THE AI REMOVAL UPDATE
 
