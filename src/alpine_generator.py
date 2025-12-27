@@ -444,7 +444,7 @@ def generate_public_alpine_components() -> List[AlpineData]:
     
     tag_group = get_main_tags()
     for tag in tag_group:
-        search_js = generate_public_search_js("public_search", default_tags=["any:read", tag.name]) # tag.name because ORM
+        search_js = generate_public_search_js("public_search", default_tags=["any:read", tag])
         alpine_registry.append(AlpineData(
             slug="public-search",
             name="Public Search",
