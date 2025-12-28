@@ -62,7 +62,7 @@ export default (slug) => ({
                     type: 'boolean', 
                     label: 'Tailwind CSS (CDN)', 
                     desc: 'Utility-first CSS framework.', 
-                    snippet: '<script src="https://cdn.tailwindcss.com"></script>',
+                    snippet: '<script src="/static/hikarin/lib/tailwind.js"></script>',
                     identifyingPart: 'cdn.tailwindcss.com' 
                 },
                 { 

@@ -5,74 +5,46 @@ export default (slug, initialData = {}) => ({
     editors: { html: null, css: null },
     
     // Internal State
-    currentHead: '', // Holds the raw HTML string for <head> from DB
-    currentScript: '', // Holds the raw JS string from DB
+    currentHead: '',
+    currentScript: '',
     
-    // Default Fallbacks (Only used if DB is empty)
     defaults: {
         html: `<div class="p-10">\n  <h1 class="text-3xl font-bold text-blue-600">New Page</h1>\n  <p>Start editing...</p>\n</div>`,
         css: `body { background-color: #f3f4f6; }`
     },
 
     async init() {
-        // 1. Initialize HTML Editor
-        this.editors.html = window.AceService.init(
-            this.$refs.htmlEditor, 
-            'html', 
-            initialData.html || this.defaults.html
-        );
-
-        // 2. Initialize CSS Editor
-        this.editors.css = window.AceService.init(
-            this.$refs.cssEditor, 
-            'css', 
-            initialData.css || this.defaults.css
-        );
-
-        // 3. Initial Load & Render
+        this.editors.html = window.AceService.init(this.$refs.htmlEditor, 'html', initialData.html || this.defaults.html);
+        this.editors.css = window.AceService.init(this.$refs.cssEditor, 'css', initialData.css || this.defaults.css);
         await this.fetchAndRender();
     },
 
-    /**
-     * CORE ACTION: Sync / Save Draft
-     * 1. Fetches latest Head/Script (Source of Truth).
-     * 2. Merges with current Editor HTML/CSS.
-     * 3. Saves to 'custom.builder'.
-     * 4. Updates Preview.
-     */
     async syncAndRender() {
         this.isProcessing = true;
         this.statusText = 'Syncing...';
-
         const userHtml = this.editors.html.getValue();
         const userCss = this.editors.css.getValue();
 
         try {
-            // 1. Fetch current state first (To get the latest Head/Script config)
             const currentData = await this.$api.aina.get(this.slug).execute();
             const builder = currentData.custom?.builder || {};
             
             this.currentHead = builder.header || '';
             this.currentScript = builder.script || '';
 
-            // 2. Prepare Payload (Merge local edits with server config)
             const payload = {
                 custom: {
                     builder: {
-                        ...builder, // Keep existing keys
+                        ...builder,
                         content: userHtml,
                         style: userCss,
-                        // Explicitly ensuring these aren't overwritten by stale local state
                         header: this.currentHead, 
                         script: this.currentScript
                     }
                 }
             };
             
-            // 3. Save (Background)
             const savePromise = this.$api.aina.updateHTML().execute(this.slug, payload);
-
-            // 4. Render Preview Immediately
             this.updatePreview(userHtml, userCss, this.currentHead, this.currentScript);
             
             await savePromise;
@@ -86,38 +58,63 @@ export default (slug, initialData = {}) => ({
     },
 
     /**
-     * CORE ACTION: Deploy
-     * Compiles the final HTML and saves it to the public `html` field.
+     * MODIFIED: Deploy Logic
+     * Grabs the *already rendered* styles from the active preview iframe.
+     * TODO: Replace tailwind scrape from iFrame with Tailwind CLI
      */
     async deployHtml() {
         this.isProcessing = true;
-        this.statusText = 'Deploying...';
+        this.statusText = 'Compiling...';
 
         try {
-            // 1. Fetch latest config (Database as Source of Truth)
+            // 1. Fetch Source of Truth for Head/Script (things not in the editor)
             const response = await this.$api.aina.get(this.slug).execute();
             const builder = response.custom?.builder || {};
             
-            // 2. Get latest values
-            const head = builder.header || '';
+            const headRaw = builder.header || '';
             const script = builder.script || '';
             const html = this.editors.html.getValue();
-            const css = this.editors.css.getValue();
 
-            // 3. Compile
-            const fullCompiledHtml = this.compilePage(html, css, head, script);
+            // 2. Extract CSS directly from the EXISTING iframe
+            const compiledCss = this.getGeneratedStylesFromIframe();
+            if (!compiledCss && headRaw.includes('tailwindcss')) {
+                console.warn("Tailwind detected but no styles found. The iframe might be reloading.");
+                this.$store.notifications.add({ 
+                    type: 'warning', 
+                    message: 'Warning: No styles detected. Is the preview loaded?' 
+                });
+            }
 
-            // 4. Update Public HTML
-            const payload = {
-                html: fullCompiledHtml
-            };
+            // 3. Clean the Head (Remove the Tailwind CDN Script)
+            const productionHead = this.stripTailwindScript(headRaw);
 
-            await this.$api.aina.updateHTML().execute(this.slug, payload);
+            // 4. Build Production HTML (Inline Compiled CSS)
+            const productionHtml = `<!DOCTYPE html>
+<html>
+    <head>
+        ${productionHead}
+        <style>
+            /* Compiled Output (Snapshot from Editor) */
+            ${compiledCss}
+        </style>
+    </head>
+    <body>
+        ${html}
+        
+        <script type="module" src="/static/hikarin/main.js"></script>
+        <script>
+        ${script}
+        </script>
+    </body>
+</html>`;
+
+            // 5. Update Public HTML
+            await this.$api.aina.updateHTML().execute(this.slug, { html: productionHtml });
             
             this.$store.notifications.add({
                 type: 'success',
                 title: 'Deployed',
-                message: 'Live page updated successfully.'
+                message: 'Site snapshot deployed successfully.'
             });
             this.statusText = 'Deployed';
 
@@ -131,23 +128,69 @@ export default (slug, initialData = {}) => ({
     },
 
     /**
-     * Fetches data from DB and updates the UI
+     * Scrapes the contents of all <style> tags inside the preview iframe.
+     * Iterates explicitly to ensure we catch Tailwind's injected styles.
      */
+    getGeneratedStylesFromIframe() {
+        const iframe = this.$refs.previewFrame;
+        // Ensure iframe is loaded and accessible
+        if (!iframe || !iframe.contentDocument || !iframe.contentDocument.body) {
+            return '';
+        }
+
+        // Get all style tags (Includes user CSS and Tailwind generated CSS)
+        const styleTags = iframe.contentDocument.querySelectorAll('style');
+        
+        // Use Array.from to map nicely, filter out empty tags if needed
+        return Array.from(styleTags)
+            .map(tag => tag.innerHTML)
+            .join('\n');
+    },
+
+    // --- Helpers for Compilation ---
+
+    /**
+     * Scrapes the contents of all <style> tags inside the preview iframe.
+     * The Tailwind CDN injects its generated CSS into a style tag here.
+     */
+    getGeneratedStylesFromIframe() {
+        const iframe = this.$refs.previewFrame;
+        if (!iframe || !iframe.contentDocument) return '';
+
+        // Get all style tags (Includes user CSS and Tailwind generated CSS)
+        const styleTags = iframe.contentDocument.querySelectorAll('style');
+        
+        let allStyles = '';
+        styleTags.forEach(tag => {
+            allStyles += tag.innerHTML + '\n';
+        });
+
+        return allStyles;
+    },
+
+    /**
+     * Removes the Tailwind CDN script tag from the header string
+     * so it doesn't run in production.
+     */
+    stripTailwindScript(headContent) {
+        // Regex looks for <script src="...tailwindcss..."></script>
+        // It handles both double and single quotes.
+        return headContent.replace(/<script\s+[^>]*src=["'][^"']*\/static\/hikarin\/lib\/tailwind\.js["'][^>]*>[\s\S]*?<\/script>/gi, '');
+    },
+
+    // --- Standard Methods ---
+
     async fetchAndRender() {
         try {
             const response = await this.$api.aina.get(this.slug).execute();
             const builder = response.custom?.builder || {};
             
-            // Update Local State
             this.currentHead = builder.header || '';
             this.currentScript = builder.script || '';
             
-            // Update Editors (Only if not already dirty? For now, we overwrite on load)
-            // Note: In a real app, you might check if editors have unsaved changes before overwriting
             if (builder.content) this.editors.html.setValue(builder.content, -1);
             if (builder.style) this.editors.css.setValue(builder.style, -1);
 
-            // Render Iframe
             this.updatePreview(
                 this.editors.html.getValue(), 
                 this.editors.css.getValue(), 
@@ -160,23 +203,18 @@ export default (slug, initialData = {}) => ({
         }
     },
 
-    /**
-     * Updates the iframe srcdoc
-     */
     updatePreview(html, css, head, script) {
         if (this.$refs.previewFrame) {
-            this.$refs.previewFrame.srcdoc = this.compilePage(html, css, head, script);
+            this.$refs.previewFrame.srcdoc = this.compilePreviewPage(html, css, head, script);
         }
     },
 
     /**
-     * The Compiler
+     * Used ONLY for the Editor Preview (keeps Tailwind CDN active)
      */
-    compilePage(htmlContent, cssContent, headContent, jsContent) {
-        // Check if Tailwind is present in the head (naive check)
-        // If Tailwind CDN is present, we use type="text/tailwindcss" to allow @apply
-        // Otherwise we use standard css
+    compilePreviewPage(htmlContent, cssContent, headContent, jsContent) {
         const isTailwind = headContent.includes('tailwindcss');
+        // If Tailwind is present, we use the special type to let the CDN process @apply
         const styleTag = isTailwind 
             ? `<style type="text/tailwindcss">${cssContent}</style>`
             : `<style>${cssContent}</style>`;
@@ -184,19 +222,12 @@ export default (slug, initialData = {}) => ({
         return `<!DOCTYPE html>
 <html>
     <head>
-        <!-- Dynamic Head from Settings -->
         ${headContent}
-        
-        <!-- Editor CSS -->
         ${styleTag}
     </head>
     <body>
         ${htmlContent}
-        
-        <!-- System Scripts -->
         <script type="module" src="/static/hikarin/main.js"></script>
-        
-        <!-- User Scripts (from Script Tab) -->
         <script>
         ${jsContent}
         </script>
@@ -204,18 +235,13 @@ export default (slug, initialData = {}) => ({
 </html>`;
     },
 
-    // --- AI Prompt Helpers ---
-
     async getPrompt() {
         const userHtml = this.editors.html.getValue();
         const userCss = this.editors.css.getValue();
-        
-        // Ensure we have latest head info for the AI context
         const response = await this.$api.aina.get(this.slug).execute();
         const head = response.custom?.builder?.header || "";
         
         return `Your task is to create a UI based on the given template.
-
 Constraints:
 1. Write HTML and CSS only.
 2. Interactivity must use Alpine.js (assume imported).
