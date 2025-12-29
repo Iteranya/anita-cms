@@ -1,7 +1,8 @@
 
-// 1. Import Alpine and the Sort plugin from their ESM builds
-import Alpine from 'https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/module.esm.js';
-import sort from 'https://cdn.jsdelivr.net/npm/@alpinejs/sort@latest/dist/module.esm.js'; // <-- Correct ESM import
+// 1. Import Alpine and plugin
+import Alpine from '/static/hikarin/lib/alpine.js';
+import sort from '/static/hikarin/lib/alpine-sort.js';
+import  collapse  from '/static/hikarin/lib/alpine-collapse.js';
 
 // 2. Import your API and Managers
 import { HikarinApi } from '../hikarin/api/client.js';
@@ -25,6 +26,7 @@ const hikarinApi = new HikarinApi();
 // 4. Register the Sort plugin with Alpine
 // This MUST be done before Alpine.start()
 Alpine.plugin(sort);
+Alpine.plugin(collapse);
 
 // 5. Register Magic & Store
 Alpine.magic('api', () => hikarinApi);

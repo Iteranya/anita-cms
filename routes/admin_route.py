@@ -13,25 +13,6 @@ router = APIRouter(tags=["Admin SPA"])
 
 ADMIN_DIR = "static/admin"
 SPA_VIEWS = {"dashboard", "page", "structure", "users", "forms", "files", "media", "config"}
-ADMIN_CSP = (
-"default-src 'self'; "
-"script-src 'self' 'unsafe-eval'"
-"https://cdn.tailwindcss.com "
-"https://unpkg.com "
-"https://cdn.jsdelivr.net; "
-"style-src 'self' 'unsafe-eval'"
-"https://fonts.googleapis.com "
-"https://cdnjs.cloudflare.com "
-"https://cdn.tailwindcss.com; "
-"font-src 'self' "
-"https://fonts.gstatic.com "
-"https://cdnjs.cloudflare.com; "
-"img-src 'self' data:; "
-"connect-src 'self'; "
-"frame-ancestors 'none'; "
-"base-uri 'self'; "
-"form-action 'self';"
-)
 
 def render_no_cache_html(file_path: str, is_partial: bool):
     """

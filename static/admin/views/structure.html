@@ -326,17 +326,41 @@
                         <template x-for="role in roles" :key="role">
                             <tr class="hover:bg-slate-50 transition-colors">
                                 <td class="p-3 font-mono font-medium text-slate-700 capitalize" x-text="role"></td>
+                                
+                                <!-- Column: Create -->
                                 <td class="p-3 text-center">
-                                    <input type="checkbox" x-if="form.permissions[role]" x-model="form.permissions[role].create" class="form-checkbox rounded text-indigo-600 focus:ring-indigo-500">
+                                    <template x-if="form.permissions[role]">
+                                        <input type="checkbox" 
+                                            x-model="form.permissions[role].create" 
+                                            class="form-checkbox rounded text-indigo-600 focus:ring-indigo-500">
+                                    </template>
                                 </td>
+
+                                <!-- Column: Read -->
                                 <td class="p-3 text-center">
-                                    <input type="checkbox" x-if="form.permissions[role]" x-model="form.permissions[role].read" class="form-checkbox rounded text-indigo-600 focus:ring-indigo-500">
+                                    <template x-if="form.permissions[role]">
+                                        <input type="checkbox" 
+                                            x-model="form.permissions[role].read" 
+                                            class="form-checkbox rounded text-indigo-600 focus:ring-indigo-500">
+                                    </template>
                                 </td>
+
+                                <!-- Column: Update -->
                                 <td class="p-3 text-center">
-                                    <input type="checkbox" x-if="form.permissions[role]" x-model="form.permissions[role].update" class="form-checkbox rounded text-indigo-600 focus:ring-indigo-500">
+                                    <template x-if="form.permissions[role]">
+                                        <input type="checkbox" 
+                                            x-model="form.permissions[role].update" 
+                                            class="form-checkbox rounded text-indigo-600 focus:ring-indigo-500">
+                                    </template>
                                 </td>
+
+                                <!-- Column: Delete -->
                                 <td class="p-3 text-center">
-                                    <input type="checkbox" x-if="form.permissions[role]" x-model="form.permissions[role].delete" class="form-checkbox rounded text-indigo-600 focus:ring-indigo-500">
+                                    <template x-if="form.permissions[role]">
+                                        <input type="checkbox" 
+                                            x-model="form.permissions[role].delete" 
+                                            class="form-checkbox rounded text-indigo-600 focus:ring-indigo-500">
+                                    </template>
                                 </td>
                             </tr>
                         </template>
