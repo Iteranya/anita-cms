@@ -55,15 +55,15 @@
         class="bg-slate-900 text-white flex flex-col flex-shrink-0 transition-all duration-300 z-20"
         :class="sidebarOpen ? 'w-64' : 'w-20'"
     >
-        <div class="h-16 flex items-center px-6 border-b border-slate-800 bg-slate-950 overflow-hidden whitespace-nowrap">
-            <img
-  src="/media/anita.jpg"
-  class="h-24 w-auto max-w-[6rem] object-contain mx-auto mb-4
-         rounded-full border-4 border-white shadow-lg"
-/>
-            <span class="font-bold text-lg tracking-wide" x-show="sidebarOpen" x-transition>Anita CMS</span>
+        <div class="h-16 flex items-center px-6 border-b border-slate-800 bg-slate-950 gap-3">
+        <img
+            src="/media/anita.webp"
+            class="h-10 w-auto object-contain"
+        />
+        <span class="font-bold text-lg tracking-wide" x-show="sidebarOpen" x-transition>
+            Anita CMS
+        </span>
         </div>
-
         <nav class="flex-1 overflow-y-auto py-4 space-y-1 px-3">
             
             <!-- Dashboard -->

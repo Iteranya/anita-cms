@@ -247,7 +247,8 @@ python main.py
 - More graceful Form Seeding (currently don't exist, actually, only page, roles and config for now)
 - Category and Tags are the same (should be separated)
 - Sandbox Aina properly (Dummy Browser, Dummy Database, Dummy Dynamic API... Goddammit, I'll add disclaimers for now)
-
+- ~~Add the cats~~
+- ~~Get rid of the cats and refactor the entire fucking database to have label (system) and tag (public) instead of tag (system) and cat(public)~~ (won't fix, weird naming convention, deal with it)
 
 Terrible Ideas That Won't Go Away
 

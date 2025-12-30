@@ -120,17 +120,12 @@ class MediaService:
                 logger.error(f"Failed to delete {filename} from Copyparty: {e}")
 
     def process_and_save_image(self, file_contents: bytes, original_filename: str) -> dict:
-        """Processes, compresses, saves locally, and uploads to Copyparty."""
         try:
             image = Image.open(io.BytesIO(file_contents))
-            # ... (Existing Image Processing Logic) ...
-            if image.mode in ('RGBA', 'P'):
-                image = image.convert('RGBA')
-                background = Image.new('RGB', image.size, (255, 255, 255))
-                background.paste(image, mask=image.split()[3])
-                image = background
-            elif image.mode != 'RGB':
-                image = image.convert('RGB')
+            
+            # 1. Determine if the image has transparency
+            # 'RGBA' is standard transparency, 'P' is palette-based (like GIFs)
+            has_alpha = image.mode in ('RGBA', 'P', 'LA') or (image.mode == 'P' and 'transparency' in image.info)
 
             original_name = os.path.splitext(original_filename)[0]
             timestamp = int(time.time())
@@ -138,19 +133,40 @@ class MediaService:
             compressed_files = []
             temp_paths_to_clean = []
 
-            # Save as JPEG
+            # --- Handle JPEG (Must flatten to RGB) ---
             jpg_path = os.path.join(self.MEDIA_DIR, f"{original_name}_{timestamp}_temp.jpg")
-            image.save(jpg_path, 'JPEG', quality=80, optimize=True)
+            if has_alpha:
+                # Create white background only for the JPEG version
+                temp_jpg_img = image.convert('RGBA')
+                bg = Image.new('RGB', temp_jpg_img.size, (255, 255, 255))
+                bg.paste(temp_jpg_img, mask=temp_jpg_img.split()[3])
+                bg.save(jpg_path, 'JPEG', quality=80, optimize=True)
+            else:
+                image.convert('RGB').save(jpg_path, 'JPEG', quality=80, optimize=True)
+            
             compressed_files.append(('jpg', jpg_path, os.path.getsize(jpg_path)))
             temp_paths_to_clean.append(jpg_path)
 
-            # Save as WebP
+            # --- Handle WebP (Preserve Alpha) ---
             webp_path = os.path.join(self.MEDIA_DIR, f"{original_name}_{timestamp}_temp.webp")
-            image.save(webp_path, 'WEBP', quality=80, method=4)
+            # If it's P/RGBA, keep it as RGBA for WebP to preserve transparency
+            webp_image = image.convert('RGBA') if has_alpha else image.convert('RGB')
+            webp_image.save(webp_path, 'WEBP', quality=80, method=4)
+            
             compressed_files.append(('webp', webp_path, os.path.getsize(webp_path)))
             temp_paths_to_clean.append(webp_path)
 
+            # --- Selection Logic ---
+            # NOTE: If preservation of transparency is critical, 
+            # you might want to always pick WebP if has_alpha is True.
+            # Currently, this picks the smallest file.
             best_format, best_path, best_size = min(compressed_files, key=lambda x: x[2])
+            
+            # OPTIONAL: Force WebP if alpha is present to ensure invisibility is kept
+            if has_alpha:
+                # Uncomment the next line if you want to prioritize transparency over file size:
+                best_format, best_path, best_size = [f for f in compressed_files if f[0] == 'webp'][0]
+                pass
             
             final_filename = f"{original_name}_{timestamp}.{best_format}"
             final_path = os.path.join(self.MEDIA_DIR, final_filename)

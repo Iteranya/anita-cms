@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anita CMS – Create Account</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Nunito', 'sans-serif'] },
+                    colors: {
+                        anita: {
+                            50:'#f0f9ff',100:'#e0f2fe',200:'#bae6fd',300:'#7dd3fc',
+                            400:'#38bdf8',500:'#0ea5e9',600:'#0284c7',
+                            700:'#0369a1',800:'#075985',900:'#0c4a6e'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script type="module" src="/static/hikarin/main.js"></script>
+
+    <style>
+        @keyframes float {
+            0% { transform: translate(0,0); }
+            33% { transform: translate(30px,-50px); }
+            66% { transform: translate(-20px,20px); }
+            100% { transform: translate(0,0); }
+        }
+        .animate-blob { animation: float 10s infinite ease-in-out; }
+        .blob {
+            position:absolute;
+            filter:blur(80px);
+            opacity:.7;
+            border-radius:50%;
+        }
+        .glass-panel {
+            background: rgba(255,255,255,.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,.6);
+            box-shadow: 0 10px 40px rgba(14,165,233,.15);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 min-h-screen flex items-center justify-center overflow-hidden font-sans">
+
+<!-- Background blobs -->
+<div class="blob bg-purple-300 w-96 h-96 top-0 right-0 translate-x-1/3 -translate-y-1/3 animate-blob"></div>
+<div class="blob bg-anita-300 w-80 h-80 bottom-0 left-0 -translate-x-1/3 translate-y-1/3 animate-blob"></div>
+<div class="blob bg-cyan-200 w-64 h-64 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-blob"></div>
+
+<div class="w-full max-w-md px-4 z-10">
+
+    <div
+        x-data="authManager"
+        x-init="mode='register'; init()"
+        class="glass-panel rounded-3xl p-8 sm:p-10 shadow-2xl relative"
+    >
+
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <img
+                src="/media/anita.webp"
+                class="h-24 w-auto max-w-[6rem] object-contain mx-auto mb-4
+                       rounded-full border-4 border-white shadow-lg"
+            >
+            <h1 class="text-3xl font-extrabold">Create Account</h1>
+            <p class="text-slate-500 mt-2">Join the Anita CMS universe</p>
+        </div>
+
+        <!-- Alert -->
+        <div
+            x-show="error || success"
+            x-transition
+            class="mb-6 p-4 rounded-xl border flex gap-3 text-sm"
+            :class="error
+                ? 'bg-red-50 border-red-100 text-red-600'
+                : 'bg-green-50 border-green-100 text-green-600'"
+        >
+            <i
+                class="fas mt-0.5"
+                :class="error ? 'fa-exclamation-circle' : 'fa-check-circle'"
+            ></i>
+            <div>
+                <span class="font-bold block"
+                      x-text="error ? 'Registration Failed' : 'Success'"></span>
+                <span x-text="error || 'Account created! Redirecting to login…'"></span>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form
+            @submit.prevent="register"
+            class="space-y-6"
+            :class="{ 'opacity-70 pointer-events-none': loading }"
+        >
+
+            <input
+                type="text"
+                placeholder="Display Name"
+                x-model="displayName"
+                class="w-full px-4 py-3 rounded-xl border font-semibold"
+            >
+
+            <input
+                type="text"
+                placeholder="Username *"
+                x-model="username"
+                required
+                class="w-full px-4 py-3 rounded-xl border font-semibold"
+            >
+
+            <input
+                type="password"
+                placeholder="Password (min 8 chars) *"
+                x-model="password"
+                minlength="8"
+                required
+                class="w-full px-4 py-3 rounded-xl border"
+            >
+
+            <input
+                type="password"
+                placeholder="Confirm Password *"
+                x-model="confirmPassword"
+                minlength="8"
+                required
+                class="w-full px-4 py-3 rounded-xl border"
+            >
+
+            <button
+                type="submit"
+                :disabled="loading"
+                class="w-full bg-gradient-to-r from-anita-600 to-anita-500
+                       text-white font-bold py-4 rounded-xl flex justify-center gap-2 text-lg"
+                :class="success && 'bg-green-500'"
+            >
+                <template x-if="!loading && !success">
+                    <span class="flex gap-2">
+                        <i class="fas fa-user-plus"></i>
+                        Create Account
+                    </span>
+                </template>
+
+                <template x-if="loading">
+                    <span class="flex gap-2">
+                        <i class="fas fa-circle-notch fa-spin"></i>
+                        Creating Account…
+                    </span>
+                </template>
+
+                <template x-if="success">
+                    <span class="flex gap-2">
+                        <i class="fas fa-check"></i>
+                        Success
+                    </span>
+                </template>
+            </button>
+        </form>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center border-t pt-6 text-sm text-slate-500">
+            Already have an account?
+            <a href="/auth/login" class="font-bold text-anita-600">Sign In</a>
+        </div>
+
+    </div>
+
+    <div class="text-center mt-8 text-xs text-slate-400 font-semibold">
+        Anita CMS • Create Account
+    </div>
+</div>
+
+</body>
+</html>

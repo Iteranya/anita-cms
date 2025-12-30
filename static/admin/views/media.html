@@ -6,10 +6,35 @@
             <h1 class="text-xl font-bold text-slate-800">Media Library</h1>
             <p class="text-xs text-slate-500">Manage images and assets</p>
         </div>
-        <button @click="openUpload()" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg font-bold text-sm flex items-center">
-            <i class="fas fa-cloud-upload-alt mr-2"></i> Upload
-        </button>
+
+        <div class="flex items-center gap-3">
+            <!-- Hidden batch input -->
+            <input
+                id="mm-batch-input"
+                type="file"
+                multiple
+                class="hidden"
+                @change="batchUpload"
+            />
+
+            <!-- Mass Upload -->
+            <button
+                @click="document.getElementById('mm-batch-input').click()"
+                class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-lg font-bold text-sm flex items-center"
+            >
+                <i class="fas fa-layer-group mr-2"></i> Mass Upload
+            </button>
+
+            <!-- Single Upload -->
+            <button
+                @click="openUpload()"
+                class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg font-bold text-sm flex items-center"
+            >
+                <i class="fas fa-cloud-upload-alt mr-2"></i> Upload
+            </button>
+        </div>
     </header>
+
 
     <!-- CONTENT -->
     <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
