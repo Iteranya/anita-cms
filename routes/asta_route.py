@@ -1,98 +1,75 @@
 # file: api/asta.py
 
-from typing import Optional
+import os
+import re  # <--- Import the regex module
+from typing import List, Optional
 from fastapi import APIRouter, Depends, Request, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse, JSONResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
-# Import services, schemas, and dependencies from our new architecture
 from data.database import get_db
-from src.asta import MarkdownService
-from data.schemas import MarkdownEditRequest
+from src.embeds_generator import generate_media_embeds, generate_page_embeds
+from data.schemas import EmbedData
+from services.forms import FormService
+from services.pages import PageService
+from src.dependencies import optional_user
 
-# Import the new, decoupled authentication dependencies
-from src.dependencies import optional_user, get_current_user
+router = APIRouter(tags=["Asta Markdown Editor"])
 
-router = APIRouter(prefix="/asta", tags=["Asta Markdown Editor"])
+# --- CONFIG ---
+ASTA_INDEX_PATH = "static/asta/index.html"
 
-@router.get("/", response_class=HTMLResponse)
-async def get_asta_ui(request: Request, user: Optional[dict] = Depends(optional_user)):
-    """Serves the static HTML for the Asta UI."""
-    if not user:
-        return RedirectResponse(url="/auth/login", status_code=302)
+# --- HELPER ---
+def render_template(file_path: str, context: dict = None):
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Editor template not found")
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    if context:
+        for key, value in context.items():
+            # --- THIS IS THE CORRECTED PART ---
+            # Create a regex pattern to find "{{ key }}", allowing for optional spaces
+            # For key="slug", this becomes: r"{{\s*slug\s*}}"
+            # \s* matches zero or more whitespace characters
+            pattern = re.compile(r"{{\s*" + re.escape(key) + r"\s*}}")
+            
+            # Use re.sub() for robust replacement
+            content = pattern.sub(str(value), content)
+            # --- END OF CORRECTION ---
+
+    return HTMLResponse(content)
+
+# --- ROUTES ---
+
+@router.get("/asta/routes", response_model=List[EmbedData])
+async def api_get_all_routes(db: Session = Depends(get_db)):
+    """API Endpoint: Provides the list of components for the Generator."""
+    page_service = PageService(db)
+    form_service = FormService(db)
+    all_routes: List[EmbedData] = []
     
-    template_path = "static/asta/index.html"
     try:
-        with open(template_path, "r", encoding="utf-8") as f:
-            html = f.read()
-    except FileNotFoundError:
-        raise HTTPException(status_code=500, detail="Asta UI file (index.html) not found.")
-        
-    # Inject slug from query params, same as original logic
-    slug = request.query_params.get("slug", "")
-    html = html.replace(
-        '<div id="slug-container" style="display: none;" data-slug=""></div>', 
-        f'<div id="slug-container" style="display: none;" data-slug="{slug}">{slug}</div>'
-    )
-    return HTMLResponse(content=html)
+        all_routes.extend(generate_page_embeds(page_service))
+        all_routes.extend(generate_media_embeds(form_service))
+    except Exception as e:
+        print(f"Error generating embeds: {e}")
 
-@router.post("/edit-text")
-async def edit_text(
-    edit_request: MarkdownEditRequest, # Use Pydantic model for automatic validation
-    user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    return all_routes
+
+
+@router.get("/asta/editor/{slug}", response_class=HTMLResponse)
+async def asta_editor_view(
+    slug: str, 
+    request: Request, 
+    user: Optional[dict] = Depends(optional_user)
 ):
     """
-    Receives a markdown editing task, processes it with the AI via the
-    MarkdownService, and returns the edited text.
+    Serves the Single Page Application for the Editor.
     """
-    try:
-        markdown_service = MarkdownService(db)
-        edited_content = await markdown_service.edit_markdown(edit_request)
-        return JSONResponse(content={"edited_content": edited_content})
-    except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
+    if not user:
+        return RedirectResponse(url=f"/auth/login?next=/asta/editor/{slug}", status_code=302)
 
-@router.post("/generate-doc")
-async def generate_doc(
-    request: Request,
-    user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Generates a complete markdown document using the MarkdownService.
-    """
-    try:
-        data = await request.json()
-        context = data.get("current_markdown", "")
-        instruction = data.get("prompt", "")
-        
-        markdown_service = MarkdownService(db)
-        result = await markdown_service.generate_markdown(context=context, instruction=instruction)
-        
-        return JSONResponse(content={"result": result})
-    except Exception as e:
-         return JSONResponse(content={"error": str(e)}, status_code=500)
-
-@router.post("/generate-doc-stream")
-async def generate_doc_stream(
-    request: Request,
-    user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Streams a generated markdown document using the MarkdownService.
-    """
-    try:
-        data = await request.json()
-        context = data.get("current_markdown", "")
-        instruction = data.get("prompt", "")
-
-        markdown_service = MarkdownService(db)
-        
-        return StreamingResponse(
-            markdown_service.stream_markdown(context=context, instruction=instruction), 
-            media_type="text/plain"
-        )
-    except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
+    # This will now correctly inject the slug
+    return render_template(ASTA_INDEX_PATH, {"slug": slug})

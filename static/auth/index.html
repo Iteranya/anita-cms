@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anita CMS – Authentication</title>
+    
+    <!-- Dependencies -->
+    <script src="/static/hikarin/lib/tailwind.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class', 
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Nunito', 'sans-serif'] },
+                    colors: {
+                        anita: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7', 900: '#0c4a6e' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        [x-cloak] { display: none !important; }
+        
+        /* Smooth Fade for HTMX Swaps */
+        #app-content { opacity: 1; transition: opacity 0.3s ease; }
+        .htmx-swapping #app-content { opacity: 0; }
+        .htmx-settling #app-content { opacity: 1; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0,0); }
+            33% { transform: translate(30px,-50px); }
+            66% { transform: translate(-20px,20px); }
+        }
+        .animate-blob { animation: float 10s infinite ease-in-out; }
+        .blob { position:absolute; filter:blur(90px); opacity:0.6; border-radius:50%; }
+        
+        /* Modern Glass Panel */
+        .glass-panel {
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.8);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+
+<body 
+    class="relative bg-slate-50 text-slate-800 font-sans h-screen w-screen overflow-hidden flex flex-col items-center justify-center"
+    x-data="authShell"
+    x-cloak
+>
+
+    <!-- Background Ambience -->
+    <div class="absolute inset-0 overflow-hidden -z-10">
+        <div class="blob animate-blob bg-anita-400 w-[600px] h-[600px] -top-32 -left-32"></div>
+        <div class="blob animate-blob bg-purple-300 w-[500px] h-[500px] -bottom-32 -right-32 animation-delay-2000"></div>
+    </div>
+
+    <!-- MAIN CARD WRAPPER -->
+    <!-- We give this a fixed min-height to prevent jumping during swaps -->
+    <main class="w-full max-w-md px-4 relative z-10">
+        
+        <div id="app-content" class="w-full transition-all duration-300">
+            <!-- 
+                Initial Loading State (Replaced by HTMX immediately).
+                We keep the glass panel class here so the shape exists before content loads.
+             -->
+            <div class="glass-panel rounded-3xl p-10 flex flex-col items-center justify-center min-h-[400px]">
+                <i class="fas fa-circle-notch fa-spin text-4xl text-anita-500 mb-4"></i>
+                <p class="text-slate-500 font-medium">Initializing...</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- NOTIFICATIONS -->
+    <div class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none">
+        <template x-for="note in $store.notifications.items" :key="note.id">
+            <div 
+                x-show="true"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-end="opacity-0 translate-x-4 scale-95"
+                class="pointer-events-auto w-80 shadow-xl rounded-xl overflow-hidden bg-white border border-slate-100 flex items-stretch ring-1 ring-black/5"
+            >
+                <div class="w-1.5"
+                     :class="{
+                        'bg-green-500': note.type === 'success',
+                        'bg-red-500': note.type === 'error',
+                        'bg-blue-500': note.type === 'info'
+                     }"></div>
+                
+                <div class="flex-1 p-4">
+                    <div class="flex justify-between items-start">
+                        <h4 class="text-sm font-bold text-slate-800" x-text="note.title"></h4>
+                        <button @click="$store.notifications.remove(note.id)" class="text-slate-400 hover:text-slate-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1" x-text="note.message"></p>
+                </div>
+            </div>
+        </template>
+    </div>
+    
+    <!-- ES Module Entry Point -->
+    <script type="module" src="/static/auth/main.js"></script>
+</body>
+</html>

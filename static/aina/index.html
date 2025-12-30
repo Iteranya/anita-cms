@@ -3,201 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML Playground | Aina's Coding Dojo</title>
+    <title>Aina IDE - {{ slug }}</title>
+    
+    <!-- Dependencies -->
+    <script src="/static/hikarin/lib/tailwind.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Styles are internal for now, move to your CSS file later -->
-    <link rel="stylesheet" href="/static/aina/style.css"> 
+    <script defer src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <!-- Tailwind Config for Dark Mode IDE -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ide: { 
+                            bg: '#1e1e1e', 
+                            panel: '#252526', 
+                            border: '#3e3e42',
+                            accent: '#007acc'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        [x-cloak] { display: none !important; }
+        /* VS Code style scrollbars */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #1e1e1e; }
+        ::-webkit-scrollbar-thumb { background: #424242; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4f4f4f; }
+        
+        .htmx-swapping { opacity: 0; transition: opacity 0.1s ease-out; }
+    </style>
 </head>
-<body>
 
-    <!-- ✨ Floating Characters (Soul Intact) -->
-    <div class="floating-characters">
-        <div class="character" style="top: 10%; left: 5%; font-size: 30px;">(>^.^)></div>
-        <div class="character" style="top: 30%; left: 80%; font-size: 40px;">(◕‿◕✿)</div>
-        <div class="character" style="top: 70%; left: 15%; font-size: 25px;">(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧</div>
-        <div class="character" style="top: 50%; left: 70%; font-size: 35px;">(づ｡◕‿‿◕｡)づ</div>
-    </div>
+<body 
+    class="bg-ide-bg text-[#cccccc] font-sans h-screen overflow-hidden flex flex-col"
+    x-data="ainaShell"
+    hx-boost="true"
+>
 
-    <!-- 🟢 Header -->
-    <header class="main-header">
-        <div class="brand">
-            <h1>Aina's Coding Dojo</h1>
-            <span class="badge">v2.0</span>
+    <!-- TOP NAVIGATION BAR (Replaces Sidebar) -->
+    <header class="h-10 bg-ide-panel border-b border-ide-border flex items-center justify-between px-4 shrink-0 select-none z-50">
+        
+        <!-- Left: Back & Title -->
+        <div class="flex items-center gap-4 w-64">
+            <a href="/admin/page" hx-boost="false" class="text-gray-400 hover:text-white transition">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="text-sm font-bold tracking-wide flex items-center gap-2">
+                <span class="text-ide-accent">Aina</span> 
+                <span class="text-gray-600">/</span> 
+                <span class="font-mono text-xs text-gray-300">{{ slug }}</span>
+            </div>
         </div>
 
-        <!-- Tabs Navigation -->
-        <div class="tabs-nav">
-            <button class="tab-btn active" data-tab="tab-generator">
-                <i class="fas fa-wand-magic-sparkles"></i> Generator
-            </button>
-            <button class="tab-btn" data-tab="tab-editor">
-                <i class="fas fa-code"></i> Editor
-            </button>
-        </div>
+        <!-- Center: TABS (The "Sidebar" Logic) -->
+        <nav class="flex bg-ide-bg rounded p-0.5 border border-ide-border">
 
-        <div class="header-actions">
-            <button class="btn" id="deploy-btn"><i class="fas fa-rocket"></i> Deploy</button>
-            <button class="btn" id="export-btn"><i class="fas fa-file-export"></i> Export</button>
-            <button class="btn" id="import-btn"><i class="fas fa-file-import"></i> Import</button>
+            <!-- GENERATOR TAB -->
+            <a href="/aina/generator/{{ slug }}" 
+            hx-target="#app-content" 
+            hx-swap="innerHTML"
+            hx-push-url="true"
+            @click="$store.ainaState.isSaving && ($event.preventDefault(), $store.notifications.add({ type: 'error', message: 'Wait for save.' }))"
+            class="px-6 py-1 text-xs font-bold rounded-sm transition flex items-center gap-2 cursor-pointer"
+            :class="{
+                'bg-[#37373d] text-white shadow-sm': isActive('/generator/'),
+                'text-gray-500 hover:text-gray-300': !isActive('/generator/'),
+                'opacity-50 cursor-not-allowed': $store.ainaState.isSaving
+            }">
+                <i class="fas fa-cubes"></i> Generator
+            </a>
+
+            <!-- EDITOR TAB -->
+            <a href="/aina/editor/{{ slug }}" 
+            hx-target="#app-content" 
+            hx-swap="innerHTML"
+            hx-push-url="true"
+            @click="$store.ainaState.isSaving && ($event.preventDefault(), $store.notifications.add({ type: 'error', message: 'Wait for save.' }))"
+            class="px-6 py-1 text-xs font-bold rounded-sm transition flex items-center gap-2 cursor-pointer"
+            :class="{
+                'bg-[#37373d] text-white shadow-sm': isActive('/editor/'),
+                'text-gray-500 hover:text-gray-300': !isActive('/editor/'),
+                'opacity-50 cursor-not-allowed': $store.ainaState.isSaving
+            }">
+                <i class="fas fa-code"></i> IDE
+            </a>
+
+            <!-- SETTING TAB -->
+            <a href="/aina/setting/{{ slug }}" 
+            hx-target="#app-content" 
+            hx-swap="innerHTML"
+            hx-push-url="true"
+            @click="$store.ainaState.isSaving && ($event.preventDefault(), $store.notifications.add({ type: 'error', message: 'Wait for save.' }))"
+            class="px-6 py-1 text-xs font-bold rounded-sm transition flex items-center gap-2 cursor-pointer"
+            :class="{
+                'bg-[#37373d] text-white shadow-sm': isActive('/setting/'),
+                'text-gray-500 hover:text-gray-300': !isActive('/setting/'),
+                'opacity-50 cursor-not-allowed': $store.ainaState.isSaving
+            }">
+                <i class="fas fa-shield-alt"></i> Setting
+            </a>
+
+        </nav>
+
+        <!-- Right: Status/User -->
+        <div class="w-64 flex justify-end">
+            <!-- Optional Actions -->
         </div>
     </header>
 
-    <!-- 🟢 Main Application Wrapper -->
-    <main class="app-wrapper">
-        
-<!-- ✨ TAB 1: Generator -->
-<div id="tab-generator" class="tab-pane active">
-    
-    <!-- Flex Wrapper -->
-    <div class="generator-layout">
-        
-        <!-- 📂 LEFT: Media Drawer -->
-        <div id="media-picker-drawer" class="media-sidebar hidden">
-            <div class="sidebar-header">
-                <h4><i class="fas fa-photo-video"></i> Media Library</h4>
-                <button id="btn-close-media" class="icon-btn close-sidebar-btn">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-            </div>
-            <div class="sidebar-content">
-                <p class="sidebar-hint">Select images for context.</p>
-                <div id="media-grid" class="media-grid-layout">
-                    <div class="loading-spinner">Loading...</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 👉 CENTER: Controls -->
-        <div class="generator-container">
-            
-            <!-- Context Panel -->
-            <div class="panel-card">
-                <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3><i class="fas fa-brain"></i> AI Context Control</h3>
-                    
-                    <!-- Toggle for Right Sidebar (Terminal Icon) -->
-                    <button id="btn-toggle-debug" class="btn secondary-btn" style="padding: 4px 10px; font-size: 0.8rem;">
-                        <i class="fas fa-terminal"></i> View Prompt
-                    </button>
-                </div>
-                
-                <div class="context-control-panel">
-                    <div class="panel-section">
-                        <label><i class="fas fa-images"></i> Visual Assets</label>
-                        <button id="btn-open-media-picker" class="btn secondary-btn full-width">
-                            <i class="fas fa-images"></i> Open Media Library
-                        </button>
-                    </div>
-                    <div class="panel-section">
-                        <label><i class="fas fa-network-wired"></i> API Routes</label>
-                        <div class="custom-select-wrapper">
-                            <select id="route-multi-select" class="modern-select">
-                                <option value="" disabled selected>+ Add Route Context</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="active-context-container" class="context-chips-area">
-                    <span class="placeholder-text"><i class="fas fa-info-circle"></i> No context selected.</span>
-                </div>
-            </div>
-
-            <!-- Prompt Area -->
-            <div class="panel-card prompt-card">
-                <div class="panel-header">
-                    <h3><i class="fas fa-pen-nib"></i> Design Prompt</h3>
-                </div>
-                <form action="#" method="post" id="generator-form">
-                    <div class="input-group">
-                        <textarea name="content" id="content" 
-                            class="modern-textarea"
-                            rows="3"
-                            placeholder="Describe the website..." 
-                            spellcheck="false"></textarea>
-                        <button type="submit" class="btn primary-btn glow" id="generate-btn">
-                            <i class="fas fa-magic"></i> <br> Generate
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div> 
-
-        <!-- 🧐 RIGHT: Prompt Inspector -->
-        <!-- Added 'hidden' class by default so it starts closed -->
-        <div id="prompt-inspector-drawer" class="prompt-sidebar hidden">
-            <div class="sidebar-header">
-                <!-- Close Button -->
-                <button id="btn-close-debug" class="icon-btn" style="margin-right: 10px;">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-                <h4>Live Prompt View</h4>
-                <div style="flex:1"></div>
-                <button id="btn-copy-prompt" class="icon-btn" title="Copy to Clipboard">
-                    <i class="fas fa-copy"></i>
-                </button>
-            </div>
-            
-            <!-- This content area will be scrollable -->
-            <div class="sidebar-content code-view">
-                <div class="prompt-debug-wrapper">
-                    <div class="debug-label">System Context</div>
-                    <pre id="debug-context-view" class="debug-pre">...</pre>
-                    
-                    <div class="debug-label">User Request</div>
-                    <pre id="debug-user-view" class="debug-pre">...</pre>
-                </div>
-            </div>
-        </div>
-
-    </div>
-</div>
-
-  
-
-            <!-- ✨ TAB 2: HTML Editor & Preview (UNCHANGED LOGIC) -->
-            <div id="tab-editor" class="tab-pane">
-                <div class="panes-container" id="panes-container">
-                    <div class="editor-pane" id="editor-pane" style="width: 50%;">
-                        <div class="pane-header">
-                            <div class="header-left"><i class="fas fa-file-code"></i> index.html</div>
-                            <div class="header-right">
-                                <button class="icon-btn" id="btn-max-editor" title="Maximize Editor"><i class="fas fa-expand"></i></button>
-                            </div>
-                        </div>
-                        <div class="pane-content">
-                            <textarea id="html-code" placeholder="<!-- Generated code appears here -->"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="gutter" id="resizer-gutter"><i class="fas fa-grip-lines-vertical"></i></div>
-
-                    <div class="preview-pane" id="preview-pane" style="width: 50%;">
-                        <div class="pane-header">
-                            <div class="header-left"><i class="fas fa-globe"></i> Live Preview</div>
-                            <div class="header-right">
-                                <button class="icon-btn" id="btn-max-preview" title="Maximize Preview"><i class="fas fa-expand"></i></button>
-                            </div>
-                        </div>
-                        <div class="pane-content">
-                            <div class="iframe-wrapper"><iframe id="preview"></iframe></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+    <!-- CONTENT AREA -->
+    <main id="app-content" class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        <!-- Initial Load Spinner -->
+        <div class="flex h-full items-center justify-center text-gray-500">
+            <i class="fas fa-circle-notch fa-spin text-3xl"></i>
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <p>Made with ♥ by Aina-chan</p>
-    </footer>
-    <!-- Hidden Logic Containers (Keep these!) -->
-    <div id="slug-container" style="display: none;" data-slug=""></div>
-    <div id="notes-sidebar" style="display:none;"></div> 
-    <button id="sidebar-toggle" style="display:none;"></button>
+    <!-- NOTIFICATION CONTAINER (Shared) -->
+    <div class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none">
+        <template x-for="note in $store.notifications.items" :key="note.id">
+            <div x-show="true" class="pointer-events-auto w-80 shadow-2xl rounded overflow-hidden border border-ide-border flex items-stretch bg-ide-panel text-white">
+                <div class="w-10 flex items-center justify-center flex-shrink-0"
+                     :class="note.type === 'error' ? 'bg-red-600' : 'bg-green-600'">
+                    <i class="fas" :class="note.type === 'error' ? 'fa-exclamation' : 'fa-check'"></i>
+                </div>
+                <div class="flex-1 p-3">
+                    <div class="text-xs font-bold" x-text="note.title || (note.type === 'error' ? 'Error' : 'Success')"></div>
+                    <div class="text-[11px] text-gray-400 mt-0.5" x-text="note.message"></div>
+                </div>
+                <button @click="$store.notifications.remove(note.id)" class="px-3 text-gray-500 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </template>
+    </div>
+    
+    <!-- Alpine Modules -->
+    
 
-    <script type="module" src="/static/aina/scripts/main.js"></script>
+    <!-- Restore View Logic (Same as Admin) -->
+    <script type="module" src="/static/aina/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const path = window.location.pathname;
+            
+            // If we are at the root shell but the URL points to a sub-view (editor or generator)
+            // Trigger HTMX to load that content immediately.
+            if(path.includes('/aina/')) {
+                console.log("Aina: Restoring view for", path);
+                const antiCacheUrl = path + "?t=" + Date.now();
+                htmx.ajax('GET', antiCacheUrl, {
+                    target: '#app-content', 
+                    swap: 'innerHTML'
+                });
+            }
+        });
+    </script>
 </body>
 </html>

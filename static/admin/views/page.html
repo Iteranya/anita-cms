@@ -66,7 +66,7 @@
                         </button>
                         
                         <!-- Open Editor (No Boost - Full Page Load) -->
-                        <a :href="`/${page.type === 'markdown' ? 'asta' : 'aina'}/?slug=${page.slug}`" 
+                        <a :href="`/${page.type === 'markdown' ? 'asta' : 'aina'}/editor/${page.slug}`" 
                            hx-boost="false"
                            class="w-8 h-8 rounded-full bg-slate-50 hover:bg-anita-50 text-slate-400 hover:text-anita-600 transition flex items-center justify-center border border-slate-200">
                             <i class="fas fa-edit text-xs"></i>

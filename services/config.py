@@ -5,7 +5,7 @@ from fastapi import HTTPException, status
 from typing import Dict, Any, Optional
 import json
 
-from data import crud, schemas
+from data import crud
 
 # Helper to load defaults from the canonical JSON file
 def _get_default_config() -> Dict[str, Any]:

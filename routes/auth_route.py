@@ -1,18 +1,13 @@
 import os
-from fastapi import APIRouter, HTTPException, status, Response, Form, Depends
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi import APIRouter, HTTPException, Request, status, Response, Form, Depends
+from fastapi.responses import HTMLResponse, RedirectResponse
 from datetime import timedelta
 from sqlalchemy.orm import Session
-
-# --- New Imports for Service-Oriented Architecture ---
-# Assumes a 'database.py' file with a get_db dependency provider
 from data.database import get_db 
 from data import schemas
 from services.auth import AuthService
 from services.users import UserService
 
-# --- Dependency Setup ---
-# These functions allow FastAPI to inject service instances into our routes.
 def get_user_service(db: Session = Depends(get_db)) -> UserService:
     return UserService(db)
 
@@ -20,7 +15,10 @@ def get_auth_service(user_service: UserService = Depends(get_user_service)) -> A
     return AuthService(user_service)
 
 # --- Router Setup ---
-router = APIRouter(prefix="/auth", tags=["Auth"])
+router = APIRouter(tags=["Auth"])
+
+AUTH_DIR = "static/auth"
+SPA_VIEWS = {"login","setup","register"}
 
 # --- HELPERS ---
 
@@ -31,17 +29,53 @@ def is_production() -> bool:
     """Simple check to determine if we should enforce HTTPS only cookies."""
     return os.getenv("APP_ENV", "dev").lower() in ["prod", "production"]
 
-# --- ROUTES ---
+def render_no_cache_html(file_path: str, is_partial: bool):
+    """
+    Reads file and adds headers to prevent caching issues between 
+    partial (HTMX) and full (Browser) requests.
+    """
+    if not os.path.exists(file_path):
+        return HTMLResponse("View not found", status_code=404)
+        
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
 
-@router.get("/login")
-async def serve_login_page(user_service: UserService = Depends(get_user_service)):
-    # If no users exist, force them to setup
+    response = HTMLResponse(content)
+    # Crucial: Tell browser the response differs based on HX-Request header
+    response.headers["Vary"] = "HX-Request" 
+    response.headers["Cache-Control"] = "no-store, max-age=0"
+    return response
+
+# --- VIEWS ---
+
+@router.get("/auth")
+async def serve_auth_page(user_service: UserService = Depends(get_user_service)):
     if not is_system_initialized(user_service):
         return RedirectResponse(url="/auth/setup", status_code=status.HTTP_302_FOUND)
     
-    return FileResponse("static/auth/login.html")
+    return RedirectResponse("/auth/login")
 
-@router.post("/login")
+@router.get("/auth/{slug}", response_class=HTMLResponse)
+async def auth_router(slug: str, request: Request):
+    
+    # Check if valid view
+    if slug not in SPA_VIEWS:
+        raise HTTPException(status_code=404, detail="Page not found")
+
+    # 1. HTMX Request -> Return just the <div x-data...> Partial
+    if request.headers.get("HX-Request"):
+        view_path = os.path.join(AUTH_DIR, "views", f"{slug}.html")
+        return render_no_cache_html(view_path, True)
+    
+    # 2. Browser Request -> Return the Shell (index.html)
+    # The Shell will then JS-fetch the content for {slug}
+    shell_path = os.path.join(AUTH_DIR, "index.html")
+    return render_no_cache_html(shell_path, False)
+
+
+# --- ROUTES ---
+
+@router.post("/auth/login")
 async def login_for_access_token(
     response: Response,
     username: str = Form(...),
@@ -88,22 +122,13 @@ async def login_for_access_token(
     
     return {"status": "success", "role": user.role}
 
-@router.post("/logout")
+@router.post("/auth/logout")
 async def logout(response: Response):
     response.delete_cookie("access_token")
     return {"status": "success"}
 
-@router.get("/setup")
-async def serve_setup_page(user_service: UserService = Depends(get_user_service)):
-    # If no users exist, force them to setup
-    if is_system_initialized(user_service):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND
-        )
-    
-    return FileResponse("static/auth/setup.html")
 
-@router.post("/setup")
+@router.post("/auth/setup")
 async def setup_admin_account(
     username: str = Form(...),
     password: str = Form(...),
@@ -149,7 +174,7 @@ async def setup_admin_account(
         "message": "Admin account created successfully. You may now login."
     }
 
-@router.get("/check-setup")
+@router.get("/auth/check-setup")
 async def check_setup(user_service: UserService = Depends(get_user_service)):
     """
     Client-side helper to check if the app needs to run the setup flow.
@@ -158,15 +183,9 @@ async def check_setup(user_service: UserService = Depends(get_user_service)):
         "initialized": is_system_initialized(user_service)
     }
 
-@router.get("/register")
-async def serve_register_page(user_service: UserService = Depends(get_user_service)):
-    # If no users exist, force them to setup
-    if not is_system_initialized(user_service):
-        return RedirectResponse(url="/auth/setup", status_code=status.HTTP_302_FOUND)
-    
-    return FileResponse("static/auth/register.html")
 
-@router.post("/register", status_code=status.HTTP_201_CREATED)
+
+@router.post("/auth/register", status_code=status.HTTP_201_CREATED)
 async def register_user(
     username: str = Form(...),
     password: str = Form(...),

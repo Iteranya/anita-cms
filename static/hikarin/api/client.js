@@ -7,6 +7,9 @@ import { PagesAPI } from './services/pages.js';
 import { UsersAPI } from './services/users.js';
 import { FileAPI } from './services/files.js';
 import { DashboardAPI } from './services/dashboard.js';
+import { PublicAPI } from './services/public.js';
+import { AinaAPI } from './services/aina.js';
+import { AstaAPI } from './services/asta.js';
 
 export class HikarinApi {
     constructor(baseUrl = '') {
@@ -19,6 +22,9 @@ export class HikarinApi {
         this.users = new UsersAPI(this);
         this.files = new FileAPI(this); 
         this.dashboard = new DashboardAPI(this);
+        this.public = new PublicAPI(this);
+        this.aina = new AinaAPI(this);
+        this.asta = new AstaAPI(this);
     }
 
     async _request(method, endpoint, options = {}) {
