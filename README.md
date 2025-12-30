@@ -255,16 +255,16 @@ python main.py
 - No Darkmode Yet (seriously?)
 - ~~Submission Sanitization not yet implemented~~ Done! (With ammonia, bleach is deprecated)
 - Pay Yozzun For Anita's Artwork
-- Fediverse/ActivityPub Implementation (I really, really want this but god this is HARD)
+- Add Event Bus and Background Handler
+- Fediverse/ActivityPub Implementation (I really, really want this but god this is HARD. Also practically impossible with SQLite, you need Postgre to handle Fediverse)
 - ~~Asta and Aina doesn't save their own prompt/configuration~~ Done! They save now!
 - ~~Remove AI Integration~~ Done! Aina is an IDE now~ 
 - ~~Implement Milkdown / Crepe to Asta~~ Done! Asta is Milkdown powered!
+- Give Asta (or Aina) a Search Engine Optimization capability 
 - Better test coverage
 - More graceful Form Seeding (currently don't exist, actually, only page, roles and config for now)
 - Category and Tags are the same (should be separated)
 - Sandbox Aina properly (Dummy Browser, Dummy Database, Dummy Dynamic API... Goddammit, I'll add disclaimers for now)
-- ~~Add the cats~~
-- ~~Get rid of the cats and refactor the entire fucking database to have label (system) and tag (public) instead of tag (system) and cat(public)~~ (won't fix, weird naming convention, deal with it)
 
 Terrible Ideas That Won't Go Away
 
@@ -278,6 +278,27 @@ Terrible Ideas That Won't Go Away
 - Discord Integration (For... I'm not sure for what... But it'll be cool)
 - Make Domain Specific Language For Themes and Plugins
 
+---
+
+## QnA
+
+Q: Is this project ready for..
+A: No
+
+Q: Can I use this for...
+A: Yes
+
+Q: What if I...
+A: No Gatekeeping
+
+Q: Do I need to be good at python???
+A: The admin page is designed so that you don't have to touch a single line of Python. Tailwind and Alpine experience will help you much, much more than Python knowledge.
+
+Q: Documentation?
+A: After I implement the Event Bridge, I'll go work on it. 
+
+Q: Anita? Hikarin? Asta? Aina?
+A: THEY'RE CUTE! FIGHT ME!!!
 ---
 
 ## License: AGPL-3.0
