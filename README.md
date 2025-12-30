@@ -116,7 +116,7 @@ Long answer: We have trust issues.
 
 - Transparent Architecture: No hidden binaries. What you see in main.py is what runs.
 - Input Sanitization: We use Ammonia (Rust-based) to scrub every input.
-- Discord-Style Permissions: We use ABAC. You can set exactly who can see or edit your cafe-menu.
+- Discord-Style Permissions: We use ABAC. You can set exactly who can see or edit your cafe-menu. This means you don't give your intern or Karen from accounting the ability to break the website's homepage.
 
 ## The Admin Page
 
@@ -164,7 +164,23 @@ Introducing, Aina Integrated Web IDE!!!
 
 #### Aina Frontend Generator
 <p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/aina-editor.png" alt="Aina Frontend IDE" width="700"></p>
-<em>Forget about coding logic and focus on UI and presentation! With Tailwind, Awesome Fonts, and AlpineJS baked in, you have everything you need to create a gorgeous site!</em>
+<em>Forget about coding logic and focus on UI and presentation! With Tailwind, Awesome Fonts, and AlpineJS baked in, you have everything you need to create a gorgeous site! (Uses Ace Editor, Realtime Tailwind Update, Compiles Tailwind For You, You're Welcome)</em>
+
+#### Asta Markdown Editor
+<p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/asta-editor.png" alt="Aina Frontend IDE" width="700"></p>
+<em>Built on top of the absolute gorgeous Milkdown Crepe, we present to you Asta Markdown Editor. A gorgeous UI to write your content with minimal fluff. You can save draft and simply publish them! And you can choose which template to use to render the post you've made!</em>
+
+---
+
+## For Poweruser: Headless CMS with Security Baked In
+
+Oh so you want to code stuff in react? You want to hydrate your page with json? You can!
+
+Anita comes with API (documentation pending) that lets you access every part of the CMS through JSON! Even the markdown contents! You can slap in any AI you like on top of Anita and it'll just work perfectly!!!
+
+Not to mention that you still get to use the Admin Panel to manage your users, your pages security, generate all the collections and the strict ACL / RBAC control for each of those collections!!
+
+(Also, hooks for plugin integration feature pending~)
 
 ---
 
@@ -203,11 +219,11 @@ git clone https://github.com/iteranya/anita-cms.git
 cd anita-cms
 
 # 2. Create virtual environment
-python -m uv venv venv
+python -m venv venv
 source venv/bin/activate  # or .\venv\Scripts\activate on Windows
 
 # 3. Install dependencies
-uv pip install -r requirements.txt
+pip install -r requirements.txt
 
 # 4. Configuration
 cp example.env .env
@@ -242,7 +258,7 @@ python main.py
 - Fediverse/ActivityPub Implementation (I really, really want this but god this is HARD)
 - ~~Asta and Aina doesn't save their own prompt/configuration~~ Done! They save now!
 - ~~Remove AI Integration~~ Done! Aina is an IDE now~ 
-- Implement Milkdown / Crepe to Asta
+- ~~Implement Milkdown / Crepe to Asta~~ Done! Asta is Milkdown powered!
 - Better test coverage
 - More graceful Form Seeding (currently don't exist, actually, only page, roles and config for now)
 - Category and Tags are the same (should be separated)
