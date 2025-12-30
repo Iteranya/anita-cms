@@ -174,7 +174,7 @@ Introducing, Aina Integrated Web IDE!!!
 
 ## For Poweruser: Headless CMS with Security Baked In
 
-Oh so you want to code stuff in react? You want to hydrate your page with json? You can!
+Oh so you want to code stuff in react? You want to hydrate your page with json?  Want to skip Aina and write your own Frontend froms scratch??? WELL OF COURSE YOU CAN!!!!
 
 Anita comes with API (documentation pending) that lets you access every part of the CMS through JSON! Even the markdown contents! You can slap in any AI you like on top of Anita and it'll just work perfectly!!!
 
