@@ -12,7 +12,7 @@ from src.embeds_generator import generate_media_embeds, generate_page_embeds
 from data.schemas import EmbedData
 from services.forms import FormService
 from services.pages import PageService
-from src.dependencies import optional_user
+from src.dependencies import get_current_user
 
 router = APIRouter(tags=["Asta Markdown Editor"])
 
@@ -43,8 +43,8 @@ def render_template(file_path: str, context: dict = None):
 
 # --- ROUTES ---
 
-@router.get("/asta/routes", response_model=List[EmbedData])
-async def api_get_all_routes(db: Session = Depends(get_db)):
+@router.get("/asta/routes", response_model=List[EmbedData], )
+async def api_get_all_routes(db: Session = Depends(get_db), user: Optional[dict] = Depends(get_current_user)):
     """API Endpoint: Provides the list of components for the Generator."""
     page_service = PageService(db)
     form_service = FormService(db)
@@ -63,7 +63,7 @@ async def api_get_all_routes(db: Session = Depends(get_db)):
 async def asta_editor_view(
     slug: str, 
     request: Request, 
-    user: Optional[dict] = Depends(optional_user)
+    user: Optional[dict] = Depends(get_current_user)
 ):
     """
     Serves the Single Page Application for the Editor.

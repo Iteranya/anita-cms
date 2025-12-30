@@ -10,7 +10,7 @@ from src.alpine_generator import generate_form_alpine_components, generate_media
 from data.database import get_db
 from data.schemas import AlpineData
 from services.forms import FormService
-from src.dependencies import optional_user
+from src.dependencies import get_current_user
 
 router = APIRouter(tags=["Aina Website Builder"])
 # TODO: Use Patch instead of Put to remove race condition in the web builder
@@ -52,7 +52,10 @@ def render_view(file_path: str, context: dict = None):
 # --- ROUTES ---
 
 @router.get("/aina/routes", response_model=List[AlpineData])
-async def api_get_all_routes(db: Session = Depends(get_db)):
+async def api_get_all_routes(
+    db: Session = Depends(get_db), 
+    user: Optional[dict] = Depends(get_current_user)
+    ):
     """
     API Endpoint: Provides the list of components for the Generator.
     """
@@ -86,7 +89,7 @@ async def aina_router(
     view_type: str, 
     slug: str, 
     request: Request, 
-    user: Optional[dict] = Depends(optional_user)
+    user: Optional[dict] = Depends(get_current_user)
 ):
     """
     The Main Router for the IDE.

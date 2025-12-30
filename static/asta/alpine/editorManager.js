@@ -23,6 +23,16 @@ export default (slug, initialData = {}) => ({
         }
 
         await this.fetchAndInitEditor();
+
+        window.addEventListener('beforeunload', (event) => {
+            // Show the confirmation dialog only if there are unsaved changes.
+            if (this.statusText === 'Unsaved changes') {
+                // Standard way to trigger the browser's confirmation dialog.
+                event.preventDefault();
+                // Included for legacy browser support.
+                event.returnValue = '';
+            }
+        });
     },
 
     /**
