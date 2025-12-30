@@ -3,140 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asta · {{ slug }}</title>
-    
-    <!-- Dependencies -->
-    <script src="/static/hikarin/lib/tailwind.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script defer src="https://unpkg.com/htmx.org@1.9.10"></script>
-    
-    <!-- Tailwind Config -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        ide: { 
-                            bg: '#191919',      /* Slightly darker for better canvas contrast */
-                            surface: '#202020', 
-                            border: '#333333',
-                            accent: '#7c3aed'   /* Purple accent for Asta */
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    }
-                }
-            }
-        }
-    </script>
+    <title>Asta - {{slug}}</title>
+    <link rel="stylesheet" href="/static/hikarin/lib/asta.css">
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        [x-cloak] { display: none !important; }
-        
-        /* Minimal Scrollbars */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #444; }
-        
-        /* Smooth HTMX Fades */
-        .htmx-swapping { opacity: 0; transition: opacity 0.2s ease-out; }
-        
-        /* Crepe/Milkdown Overrides for Full Height Canvas */
-        .milkdown .editor { 
-            padding: 4rem 2rem !important; /* Breathing room */
-            max-width: 900px !important;   /* readable line length */
-            margin: 0 auto;
+        .editor-wrapper {
+            height: 500px;
+            overflow-y: auto;
+            background: white;
+            cursor: text;
         }
+        .editor-wrapper .milkdown { height: 100%; display: flex; flex-direction: column; }
+        .editor-wrapper .milkdown .ProseMirror { flex-grow: 1; outline: none; padding-bottom: 50px; min-height: 100%; }
+        [x-cloak] { display: none !important; }
     </style>
 </head>
+<body class="bg-gray-100 p-10">
 
-<body 
-    class="bg-ide-bg text-gray-300 font-sans h-screen w-screen overflow-hidden flex flex-col relative selection:bg-ide-accent selection:text-white"
-    x-data="astaShell"
-    hx-boost="true"
->
+    <script src="/static/hikarin/lib/asta.js"></script>
 
-    <!-- FLOATING NAV (Minimalist) -->
-    <!-- Positioned absolute so it floats over the canvas without taking space -->
-    <div class="absolute top-0 left-0 w-full z-50 p-6 flex justify-between items-start pointer-events-none">
-        
-        <!-- Back & Title -->
-        <div class="pointer-events-auto flex items-center gap-3 opacity-60 hover:opacity-100 transition duration-300">
-            <a href="/admin/page" hx-boost="false" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition">
-                <i class="fas fa-arrow-left text-sm"></i>
-            </a>
-            <div class="flex flex-col">
-                <span class="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Editing</span>
-                <span class="font-mono text-sm text-gray-200">{{ slug }}</span>
-            </div>
+    <div 
+        class="max-w-6xl mx-auto" 
+        x-data="editorManager('{{slug}}')" 
+        x-init="init()"
+        x-cloak
+    >
+        <div class="flex justify-between items-center mb-4 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+            <h1 class="font-bold text-gray-800">Real Upload Test</h1>
+            <span class="text-xs font-mono px-2 py-1 bg-gray-100 rounded text-gray-600" x-text="status"></span>
         </div>
 
-        <!-- Status / Tools Area (If needed later) -->
-        <div class="pointer-events-auto">
-            <!-- Spinner handled by Alpine/HTMX usually, but here is a placeholder for saving state -->
-            <span x-show="$store.asta.isSaving" x-transition class="text-xs text-gray-500 flex items-center gap-2">
-                <i class="fas fa-circle-notch fa-spin"></i> Saving...
-            </span>
+        <div class="bg-white rounded-lg shadow-md border border-gray-300 editor-wrapper p-6"
+             @click="focusEditor($event)">
+            <div x-ref="editorRoot" class="h-full"></div>
+        </div>
+
+        <div class="mt-6 bg-slate-900 rounded-lg p-4 shadow-inner">
+            <p class="text-xs font-bold text-slate-400 border-b border-slate-700 pb-2 mb-2">OUTPUT MARKDOWN</p>
+            <pre class="text-green-400 font-mono text-xs overflow-auto h-32 whitespace-pre-wrap" x-text="content"></pre>
         </div>
     </div>
 
-    <!-- MAIN CANVAS -->
-    <!-- HTMX will swap the content here. The content should fit 100% height -->
-    <main id="app-content" class="w-full h-full relative z-0 overflow-hidden">
-        
-        <!-- Initial Loading State -->
-        <div class="flex h-full w-full items-center justify-center text-gray-600 gap-3">
-            <i class="fas fa-circle-notch fa-spin text-2xl"></i>
-            <span class="text-sm font-medium tracking-wide">LOADING ASTA CANVAS...</span>
-        </div>
-
-    </main>
-
-    <!-- TOAST NOTIFICATIONS -->
-    <div class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none">
-        <template x-for="note in $store.notifications.items" :key="note.id">
-            <div 
-                x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 translate-y-2"
-                x-transition:enter-end="opacity-100 translate-y-0"
-                x-transition:leave="transition ease-in duration-200"
-                x-transition:leave-start="opacity-100 translate-y-0"
-                x-transition:leave-end="opacity-0 translate-y-2"
-                class="pointer-events-auto backdrop-blur-md bg-ide-surface/90 border border-white/10 shadow-2xl rounded-lg p-4 w-72 flex gap-3"
-            >
-                <div :class="note.type === 'error' ? 'text-red-400' : 'text-emerald-400'">
-                    <i class="fas" :class="note.type === 'error' ? 'fa-circle-exclamation' : 'fa-check-circle'"></i>
-                </div>
-                <div class="flex-1">
-                    <p class="text-sm font-medium text-white" x-text="note.title || (note.type === 'error' ? 'Error' : 'Saved')"></p>
-                    <p class="text-xs text-gray-400 mt-1" x-text="note.message"></p>
-                </div>
-            </div>
-        </template>
-    </div>
-
-    <!-- LOGIC -->
     <script type="module" src="/static/asta/main.js"></script>
-    
-    <script>
-        // Router Logic to load the partial immediately
-        document.addEventListener('DOMContentLoaded', () => {
-            const path = window.location.pathname;
-            
-            if(path.includes('/asta/')) {
-                // Determine if we need Editor or Generator based on URL, or default to Editor
-                // Since this is a "Single Canvas", we assume the URL defines the mode.
-                const antiCacheUrl = path + "?t=" + Date.now();
-                
-                htmx.ajax('GET', antiCacheUrl, {
-                    target: '#app-content', 
-                    swap: 'innerHTML'
-                });
-            }
-        });
-    </script>
 </body>
 </html>
+

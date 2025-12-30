@@ -85,7 +85,7 @@ class PageBase(BaseModel):
     thumb: Optional[str] = None
     type: Optional[str] = "markdown"
     author: Optional[str] = None
-    custom: Optional[Dict[str, Any]] = {} # Exempted These Are For Aina To Use
+    custom: Optional[Dict[str, Any]] = {} # Exempted These Are For Aina/Asta To Use
     
     @field_validator('title', 'content', 'markdown', 'author', 'thumb', 'type', mode='before')
     @classmethod
@@ -325,28 +325,6 @@ class RoleCreate(RoleBase):
 class Role(RoleCreate):
     class Config: 
         from_attributes = True
-
-# --- AI & Tooling Schemas ---
-
-class Prompt(BaseModel):
-    system: Optional[str] = None
-    user: Optional[str] = None
-    assistant: Optional[str] = None 
-    model: Optional[str] = None
-    temp: Optional[float] = None
-    endpoint: Optional[str] = None
-    ai_key: Optional[str] = None
-    stop: Optional[List[str]] = None
-    result: Optional[str] = None
-
-class MarkdownEditRequest(BaseModel):
-    global_instruction: str
-    edit_instruction: str
-    editor_content: str
-    selected_text: str
-    @field_validator('*', mode='before')
-    @classmethod
-    def bleach_all_fields(cls, v: Any) -> Any: return sanitize_text(v)
 
 # --- Media Schemas ---
 

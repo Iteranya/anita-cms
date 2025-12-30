@@ -1,7 +1,7 @@
 [project]
 name = "anita-cms"
 version = "0.1.0"
-description = "An AI Powered CMS Built From Ground Up with Fast API, Vanilla JS, and SQlite."
+description = "A CMS Built From Ground Up with Fast API, Vanilla JS, and SQlite."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

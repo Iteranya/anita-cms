@@ -1,116 +1,75 @@
 # file: api/asta.py
 
 import os
+import re  # <--- Import the regex module
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
-# Import services, schemas, and dependencies from our new architecture
 from data.database import get_db
 from src.embeds_generator import generate_media_embeds, generate_page_embeds
 from data.schemas import EmbedData
-
-# Import the new, decoupled authentication dependencies
 from services.forms import FormService
 from services.pages import PageService
 from src.dependencies import optional_user
 
-router = APIRouter(prefix="/asta", tags=["Asta Markdown Editor"])
+router = APIRouter(tags=["Asta Markdown Editor"])
 
 # --- CONFIG ---
-AINA_DIR = "static/asta"
-ALLOWED_VIEWS = {"editor", "generator", "setting"}
+ASTA_INDEX_PATH = "static/asta/index.html"
 
-# --- HELPERS ---
-
-def render_view(file_path: str, context: dict = None):
-    """
-    Reads the HTML file and performs simple string replacement (templating).
-    Adds anti-caching headers for HTMX.
-    """
+# --- HELPER ---
+def render_template(file_path: str, context: dict = None):
     if not os.path.exists(file_path):
-        # Fallback or Error
-        print(f"File not found: {file_path}")
-        raise HTTPException(status_code=404, detail="View template not found")
+        raise HTTPException(status_code=404, detail="Editor template not found")
 
     with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
-    # Simple Templating: Replace {{ key }} with value
     if context:
         for key, value in context.items():
-            placeholder = f"{{{{ {key} }}}}" # {{ key }}
-            content = content.replace(placeholder, str(value))
+            # --- THIS IS THE CORRECTED PART ---
+            # Create a regex pattern to find "{{ key }}", allowing for optional spaces
+            # For key="slug", this becomes: r"{{\s*slug\s*}}"
+            # \s* matches zero or more whitespace characters
+            pattern = re.compile(r"{{\s*" + re.escape(key) + r"\s*}}")
+            
+            # Use re.sub() for robust replacement
+            content = pattern.sub(str(value), content)
+            # --- END OF CORRECTION ---
 
-    response = HTMLResponse(content)
-    
-    # Crucial for HTMX to know the history stack might change
-    response.headers["Vary"] = "HX-Request"
-    response.headers["Cache-Control"] = "no-store, max-age=0"
-
-    return response
-
+    return HTMLResponse(content)
 
 # --- ROUTES ---
 
 @router.get("/asta/routes", response_model=List[EmbedData])
 async def api_get_all_routes(db: Session = Depends(get_db)):
-    """
-    API Endpoint: Provides the list of components for the Generator.
-    """
+    """API Endpoint: Provides the list of components for the Generator."""
     page_service = PageService(db)
     form_service = FormService(db)
     all_routes: List[EmbedData] = []
     
-    # 1. Page Components
     try:
         all_routes.extend(generate_page_embeds(page_service))
-    except Exception as e:
-        print(f"Error generating form components: {e}")
-    
-    # 2. Media Components
-    try:
         all_routes.extend(generate_media_embeds(form_service))
     except Exception as e:
-        print(f"Error generating media components: {e}")
+        print(f"Error generating embeds: {e}")
 
     return all_routes
 
 
-@router.get("/aina/{view_type}/{slug}", response_class=HTMLResponse)
-async def aina_router(
-    view_type: str, 
+@router.get("/asta/editor/{slug}", response_class=HTMLResponse)
+async def asta_editor_view(
     slug: str, 
     request: Request, 
     user: Optional[dict] = Depends(optional_user)
 ):
     """
-    The Main Router for the IDE.
-    Handles Shell vs Partial rendering based on HTMX headers.
+    Serves the Single Page Application for the Editor.
     """
-    # 1. Auth Check
     if not user:
-        return RedirectResponse(url=f"/auth/login?next=/aina/{view_type}/{slug}", status_code=302)
+        return RedirectResponse(url=f"/auth/login?next=/asta/editor/{slug}", status_code=302)
 
-    # 2. Validate View Type
-    if view_type not in ALLOWED_VIEWS:
-        raise HTTPException(status_code=404, detail="Invalid View Type")
-
-    # 3. Prepare Context for Templating
-    context = {
-        "slug": slug
-    }
-
-    # --- CASE A: HTMX Request (The Partial) ---
-    # The user clicked a tab inside the shell. Return ONLY the content.
-    if request.headers.get("HX-Request"):
-        view_path = os.path.join(AINA_DIR, "views", f"{view_type}.html")
-        return render_view(view_path, context)
-
-    # --- CASE B: Browser Request (The Shell) ---
-    # The user refreshed the page or typed the URL. Return the Shell.
-    # The Shell will use the URL to highlight the correct tab, but 
-    # we need to inject the slug into the shell's header/nav as well.
-    shell_path = os.path.join(AINA_DIR, "index.html")
-    return render_view(shell_path, context)
+    # This will now correctly inject the slug
+    return render_template(ASTA_INDEX_PATH, {"slug": slug})

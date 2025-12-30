@@ -1,3 +1,4 @@
+//aina
 export default (slug, initialData = {}) => ({
     slug: slug,
     isProcessing: false,

@@ -25,4 +25,12 @@ export class AstaAPI {
             })
         );
     }
+
+    upload() {
+        return new ApiRequest((files) => {
+            const fd = new FormData();
+            for (const f of files) fd.append('files', f);
+            return this._client._request('POST', '/media/', { body: fd });
+        });
+    }
 }
