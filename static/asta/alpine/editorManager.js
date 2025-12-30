@@ -159,13 +159,30 @@ export default (slug, initialData = {}) => ({
             // The API expects an array of files.
             const response = await this.$api.asta.upload().execute([file]);
 
-            // Assuming the API returns an array of upload results, e.g., [{ url: '...' }]
-            if (!response || response.length === 0 || !response[0].url) {
+            // --- FIX STARTS HERE ---
+
+            // 1. Validate the main response object and the 'files' array.
+            if (!response || !response.files || response.files.length === 0) {
                 throw new Error("Invalid API response from upload endpoint.");
             }
             
-            const uploadedFileUrl = response[0].url;
+            // 2. Get the report for the first (and only) file uploaded.
+            const fileReport = response.files[0];
+
+            // 3. Check for a file-specific error returned from the backend.
+            if (fileReport.error) {
+                throw new Error(`Server failed to process file '${fileReport.original}': ${fileReport.error}`);
+            }
+
+            // 4. Ensure the URL exists in the file report.
+            if (!fileReport.url) {
+                throw new Error("API response for file is missing a URL.");
+            }
+            
+            const uploadedFileUrl = fileReport.url;
             console.log(`[Upload] ✅ SUCCESS:`, uploadedFileUrl);
+
+            // --- FIX ENDS HERE ---
             
             this.statusText = 'Unsaved changes'; // Reset status after successful upload
             
