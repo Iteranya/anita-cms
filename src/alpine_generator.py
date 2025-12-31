@@ -234,44 +234,48 @@ document.addEventListener('alpine:init', () => {{
 }});
 """
 
-def generate_public_search_js(component_name: str, default_labels: List[str]) -> str:
-    """
-    Generates the JS for a public search component with embedded Page schema.
-    """
-    # 1. Serialize labels to valid JS array string
-    labels_js = json.dumps(default_labels)
 
-    # 2. Define the PageBase structure (Mirroring your Pydantic model)
-    # We use this to provide a blueprint in the frontend code
+def generate_public_search_js(component_name: str, default_labels: List[str], label:str = "") -> str:
+    """
+    Generates the JS for a public search component with embedded Page schema
+    and dynamic link generation.
+    """
+    # 1. Serialize inputs to valid JS
+    labels_js = json.dumps(default_labels)
+    
+    # Serialize component_name to ensure safe string handling (handles quotes/escapes)
+    base_path_js = json.dumps(label)
+
+    # 2. Define the PageBase structure
     page_structure = {
+        "slug": "",
         "title": "",
-        "content": None,    # Optional[str]
-        "labels": [],       # Optional[List[str]]
+        "content": None,
+        "labels": [],
         "tags" : [],
-        "thumb": None,      # Optional[str]
-        "type": "markdown", # Default value
-        "author": None,     # Optional[str]
-        "custom": {}        # Optional[Dict]
+        "thumb": None,
+        "type": "markdown",
+        "author": None,
+        "custom": {},
+        "created": "",
+        "updated": ""
     }
     
-    # Serialize with indentation so it looks readable in the 'View Source' or DevTools
     schema_js = json.dumps(page_structure, indent=4)
 
     return f"""
 document.addEventListener('alpine:init', () => {{
     Alpine.data('{component_name}', (initialLabels = {labels_js}) => ({{
         
-        // --- Data Structure Definitions ---
-        /**
-         * The Blueprint for a Page result.
-         * Used for reference or skeleton loading.
+        // --- Configuration ---
+        /** 
+         * The base component name used for routing. 
+         * Injected from Python.
          */
-        resultSchema: {schema_js},
+        basePath: {base_path_js},
 
-        /**
-         * Array of Page objects matching resultSchema
-         * @type {{Array<typeof this.resultSchema>}}
-         */
+        // --- Data Structure Definitions ---
+        resultSchema: {schema_js},
         searchResults: [],    
         
         // --- State ---
@@ -283,9 +287,20 @@ document.addEventListener('alpine:init', () => {{
         async init() {{
             if (this.defaultLabels.length > 0) {{
                 await this.search(this.defaultLabels);
-            }}else{{
+            }} else {{
                 this.isLoading = false;
             }}
+        }},
+
+        /**
+         * Generates the link for a specific page slug.
+         * Format: /component_name/slug
+         */
+        getLink(slug) {{
+            if (!slug) return '#';
+            // We strip leading slashes from slug to ensure clean concatenation
+            const cleanSlug = slug.replace(/^\\/+/g, '');
+            return `/${{this.basePath}}/${{cleanSlug}}`;
         }},
 
         async search(explicitLabels = null) {{
@@ -303,14 +318,14 @@ document.addEventListener('alpine:init', () => {{
                         .map(t => t.trim())
                         .filter(t => t.length > 0);
                     
+                    // Merge unique
                     labels = [...new Set([...labels, ...userLabels])];
                 }}
             }}
 
             try {{
-                // Returns List[PageBase]
                 this.searchResults = await this.$api.public.search(labels).execute();
-            }} catch (e){{
+            }} catch (e) {{
                 console.error('Search failed:', e);
                 this.error = 'Unable to fetch results.';
                 this.searchResults = []; 
@@ -454,7 +469,8 @@ def generate_public_alpine_components(label_service: LabelService) -> List[Alpin
     for label in label_group:
         alpine_data = generate_public_search_js(
             f"{label.removeprefix('main:')}_component",
-            default_labels=["any:read", label]
+            default_labels=["any:read", label],
+            label = f"{label.removeprefix('main:')}"
         )
 
         alpine_registry.append(AlpineData(
