@@ -370,6 +370,7 @@ document.addEventListener('alpine:init', () => {{
 """
 
 # --- Registry Generators ---
+#TODO: Tweak the searching so that it searches tags instead of labels, labels are not meant to be searched
 
 def generate_collection_alpine_components(collection_service: CollectionService) -> List[AlpineData]:
     collections = collection_service.get_all_collections(skip=0, limit=1000)
