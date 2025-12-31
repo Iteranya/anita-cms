@@ -17,8 +17,8 @@ export default () =>  ({
             thumb: '',
             tags:[],
             type: 'markdown', // markdown | html
-            labelInput: '',
-            labels: [],
+            tagInput: '',
+            tags: [],
             customFields: [] // Array of {k, v} objects for UI
         },
 
@@ -88,14 +88,14 @@ export default () =>  ({
 
         // --- Label & Field Logic ---
 
-        addLabel() {
-            const val = this.collection.labelInput.trim();
-            if (val && !this.collection.labels.includes(val)) {
-                this.collection.labels.push(val);
+        addTag() {
+            const val = this.collection.tagInput.trim();
+            if (val && !this.collection.tags.includes(val)) {
+                this.collection.tags.push(val);
             }
-            this.collection.labelInput = '';
+            this.collection.tagInput = '';
         },
-        removeLabel(index) { this.collection.labels.splice(index, 1); },
+        removeTag(index) { this.collection.tags.splice(index, 1); },
 
         addCustomField() { this.collection.customFields.push({k: '', v: ''}); },
         removeCustomField(index) { this.collection.customFields.splice(index, 1); },

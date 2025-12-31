@@ -3,6 +3,7 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 
 from data import models, schemas
+from .tags import get_or_create_tags
 from .labels import get_or_create_labels, apply_label_filters
 
 
@@ -19,11 +20,13 @@ def search_submissions(db: Session, query_str: str) -> List[models.Submission]:
 
 def create_submission(db: Session, submission: schemas.SubmissionCreate) -> models.Submission:
     now = datetime.now(timezone.utc).isoformat()
-    sub_data = submission.model_dump(exclude={'labels'})
+    sub_data = submission.model_dump(exclude={'labels','tags'})
     label_objects = get_or_create_labels(db, submission.labels)
+    tag_objects = get_or_create_labels(db, submission.tags)
 
     db_submission = models.Submission(**sub_data, created=now, updated=now)
     db_submission.labels = label_objects
+    db_submission.tags = tag_objects
 
     db.add(db_submission)
     db.commit()
@@ -42,6 +45,11 @@ def update_submission(db: Session, submission_id: int, submission_update: schema
         new_labels = update_data.pop('labels')
         if new_labels is not None:
             db_submission.labels = get_or_create_labels(db, new_labels)
+    
+    if 'tags' in update_data:
+        new_tags = update_data.pop('tags')
+        if new_tags is not None:
+            db_submission.tags = get_or_create_tags(db, new_tags)
 
     for key, value in update_data.items():
         setattr(db_submission, key, value)

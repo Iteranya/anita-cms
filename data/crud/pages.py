@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from data import models, schemas
 from .labels import get_or_create_labels, apply_label_filters
+from .tags import get_or_create_tags
 
 def get_page(db: Session, slug: str) -> Optional[models.Page]:
     return db.query(models.Page).filter(models.Page.slug == slug).first()
@@ -51,11 +52,13 @@ def get_pages_by_author(db: Session, author: str, skip: int = 0, limit: int = 10
 
 def create_page(db: Session, page: schemas.PageCreate) -> models.Page:
     now = datetime.now(timezone.utc).isoformat()
-    page_data = page.model_dump(exclude={'labels'})
+    page_data = page.model_dump(exclude={'labels','tags'})
     label_objects = get_or_create_labels(db, page.labels)
+    tag_objects = get_or_create_tags(db, page.tags)
     
     db_page = models.Page(**page_data, created=now, updated=now)
     db_page.labels = label_objects 
+    db_page.tags = tag_objects 
     
     db.add(db_page)
     db.commit()
@@ -77,6 +80,11 @@ def update_page(db: Session, slug: str, page_update: schemas.PageUpdate) -> Opti
         new_labels_list = update_data.pop('labels')
         if new_labels_list is not None:
             db_page.labels = get_or_create_labels(db, new_labels_list)
+
+    if 'tags' in update_data:
+        new_tags_list = update_data.pop('tags')
+        if new_tags_list is not None:
+            db_page.tags = get_or_create_tags(db, new_tags_list)
 
     for key, value in update_data.items():
         setattr(db_page, key, value)

@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from data import models, schemas
 from .labels import get_or_create_labels
+from .tags import get_or_create_tags
 
 def get_collection(db: Session, slug: str) -> Optional[models.Collection]:
     return db.query(models.Collection).filter(models.Collection.slug == slug).first()
@@ -13,11 +14,12 @@ def list_collections(db: Session, skip: int = 0, limit: int = 100) -> List[model
 
 def create_collection(db: Session, collection: schemas.CollectionCreate) -> models.Collection:
     now = datetime.now(timezone.utc).isoformat()
-    collection_data = collection.model_dump(by_alias=True, exclude={'labels'})
+    collection_data = collection.model_dump(by_alias=True, exclude={'labels','tags'})
     label_objects = get_or_create_labels(db, collection.labels)
-
+    tag_objects = get_or_create_tags(db, collection.tags)
     db_collection = models.Collection(**collection_data, created=now, updated=now)
     db_collection.labels = label_objects
+    db_collection.tags = tag_objects
 
     db.add(db_collection)
     db.commit()
@@ -38,6 +40,11 @@ def update_collection(db: Session, slug: str, collection_update: schemas.Collect
         new_labels = update_data.pop('labels')
         if new_labels is not None:
             db_collection.labels = get_or_create_labels(db, new_labels)
+
+    if 'tags' in update_data:
+        new_tags = update_data.pop('tags')
+        if new_tags is not None:
+            db_collection.tags = get_or_create_tags(db, new_tags)
 
     for key, value in update_data.items():
         setattr(db_collection, key, value)
