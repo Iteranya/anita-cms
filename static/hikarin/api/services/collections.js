@@ -3,8 +3,8 @@ import { ApiRequest } from "../core.js";
 export class CollectionsAPI {
     constructor(client) { this._client = client; }
     
-    list(tag=null) { 
-        const q = tag ? `?tag=${tag}` : '';
+    list(label=null) { 
+        const q = label ? `?label=${label}` : '';
         return new ApiRequest(() => this._client._request('GET', `/forms/list${q}`)); 
     }
     get(slug) { return new ApiRequest(() => this._client._request('GET', `/forms/${slug}`)); }

@@ -76,8 +76,8 @@ export default () => ({
 
         // 3. Distribute pages
         this.pages.forEach(page => {
-            const mainTag = (page.tags || []).find(t => t.startsWith('main:'));
-            const groupName = mainTag ? mainTag.split(':')[1] : 'uncategorized';
+            const mainLabel = (page.labels || []).find(t => t.startsWith('main:'));
+            const groupName = mainLabel ? mainLabel.split(':')[1] : 'uncategorized';
 
             if (!tree[groupName]) {
                 tree[groupName] = [];
@@ -139,17 +139,17 @@ export default () => ({
         this.pageTree[newCategoryName].splice(position, 0, movedPage);
 
         // 3. PREPARE API PAYLOAD
-        // We reuse your existing logic to parse/compile tags
+        // We reuse your existing logic to parse/compile labels
         // Reset form just for calculation purposes
         this.form = { permissions: this.getEmptyPermissions() }; 
-        this.parseTagsToForm(movedPage.tags || []);
+        this.parseLabelsToForm(movedPage.labels || []);
         
         // Update the category in the form data
         this.form.category = (newCategoryName === 'uncategorized') ? '' : newCategoryName;
         
-        // Recompile tags
-        const newTags = this.compileTagsFromForm();
-        const payload = { ...movedPage, tags: newTags };
+        // Recompile labels
+        const newLabels = this.compileLabelsFromForm();
+        const payload = { ...movedPage, labels: newLabels };
 
         // 4. SEND API REQUEST
         try {
@@ -178,7 +178,7 @@ export default () => ({
         this.isCreatingGroup = false;
     },
 
-    // --- Permission & Tag Logic (Unchanged) ---
+    // --- Permission & Label Logic (Unchanged) ---
     getEmptyPermissions() {
         const perms = {};
         this.roles.forEach(role => {
@@ -187,7 +187,7 @@ export default () => ({
         return perms;
     },
 
-    parseTagsToForm(tags = []) {
+    parseLabelsToForm(labels = []) {
         this.form.category = '';
         this.form.isPublic = false;
         this.form.isHome = false;
@@ -195,14 +195,14 @@ export default () => ({
         this.form.isHead = false;
         this.form.permissions = this.getEmptyPermissions();
 
-        tags.forEach(tag => {
-            if (tag === 'any:read') { this.form.isPublic = true; return; }
-            if (tag === 'sys:home') { this.form.isHome = true; return; }
-            if (tag === 'sys:template') {this.form.isTemplate = true; return;}
-            if (tag === 'sys:head') {this.form.isHead = true; return;}
-            if (tag.startsWith('main:')) { this.form.category = tag.split(':')[1]; return; }
+        labels.forEach(label => {
+            if (label === 'any:read') { this.form.isPublic = true; return; }
+            if (label === 'sys:home') { this.form.isHome = true; return; }
+            if (label === 'sys:template') {this.form.isTemplate = true; return;}
+            if (label === 'sys:head') {this.form.isHead = true; return;}
+            if (label.startsWith('main:')) { this.form.category = label.split(':')[1]; return; }
 
-            const parts = tag.split(':');
+            const parts = label.split(':');
             if (parts.length === 2) {
                 const [role, action] = parts;
                 if (this.form.permissions[role]) this.form.permissions[role][action] = true;
@@ -210,23 +210,23 @@ export default () => ({
         });
     },
 
-    compileTagsFromForm() {
-        const tags = [];
+    compileLabelsFromForm() {
+        const labels = [];
         if (this.form.category) {
             const cleanCat = this.slugify(this.form.category);
-            tags.push(`main:${cleanCat}`);
+            labels.push(`main:${cleanCat}`);
         }
-        if (this.form.isPublic) tags.push('any:read');
-        if (this.form.isHome) tags.push('sys:home');
-        if (this.form.isTemplate) tags.push('sys:template');
-        if (this.form.isHead) tags.push('sys:head');
+        if (this.form.isPublic) labels.push('any:read');
+        if (this.form.isHome) labels.push('sys:home');
+        if (this.form.isTemplate) labels.push('sys:template');
+        if (this.form.isHead) labels.push('sys:head');
 
         Object.entries(this.form.permissions).forEach(([role, actions]) => {
             Object.entries(actions).forEach(([action, isEnabled]) => {
-                if (isEnabled) tags.push(`${role}:${action}`);
+                if (isEnabled) labels.push(`${role}:${action}`);
             });
         });
-        return tags;
+        return labels;
     },
 
     // --- Form Handling ---
@@ -252,7 +252,7 @@ export default () => ({
         this.form.type = page.type || 'markdown';
         this.form.thumb = page.thumb || '';
         this.form.content = page.content || '';
-        this.parseTagsToForm(page.tags || []);
+        this.parseLabelsToForm(page.labels || []);
         this.modalOpen = true;
     },
 
@@ -290,7 +290,7 @@ export default () => ({
         const payload = {
             title: this.form.title, slug: this.form.slug, type: this.form.type,
             thumb: this.form.thumb, content: this.form.content,
-            tags: this.compileTagsFromForm(), custom: {}
+            labels: this.compileLabelsFromForm(), custom: {}
         };
 
         try {

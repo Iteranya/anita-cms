@@ -15,7 +15,7 @@ export default () => ({
         slug: '',
         description: '',
         fields: [], // Flat array for easier Alpine editing
-        permissions: { // NEW: Replaces tags
+        permissions: { // NEW: Replaces labels
             any: { create: false, read: false, update: false, delete: false },
             roles: {} // e.g. { admin: { create: true, ... } }
         }
@@ -102,10 +102,10 @@ export default () => ({
         return perms;
     },
 
-    parsePermissionsFromTags(tags = []) {
+    parsePermissionsFromLabels(labels = []) {
         const perms = this.getEmptyPermissions();
-        tags.forEach(tag => {
-            const parts = tag.split(':');
+        labels.forEach(label => {
+            const parts = label.split(':');
             if (parts.length === 2) {
                 const [entity, action] = parts;
                 if (entity === 'any' && perms.any.hasOwnProperty(action)) {
@@ -120,12 +120,12 @@ export default () => ({
         return perms;
     },
 
-    formatPermissionsToTags() {
-        const tags = [];
+    formatPermissionsToLabels() {
+        const labels = [];
         // Handle 'any' permissions
         for (const action in this.form.permissions.any) {
             if (this.form.permissions.any[action]) {
-                tags.push(`any:${action}`);
+                labels.push(`any:${action}`);
             }
         }
         // Handle role-based permissions
@@ -133,11 +133,11 @@ export default () => ({
             for (const action in this.form.permissions.roles[role]) {
                 if (this.form.permissions.roles[role][action]) {
                     // CHANGE: Removed 'role:' prefix
-                    tags.push(`${role}:${action}`);
+                    labels.push(`${role}:${action}`);
                 }
             }
         }
-        return tags;
+        return labels;
     },
 
 
@@ -165,7 +165,7 @@ export default () => ({
             title: item.title,
             slug: item.slug,
             description: item.description || '',
-            permissions: this.parsePermissionsFromTags(item.tags), // Parse tags into UI state
+            permissions: this.parsePermissionsFromLabels(item.labels), // Parse labels into UI state
             fields: item.schema && item.schema.fields ? [...item.schema.fields] : []
         };
         this.modalOpen = true;
@@ -177,7 +177,7 @@ export default () => ({
             title: this.form.title,
             slug: this.form.slug,
             description: this.form.description,
-            tags: this.formatPermissionsToTags(), // Convert permissions UI state back to tags
+            labels: this.formatPermissionsToLabels(), // Convert permissions UI state back to labels
             schema: { fields: this.form.fields },
             custom: {}
         };

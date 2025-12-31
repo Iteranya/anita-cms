@@ -9,11 +9,11 @@ class MarkdownService:
     
     def _regex_result(self, content: str) -> str:
         """
-        Extracts content from within <edited_content> tags.
+        Extracts content from within <edited_content> labels.
         Returns the extracted content or an empty string if not found.
         """
         match = re.search(r'<edited_content>(.*?)</edited_content>', content, re.DOTALL)
         if match:
             return match.group(1).strip()
-        # Return the original content as a fallback if tags are missing
+        # Return the original content as a fallback if labels are missing
         return content 

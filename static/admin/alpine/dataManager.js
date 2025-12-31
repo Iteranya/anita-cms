@@ -56,7 +56,7 @@ export default () =>  ({
             const payload = {
                 data: this.record.data,
                 custom: this.record.custom,
-                tags: [] 
+                labels: [] 
             };
 
             try {

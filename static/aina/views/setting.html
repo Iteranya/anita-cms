@@ -68,7 +68,7 @@
                                         <div class="pr-4">
                                             <div class="text-sm font-medium text-gray-300 group-hover:text-white transition-colors" x-text="item.label"></div>
                                             <div class="text-[11px] text-gray-500 leading-tight mt-1" x-text="item.desc"></div>
-                                            <!-- Identifier Tag -->
+                                            <!-- Identifier Label -->
                                             <div class="mt-1">
                                                 <span class="text-[10px] font-mono bg-ide-bg px-1.5 py-0.5 rounded text-gray-600 border border-ide-border" x-text="'Matches: ' + item.identifyingPart"></span>
                                             </div>
@@ -121,14 +121,14 @@
                                             </div>
                                         </div>
 
-                                        <!-- Domain Tags -->
+                                        <!-- Domain Labels -->
                                         <div class="flex flex-wrap gap-2 mt-2">
                                             <!-- Empty State -->
                                             <div x-show="cspState.rules[item.id].length === 0" class="text-[10px] text-gray-600 italic">
                                                 No custom domains (default 'self' only)
                                             </div>
                                             
-                                            <!-- Tags -->
+                                            <!-- Labels -->
                                             <template x-for="(domain, idx) in cspState.rules[item.id]" :key="idx">
                                                 <div class="bg-[#3e3e42] text-gray-200 text-[10px] font-mono px-2 py-1 rounded flex items-center gap-2 group hover:bg-[#4e4e52] transition-colors border border-transparent hover:border-gray-500">
                                                     <span x-text="domain"></span>

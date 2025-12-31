@@ -2,7 +2,7 @@ from typing import List, Tuple
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from data import models
-from .tags import format_tag_for_db
+from .labels import format_label_for_db
 
 def get_total_pages_count(db: Session) -> int:
     return db.query(func.count(models.Page.id)).scalar()
@@ -16,15 +16,15 @@ def get_total_submissions_count(db: Session) -> int:
 def get_total_users_count(db: Session) -> int:
     return db.query(func.count(models.User.username)).scalar()
 
-def get_total_tags_count(db: Session) -> int:
-    return db.query(func.count(models.Tag.id)).scalar()
+def get_total_labels_count(db: Session) -> int:
+    return db.query(func.count(models.Label.id)).scalar()
 
-def get_pages_count_by_tag(db: Session, tag_name: str) -> int:
-    formatted_tag = format_tag_for_db(tag_name)
+def get_pages_count_by_label(db: Session, label_name: str) -> int:
+    formatted_label = format_label_for_db(label_name)
     return (
         db.query(func.count(models.Page.id))
-        .join(models.Page.tags)
-        .filter(models.Tag.name == formatted_tag)
+        .join(models.Page.labels)
+        .filter(models.Label.name == formatted_label)
         .scalar()
     )
 
@@ -42,14 +42,14 @@ def get_top_forms_by_submission_count(db: Session, limit: int = 5) -> List[Tuple
         .all()
     )
 
-def get_top_tags_by_page_usage(db: Session, limit: int = 10) -> List[Tuple[str, int]]:
+def get_top_labels_by_page_usage(db: Session, limit: int = 10) -> List[Tuple[str, int]]:
     return (
         db.query(
-            models.Tag.name,
+            models.Label.name,
             func.count(models.Page.id).label("use_count")
         )
-        .join(models.Page.tags)
-        .group_by(models.Tag.name)
+        .join(models.Page.labels)
+        .group_by(models.Label.name)
         .order_by(func.count(models.Page.id).desc())
         .limit(limit)
         .all()

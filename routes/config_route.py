@@ -1,7 +1,7 @@
 # file: api/admin.py
 
 from typing import Optional, List, Dict, Any
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 

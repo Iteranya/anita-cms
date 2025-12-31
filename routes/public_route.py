@@ -20,8 +20,8 @@ router = APIRouter(tags=["Public"])
 
 @router.get("/", response_class=HTMLResponse)
 def serve_home_page(page_service: PageService = Depends(get_page_service)):
-    """Serves the page tagged as 'home'."""
-    page = page_service.get_first_page_by_tags(['sys:home','any:read'])
+    """Serves the page labelged as 'home'."""
+    page = page_service.get_first_page_by_labels(['sys:home','any:read'])
     if not page:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Critical: Home page not configured, notify site owner.")
 
@@ -39,7 +39,7 @@ def serve_generic_page(slug: str, page_service: PageService = Depends(get_page_s
     This acts as a catch-all for any slug not matched by other routes.
     """
     page = page_service.get_page_by_slug(slug)
-    if not page.tags or not {'sys:head', 'any:read'}.issubset(tag.name for tag in page.tags):
+    if not page.labels or not {'sys:head', 'any:read'}.issubset(label.name for label in page.labels):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found in this category.")
     return page
 
@@ -50,28 +50,28 @@ def api_get_any_page(main:str, slug: str, page_service: PageService = Depends(ge
     """
     page = page_service.get_page_by_slug(slug)
     
-    if not page.tags or not {f'main:{main}', 'any:read'}.issubset(tag.name for tag in page.tags):
+    if not page.labels or not {f'main:{main}', 'any:read'}.issubset(label.name for label in page.labels):
          raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found in this category.")
 
     return page
 
 @router.get("/search", response_model=list[schemas.PageData])
-def api_search_pages_by_tags(
+def api_search_pages_by_labels(
     # Changed "..." to "None" to make it optional
-    tags: Optional[List[str]] = Query(None, description="List of tags to filter pages by"),
+    labels: Optional[List[str]] = Query(None, description="List of labels to filter pages by"),
     page_service: PageService = Depends(get_page_service),
 ):
     """
-    Search pages by tags.
-    All provided tags must be present on the page.
-    If no tags are provided, returns all pages with 'any:read'.
+    Search pages by labels.
+    All provided labels must be present on the page.
+    If no labels are provided, returns all pages with 'any:read'.
     """
-    # Initialize as empty list if no tags were provided to prevent crashing on .append()
-    search_tags = tags if tags is not None else []
-    print(search_tags)
-    search_tags.append("any:read")
+    # Initialize as empty list if no labels were provided to prevent crashing on .append()
+    search_labels = labels if labels is not None else []
+    print(search_labels)
+    search_labels.append("any:read")
     
-    pages = page_service.get_pages_by_tags(search_tags)
+    pages = page_service.get_pages_by_labels(search_labels)
 
     return pages
 
@@ -92,11 +92,11 @@ def serve_top_level_page(
             detail="Page not found",
         )
 
-    tag_names = {tag.name for tag in page.tags}
+    label_names = {label.name for label in page.labels}
 
-    required_tags = {"sys:head", "any:read"}
+    required_labels = {"sys:head", "any:read"}
 
-    if not required_tags.issubset(tag_names):
+    if not required_labels.issubset(label_names):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Page not found",
@@ -111,8 +111,8 @@ def serve_any_post(slug: str, main:str,page_service: PageService = Depends(get_p
     if main == slug:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found.")
     page = page_service.get_page_by_slug(slug) # Service handles 404 if slug doesn't exist
-    markdown_template = page_service.get_first_page_by_tags(['sys:template','any:read'])
-    if not page.tags or not {f'main:{main}', 'any:read'}.issubset(tag.name for tag in page.tags):
+    markdown_template = page_service.get_first_page_by_labels(['sys:template','any:read'])
+    if not page.labels or not {f'main:{main}', 'any:read'}.issubset(label.name for label in page.labels):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found.")
     if page.type == 'html':
         return HTMLResponse(content=page.html, status_code=200)

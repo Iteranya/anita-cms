@@ -6,7 +6,7 @@ from typing import Dict, Any, Optional
 import json
 
 from data import crud
-
+# DEPRECATED NO LONGER USED THIS IS USED TO DEAL WITH AI CONFIG
 # Helper to load defaults from the canonical JSON file
 def _get_default_config() -> Dict[str, Any]:
     try:

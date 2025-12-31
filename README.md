@@ -196,7 +196,7 @@ Using our strict Attribute-Based Access Control (ABAC) and Security Matrix, you 
 
 - The "Menu Updater" Role: Does the restaurant owner only need to change prices? Create a role that has UPDATE permission on the cafe-menu collection, but NO ACCESS to Pages, Settings, or Media. They won't even see the other buttons.
 - The "Blog Writer" Role: Give them access to Asta (Markdown) to write news, but block access to Aina (Builder) so they can't break the layout.
-- System Locks: Critical pages (like Home or 404) are protected by System Tags. Even if you give a client "Delete Page" permissions, Anita will refuse to delete a System-Tagged page.
+- System Locks: Critical pages (like Home or 404) are protected by System Labels. Even if you give a client "Delete Page" permissions, Anita will refuse to delete a System-Labelged page.
 - Advanced: Create your client their very own custom admin page that they can use to update their menu without touching the admin panel
 
 Result: They feel empowered to update their content. You sleep soundly knowing they can't nuke the database.
@@ -248,10 +248,10 @@ python main.py
 - ~~CSP Configuration Is Still Globally Strict (should be configurable per-page basis)~~ Done! Per-page CSP Implemented!
 - ~~HikarinJS Is Still Opt-in (should be default for all ai generated site)~~ Done! Hikarin JS is first class citizen now~
 - ~~Default Pages Still Uses script (Should use HikarinJS Instead)~~ Done! Script exists, but it uses Hikarin middleware now~
-- ~~System Page Tags Are Still Manual (Should be abstracted with switches / panel)~~ Done! Made new panel for Structure
-- ~~Form Page Tags Are Still Manual (Should be abstracted with switches / panel)~~ Done! With amazing RBAC Panel
+- ~~System Page Labels Are Still Manual (Should be abstracted with switches / panel)~~ Done! Made new panel for Structure
+- ~~Form Page Labels Are Still Manual (Should be abstracted with switches / panel)~~ Done! With amazing RBAC Panel
 - ~~User Roles and Perms Are Still Manual (Should be abstracted with switches / panel)~~ Done! Discord Flavored ABAC Panel~
-- No Tags and Sort Filter Yet
+- No Labels and Sort Filter Yet
 - No Darkmode Yet (seriously?)
 - ~~Submission Sanitization not yet implemented~~ Done! (With ammonia, bleach is deprecated)
 - Pay Yozzun For Anita's Artwork
@@ -263,7 +263,7 @@ python main.py
 - Give Asta (or Aina) a Search Engine Optimization capability 
 - Better test coverage
 - More graceful Form Seeding (currently don't exist, actually, only page, roles and config for now)
-- Category and Tags are the same (should be separated)
+- Category and Labels are the same (should be separated)
 - Sandbox Aina properly (Dummy Browser, Dummy Database, Dummy Dynamic API... Goddammit, I'll add disclaimers for now)
 
 Terrible Ideas That Won't Go Away

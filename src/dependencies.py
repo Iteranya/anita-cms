@@ -163,7 +163,7 @@ page_update = require_permission("page:update")
 page_delete = require_permission("page:delete")
 
 # THESE ARE OVERRIDES
-# By default, per form submission CRUD is managed by the Form's own tags
+# By default, per form submission CRUD is managed by the Form's own labels
 # It uses per-role basis, these ones are system level access to form's own permission
 submission_create = require_permission("submission:create")
 submission_read = require_permission("submission:read")

@@ -3,7 +3,7 @@ from typing import List
 
 from data.schemas import AlpineData
 from services.forms import FormService
-from services.tags import TagService
+from services.labels import LabelService
 
 # TODO: Abstract this somehow...
 
@@ -24,7 +24,7 @@ def _get_default_value(field_type: str) -> str:
         return 'false'
     if field_type == 'number':
         return 'null'
-    if field_type == 'json' or field_type == 'tags':
+    if field_type == 'json' or field_type == 'labels':
         return '[]'
     return "''" # Default string
 
@@ -234,60 +234,60 @@ document.addEventListener('alpine:init', () => {{
 }});
 """
 
-def generate_public_search_js(component_name: str, default_tags: List[str]) -> str:
+def generate_public_search_js(component_name: str, default_labels: List[str]) -> str:
     """
     Generates the JS for a public search component.
     """
-    # Serialize tags to valid JS array string
-    tags_js = json.dumps(default_tags)
+    # Serialize labels to valid JS array string
+    labels_js = json.dumps(default_labels)
 
     return f"""
 document.addEventListener('alpine:init', () => {{
-    // Add 'initialTags' as a parameter here ----v
-    Alpine.data('{component_name}', (initialTags = {tags_js}) => ({{
+    // Add 'initialLabels' as a parameter here ----v
+    Alpine.data('{component_name}', (initialLabels = {labels_js}) => ({{
         
         searchResults: [],    
         searchQuery: '',         
-        defaultTags: initialTags, // Initialize with the passed tags
+        defaultLabels: initialLabels, // Initialize with the passed labels
         
         isLoading: false,
         error: null,          
 
         async init() {{
             // This runs automatically ONCE. 
-            // Since defaultTags is now set via the constructor, this will work!
-            if (this.defaultTags.length > 0) {{
-                await this.search(this.defaultTags);
+            // Since defaultLabels is now set via the constructor, this will work!
+            if (this.defaultLabels.length > 0) {{
+                await this.search(this.defaultLabels);
             }}
         }},
 
-        async search(explicitTags = null) {{
+        async search(explicitLabels = null) {{
             this.isLoading = true;
             this.error = null;
             
-            // 1. Start with the default tags as the base
-            let tags = [...this.defaultTags]; 
+            // 1. Start with the default labels as the base
+            let labels = [...this.defaultLabels]; 
 
-            if (Array.isArray(explicitTags)) {{
-                // If specific tags are passed (like during init), use them
-                tags = explicitTags;
+            if (Array.isArray(explicitLabels)) {{
+                // If specific labels are passed (like during init), use them
+                labels = explicitLabels;
             }} else {{
-                // 2. If the user typed something, APPEND those tags to the defaults
+                // 2. If the user typed something, APPEND those labels to the defaults
                 const rawInput = (this.searchQuery || '').trim();
                 if (rawInput.length > 0) {{
-                    const userTags = rawInput.split(',')
+                    const userLabels = rawInput.split(',')
                         .map(t => t.trim())
                         .filter(t => t.length > 0);
                     
-                    // Merge defaults with user tags, ensuring no duplicates
-                    tags = [...new Set([...tags, ...userTags])];
+                    // Merge defaults with user labels, ensuring no duplicates
+                    labels = [...new Set([...labels, ...userLabels])];
                 }}
             }}
 
             try {{
-                // Now 'tags' contains both the hidden defaults (main:blog) 
+                // Now 'labels' contains both the hidden defaults (main:blog) 
                 // AND the user's search terms.
-                this.searchResults = await this.$api.public.search(tags).execute();
+                this.searchResults = await this.$api.public.search(labels).execute();
             }} catch (e){{
                 console.error('Search failed:', e);
                 this.error = 'Unable to fetch results.';
@@ -341,10 +341,10 @@ def generate_form_alpine_components(form_service: FormService) -> List[AlpineDat
     REQUIRED_TAGS = {"any:read", "any:create"}
 
     for form in forms:
-        tag_names = {tag.name for tag in form.tags}
+        label_names = {label.name for label in form.labels}
 
-        # Skip forms without any of the required tags
-        if not tag_names.intersection(REQUIRED_TAGS):
+        # Skip forms without any of the required labels
+        if not label_names.intersection(REQUIRED_TAGS):
             continue
 
         schema_fields = form.schema.get('fields', []) if form.schema else []
@@ -397,19 +397,19 @@ def generate_media_alpine_components(form_service: FormService) -> List[AlpineDa
 
     return alpine_registry
 
-def generate_public_alpine_components(tag_service: TagService) -> List[AlpineData]:
+def generate_public_alpine_components(label_service: LabelService) -> List[AlpineData]:
     """
     Generates standard public-facing components like Search, Page Loaders, etc.
     """
     alpine_registry: List[AlpineData] = []
 
     # 1. Public Search Component
-    # This component can be dropped into any page to enable tag-based search
-    search_js = generate_public_search_js("public_search", default_tags=["any:read"])
+    # This component can be dropped into any page to enable label-based search
+    search_js = generate_public_search_js("public_search", default_labels=["any:read"])
     alpine_registry.append(AlpineData(
         slug="public-search",
         name="Public Search",
-        description="Search content by tags or query string",
+        description="Search content by labels or query string",
         category="Pages",
         data=search_js
     ))
@@ -428,17 +428,17 @@ def generate_public_alpine_components(tag_service: TagService) -> List[AlpineDat
 
     # 3. Public Page Group Loader Component
     # This is the thing you use to get like, blog pages...    
-    tag_group = tag_service.get_main_tag()
-    for tag in tag_group:
+    label_group = label_service.get_main_label()
+    for label in label_group:
         alpine_data = generate_public_search_js(
-            f"{tag.removeprefix('main:')}_component",
-            default_tags=["any:read", tag]
+            f"{label.removeprefix('main:')}_component",
+            default_labels=["any:read", label]
         )
 
         alpine_registry.append(AlpineData(
-            slug=tag.removeprefix("main:"),
-            name=f"{tag.removeprefix('main:')} List Component",
-            description="Search content by tags or query string",
+            slug=label.removeprefix("main:"),
+            name=f"{label.removeprefix('main:')} List Component",
+            description="Search content by labels or query string",
             category="Pages",
             data=alpine_data
         ))

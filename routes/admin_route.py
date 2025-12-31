@@ -76,7 +76,7 @@ async def admin_router(
     page_service = PageService(db)
     page = page_service.get_page_by_slug(slug)
 
-    is_admin_tool = any(t.name == "sys:admin" for t in page.tags)
+    is_admin_tool = any(t.name == "sys:admin" for t in page.labels)
     if not is_admin_tool:
         raise HTTPException(status_code=404, detail="Page is not an admin tool")
 

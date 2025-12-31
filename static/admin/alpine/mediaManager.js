@@ -45,7 +45,7 @@ export default () => ({
                     slug: "media-data",
                     title: "Media Metadata",
                     description: "System metadata for uploaded files",
-                    tags: ["editor:create", "editor:read", "editor:delete", "editor:update"],
+                    labels: ["editor:create", "editor:read", "editor:delete", "editor:update"],
                     schema: {
                         fields: [
                             { name: "slug", label: "Slug", type: "text" },

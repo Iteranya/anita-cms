@@ -16,8 +16,8 @@ export default () =>  ({
             description: '',
             thumb: '',
             type: 'markdown', // markdown | html
-            tagInput: '',
-            tags: [],
+            labelInput: '',
+            labels: [],
             customFields: [] // Array of {k, v} objects for UI
         },
 
@@ -56,7 +56,7 @@ export default () =>  ({
             this.form.type = page.type || 'markdown';
             this.form.thumb = page.thumb || '';
             this.form.description = page.description || (page.custom ? page.custom.description : '') || '';
-            this.form.tags = page.tags ? [...page.tags] : [];
+            this.form.labels = page.labels ? [...page.labels] : [];
             
             // Handle Custom Fields (Convert Object -> Array)
             this.form.customFields = [];
@@ -72,7 +72,7 @@ export default () =>  ({
         resetForm() {
             this.form = {
                 title: '', slug: '', description: '', thumb: '',
-                type: 'markdown', tagInput: '', tags: [], customFields: []
+                type: 'markdown', labelInput: '', labels: [], customFields: []
             };
         },
 
@@ -84,16 +84,16 @@ export default () =>  ({
             }
         },
 
-        // --- Tag & Field Logic ---
+        // --- Label & Field Logic ---
 
-        addTag() {
-            const val = this.form.tagInput.trim();
-            if (val && !this.form.tags.includes(val)) {
-                this.form.tags.push(val);
+        addLabel() {
+            const val = this.form.labelInput.trim();
+            if (val && !this.form.labels.includes(val)) {
+                this.form.labels.push(val);
             }
-            this.form.tagInput = '';
+            this.form.labelInput = '';
         },
-        removeTag(index) { this.form.tags.splice(index, 1); },
+        removeLabel(index) { this.form.labels.splice(index, 1); },
 
         addCustomField() { this.form.customFields.push({k: '', v: ''}); },
         removeCustomField(index) { this.form.customFields.splice(index, 1); },
@@ -126,7 +126,7 @@ async save() {
                 slug: this.form.slug,
                 type: this.form.type,
                 thumb: this.form.thumb,
-                tags: this.form.tags,
+                labels: this.form.labels,
                 custom: customObj
             };
 

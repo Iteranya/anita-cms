@@ -7,11 +7,11 @@ export default () => ({
         title: '', 
         slug: '', 
         description: '', 
-        tags: [], 
+        labels: [], 
         schemaString: '{\n  "type": "object",\n  "properties": {\n    "field_name": {"type": "string"}\n  }\n}'
     },
     targetSlug: '',
-    tagInput: '',
+    labelInput: '',
 
     async init() { await this.refresh(); },
     
@@ -21,7 +21,7 @@ export default () => ({
     },
 
     openCreate() {
-        this.def = { title: '', slug: '', description: '', tags: [], schemaString: '{\n  "type": "object",\n  "properties": {\n    "field_name": {"type": "string"}\n  }\n}' };
+        this.def = { title: '', slug: '', description: '', labels: [], schemaString: '{\n  "type": "object",\n  "properties": {\n    "field_name": {"type": "string"}\n  }\n}' };
         this.mode = 'create';
         this.modalOpen = true;
     },
@@ -32,7 +32,7 @@ export default () => ({
         this.def.title = item.title;
         this.def.slug = item.slug;
         this.def.description = item.description;
-        this.def.tags = item.tags ? [...item.tags] : [];
+        this.def.labels = item.labels ? [...item.labels] : [];
         this.def.schemaString = JSON.stringify(item.schema || {}, null, 2);
         this.modalOpen = true;
     },
@@ -41,8 +41,8 @@ export default () => ({
         if(this.mode === 'create') this.def.slug = this.def.title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
     },
 
-    addTag() { if(this.tagInput) this.def.tags.push(this.tagInput); this.tagInput = ''; },
-    removeTag(i) { this.def.tags.splice(i, 1); },
+    addLabel() { if(this.labelInput) this.def.labels.push(this.labelInput); this.labelInput = ''; },
+    removeLabel(i) { this.def.labels.splice(i, 1); },
 
     async save() {
         let parsedSchema;
@@ -52,7 +52,7 @@ export default () => ({
             title: this.def.title,
             slug: this.def.slug,
             description: this.def.description,
-            tags: this.def.tags,
+            labels: this.def.labels,
             schema: parsedSchema,
             custom: {}
         };

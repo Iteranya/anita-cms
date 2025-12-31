@@ -47,7 +47,7 @@ export default () =>  ({
         perms: [
             { key: 'media:create', label: 'Upload Media', desc: 'Allows uploading new media files into the media library.' },
             { key: 'media:read', label: 'View Media Library', desc: 'Allows browsing and viewing all items in the media library.' },
-            { key: 'media:update', label: 'Edit Media Metadata', desc: 'Allows editing media details such as titles, descriptions, and tags.' },
+            { key: 'media:update', label: 'Edit Media Metadata', desc: 'Allows editing media details such as titles, descriptions, and labels.' },
             { key: 'media:delete', label: 'Delete Media', desc: 'Allows permanently deleting media files from the library.' }
         ]
     },

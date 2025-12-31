@@ -1,13 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, status
-from typing import Any, Dict, List, Optional
-from pydantic import BaseModel
+from typing import List, Optional
 from sqlalchemy.orm import Session
 from data.database import get_db
 from data import schemas 
 from services.forms import FormService
 from services.users import UserService
 from src.dependencies import get_current_user, optional_user
-from data.schemas import AlpineData, CurrentUser, SubmissionBase
+from data.schemas import CurrentUser, SubmissionBase
 
 # --- Dependency Setup ---
 def get_form_service(db: Session = Depends(get_db)) -> FormService:
@@ -48,14 +47,14 @@ def create_form(
 
 @router.get("/list", response_model=List[schemas.Form])
 def list_forms(
-    tag: Optional[str] = None,
+    label: Optional[str] = None,
     skip: int = 0,
     limit: int = 100,
     form_service: FormService = Depends(get_form_service),
     user_service: UserService = Depends(get_user_service),  
     user: CurrentUser = Depends(get_current_user),
 ):
-    """List all available forms, optionally filtered by tag."""
+    """List all available forms, optionally filtered by label."""
     user_permissions = user_service.get_user_permissions(user.username)
     can_read_form = "*" in user_permissions or "form:read" in user_permissions
     if not can_read_form:
@@ -66,11 +65,11 @@ def list_forms(
     
     all_forms = form_service.get_all_forms(skip=skip, limit=limit)
     
-    if tag:
-        # FIX: Iterate over f.tags (objects) and check if the tag string matches .name
+    if label:
+        # FIX: Iterate over f.labels (objects) and check if the label string matches .name
         return [
             f for f in all_forms 
-            if f.tags and any(t.name == tag for t in f.tags)
+            if f.labels and any(t.name == label for t in f.labels)
         ]
     
     return all_forms
@@ -132,13 +131,13 @@ def delete_form(
 # 🏷️ TAG UTILITIES
 # ----------------------------------------------------
 
-@router.get("/tags/all", response_model=List[str])
-def get_all_tags(
+@router.get("/labels/all", response_model=List[str])
+def get_all_labels(
     form_service: FormService = Depends(get_form_service),
     user: CurrentUser = Depends(get_current_user),
     user_service: UserService = Depends(get_user_service),  
 ):
-    """Get a list of all unique tags across all forms."""
+    """Get a list of all unique labels across all forms."""
     user_permissions = user_service.get_user_permissions(user.username)
     permission = "*" in user_permissions or "form:read" in user_permissions
     if not permission:
@@ -148,12 +147,12 @@ def get_all_tags(
         )
     forms = form_service.get_all_forms(skip=0, limit=1000)
     
-    tags = set()
+    labels = set()
     for form in forms:
-        if form.tags:
+        if form.labels:
             # FIX: Extract .name from the objects
-            tags.update(tag.name for tag in form.tags) 
-    return sorted(list(tags))
+            labels.update(label.name for label in form.labels) 
+    return sorted(list(labels))
 
 # ----------------------------------------------------
 # 📨 FORM SUBMISSIONS
@@ -171,7 +170,7 @@ def submit_form(
     form = form_service.get_form_by_slug(slug)
     
     # FIX: Convert list of objects to set of strings
-    form_tag_names = {tag.name for tag in (form.tags or [])}
+    form_label_names = {label.name for label in (form.labels or [])}
 
     user_permissions = []
     user_role = "anon" 
@@ -182,9 +181,9 @@ def submit_form(
 
     override_submission = "*" in user_permissions or "submission:create" in user_permissions
     # FIX: Check against the string set
-    form_is_open = "any:create" in form_tag_names
+    form_is_open = "any:create" in form_label_names
     
-    role_is_allowed = f"{user_role}:create" in form_tag_names
+    role_is_allowed = f"{user_role}:create" in form_label_names
 
     if override_submission:
         pass
@@ -223,15 +222,15 @@ def list_submissions(
     if not form:
         raise HTTPException(status_code=404, detail="Form not found")
     
-    # FIX: Extract tag names
-    form_tag_names = {tag.name for tag in (form.tags or [])}
+    # FIX: Extract label names
+    form_label_names = {label.name for label in (form.labels or [])}
 
     user_permissions = user_service.get_user_permissions(user.username)
     override_submission = "*" in user_permissions or "submission:read" in user_permissions
     
     # FIX: Check against string set
-    form_is_open = "any:read" in form_tag_names
-    role_is_allowed = f"{user.role}:read" in form_tag_names
+    form_is_open = "any:read" in form_label_names
+    role_is_allowed = f"{user.role}:read" in form_label_names
     
     if not override_submission and not form_is_open and not role_is_allowed:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
@@ -254,16 +253,16 @@ def get_submission(
     if not submission:
         raise HTTPException(status_code=404, detail="Submission not found")
 
-    # FIX: Extract tag names
-    form_tag_names = {tag.name for tag in (form.tags or [])}
+    # FIX: Extract label names
+    form_label_names = {label.name for label in (form.labels or [])}
 
     user_permissions = user_service.get_user_permissions(user.username)
 
     override_submission = ("*" in user_permissions or "submission:read" in user_permissions)
     
     # FIX: Check against string set
-    form_is_open = "any:read" in form_tag_names
-    role_is_allowed = f"{user.role}:read" in form_tag_names
+    form_is_open = "any:read" in form_label_names
+    role_is_allowed = f"{user.role}:read" in form_label_names
     user_owns_it = submission.author == user.username
 
     authorized = (
@@ -295,12 +294,12 @@ def update_submission(
     if not form:
         raise HTTPException(status_code=404, detail="Form not found")
 
-    # FIX: Extract tag names once
-    form_tag_names = {tag.name for tag in (form.tags or [])}
+    # FIX: Extract label names once
+    form_label_names = {label.name for label in (form.labels or [])}
 
     if user is None:
         # FIX: Check against string set
-        if "any:update" not in form_tag_names:
+        if "any:update" not in form_label_names:
             raise HTTPException(status_code=404, detail="Submission not found")
 
     submission = form_service.get_submission_by_id(submission_id)
@@ -317,8 +316,8 @@ def update_submission(
     override_update = ("*" in user_permissions or "submission:update" in user_permissions)
 
     # FIX: Check against string set using safe variables
-    form_is_open_for_update = "any:update" in form_tag_names
-    role_is_allowed = f"{user_role}:update" in form_tag_names
+    form_is_open_for_update = "any:update" in form_label_names
+    role_is_allowed = f"{user_role}:update" in form_label_names
     user_owns_it = user and submission.author == user.username
 
     authorized = (
@@ -349,12 +348,12 @@ def delete_submission(
     if not form:
         raise HTTPException(status_code=404, detail="Submission not found")
 
-    # FIX: Extract tag names once
-    form_tag_names = {tag.name for tag in (form.tags or [])}
+    # FIX: Extract label names once
+    form_label_names = {label.name for label in (form.labels or [])}
 
     if user is None:
         # FIX: Check against string set
-        if "any:delete" not in form_tag_names:
+        if "any:delete" not in form_label_names:
             raise HTTPException(status_code=404, detail="Submission not found")
 
     submission = form_service.get_submission_by_id(submission_id)
@@ -371,8 +370,8 @@ def delete_submission(
     override_delete = ("*" in user_permissions or "submission:delete" in user_permissions)
 
     # FIX: Check against string set using safe variables
-    form_is_open_for_delete = "any:delete" in form_tag_names
-    role_is_allowed = f"{user_role}:delete" in form_tag_names
+    form_is_open_for_delete = "any:delete" in form_label_names
+    role_is_allowed = f"{user_role}:delete" in form_label_names
     user_owns_it = user and submission.author == user.username
 
     authorized = (

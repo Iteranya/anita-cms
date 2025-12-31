@@ -50,8 +50,8 @@
                             <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
                                 <p class="text-xs text-slate-400 font-mono" x-text="'/' + page.slug"></p>
                                 <div class="flex flex-wrap gap-1">
-                                    <template x-for="tag in (page.tags || [])">
-                                        <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200" x-text="'#' + tag"></span>
+                                    <template x-for="label in (page.labels || [])">
+                                        <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200" x-text="'#' + label"></span>
                                     </template>
                                 </div>
                             </div>
@@ -163,17 +163,17 @@
                         </div>
                     </div>
 
-                    <!-- Tags -->
+                    <!-- Labels -->
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tags</label>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Labels</label>
                         <div class="flex flex-wrap gap-2 p-2 border border-slate-200 rounded-lg bg-white focus-within:ring-2 focus-within:ring-anita-500 min-h-[42px]">
-                            <template x-for="(tag, index) in form.tags" :key="index">
+                            <template x-for="(label, index) in form.labels" :key="index">
                                 <span class="bg-slate-100 text-slate-700 px-2 py-1 rounded text-xs font-bold flex items-center gap-1 border border-slate-200">
-                                    <span x-text="tag"></span>
-                                    <button @click="removeTag(index)" class="hover:text-red-500"><i class="fas fa-times"></i></button>
+                                    <span x-text="label"></span>
+                                    <button @click="removeLabel(index)" class="hover:text-red-500"><i class="fas fa-times"></i></button>
                                 </span>
                             </template>
-                            <input type="text" x-model="form.tagInput" @keydown.enter.prevent="addTag" placeholder="Add tag + Enter" class="flex-1 min-w-[100px] outline-none text-sm bg-transparent">
+                            <input type="text" x-model="form.labelInput" @keydown.enter.prevent="addLabel" placeholder="Add label + Enter" class="flex-1 min-w-[100px] outline-none text-sm bg-transparent">
                         </div>
                     </div>
                     

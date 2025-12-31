@@ -48,8 +48,8 @@ def generate_link_embed_html(page: PageBase, slug: str) -> str:
 
 # --- HTML Generators (Media) ---
 
-def generate_media_tag_html(url: str, alt: str, desc: str = "") -> str:
-    """Generates a standard HTML <figure> tag."""
+def generate_media_label_html(url: str, alt: str, desc: str = "") -> str:
+    """Generates a standard HTML <figure> label."""
     safe_alt = _escape_html(alt)
     safe_desc = _escape_html(desc)
     caption_html = f"<figcaption>{safe_desc}</figcaption>" if desc else ""
@@ -75,7 +75,7 @@ def generate_page_embeds(page_service:PageService) -> List[EmbedData]:
     Expects 'pages' to be a list of DB objects with .slug and .data attributes.
     """
     embed_registry: List[EmbedData] = []
-    pages:List[Page] = page_service.get_pages_by_tag("any:read") # TODO: Make this filter only markdown-type page
+    pages:List[Page] = page_service.get_pages_by_label("any:read") # TODO: Make this filter only markdown-type page
     for item in pages:
         slug = item.slug
         
@@ -131,13 +131,13 @@ def generate_media_embeds(form_service:FormService) -> List[EmbedData]:
         if not public_link:
             continue
 
-        # 1. HTML Image Tag (with optional caption)
+        # 1. HTML Image Label (with optional caption)
         embed_registry.append(EmbedData(
             slug=f"media-html-{slug}",
             name=f"Image (HTML): {friendly_name}",
-            description=f"Standard HTML <img> tag for {friendly_name}",
+            description=f"Standard HTML <img> label for {friendly_name}",
             category="Media",
-            data=generate_media_tag_html(public_link, friendly_name, description)
+            data=generate_media_label_html(public_link, friendly_name, description)
         ))
 
         # 2. Markdown Image Syntax (Great for inserting into the markdown post directly)

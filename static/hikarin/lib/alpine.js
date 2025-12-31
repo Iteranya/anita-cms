@@ -127,7 +127,7 @@ function start() {
     warn("Alpine has already been initialized on this page. Calling Alpine.start() more than once can cause problems.");
   started = true;
   if (!document.body)
-    warn("Unable to initialize. Trying to load Alpine before `<body>` is available. Did you forget to add `defer` in Alpine's `<script>` tag?");
+    warn("Unable to initialize. Trying to load Alpine before `<body>` is available. Did you forget to add `defer` in Alpine's `<script>` label?");
   dispatch(document, "alpine:init");
   dispatch(document, "alpine:initializing");
   startObservingMutations();
@@ -935,7 +935,7 @@ directive("transition", (el, { value, modifiers, expression }, { evaluate: evalu
     registerTransitionsFromClassString(el, expression, value);
   }
 });
-function registerTransitionsFromClassString(el, classString, stage) {
+function registerTransitionsFromClassString(el, classString, slabele) {
   registerTransitionObject(el, setClasses, "");
   let directiveStorageMap = {
     "enter": (classes) => {
@@ -957,13 +957,13 @@ function registerTransitionsFromClassString(el, classString, stage) {
       el._x_transition.leave.end = classes;
     }
   };
-  directiveStorageMap[stage](classString);
+  directiveStorageMap[slabele](classString);
 }
-function registerTransitionsFromHelper(el, modifiers, stage) {
+function registerTransitionsFromHelper(el, modifiers, slabele) {
   registerTransitionObject(el, setStyles);
-  let doesntSpecify = !modifiers.includes("in") && !modifiers.includes("out") && !stage;
-  let transitioningIn = doesntSpecify || modifiers.includes("in") || ["enter"].includes(stage);
-  let transitioningOut = doesntSpecify || modifiers.includes("out") || ["leave"].includes(stage);
+  let doesntSpecify = !modifiers.includes("in") && !modifiers.includes("out") && !slabele;
+  let transitioningIn = doesntSpecify || modifiers.includes("in") || ["enter"].includes(slabele);
+  let transitioningOut = doesntSpecify || modifiers.includes("out") || ["leave"].includes(slabele);
   if (modifiers.includes("in") && !doesntSpecify) {
     modifiers = modifiers.filter((i, index) => index < modifiers.indexOf("out"));
   }
@@ -1118,20 +1118,20 @@ function transition(el, setFunction, { during, start: start2, end } = {}, before
     }
   });
 }
-function performTransition(el, stages) {
+function performTransition(el, slabeles) {
   let interrupted, reachedBefore, reachedEnd;
   let finish = once(() => {
     mutateDom(() => {
       interrupted = true;
       if (!reachedBefore)
-        stages.before();
+        slabeles.before();
       if (!reachedEnd) {
-        stages.end();
+        slabeles.end();
         releaseNextTicks();
       }
-      stages.after();
+      slabeles.after();
       if (el.isConnected)
-        stages.cleanup();
+        slabeles.cleanup();
       delete el._x_transitioning;
     });
   });
@@ -1150,8 +1150,8 @@ function performTransition(el, stages) {
     finish
   };
   mutateDom(() => {
-    stages.start();
-    stages.during();
+    slabeles.start();
+    slabeles.during();
   });
   holdNextTicks();
   requestAnimationFrame(() => {
@@ -1162,14 +1162,14 @@ function performTransition(el, stages) {
     if (duration === 0)
       duration = Number(getComputedStyle(el).animationDuration.replace("s", "")) * 1e3;
     mutateDom(() => {
-      stages.before();
+      slabeles.before();
     });
     reachedBefore = true;
     requestAnimationFrame(() => {
       if (interrupted)
         return;
       mutateDom(() => {
-        stages.end();
+        slabeles.end();
       });
       releaseNextTicks();
       setTimeout(el._x_transitioning.finish, duration + delay);
@@ -1309,7 +1309,7 @@ function bindInputValue(el, value) {
         el.checked = !!value;
       }
     }
-  } else if (el.tagName === "SELECT") {
+  } else if (el.labelName === "SELECT") {
     updateSelect(el, value);
   } else {
     if (el.value === value)
@@ -2503,8 +2503,8 @@ directive("modelable", (el, { expression }, { effect: effect3, evaluateLater: ev
 
 // packages/alpinejs/src/directives/x-teleport.js
 directive("teleport", (el, { modifiers, expression }, { cleanup: cleanup2 }) => {
-  if (el.tagName.toLowerCase() !== "template")
-    warn("x-teleport can only be used on a <template> tag", el);
+  if (el.labelName.toLowerCase() !== "template")
+    warn("x-teleport can only be used on a <template> label", el);
   let target = getTarget(expression);
   let clone2 = el.content.cloneNode(true).firstElementChild;
   el._x_teleport = clone2;
@@ -2762,7 +2762,7 @@ directive("model", (el, { modifiers, expression }, { effect: effect3, cleanup: c
         el.setAttribute("name", expression);
     });
   }
-  var event = el.tagName.toLowerCase() === "select" || ["checkbox", "radio"].includes(el.type) || modifiers.includes("lazy") ? "change" : "input";
+  var event = el.labelName.toLowerCase() === "select" || ["checkbox", "radio"].includes(el.type) || modifiers.includes("lazy") ? "change" : "input";
   let removeListener = isCloning ? () => {
   } : on(el, event, modifiers, (e) => {
     setValue(getInputValue(el, modifiers, e, getValue()));
@@ -2822,7 +2822,7 @@ function getInputValue(el, modifiers, event, currentValue) {
       } else {
         return event.target.checked;
       }
-    } else if (el.tagName.toLowerCase() === "select" && el.multiple) {
+    } else if (el.labelName.toLowerCase() === "select" && el.multiple) {
       if (modifiers.includes("number")) {
         return Array.from(event.target.selectedOptions).map((option) => {
           let rawValue = option.value || option.text;
@@ -3214,8 +3214,8 @@ directive("ref", handler3);
 
 // packages/alpinejs/src/directives/x-if.js
 directive("if", (el, { expression }, { effect: effect3, cleanup: cleanup2 }) => {
-  if (el.tagName.toLowerCase() !== "template")
-    warn("x-if can only be used on a <template> tag", el);
+  if (el.labelName.toLowerCase() !== "template")
+    warn("x-if can only be used on a <template> label", el);
   let evaluate2 = evaluateLater(el, expression);
   let show = () => {
     if (el._x_currentIfEl)
@@ -3261,7 +3261,7 @@ mapAttributes(startingWith("@", into(prefix("on:"))));
 directive("on", skipDuringClone((el, { value, modifiers, expression }, { cleanup: cleanup2 }) => {
   let evaluate2 = expression ? evaluateLater(el, expression) : () => {
   };
-  if (el.tagName.toLowerCase() === "template") {
+  if (el.labelName.toLowerCase() === "template") {
     if (!el._x_forwardEvents)
       el._x_forwardEvents = [];
     if (!el._x_forwardEvents.includes(value))

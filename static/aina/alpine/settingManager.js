@@ -140,7 +140,7 @@ export default (slug) => ({
         });
         
         // 3. Detect CSP (The complex part)
-        // Regex to extract the content="..." from the meta tag
+        // Regex to extract the content="..." from the meta label
         const cspMatch = html.match(/<meta http-equiv="Content-Security-Policy" content="([^"]+)">/);
         
         if (cspMatch) {
@@ -227,13 +227,13 @@ export default (slug) => ({
 
         // 2. Add CSP if enabled
         if (this.cspState.enabled) {
-            lines.push(this.buildCspMetaTag());
+            lines.push(this.buildCspMetaLabel());
         }
 
         this.previewString = lines.join('\n');
     },
 
-    buildCspMetaTag() {
+    buildCspMetaLabel() {
         let policies = [];
         
         // Base Policy

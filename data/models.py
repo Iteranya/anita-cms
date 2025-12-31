@@ -6,28 +6,28 @@ from .database import Base
 
 # --- ASSOCIATION TABLES ---
 
-page_tags = Table(
-    'page_tags', Base.metadata,
+page_labels = Table(
+    'page_labels', Base.metadata,
     Column('page_slug', String, ForeignKey('pages.slug'), primary_key=True),
-    Column('tag_id', Integer, ForeignKey('tags.id'), primary_key=True)
+    Column('label_id', Integer, ForeignKey('labels.id'), primary_key=True)
 )
 
-form_tags = Table(
-    'form_tags', Base.metadata,
+form_labels = Table(
+    'form_labels', Base.metadata,
     Column('form_id', Integer, ForeignKey('forms.id'), primary_key=True),
-    Column('tag_id', Integer, ForeignKey('tags.id'), primary_key=True)
+    Column('label_id', Integer, ForeignKey('labels.id'), primary_key=True)
 )
 
-submission_tags = Table(
-    'submission_tags', Base.metadata,
+submission_labels = Table(
+    'submission_labels', Base.metadata,
     Column('submission_id', Integer, ForeignKey('submissions.id'), primary_key=True),
-    Column('tag_id', Integer, ForeignKey('tags.id'), primary_key=True)
+    Column('label_id', Integer, ForeignKey('labels.id'), primary_key=True)
 )
 
 # --- THE TAG DICTIONARY ---
 
-class Tag(Base):
-    __tablename__ = 'tags'
+class Label(Base):
+    __tablename__ = 'labels'
     
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True) 
@@ -42,7 +42,7 @@ class Page(Base):
     content = Column(Text)
     markdown = Column(Text)
     html = Column(Text)
-    tags = relationship("Tag", secondary=page_tags, backref="pages")
+    labels = relationship("Label", secondary=page_labels, backref="pages")
     thumb = Column(String)
     type = Column(String)
     created = Column(String)
@@ -61,7 +61,7 @@ class Form(Base):
     created = Column(String)
     updated = Column(String)
     author = Column(String)
-    tags = relationship("Tag", secondary=form_tags, backref="forms")
+    labels = relationship("Label", secondary=form_labels, backref="forms")
     
     custom = Column(JSON)
     submissions = relationship("Submission", back_populates="form", cascade="all, delete-orphan")
@@ -76,7 +76,7 @@ class Submission(Base):
     updated = Column(String)
     author = Column(String)
     custom = Column(JSON)
-    tags = relationship("Tag", secondary=submission_tags, backref="submissions")
+    labels = relationship("Label", secondary=submission_labels, backref="submissions")
 
     form = relationship("Form", back_populates="submissions")
 

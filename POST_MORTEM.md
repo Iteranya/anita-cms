@@ -139,7 +139,7 @@ Or better yet, you can actually hack this thing!!! Create something that is more
 
 (Ah, also, A-GPL-3 License, so you need to share that too~ :3)
 
-Edit: Added RBAC, I need a life, Anita now has ABAC, RBAC, and that tag object thing. Why am I doing this to myself?
+Edit: Added RBAC, I need a life, Anita now has ABAC, RBAC, and that label object thing. Why am I doing this to myself?
 
 # React? Svelte?
 

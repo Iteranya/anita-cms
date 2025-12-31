@@ -4,16 +4,16 @@ export class PublicAPI {
     constructor(client) { this._client = client; }
 
     /**
-     * Search pages by tags.
-     * Maps to: GET /search?tags=...
-     * @param {string[]} tags - Array of strings
+     * Search pages by labels.
+     * Maps to: GET /search?labels=...
+     * @param {string[]} labels - Array of strings
      */
-    search(tags) { 
+    search(labels) { 
         // 1. Manually construct the query string
-        // FastAPI expects: ?tags=val1&tags=val2
+        // FastAPI expects: ?labels=val1&labels=val2
         const params = new URLSearchParams();
-        if (Array.isArray(tags)) {
-            tags.forEach(tag => params.append('tags', tag));
+        if (Array.isArray(labels)) {
+            labels.forEach(label => params.append('labels', label));
         }
 
         const queryString = params.toString();

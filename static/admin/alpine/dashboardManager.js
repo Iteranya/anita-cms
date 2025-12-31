@@ -9,9 +9,9 @@ export default () => ({
     activeTab: 'welcome', // 'welcome' | 'stats' | 'settings'
 
     stats: {
-        core_counts: { pages: 0, forms: 0, submissions: 0, users: 0, tags: 0 },
+        core_counts: { pages: 0, forms: 0, submissions: 0, users: 0, labels: 0 },
         page_stats: { public_count: 0, blog_posts_count: 0 },
-        activity: { top_forms_by_submission: [], top_tags_on_pages: [] },
+        activity: { top_forms_by_submission: [], top_labels_on_pages: [] },
         recent_items: { newest_pages: [], latest_updates: [], latest_submissions: [] }
     },
     user: {
@@ -67,7 +67,7 @@ export default () => ({
                         slug: "media-data",
                         title: "Media Metadata",
                         description: "System metadata for uploaded files",
-                        tags: ["editor:create","editor:read", "editor:delete", "editor:update"],
+                        labels: ["editor:create","editor:read", "editor:delete", "editor:update"],
                         schema: { fields: [
                             {name: "slug", label: "Slug", type: "text"},
                             { name: "saved_filename", label: "Filename", type: "text" },
@@ -90,7 +90,7 @@ export default () => ({
                         slug: "file-data",
                         title: "File Registry",
                         description: "Registry for documents and generic files",
-                        tags: ["editor:create","editor:read", "editor:delete", "editor:update"],
+                        labels: ["editor:create","editor:read", "editor:delete", "editor:update"],
                         schema: { fields: [
                             {name: "slug", label: "Slug", type: "text"},
                             { name: "saved_filename", label: "Filename", type: "text" },

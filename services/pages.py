@@ -109,12 +109,12 @@ class PageService:
     # ✨ NEW METHODS FOR TAG-BASED QUERIES ✨
     # -----------------------------------------------------------------
 
-    def get_pages_by_tag(self, tag: str) -> List[models.Page]:
+    def get_pages_by_label(self, label: str) -> List[models.Page]:
         """
-        Retrieves all pages containing a specific tag by calling the efficient
+        Retrieves all pages containing a specific label by calling the efficient
         CRUD function that filters in the database.
         """
-        return crud.get_pages_by_tag(self.db, tag=tag)
+        return crud.get_pages_by_label(self.db, label=label)
     
     def get_pages_by_author(self,author:str) -> List[models.Page]:
         """
@@ -122,32 +122,32 @@ class PageService:
         """
         return crud.get_pages_by_author(self.db,author)
     
-    def get_pages_by_tags(self, tags: List[str]) -> List[models.Page]:
+    def get_pages_by_labels(self, labels: List[str]) -> List[models.Page]:
         """
-        Retrieves all pages containing ALL of the given tags.
+        Retrieves all pages containing ALL of the given labels.
         """
 
-        if not tags:
+        if not labels:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="At least one tag must be provided."
+                detail="At least one label must be provided."
             )
 
         # Normalize + join for the CRUD engine
-        query_str = " ".join(tags)
+        query_str = " ".join(labels)
 
         return crud.search_pages(self.db, query_str=query_str)
     
-    def get_first_page_by_tags(self, tag: List[str]) -> Optional[models.Page]:
+    def get_first_page_by_labels(self, label: List[str]) -> Optional[models.Page]:
         """
-        Retrieves the most recent page with a specific tag by calling the
+        Retrieves the most recent page with a specific label by calling the
         efficient CRUD function.
         """
-        return crud.get_first_page_by_tags(self.db, tag=tag)
+        return crud.get_first_page_by_labels(self.db, label=label)
 
-    def get_first_page_by_tag(self, tag: str) -> Optional[models.Page]:
+    def get_first_page_by_label(self, label: str) -> Optional[models.Page]:
         """
-        Retrieves the most recent page with a specific tag by calling the
+        Retrieves the most recent page with a specific label by calling the
         efficient CRUD function.
         """
-        return crud.get_first_page_by_tag(self.db, tag=tag)
+        return crud.get_first_page_by_label(self.db, label=label)

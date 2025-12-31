@@ -33,8 +33,8 @@ def _filter_page_list_for_user(pages: List[models.Page], permissions: Set[str]) 
     
     filtered_pages = []
     for page in pages:
-        is_public = any(tag.name == 'sys:public' for tag in page.tags)
-        is_blog = any(tag.name == 'sys:blog' for tag in page.tags)
+        is_public = any(label.name == 'sys:public' for label in page.labels)
+        is_blog = any(label.name == 'sys:blog' for label in page.labels)
 
         # Anonymous/basic users only see public pages.
         if is_public:
@@ -79,7 +79,7 @@ def read_dashboard_stats(
     # --- Filter Core Counts ---
     if not (is_admin or "page:read" in permissions):
         stats["core_counts"]["pages"] = 0
-        stats["core_counts"]["tags"] = 0 # Tags are tied to content
+        stats["core_counts"]["labels"] = 0 # Labels are tied to content
     if not (is_admin or "form:read" in permissions):
         stats["core_counts"]["forms"] = 0
     if not (is_admin or "submission:read" in permissions):
@@ -97,7 +97,7 @@ def read_dashboard_stats(
     if not (is_admin or ("form:read" in permissions and "submission:read" in permissions)):
         stats["activity"]["top_forms_by_submission"] = []
     if not (is_admin or "page:read" in permissions):
-        stats["activity"]["top_tags_on_pages"] = []
+        stats["activity"]["top_labels_on_pages"] = []
         
     # --- Filter Recent Items (Lists) ---
     if not (is_admin or "submission:read" in permissions):

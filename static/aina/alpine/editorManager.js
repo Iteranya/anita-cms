@@ -129,7 +129,7 @@ export default (slug, initialData = {}) => ({
     },
 
     /**
-     * Scrapes the contents of all <style> tags inside the preview iframe.
+     * Scrapes the contents of all <style> labels inside the preview iframe.
      * Iterates explicitly to ensure we catch Tailwind's injected styles.
      */
     getGeneratedStylesFromIframe() {
@@ -139,38 +139,38 @@ export default (slug, initialData = {}) => ({
             return '';
         }
 
-        // Get all style tags (Includes user CSS and Tailwind generated CSS)
-        const styleTags = iframe.contentDocument.querySelectorAll('style');
+        // Get all style labels (Includes user CSS and Tailwind generated CSS)
+        const styleLabels = iframe.contentDocument.querySelectorAll('style');
         
-        // Use Array.from to map nicely, filter out empty tags if needed
-        return Array.from(styleTags)
-            .map(tag => tag.innerHTML)
+        // Use Array.from to map nicely, filter out empty labels if needed
+        return Array.from(styleLabels)
+            .map(label => label.innerHTML)
             .join('\n');
     },
 
     // --- Helpers for Compilation ---
 
     /**
-     * Scrapes the contents of all <style> tags inside the preview iframe.
-     * The Tailwind CDN injects its generated CSS into a style tag here.
+     * Scrapes the contents of all <style> labels inside the preview iframe.
+     * The Tailwind CDN injects its generated CSS into a style label here.
      */
     getGeneratedStylesFromIframe() {
         const iframe = this.$refs.previewFrame;
         if (!iframe || !iframe.contentDocument) return '';
 
-        // Get all style tags (Includes user CSS and Tailwind generated CSS)
-        const styleTags = iframe.contentDocument.querySelectorAll('style');
+        // Get all style labels (Includes user CSS and Tailwind generated CSS)
+        const styleLabels = iframe.contentDocument.querySelectorAll('style');
         
         let allStyles = '';
-        styleTags.forEach(tag => {
-            allStyles += tag.innerHTML + '\n';
+        styleLabels.forEach(label => {
+            allStyles += label.innerHTML + '\n';
         });
 
         return allStyles;
     },
 
     /**
-     * Removes the Tailwind CDN script tag from the header string
+     * Removes the Tailwind CDN script label from the header string
      * so it doesn't run in production.
      */
     stripTailwindScript(headContent) {
@@ -216,7 +216,7 @@ export default (slug, initialData = {}) => ({
     compilePreviewPage(htmlContent, cssContent, headContent, jsContent) {
         const isTailwind = headContent.includes('tailwindcss');
         // If Tailwind is present, we use the special type to let the CDN process @apply
-        const styleTag = isTailwind 
+        const styleLabel = isTailwind 
             ? `<style type="text/tailwindcss">${cssContent}</style>`
             : `<style>${cssContent}</style>`;
 
@@ -224,7 +224,7 @@ export default (slug, initialData = {}) => ({
 <html>
     <head>
         ${headContent}
-        ${styleTag}
+        ${styleLabel}
     </head>
     <body>
         ${htmlContent}

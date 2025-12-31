@@ -23,13 +23,13 @@ class DashboardService:
             "forms": crud.get_total_forms_count(self.db),
             "submissions": crud.get_total_submissions_count(self.db),
             "users": crud.get_total_users_count(self.db),
-            "tags": crud.get_total_tags_count(self.db),
+            "labels": crud.get_total_labels_count(self.db),
         }
 
         # --- 2. Fetch Specific Page-Related Stats ---
         page_stats = {
-            "public_count": crud.get_pages_count_by_tag(self.db, 'sys:public'),
-            "blog_posts_count": crud.get_pages_count_by_tag(self.db, 'sys:blog'),
+            "public_count": crud.get_pages_count_by_label(self.db, 'sys:public'),
+            "blog_posts_count": crud.get_pages_count_by_label(self.db, 'sys:blog'),
         }
         
         # --- 3. Fetch and Transform Activity Metrics ---
@@ -41,14 +41,14 @@ class DashboardService:
             for name, slug, count in top_forms_raw  # <-- Unpack all three items
         ]
 
-        top_tags_raw = crud.get_top_tags_by_page_usage(self.db, limit=10)
-        top_tags_formatted = [
-            {"name": name, "count": count} for name, count in top_tags_raw
+        top_labels_raw = crud.get_top_labels_by_page_usage(self.db, limit=10)
+        top_labels_formatted = [
+            {"name": name, "count": count} for name, count in top_labels_raw
         ]
 
         activity = {
             "top_forms_by_submission": top_forms_formatted,
-            "top_tags_on_pages": top_tags_formatted,
+            "top_labels_on_pages": top_labels_formatted,
         }
 
         # --- 4. Fetch Lists of Recent Items ---
