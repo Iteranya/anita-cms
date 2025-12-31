@@ -44,7 +44,7 @@ async def admin_root():
 @router.get("/admin/submissions", response_class=HTMLResponse)
 async def view_submissions_manager(request: Request, user: dict = Depends(optional_user)):
     if not user: 
-        return RedirectResponse("/auth/login")
+        return RedirectResponse("/auth")
     # Use the helper to ensure this page also doesn't stick in cache strangely
     return render_no_cache_html(os.path.join(ADMIN_DIR, "submissions.html"), False)
 
@@ -56,7 +56,7 @@ async def admin_router(
     db: Session = Depends(get_db)
 ):
     if not user:
-        return RedirectResponse(url="/auth/login", status_code=302)
+        return RedirectResponse(url="/auth", status_code=302)
 
     # --- CASE A: Static SPA View ---
     if slug in SPA_VIEWS:

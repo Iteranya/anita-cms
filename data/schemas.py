@@ -82,6 +82,7 @@ class PageBase(BaseModel):
     markdown: Optional[str] = None # Sanitized Until Per-Page CSP is Implemented
     html: Optional[str] = None  # EXEMPTED / UNTOUCHED / LITERALLY THE ENTIRE SITE
     labels: Optional[List[str]] = []
+    tags: Optional[List[str]] = [] 
     thumb: Optional[str] = None
     type: Optional[str] = "markdown"
     author: Optional[str] = None
@@ -112,20 +113,23 @@ class Page(PageBase):
     slug: str
     created: str
     updated: str
-    @field_validator('labels', mode='before')
+    @field_validator('labels', 'tags', mode='before')
     @classmethod
     def clean_labels_output(cls, v): return flatten_labels_to_strings(v)
     model_config = ConfigDict(from_attributes=True)
 
 class PageUpdateHTML(BaseModel):
     html: Optional[str] = None
+    tags: Optional[List[str]] = None
     custom: Optional[Dict[str, Any]] = None
     labels: Optional[List[str]] = None
 
 class PageMarkdownUpdate(BaseModel):
     markdown: str
+    tags: Optional[List[str]] = None
     custom: Optional[Dict[str, Any]] = None
     labels: Optional[List[str]] = None
+    
 
     @field_validator('markdown', mode='before')
     @classmethod
@@ -155,6 +159,7 @@ class CollectionBase(BaseModel):
     title: str
     schema: Dict[str, Any] = Field(alias='schema') 
     description: Optional[str] = None
+    tags: Optional[List[str]] = []
     labels: Optional[List[str]] = []
     custom: Optional[Dict[str, Any]] = {}
     author: Optional[str] = None
@@ -182,7 +187,7 @@ class Collection(CollectionBase):
     slug: str
     created: str
     updated: str
-    @field_validator('labels', mode='before')
+    @field_validator('labels', 'tags', mode='before')
     @classmethod
     def clean_labels_output(cls, v): return flatten_labels_to_strings(v)
     model_config = ConfigDict(from_attributes=True)
@@ -195,6 +200,7 @@ class SubmissionBase(BaseModel): # Bleach Everything Until Whitelist is Implemen
     author: Optional[str] = None
     custom: Optional[Dict[str, Any]] = {}
     labels: Optional[List[str]] = []
+    tags: Optional[List[str]] = []
     
     @field_validator('author', mode='before')
     @classmethod
@@ -227,7 +233,7 @@ class Submission(SubmissionBase):
     collection_slug: str
     created: str
     updated: str
-    @field_validator('labels', mode='before')
+    @field_validator('labels', 'tags', mode='before')
     @classmethod
     def clean_labels_output(cls, v): return flatten_labels_to_strings(v)
     model_config = ConfigDict(from_attributes=True)

@@ -6,6 +6,25 @@ from .database import Base
 
 # --- ASSOCIATION TABLES ---
 
+page_tags = Table(
+    'page_tags', Base.metadata,
+    Column('page_slug', String, ForeignKey('pages.slug'), primary_key=True),
+    Column('tag_id', Integer, ForeignKey('tags.id'), primary_key=True)
+)
+
+collection_tags = Table(
+    'collection_tags', Base.metadata,
+    Column('collection_id', Integer, ForeignKey('collections.id'), primary_key=True),
+    Column('tag_id', Integer, ForeignKey('tags.id'), primary_key=True)
+)
+
+submission_tags = Table(
+    'submission_tags', Base.metadata,
+    Column('submission_id', Integer, ForeignKey('submissions.id'), primary_key=True),
+    Column('tag_id', Integer, ForeignKey('tags.id'), primary_key=True)
+)
+
+
 page_labels = Table(
     'page_labels', Base.metadata,
     Column('page_slug', String, ForeignKey('pages.slug'), primary_key=True),
@@ -31,6 +50,12 @@ class Label(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True) 
+
+class Tag(Base):
+    __tablename__ = 'tags'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True) 
 # --- MAIN MODELS ---
 
 class Page(Base):
@@ -43,6 +68,7 @@ class Page(Base):
     markdown = Column(Text)
     html = Column(Text)
     labels = relationship("Label", secondary=page_labels, backref="pages")
+    tags = relationship("Tag", secondary=page_tags, backref="pages")
     thumb = Column(String)
     type = Column(String)
     created = Column(String)
@@ -62,6 +88,7 @@ class Collection(Base):
     updated = Column(String)
     author = Column(String)
     labels = relationship("Label", secondary=collection_labels, backref="collections")
+    tags = relationship("Tag", secondary=collection_tags, backref="collections")
     
     custom = Column(JSON)
     submissions = relationship("Submission", back_populates="collection", cascade="all, delete-orphan")
@@ -77,7 +104,7 @@ class Submission(Base):
     author = Column(String)
     custom = Column(JSON)
     labels = relationship("Label", secondary=submission_labels, backref="submissions")
-
+    tags = relationship("Tag", secondary=submission_tags, backref="submissions")
     collection = relationship("Collection", back_populates="submissions")
 
 class User(Base):

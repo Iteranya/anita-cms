@@ -25,6 +25,7 @@ export default () => ({
         content: '', 
         type: 'markdown', 
         thumb: '',
+        tags:[],
         category: '', 
         isPublic: false, 
         isHome: false,   
@@ -252,6 +253,7 @@ export default () => ({
         this.collection.type = page.type || 'markdown';
         this.collection.thumb = page.thumb || '';
         this.collection.content = page.content || '';
+        this.collection.tags = page.tags || [];
         this.parseLabelsToCollection(page.labels || []);
         this.modalOpen = true;
     },
@@ -288,9 +290,14 @@ export default () => ({
         if(this.collection.category) this.collection.category = this.slugify(this.collection.category);
 
         const payload = {
-            title: this.collection.title, slug: this.collection.slug, type: this.collection.type,
-            thumb: this.collection.thumb, content: this.collection.content,
-            labels: this.compileLabelsFromCollection(), custom: {}
+            title: this.collection.title, 
+            slug: this.collection.slug, 
+            type: this.collection.type,
+            thumb: this.collection.thumb, 
+            content: this.collection.content,
+            tags:this.collection.tags,
+            labels: this.compileLabelsFromCollection(), 
+            custom: {}
         };
 
         try {

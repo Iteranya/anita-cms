@@ -15,6 +15,7 @@ export default () =>  ({
             slug: '',
             description: '',
             thumb: '',
+            tags:[],
             type: 'markdown', // markdown | html
             labelInput: '',
             labels: [],
@@ -54,6 +55,7 @@ export default () =>  ({
             this.collection.title = page.title;
             this.collection.slug = page.slug;
             this.collection.type = page.type || 'markdown';
+            this.collection.tags = page.tags ? [...page.tags] : [];
             this.collection.thumb = page.thumb || '';
             this.collection.description = page.description || (page.custom ? page.custom.description : '') || '';
             this.collection.labels = page.labels ? [...page.labels] : [];
@@ -71,7 +73,7 @@ export default () =>  ({
 
         resetCollection() {
             this.collection = {
-                title: '', slug: '', description: '', thumb: '',
+                title: '', slug: '', description: '', thumb: '', tags:[],
                 type: 'markdown', labelInput: '', labels: [], customFields: []
             };
         },
@@ -126,6 +128,7 @@ async save() {
                 slug: this.collection.slug,
                 type: this.collection.type,
                 thumb: this.collection.thumb,
+                tags:this.collection.tags,
                 labels: this.collection.labels,
                 custom: customObj
             };

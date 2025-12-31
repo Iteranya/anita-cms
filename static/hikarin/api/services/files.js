@@ -7,7 +7,7 @@ export class FileAPI {
     // Expects a single File object (from input.files[0])
     upload() {
         return new ApiRequest((fileObj) => {
-            const fd = new CollectionData();
+            const fd = new FormData();
             fd.append('file', fileObj); 
             return this._client._request('POST', '/file/', { body: fd });
         });

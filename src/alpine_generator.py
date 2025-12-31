@@ -236,28 +236,55 @@ document.addEventListener('alpine:init', () => {{
 
 def generate_public_search_js(component_name: str, default_labels: List[str]) -> str:
     """
-    Generates the JS for a public search component.
+    Generates the JS for a public search component with embedded Page schema.
     """
-    # Serialize labels to valid JS array string
+    # 1. Serialize labels to valid JS array string
     labels_js = json.dumps(default_labels)
+
+    # 2. Define the PageBase structure (Mirroring your Pydantic model)
+    # We use this to provide a blueprint in the frontend code
+    page_structure = {
+        "title": "",
+        "content": None,    # Optional[str]
+        "labels": [],       # Optional[List[str]]
+        "tags" : [],
+        "thumb": None,      # Optional[str]
+        "type": "markdown", # Default value
+        "author": None,     # Optional[str]
+        "custom": {}        # Optional[Dict]
+    }
+    
+    # Serialize with indentation so it looks readable in the 'View Source' or DevTools
+    schema_js = json.dumps(page_structure, indent=4)
 
     return f"""
 document.addEventListener('alpine:init', () => {{
-    // Add 'initialLabels' as a parameter here ----v
     Alpine.data('{component_name}', (initialLabels = {labels_js}) => ({{
         
+        // --- Data Structure Definitions ---
+        /**
+         * The Blueprint for a Page result.
+         * Used for reference or skeleton loading.
+         */
+        resultSchema: {schema_js},
+
+        /**
+         * Array of Page objects matching resultSchema
+         * @type {{Array<typeof this.resultSchema>}}
+         */
         searchResults: [],    
-        searchQuery: '',         
-        defaultLabels: initialLabels, // Initialize with the passed labels
         
-        isLoading: false,
+        // --- State ---
+        searchQuery: '',         
+        defaultLabels: initialLabels,
+        isLoading: true,
         error: null,          
 
         async init() {{
-            // This runs automatically ONCE. 
-            // Since defaultLabels is now set via the constructor, this will work!
             if (this.defaultLabels.length > 0) {{
                 await this.search(this.defaultLabels);
+            }}else{{
+                this.isLoading = false;
             }}
         }},
 
@@ -265,28 +292,23 @@ document.addEventListener('alpine:init', () => {{
             this.isLoading = true;
             this.error = null;
             
-            // 1. Start with the default labels as the base
             let labels = [...this.defaultLabels]; 
 
             if (Array.isArray(explicitLabels)) {{
-                // If specific labels are passed (like during init), use them
                 labels = explicitLabels;
             }} else {{
-                // 2. If the user typed something, APPEND those labels to the defaults
                 const rawInput = (this.searchQuery || '').trim();
                 if (rawInput.length > 0) {{
                     const userLabels = rawInput.split(',')
                         .map(t => t.trim())
                         .filter(t => t.length > 0);
                     
-                    // Merge defaults with user labels, ensuring no duplicates
                     labels = [...new Set([...labels, ...userLabels])];
                 }}
             }}
 
             try {{
-                // Now 'labels' contains both the hidden defaults (main:blog) 
-                // AND the user's search terms.
+                // Returns List[PageBase]
                 this.searchResults = await this.$api.public.search(labels).execute();
             }} catch (e){{
                 console.error('Search failed:', e);

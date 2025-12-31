@@ -11,7 +11,7 @@ export class AuthAPI {
 
     login(username, password, rememberMe = false) {
         return new ApiRequest(() => {
-            const fd = new CollectionData();
+            const fd = new FormData();
             fd.append("username", username);
             fd.append("password", password);
             fd.append("remember_me", String(rememberMe));
@@ -40,7 +40,7 @@ export class AuthAPI {
 
     setupAdmin(username, password, confirmPassword) {
         return new ApiRequest(() => {
-            const fd = new CollectionData();
+            const fd = new FormData();
             fd.append("username", username);
             fd.append("password", password);
             fd.append("confirm_password", confirmPassword);
@@ -57,7 +57,7 @@ export class AuthAPI {
 
     register(username, password, confirmPassword, displayName = null) {
         return new ApiRequest(() => {
-            const fd = new CollectionData();
+            const fd = new FormData();
             fd.append("username", username);
             fd.append("password", password);
             fd.append("confirm_password", confirmPassword);
