@@ -202,9 +202,9 @@ function matrix(el, selfOnly) {
   var matrixFn = window.DOMMatrix || window.WebKitCSSMatrix || window.CSSMatrix || window.MSCSSMatrix;
   return matrixFn && new matrixFn(appliedTransforms);
 }
-function find(ctx, labelName, iterator) {
+function find(ctx, tagName, iterator) {
   if (ctx) {
-    var list = ctx.getElementsByLabelName(labelName), i = 0, n = list.length;
+    var list = ctx.getElementsByTagName(tagName), i = 0, n = list.length;
     if (iterator) {
       for (; i < n; i++) {
         iterator(list[i], i);
@@ -887,7 +887,7 @@ function Sortable(el, options) {
     handle: null,
     draggable: /^[uo]l$/i.test(el.nodeName) ? ">li" : ">*",
     swapThreshold: 1,
-    // percenlabele; 0 <= x <= 1
+    // percentage; 0 <= x <= 1
     invertSwap: false,
     // invert always
     invertedSwapThreshold: null,
@@ -977,7 +977,7 @@ Sortable.prototype = /** @lends Sortable.prototype */
     if (originalTarget.isContentEditable) {
       return;
     }
-    if (!this.nativeDraggable && Safari && target && target.labelName.toUpperCase() === "SELECT") {
+    if (!this.nativeDraggable && Safari && target && target.tagName.toUpperCase() === "SELECT") {
       return;
     }
     target = closest(target, options.draggable, el, false);
@@ -1926,7 +1926,7 @@ function _getInsertDirection(target) {
   }
 }
 function _generateId(el) {
-  var str = el.labelName + el.className + el.src + el.href + el.textContent, i = str.length, sum = 0;
+  var str = el.tagName + el.className + el.src + el.href + el.textContent, i = str.length, sum = 0;
   while (i--) {
     sum += str.charCodeAt(i);
   }
@@ -1934,7 +1934,7 @@ function _generateId(el) {
 }
 function _saveInputCheckedState(root) {
   savedInputChecked.length = 0;
-  var inputs = root.getElementsByLabelName("input");
+  var inputs = root.getElementsByTagName("input");
   var idx = inputs.length;
   while (idx--) {
     var el = inputs[idx];
