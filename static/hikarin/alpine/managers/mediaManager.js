@@ -8,12 +8,12 @@ export default () =>  ({
         uploadModalOpen: false,
         detailsModalOpen: false,
 
-        // Details Form
+        // Details Collection
         targetFilename: '',
         targetId: null, // If null, it's unregistered
-        form: { title: '', description: '', link: '' },
+        collection: { title: '', description: '', link: '' },
         
-        // Upload Form
+        // Upload Collection
         uploadFile: null,
         uploadMeta: { title: '', description: '' },
         isUploading: false,
@@ -153,17 +153,17 @@ export default () =>  ({
 
         openDetails(filename) {
             this.targetFilename = filename;
-            this.form.link = window.location.origin + '/media/' + filename;
+            this.collection.link = window.location.origin + '/media/' + filename;
             
             const meta = this.metaMap[filename];
             if (meta) {
                 this.targetId = meta.id;
-                this.form.title = meta.title;
-                this.form.description = meta.description;
+                this.collection.title = meta.title;
+                this.collection.description = meta.description;
             } else {
                 this.targetId = null;
-                this.form.title = filename.split('.')[0];
-                this.form.description = '';
+                this.collection.title = filename.split('.')[0];
+                this.collection.description = '';
             }
             
             this.detailsModalOpen = true;
@@ -173,8 +173,8 @@ export default () =>  ({
             const payload = {
                 data: {
                     saved_filename: this.targetFilename,
-                    friendly_name: this.form.title,
-                    description: this.form.description,
+                    friendly_name: this.collection.title,
+                    description: this.collection.description,
                     public_link: '/media/' + this.targetFilename
                 }
             };
@@ -238,7 +238,7 @@ export default () =>  ({
         },
 
         copyLink() {
-            navigator.clipboard.writeText(this.form.link);
+            navigator.clipboard.writeText(this.collection.link);
             // Optional: visual feedback handled in UI via x-data local state
         }
     });

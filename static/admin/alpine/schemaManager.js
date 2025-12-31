@@ -63,7 +63,7 @@ export default () => ({
             this.modalOpen = false;
             this.refresh();
             Alpine.store('notifications').success('Saved', 'Your changes have been applied.');
-        } catch(e) { Alpine.store('notifications').error('Create Form Failed', e); }
+        } catch(e) { Alpine.store('notifications').error('Create Collection Failed', e); }
     },
     
     async deleteCollection(slug) {

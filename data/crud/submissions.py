@@ -9,8 +9,8 @@ from .labels import get_or_create_labels, apply_label_filters
 def get_submission(db: Session, submission_id: int) -> Optional[models.Submission]:
     return db.query(models.Submission).filter(models.Submission.id == submission_id).first()
 
-def list_submissions(db: Session, form_slug: str, skip: int = 0, limit: int = 100) -> List[models.Submission]:
-    return db.query(models.Submission).filter(models.Submission.form_slug == form_slug).order_by(models.Submission.created.desc()).offset(skip).limit(limit).all()
+def list_submissions(db: Session, collection_slug: str, skip: int = 0, limit: int = 100) -> List[models.Submission]:
+    return db.query(models.Submission).filter(models.Submission.collection_slug == collection_slug).order_by(models.Submission.created.desc()).offset(skip).limit(limit).all()
 
 def search_submissions(db: Session, query_str: str) -> List[models.Submission]:
     query = db.query(models.Submission)
@@ -36,7 +36,7 @@ def update_submission(db: Session, submission_id: int, submission_update: schema
         return None
     
     update_data = submission_update.model_dump(exclude_unset=True)
-    update_data.pop('form_slug', None)
+    update_data.pop('collection_slug', None)
     
     if 'labels' in update_data:
         new_labels = update_data.pop('labels')

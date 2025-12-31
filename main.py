@@ -26,7 +26,7 @@ from routes import (
     asta_route,
     auth_route,
     file_route,
-    forms_route,
+    collections_route,
     media_route,
     pages_route, 
     public_route,
@@ -107,7 +107,7 @@ api_router.include_router(config_route.router, tags=["Config"])
 api_router.include_router(aina_route.router, tags=["Aina"])
 api_router.include_router(asta_route.router, tags=["Asta"])
 api_router.include_router(media_route.router, tags=["Media"])
-api_router.include_router(forms_route.router, tags=["Forms"])
+api_router.include_router(collections_route.router, tags=["Collections"])
 api_router.include_router(file_route.router, tags=["Files"])
 api_router.include_router(roles_route.router, tags=["Roles"])
 api_router.include_router(pages_route.router, tags=["Pages"]) 

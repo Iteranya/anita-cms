@@ -12,7 +12,7 @@ import dataManager from './alpine/dataManager.js';
 import pageManager from './alpine/pageManager.js'; 
 import userManager from './alpine/userManager.js';
 import mediaManager from './alpine/mediaManager.js';
-import formManager from './alpine/formManager.js';
+import collectionManager from './alpine/collectionManager.js';
 import configManager from './alpine/configManager.js';
 import fileManager from './alpine/fileManager.js';
 import submissionManager from './alpine/submissionManager.js';
@@ -39,7 +39,7 @@ Alpine.data('pageManager', pageManager);
 Alpine.data('structureManager', structureManager)
 Alpine.data('userManager', userManager);
 Alpine.data('mediaManager', mediaManager);
-Alpine.data('formManager', formManager);
+Alpine.data('collectionManager', collectionManager);
 Alpine.data('configManager', configManager);
 Alpine.data('fileManager', fileManager);
 Alpine.data('submissionManager', submissionManager);

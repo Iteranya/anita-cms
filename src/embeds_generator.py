@@ -2,9 +2,9 @@ from typing import List
 # Assuming these imports exist based on your environment
 from data.models import Page
 from data.schemas import EmbedData, PageBase
-from services.forms import FormService
+from services.collections import CollectionService
 from services.pages import PageService 
-# from services.forms import FormService # If you need to type hint the service
+# from services.collections import CollectionService # If you need to type hint the service
 
 # --- Helpers ---
 
@@ -111,13 +111,13 @@ def generate_page_embeds(page_service:PageService) -> List[EmbedData]:
 
     return embed_registry
 
-def generate_media_embeds(form_service:FormService) -> List[EmbedData]:
+def generate_media_embeds(collection_service:CollectionService) -> List[EmbedData]:
     """
     Generates embeds for Media items (Images, etc).
-    Expects 'media_items' to be a list of DB objects from the 'media-data' form.
+    Expects 'media_items' to be a list of DB objects from the 'media-data' collection.
     """
     embed_registry: List[EmbedData] = []
-    media_items = form_service.get_submissions_for_form("media-data")
+    media_items = collection_service.get_submissions_for_collection("media-data")
     for media in media_items:
         # Safety checks
         if not media.data or 'slug' not in media.data:

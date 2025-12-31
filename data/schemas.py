@@ -149,9 +149,9 @@ class PageSeed(PageBase):
     def validate_slug(cls, v): return validate_slug_format(v)
 
 
-# --- Form Schemas ---
+# --- Collection Schemas ---
 
-class FormBase(BaseModel):
+class CollectionBase(BaseModel):
     title: str
     schema: Dict[str, Any] = Field(alias='schema') 
     description: Optional[str] = None
@@ -161,23 +161,23 @@ class FormBase(BaseModel):
 
     @field_validator('title', 'description', 'author', mode='before')
     @classmethod
-    def bleach_form_fields(cls, v): return sanitize_text(v)
+    def bleach_collection_fields(cls, v): return sanitize_text(v)
 
     @field_validator('custom', 'schema', mode='before')
     @classmethod
     def validate_and_bleach_dicts(cls, v): return sanitize_recursively(v)
 
-class FormCreate(FormBase):
+class CollectionCreate(CollectionBase):
     slug: str
     @field_validator('slug', mode='before')
     @classmethod
     def validate_slug(cls, v): return validate_slug_format(v)
 
-class FormUpdate(FormBase):
+class CollectionUpdate(CollectionBase):
     title: Optional[str] = None
     schema: Optional[Dict[str, Any]] = Field(default=None, alias='schema')
 
-class Form(FormBase):
+class Collection(CollectionBase):
     id: int
     slug: str
     created: str
@@ -207,8 +207,8 @@ class SubmissionBase(BaseModel): # Bleach Everything Until Whitelist is Implemen
         return sanitize_recursively(v)
 
 class SubmissionCreate(SubmissionBase):
-    form_slug: str
-    @field_validator('form_slug', mode='before')
+    collection_slug: str
+    @field_validator('collection_slug', mode='before')
     @classmethod
     def validate_slug(cls, v): return validate_slug_format(v)
 
@@ -224,7 +224,7 @@ class SubmissionUpdate(BaseModel):
     
 class Submission(SubmissionBase):
     id: int
-    form_slug: str
+    collection_slug: str
     created: str
     updated: str
     @field_validator('labels', mode='before')
@@ -349,7 +349,7 @@ class UploadResult(BaseModel):
 
 class DashboardCoreCounts(BaseModel):
     pages: int
-    forms: int
+    collections: int
     submissions: int
     users: int
     labels: int
@@ -364,7 +364,7 @@ class DashboardActivityItem(BaseModel):
     count: int
 
 class DashboardActivity(BaseModel):
-    top_forms_by_submission: List[DashboardActivityItem]
+    top_collections_by_submission: List[DashboardActivityItem]
     top_labels_on_pages: List[DashboardActivityItem]
 
 class DashboardRecentItems(BaseModel):

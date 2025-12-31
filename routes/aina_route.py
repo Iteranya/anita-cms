@@ -6,10 +6,10 @@ from sqlalchemy.orm import Session
 
 # Data & Logic
 from services.labels import LabelService
-from src.alpine_generator import generate_form_alpine_components, generate_media_alpine_components, generate_public_alpine_components
+from src.alpine_generator import generate_collection_alpine_components, generate_media_alpine_components, generate_public_alpine_components
 from data.database import get_db
 from data.schemas import AlpineData
-from services.forms import FormService
+from services.collections import CollectionService
 from src.dependencies import get_current_user
 
 router = APIRouter(tags=["Aina Website Builder"])
@@ -59,19 +59,19 @@ async def api_get_all_routes(
     """
     API Endpoint: Provides the list of components for the Generator.
     """
-    form_service = FormService(db)
+    collection_service = CollectionService(db)
     label_service = LabelService(db)
     all_routes: List[AlpineData] = []
     
-    # 1. Form Components
+    # 1. Collection Components
     try:
-        all_routes.extend(generate_form_alpine_components(form_service))
+        all_routes.extend(generate_collection_alpine_components(collection_service))
     except Exception as e:
-        print(f"Error generating form components: {e}")
+        print(f"Error generating collection components: {e}")
     
     # 2. Media Components
     try:
-        all_routes.extend(generate_media_alpine_components(form_service))
+        all_routes.extend(generate_media_alpine_components(collection_service))
     except Exception as e:
         print(f"Error generating media components: {e}")
     

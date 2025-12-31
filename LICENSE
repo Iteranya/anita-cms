@@ -99,9 +99,9 @@ menu, a prominent item in the list meets this criterion.
 
   1. Source Code.
 
-  The "source code" for a work means the preferred form of the work
+  The "source code" for a work means the preferred collection of the work
 for making modifications to it.  "Object code" means any non-source
-form of a work.
+collection of a work.
 
   A "Standard Interface" means an interface that either is an official
 standard defined by a recognized standards body, or, in the case of
@@ -109,17 +109,17 @@ interfaces specified for a particular programming language, one that
 is widely used among developers working in that language.
 
   The "System Libraries" of an executable work include anything, other
-than the work as a whole, that (a) is included in the normal form of
+than the work as a whole, that (a) is included in the normal collection of
 packaging a Major Component, but which is not part of that Major
 Component, and (b) serves only to enable use of the work with that
 Major Component, or to implement a Standard Interface for which an
-implementation is available to the public in source code form.  A
+implementation is available to the public in source code collection.  A
 "Major Component", in this context, means a major essential component
 (kernel, window system, and so on) of the specific operating system
 (if any) on which the executable work runs, or a compiler used to
 produce the work, or an object code interpreter used to run it.
 
-  The "Corresponding Source" for a work in object code form means all
+  The "Corresponding Source" for a work in object code collection means all
 the source code needed to generate, install, and (for an executable
 work) run the object code and to modify the work, including scripts to
 control those activities.  However, it does not include the work's
@@ -136,7 +136,7 @@ subprograms and other parts of the work.
 can regenerate automatically from other parts of the Corresponding
 Source.
 
-  The Corresponding Source for a work in source code form is that
+  The Corresponding Source for a work in source code collection is that
 same work.
 
   2. Basic Permissions.
@@ -196,7 +196,7 @@ and you may offer support or warranty protection for a fee.
   5. Conveying Modified Source Versions.
 
   You may convey a work based on the Program, or the modifications to
-produce it from the Program, in the form of source code under the
+produce it from the Program, in the collection of source code under the
 terms of section 4, provided that you also meet all of these conditions:
 
     a) The work must carry prominent notices stating that you modified
@@ -222,7 +222,7 @@ terms of section 4, provided that you also meet all of these conditions:
 
   A compilation of a covered work with other separate and independent
 works, which are not by their nature extensions of the covered work,
-and which are not combined with it such as to form a larger program,
+and which are not combined with it such as to collection a larger program,
 in or on a volume of a storage or distribution medium, is called an
 "aggregate" if the compilation and its resulting copyright are not
 used to limit the access or legal rights of the compilation's users
@@ -230,9 +230,9 @@ beyond what the individual works permit.  Inclusion of a covered work
 in an aggregate does not cause this License to apply to the other
 parts of the aggregate.
 
-  6. Conveying Non-Source Forms.
+  6. Conveying Non-Source Collections.
 
-  You may convey a covered work in object code form under the terms
+  You may convey a covered work in object code collection under the terms
 of sections 4 and 5, provided that you also convey the
 machine-readable Corresponding Source under the terms of this License,
 in one of these ways:
@@ -274,7 +274,7 @@ in one of these ways:
     available for as long as needed to satisfy these requirements.
 
     e) Convey the object code using peer-to-peer transmission, provided
-    you inform other peers where the object code and Corresponding
+    you incollection other peers where the object code and Corresponding
     Source of the work are being offered to the general public at no
     charge under subsection 6d.
 
@@ -325,7 +325,7 @@ protocols for communication across the network.
   Corresponding Source conveyed, and Installation Information provided,
 in accord with this section must be in a format that is publicly
 documented (and with an implementation available to the public in
-source code form), and must require no special password or key for
+source code collection), and must require no special password or key for
 unpacking, reading or copying.
 
   7. Additional Terms.
@@ -389,7 +389,7 @@ additional terms that apply to those files, or a notice indicating
 where to find the applicable terms.
 
   Additional terms, permissive or non-permissive, may be stated in the
-form of a separately written license, or stated as exceptions;
+collection of a separately written license, or stated as exceptions;
 the above requirements apply either way.
 
   8. Termination.

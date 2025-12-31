@@ -9,8 +9,8 @@ export default () =>  ({
         mode: 'create', // 'create' | 'edit'
         targetSlug: '',
 
-        // Form Data
-        form: {
+        // Collection Data
+        collection: {
             title: '',
             slug: '',
             description: '',
@@ -38,11 +38,11 @@ export default () =>  ({
             }
         },
 
-        // --- Form Logic ---
+        // --- Collection Logic ---
 
         openCreate() {
             this.mode = 'create';
-            this.resetForm();
+            this.resetCollection();
             this.modalOpen = true;
         },
 
@@ -50,27 +50,27 @@ export default () =>  ({
             this.mode = 'edit';
             this.targetSlug = page.slug;
             
-            // Map API data to Form
-            this.form.title = page.title;
-            this.form.slug = page.slug;
-            this.form.type = page.type || 'markdown';
-            this.form.thumb = page.thumb || '';
-            this.form.description = page.description || (page.custom ? page.custom.description : '') || '';
-            this.form.labels = page.labels ? [...page.labels] : [];
+            // Map API data to Collection
+            this.collection.title = page.title;
+            this.collection.slug = page.slug;
+            this.collection.type = page.type || 'markdown';
+            this.collection.thumb = page.thumb || '';
+            this.collection.description = page.description || (page.custom ? page.custom.description : '') || '';
+            this.collection.labels = page.labels ? [...page.labels] : [];
             
             // Handle Custom Fields (Convert Object -> Array)
-            this.form.customFields = [];
+            this.collection.customFields = [];
             if (page.custom) {
                 Object.entries(page.custom).forEach(([k, v]) => {
-                    if(k !== 'description') this.form.customFields.push({k, v});
+                    if(k !== 'description') this.collection.customFields.push({k, v});
                 });
             }
             
             this.modalOpen = true;
         },
 
-        resetForm() {
-            this.form = {
+        resetCollection() {
+            this.collection = {
                 title: '', slug: '', description: '', thumb: '',
                 type: 'markdown', labelInput: '', labels: [], customFields: []
             };
@@ -78,7 +78,7 @@ export default () =>  ({
 
         generateSlug() {
             if (this.mode === 'create') {
-                this.form.slug = this.form.title.toLowerCase()
+                this.collection.slug = this.collection.title.toLowerCase()
                     .replace(/[^\w\s-]/g, '')
                     .replace(/\s+/g, '-');
             }
@@ -87,16 +87,16 @@ export default () =>  ({
         // --- Label & Field Logic ---
 
         addLabel() {
-            const val = this.form.labelInput.trim();
-            if (val && !this.form.labels.includes(val)) {
-                this.form.labels.push(val);
+            const val = this.collection.labelInput.trim();
+            if (val && !this.collection.labels.includes(val)) {
+                this.collection.labels.push(val);
             }
-            this.form.labelInput = '';
+            this.collection.labelInput = '';
         },
-        removeLabel(index) { this.form.labels.splice(index, 1); },
+        removeLabel(index) { this.collection.labels.splice(index, 1); },
 
-        addCustomField() { this.form.customFields.push({k: '', v: ''}); },
-        removeCustomField(index) { this.form.customFields.splice(index, 1); },
+        addCustomField() { this.collection.customFields.push({k: '', v: ''}); },
+        removeCustomField(index) { this.collection.customFields.splice(index, 1); },
 
         // --- Actions ---
 
@@ -107,7 +107,7 @@ export default () =>  ({
                     const req = this.$api.media.upload();
                     const res = await req.execute(files);
                     if(res.files && res.files.length > 0) {
-                        this.form.thumb = '/media/' + res.files[0].saved_as;
+                        this.collection.thumb = '/media/' + res.files[0].saved_as;
                     }
                 } catch(err) { 
                     Alpine.store('notifications').error('Upload Failed', err); ; 
@@ -117,16 +117,16 @@ export default () =>  ({
 
 async save() {
             // 1. Prepare Metadata
-            const customObj = { description: this.form.description };
-            this.form.customFields.forEach(f => { if(f.k) customObj[f.k] = f.v; });
+            const customObj = { description: this.collection.description };
+            this.collection.customFields.forEach(f => { if(f.k) customObj[f.k] = f.v; });
 
             // 2. Construct Payload
             const payload = {
-                title: this.form.title,
-                slug: this.form.slug,
-                type: this.form.type,
-                thumb: this.form.thumb,
-                labels: this.form.labels,
+                title: this.collection.title,
+                slug: this.collection.slug,
+                type: this.collection.type,
+                thumb: this.collection.thumb,
+                labels: this.collection.labels,
                 custom: customObj
             };
 

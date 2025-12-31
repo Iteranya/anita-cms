@@ -8,7 +8,7 @@ TODO
 - HikarinJS Is Still Opt-in (should be default for all ai generated site)
 - Default Pages Still Uses <script> (Should use HikarinJS Instead)
 - ~~System Page Labels Are Still Manual (Should be abstracted with switches / panel)~~ Done! With site tree and structure thingy!
-- ~~Form Page Labels Are Still Manual (Should be abstracted with switches / panel)~~ Done! With amazing RBAC Panel
+- ~~Collection Page Labels Are Still Manual (Should be abstracted with switches / panel)~~ Done! With amazing RBAC Panel
 - ~~User Roles and Perms Are Still Manual (Should be abstracted with switches / panel)~~ Done! Discord Flavored ABAC Panel~
 - No Labels and Sort Filter Yet
 - No Darkmode Yet (seriously?)
@@ -16,7 +16,7 @@ TODO
 - Pay Yozzun For Anita's Artwork
 - Asta and Aina doesn't save their own prompt/configuration
 - Better test coverage
-- More graceful Form Seeding (currently don't exist, actually, only page, roles and config for now)
+- More graceful Collection Seeding (currently don't exist, actually, only page, roles and config for now)
 ~~- Category and Labels are the same (should be separated)~~ Cats and Labels, see below
 - Sandbox Aina properly (Dummy Browser, Dummy Database, Dummy Dynamic API... Goddammit, I'll add disclaimers for now)
 - ~~Add the cats~~

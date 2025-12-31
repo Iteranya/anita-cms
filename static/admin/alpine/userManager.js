@@ -14,10 +14,10 @@ export default () =>  ({
         deleteModalOpen: false,
         isEditingUser: false,
 
-        // Forms
-        userForm: { username: '', display_name: '', role: 'viewer', disabled: false, password: '' },
-        passwordForm: { username: '', new_password: '' },
-        roleForm: { role_name: '', permissions: [] },
+        // Collections
+        userCollection: { username: '', display_name: '', role: 'viewer', disabled: false, password: '' },
+        passwordCollection: { username: '', new_password: '' },
+        roleCollection: { role_name: '', permissions: [] },
         deleteTarget: { type: '', id: '' },
 
         // Static Data: Permission Categories
@@ -29,17 +29,17 @@ export default () =>  ({
         ]
     },
     {
-        name: 'Forms & Submissions',
+        name: 'Collections & Submissions',
         perms: [
-            { key: 'form:create', label: 'Create Forms', desc: 'Allows creating new forms, including defining fields, settings, and behavior.' },
-            { key: 'form:read', label: 'View Forms', desc: 'Allows viewing existing forms and their configuration.' },
-            { key: 'form:update', label: 'Edit Forms', desc: 'Allows editing or modifying existing forms and their settings.' },
-            { key: 'form:delete', label: 'Delete Forms', desc: 'Allows deleting forms entirely from the system.' },
+            { key: 'collection:create', label: 'Create Collections', desc: 'Allows creating new collections, including defining fields, settings, and behavior.' },
+            { key: 'collection:read', label: 'View Collections', desc: 'Allows viewing existing collections and their configuration.' },
+            { key: 'collection:update', label: 'Edit Collections', desc: 'Allows editing or modifying existing collections and their settings.' },
+            { key: 'collection:delete', label: 'Delete Collections', desc: 'Allows deleting collections entirely from the system.' },
             
-            { key: 'submission:create', label: 'Create Submissions (Override)', desc: 'Allows creating form submissions even when the form’s own access rules would normally prevent it.' },
-            { key: 'submission:read', label: 'View Submissions (Override)', desc: 'Allows viewing any form submissions regardless of the form’s internal permission rules.' },
-            { key: 'submission:update', label: 'Edit Submissions (Override)', desc: 'Allows editing any form submission even if role-based or form-level rules would normally block it.' },
-            { key: 'submission:delete', label: 'Delete Submissions (Override)', desc: 'Allows deleting any form submission regardless of the form’s access restrictions.' }
+            { key: 'submission:create', label: 'Create Submissions (Override)', desc: 'Allows creating collection submissions even when the collection’s own access rules would normally prevent it.' },
+            { key: 'submission:read', label: 'View Submissions (Override)', desc: 'Allows viewing any collection submissions regardless of the collection’s internal permission rules.' },
+            { key: 'submission:update', label: 'Edit Submissions (Override)', desc: 'Allows editing any collection submission even if role-based or collection-level rules would normally block it.' },
+            { key: 'submission:delete', label: 'Delete Submissions (Override)', desc: 'Allows deleting any collection submission regardless of the collection’s access restrictions.' }
         ]
     },
     {
@@ -115,13 +115,13 @@ export default () =>  ({
         openCreateUser() {
             this.isEditingUser = false;
             const firstRole = this.roles.length > 0 ? this.roles[0].role_name : 'viewer';
-            this.userForm = { username: '', display_name: '', role: firstRole, disabled: false, password: '' };
+            this.userCollection = { username: '', display_name: '', role: firstRole, disabled: false, password: '' };
             this.userModalOpen = true;
         },
 
         openEditUser(user) {
             this.isEditingUser = true;
-            this.userForm = { 
+            this.userCollection = { 
                 username: user.username,
                 display_name: user.display_name,
                 role: user.role,
@@ -132,23 +132,23 @@ export default () =>  ({
         },
 
         openPasswordModal(user) {
-            this.passwordForm = { username: user.username, new_password: '' };
+            this.passwordCollection = { username: user.username, new_password: '' };
             this.passwordModalOpen = true;
         },
 
         async saveUser() {
             try {
                 const payload = {
-                    display_name: this.userForm.display_name,
-                    role: this.userForm.role,
-                    disabled: this.userForm.disabled
+                    display_name: this.userCollection.display_name,
+                    role: this.userCollection.role,
+                    disabled: this.userCollection.disabled
                 };
 
                 if (this.isEditingUser) {
-                    await this.$api.users.update(this.userForm.username, payload).execute();
+                    await this.$api.users.update(this.userCollection.username, payload).execute();
                 } else {
-                    payload.username = this.userForm.username;
-                    payload.password = this.userForm.password;
+                    payload.username = this.userCollection.username;
+                    payload.password = this.userCollection.password;
                     await this.$api.users.create().execute(payload);
                 }
                 this.userModalOpen = false;
@@ -162,8 +162,8 @@ export default () =>  ({
                 // If your API has a specific endpoint, use that. 
                 // Otherwise, some systems allow password update via standard PUT if permissions allow.
                 // We'll try the standard update first.
-                await this.$api.users.update(this.passwordForm.username, { 
-                    password: this.passwordForm.new_password 
+                await this.$api.users.update(this.passwordCollection.username, { 
+                    password: this.passwordCollection.new_password 
                 }).execute();
                 
                 this.passwordModalOpen = false;
@@ -175,7 +175,7 @@ export default () =>  ({
 
         selectRole(role) {
             this.selectedRole = role; // Reference for UI highlight
-            this.roleForm = {
+            this.roleCollection = {
                 role_name: role.role_name,
                 permissions: [...role.permissions] // Deep copy perms
             };
@@ -189,10 +189,10 @@ export default () =>  ({
         },
 
         togglePermission(key) {
-            if (this.roleForm.permissions.includes(key)) {
-                this.roleForm.permissions = this.roleForm.permissions.filter(p => p !== key);
+            if (this.roleCollection.permissions.includes(key)) {
+                this.roleCollection.permissions = this.roleCollection.permissions.filter(p => p !== key);
             } else {
-                this.roleForm.permissions.push(key);
+                this.roleCollection.permissions.push(key);
             }
         },
 
@@ -200,8 +200,8 @@ export default () =>  ({
             if(!this.selectedRole) return;
             try {
                 const payload = {
-                    role_name: this.roleForm.role_name,
-                    permissions: this.roleForm.permissions
+                    role_name: this.roleCollection.role_name,
+                    permissions: this.roleCollection.permissions
                 };
                 
                 // Using generic POST to /users/roles/

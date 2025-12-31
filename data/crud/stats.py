@@ -7,8 +7,8 @@ from .labels import format_label_for_db
 def get_total_pages_count(db: Session) -> int:
     return db.query(func.count(models.Page.id)).scalar()
 
-def get_total_forms_count(db: Session) -> int:
-    return db.query(func.count(models.Form.id)).scalar()
+def get_total_collections_count(db: Session) -> int:
+    return db.query(func.count(models.Collection.id)).scalar()
 
 def get_total_submissions_count(db: Session) -> int:
     return db.query(func.count(models.Submission.id)).scalar()
@@ -28,15 +28,15 @@ def get_pages_count_by_label(db: Session, label_name: str) -> int:
         .scalar()
     )
 
-def get_top_forms_by_submission_count(db: Session, limit: int = 5) -> List[Tuple[str, str, int]]:
+def get_top_collections_by_submission_count(db: Session, limit: int = 5) -> List[Tuple[str, str, int]]:
     return (
         db.query(
-            models.Form.title,                                               
-            models.Form.slug,                                              
+            models.Collection.title,                                               
+            models.Collection.slug,                                              
             func.count(models.Submission.id).label("submission_count")
         )
-        .join(models.Submission, models.Form.slug == models.Submission.form_slug) 
-        .group_by(models.Form.title, models.Form.slug)                      
+        .join(models.Submission, models.Collection.slug == models.Submission.collection_slug) 
+        .group_by(models.Collection.title, models.Collection.slug)                      
         .order_by(func.count(models.Submission.id).desc())
         .limit(limit)
         .all()

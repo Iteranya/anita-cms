@@ -2,7 +2,7 @@ import json
 from typing import List
 
 from data.schemas import AlpineData
-from services.forms import FormService
+from services.collections import CollectionService
 from services.labels import LabelService
 
 # TODO: Abstract this somehow...
@@ -30,11 +30,11 @@ def _get_default_value(field_type: str) -> str:
 
 # --- Generators ---
 
-def generate_form_list_js(form_slug: str, fields: List[dict]) -> str:
+def generate_collection_list_js(collection_slug: str, fields: List[dict]) -> str:
     """
     Creates the Javascript string for the List/Table view.
     """
-    safe_slug = _get_js_safe_slug(form_slug)
+    safe_slug = _get_js_safe_slug(collection_slug)
     component_name = f"list_{safe_slug}"
 
     return f"""
@@ -55,7 +55,7 @@ document.addEventListener('alpine:init', () => {{
             this.isLoading = true;
             try {{
                 // Expects response format: {{ items: [], totalItems: 0, totalPages: 0 }}
-                const response = await this.$api.collections.listRecords('{form_slug}', this.page, this.limit).execute();
+                const response = await this.$api.collections.listRecords('{collection_slug}', this.page, this.limit).execute();
                 this.submissions = response.items || response; 
                 this.totalItems = response.totalItems || 0;
                 this.totalPages = response.totalPages || 0;
@@ -72,7 +72,7 @@ document.addEventListener('alpine:init', () => {{
             
             this.isLoading = true;
             try {{
-                await this.$api.collections.deleteRecord('{form_slug}', id).execute();
+                await this.$api.collections.deleteRecord('{collection_slug}', id).execute();
                 if(Alpine.store('notifications')) Alpine.store('notifications').success('Deleted', 'Record removed.');
                 await this.refresh();
             }} catch(e) {{
@@ -107,11 +107,11 @@ document.addEventListener('alpine:init', () => {{
 """
 
 
-def generate_form_editor_js(form_slug: str, fields: List[dict]) -> str:
+def generate_collection_editor_js(collection_slug: str, fields: List[dict]) -> str:
     """
     Creates the Javascript string for the Create/Update view.
     """
-    safe_slug = _get_js_safe_slug(form_slug)
+    safe_slug = _get_js_safe_slug(collection_slug)
     component_name = f"editor_{safe_slug}"
     
     # 1. Initialize properties with type awareness
@@ -188,20 +188,20 @@ document.addEventListener('alpine:init', () => {{
                 if (this.isEditing && this.submissionId) {{
                     // --- UPDATE ---
                     const payload = {{ data: submissionBody }};
-                    await this.$api.collections.updateRecord('{form_slug}', this.submissionId, payload).execute();
+                    await this.$api.collections.updateRecord('{collection_slug}', this.submissionId, payload).execute();
                     if(Alpine.store('notifications')) Alpine.store('notifications').success('Saved', 'Submission updated.');
 
                 }} else {{
                     // --- CREATE ---
                     const payload = {{
-                        form_slug: '{form_slug}',
+                        collection_slug: '{collection_slug}',
                         data: submissionBody
                     }};
                     
-                    await this.$api.collections.createRecord('{form_slug}', payload).execute();
+                    await this.$api.collections.createRecord('{collection_slug}', payload).execute();
                     
                     if(Alpine.store('notifications')) Alpine.store('notifications').success('Success', 'Submission created.');
-                    this.resetForm();
+                    this.resetCollection();
                 }}
                 
                 this.$dispatch('submission-saved');
@@ -214,7 +214,7 @@ document.addEventListener('alpine:init', () => {{
             }}
         }},
 
-        resetForm() {{
+        resetCollection() {{
             this.submissionId = null;
             this.isEditing = false;
             {reset_str}
@@ -334,44 +334,44 @@ document.addEventListener('alpine:init', () => {{
 
 # --- Registry Generators ---
 
-def generate_form_alpine_components(form_service: FormService) -> List[AlpineData]:
-    forms = form_service.get_all_forms(skip=0, limit=1000)
+def generate_collection_alpine_components(collection_service: CollectionService) -> List[AlpineData]:
+    collections = collection_service.get_all_collections(skip=0, limit=1000)
     alpine_registry: List[AlpineData] = []
 
     REQUIRED_TAGS = {"any:read", "any:create"}
 
-    for form in forms:
-        label_names = {label.name for label in form.labels}
+    for collection in collections:
+        label_names = {label.name for label in collection.labels}
 
-        # Skip forms without any of the required labels
+        # Skip collections without any of the required labels
         if not label_names.intersection(REQUIRED_TAGS):
             continue
 
-        schema_fields = form.schema.get('fields', []) if form.schema else []
+        schema_fields = collection.schema.get('fields', []) if collection.schema else []
 
         # 1. List Component
-        list_js = generate_form_list_js(form.slug, schema_fields)
+        list_js = generate_collection_list_js(collection.slug, schema_fields)
         alpine_registry.append(AlpineData(
-            slug=f"list-{form.slug}",
-            name=f"List: {form.title}",
-            description=f"Displays submissions for {form.title}",
+            slug=f"list-{collection.slug}",
+            name=f"List: {collection.title}",
+            description=f"Displays submissions for {collection.title}",
             category="Collections",
             data=list_js
         ))
 
         # 2. Editor Component
-        editor_js = generate_form_editor_js(form.slug, schema_fields)
+        editor_js = generate_collection_editor_js(collection.slug, schema_fields)
         alpine_registry.append(AlpineData(
-            slug=f"editor-{form.slug}",
-            name=f"Editor: {form.title}",
-            description=f"Create or Edit submissions for {form.title}",
+            slug=f"editor-{collection.slug}",
+            name=f"Editor: {collection.title}",
+            description=f"Create or Edit submissions for {collection.title}",
             category="Collections",
             data=editor_js
         ))
 
-def generate_media_alpine_components(form_service: FormService) -> List[AlpineData]:
-    # Assuming 'media-data' is the internal form slug for media
-    all_media = form_service.get_submissions_for_form("media-data", 0, 100)
+def generate_media_alpine_components(collection_service: CollectionService) -> List[AlpineData]:
+    # Assuming 'media-data' is the internal collection slug for media
+    all_media = collection_service.get_submissions_for_collection("media-data", 0, 100)
     alpine_registry: List[AlpineData] = []
 
     for media in all_media:

@@ -2,7 +2,7 @@ export default () =>  ({
         isLoading: false,
         isSaving: false,
         
-        form: {
+        collection: {
             ai_endpoint: '',
             base_llm: '',
             ai_key: '',
@@ -20,14 +20,14 @@ export default () =>  ({
                 // Fetch current config
                 const res = await this.$api.config.get().execute();
                 
-                // Map to form
-                this.form.ai_endpoint = res.ai_endpoint || '';
-                this.form.base_llm = res.base_llm || '';
-                this.form.temperature = res.temperature !== undefined ? res.temperature : 0.7;
-                this.form.system_note = res.system_note || '';
+                // Map to collection
+                this.collection.ai_endpoint = res.ai_endpoint || '';
+                this.collection.base_llm = res.base_llm || '';
+                this.collection.temperature = res.temperature !== undefined ? res.temperature : 0.7;
+                this.collection.system_note = res.system_note || '';
                 
                 // Never populate the key field for security, it stays blank implies "no change"
-                this.form.ai_key = ''; 
+                this.collection.ai_key = ''; 
             } catch (e) {
                 console.error("Config Load Error", e);
             } finally {
@@ -38,8 +38,8 @@ export default () =>  ({
         async save() {
             this.isSaving = true;
             
-            // Clone form to avoid mutating UI state during save
-            const payload = { ...this.form };
+            // Clone collection to avoid mutating UI state during save
+            const payload = { ...this.collection };
 
             // If key is empty, don't send it (backend should treat this as "keep existing")
             if (!payload.ai_key || payload.ai_key.trim() === '') {

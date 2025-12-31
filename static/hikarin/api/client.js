@@ -36,11 +36,11 @@ export class HikarinApi {
             ...options
         };
 
-        if (options.body && !(options.body instanceof FormData)) {
+        if (options.body && !(options.body instanceof CollectionData)) {
             config.headers['Content-Type'] = 'application/json';
             config.body = JSON.stringify(options.body);
         }
-        if (!(options.body instanceof FormData)) config.headers['Accept'] = 'application/json';
+        if (!(options.body instanceof CollectionData)) config.headers['Accept'] = 'application/json';
 
         const response = await fetch(url, config);
         

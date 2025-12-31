@@ -5,23 +5,23 @@ export class CollectionsAPI {
     
     list(label=null) { 
         const q = label ? `?label=${label}` : '';
-        return new ApiRequest(() => this._client._request('GET', `/forms/list${q}`)); 
+        return new ApiRequest(() => this._client._request('GET', `/collections/list${q}`)); 
     }
-    get(slug) { return new ApiRequest(() => this._client._request('GET', `/forms/${slug}`)); }
-    create(data) { return new ApiRequest(() => this._client._request('POST', '/forms/', { body: data })); }
-    update(slug, data) { return new ApiRequest(() => this._client._request('PUT', `/forms/${slug}`, { body: data })); }
-    delete(slug) { return new ApiRequest(() => this._client._request('DELETE', `/forms/${slug}`)); }
+    get(slug) { return new ApiRequest(() => this._client._request('GET', `/collections/${slug}`)); }
+    create(data) { return new ApiRequest(() => this._client._request('POST', '/collections/', { body: data })); }
+    update(slug, data) { return new ApiRequest(() => this._client._request('PUT', `/collections/${slug}`, { body: data })); }
+    delete(slug) { return new ApiRequest(() => this._client._request('DELETE', `/collections/${slug}`)); }
     
     listRecords(slug, skip=0, limit=100) {
-        return new ApiRequest(() => this._client._request('GET', `/forms/${slug}/submissions?skip=${skip}&limit=${limit}`));
+        return new ApiRequest(() => this._client._request('GET', `/collections/${slug}/submissions?skip=${skip}&limit=${limit}`));
     }
     createRecord(slug, payload) {
-        return new ApiRequest(() => this._client._request('POST', `/forms/${slug}/submit`, { body: payload }));
+        return new ApiRequest(() => this._client._request('POST', `/collections/${slug}/submit`, { body: payload }));
     }
     updateRecord(slug, id, payload) {
-        return new ApiRequest(() => this._client._request('PUT', `/forms/${slug}/submissions/${id}`, { body: payload }));
+        return new ApiRequest(() => this._client._request('PUT', `/collections/${slug}/submissions/${id}`, { body: payload }));
     }
     deleteRecord(slug, id) {
-        return new ApiRequest(() => this._client._request('DELETE', `/forms/${slug}/submissions/${id}`));
+        return new ApiRequest(() => this._client._request('DELETE', `/collections/${slug}/submissions/${id}`));
     }
 }

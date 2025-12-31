@@ -1,13 +1,13 @@
-<div x-data="formManager" class="flex flex-col h-full bg-slate-50">
+<div x-data="collectionManager" class="flex flex-col h-full bg-slate-50">
     
     <!-- HEADER -->
     <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-8 shadow-sm z-10 flex-shrink-0">
         <div>
-            <h1 class="text-xl font-bold text-slate-800">Forms Builder</h1>
+            <h1 class="text-xl font-bold text-slate-800">Collections Builder</h1>
             <p class="text-xs text-slate-500">API Collections and Data Schemas</p>
         </div>
         <button @click="openCreate()" class="bg-slate-900 hover:bg-slate-700 active:scale-95 text-white px-5 py-2.5 rounded-lg shadow-lg font-bold text-sm flex items-center gap-2 transition-all">
-            <i class="fas fa-plus"></i> New Form
+            <i class="fas fa-plus"></i> New Collection
         </button>
     </header>
 
@@ -16,24 +16,24 @@
         <!-- Loading State -->
         <div x-show="isLoading" class="flex flex-col items-center justify-center py-20">
             <i class="fas fa-circle-notch fa-spin text-5xl text-anita-500 mb-4"></i>
-            <p class="text-slate-500 text-sm">Loading your forms...</p>
+            <p class="text-slate-500 text-sm">Loading your collections...</p>
         </div>
 
         <!-- Empty State -->
-        <div x-show="!isLoading && forms.length === 0" class="flex flex-col items-center justify-center py-20" x-cloak>
+        <div x-show="!isLoading && collections.length === 0" class="flex flex-col items-center justify-center py-20" x-cloak>
             <div class="w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center mb-4">
                 <i class="fas fa-table text-4xl text-slate-300"></i>
             </div>
-            <h3 class="text-lg font-bold text-slate-700 mb-2">No forms yet</h3>
-            <p class="text-sm text-slate-500 mb-6">Create your first form to get started</p>
+            <h3 class="text-lg font-bold text-slate-700 mb-2">No collections yet</h3>
+            <p class="text-sm text-slate-500 mb-6">Create your first collection to get started</p>
             <button @click="openCreate()" class="bg-anita-600 hover:bg-anita-700 text-white px-5 py-2.5 rounded-lg font-bold text-sm flex items-center gap-2">
-                <i class="fas fa-plus"></i> Create Your First Form
+                <i class="fas fa-plus"></i> Create Your First Collection
             </button>
         </div>
 
-        <!-- Forms Grid -->
-        <div x-show="!isLoading && forms.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" x-cloak>
-            <template x-for="f in forms" :key="f.slug">
+        <!-- Collections Grid -->
+        <div x-show="!isLoading && collections.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" x-cloak>
+            <template x-for="f in collections" :key="f.slug">
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-lg hover:border-anita-200 transition-all cursor-pointer flex flex-col group" @click="openEdit(f)">
                     <div class="flex justify-between items-start mb-4">
                         <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-anita-50 to-anita-100 text-anita-600 flex items-center justify-center text-xl shadow-sm">
@@ -43,7 +43,7 @@
                             <button @click.stop="openEdit(f)" class="text-slate-400 hover:text-anita-600 hover:bg-anita-50 p-2 rounded-lg transition-all" title="Edit settings">
                                 <i class="fas fa-cog"></i>
                             </button>
-                            <button @click.stop="deleteForm(f.slug)" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition-all" title="Delete form">
+                            <button @click.stop="deleteCollection(f.slug)" class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition-all" title="Delete collection">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -52,8 +52,8 @@
                     <div class="flex-1">
                         <h3 class="font-bold text-slate-800 text-lg mb-1" x-text="f.title"></h3>
                         <div class="flex items-center gap-2 mb-3">
-                            <code class="text-xs text-slate-400 bg-slate-50 px-2 py-1 rounded font-mono" x-text="'/forms/' + f.slug"></code>
-                            <button @click.stop="copyToClipboard('/forms/' + f.slug)" class="text-slate-300 hover:text-anita-600 text-xs transition-colors" title="Copy path">
+                            <code class="text-xs text-slate-400 bg-slate-50 px-2 py-1 rounded font-mono" x-text="'/collections/' + f.slug"></code>
+                            <button @click.stop="copyToClipboard('/collections/' + f.slug)" class="text-slate-300 hover:text-anita-600 text-xs transition-colors" title="Copy path">
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>
@@ -90,7 +90,7 @@
                 <div class="flex justify-between items-center mb-6">
                     <div>
                         <h3 class="text-2xl font-bold text-slate-800 mb-1" x-text="mode === 'create' ? 'New Collection' : 'Edit Collection'"></h3>
-                        <p class="text-sm text-slate-500" x-show="mode === 'edit'" x-text="form.title"></p>
+                        <p class="text-sm text-slate-500" x-show="mode === 'edit'" x-text="collection.title"></p>
                     </div>
                     <button @click="modalOpen = false" class="text-slate-400 hover:text-red-500 hover:bg-red-50 w-10 h-10 rounded-full flex items-center justify-center transition-all">
                         <i class="fas fa-times text-xl"></i>
@@ -106,7 +106,7 @@
                         :class="activeTab === 'builder' ? 'bg-white text-anita-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'">
                         <i class="fas fa-tools mr-2"></i>Schema Builder
                     </button>
-                    <a :href="`/admin/submissions?slug=${form.slug}`" 
+                    <a :href="`/admin/submissions?slug=${collection.slug}`" 
                         target="_blank"
                         class="px-4 py-2 text-sm font-bold rounded-md transition-all text-slate-500 hover:text-anita-600 hover:bg-white/50 flex items-center gap-2">
                             <i class="fas fa-database"></i>
@@ -128,19 +128,19 @@
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Display Title *</label>
-                                <input type="text" x-model="form.title" @input="handleTitleInput" placeholder="e.g., Contact Form" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-anita-500 focus:border-anita-500 outline-none font-semibold transition-all">
+                                <input type="text" x-model="collection.title" @input="handleTitleInput" placeholder="e.g., Contact Collection" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-anita-500 focus:border-anita-500 outline-none font-semibold transition-all">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-600 uppercase mb-2 flex items-center gap-2">
                                     Slug (API Key) *
                                     <span x-show="mode === 'edit'" class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">READ-ONLY</span>
                                 </label>
-                                <input type="text" x-model="form.slug" @blur="sanitizeSlug" :disabled="mode === 'edit'" placeholder="contact_form" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none font-mono text-sm transition-all" :class="mode === 'edit' ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : 'bg-white'">
+                                <input type="text" x-model="collection.slug" @blur="sanitizeSlug" :disabled="mode === 'edit'" placeholder="contact_collection" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none font-mono text-sm transition-all" :class="mode === 'edit' ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : 'bg-white'">
                             </div>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Description</label>
-                            <textarea x-model="form.description" rows="3" placeholder="Describe what this form is used for..." class="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-anita-500 focus:border-anita-500 outline-none resize-none transition-all"></textarea>
+                            <textarea x-model="collection.description" rows="3" placeholder="Describe what this collection is used for..." class="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-anita-500 focus:border-anita-500 outline-none resize-none transition-all"></textarea>
                         </div>
                     </div>
 
@@ -188,10 +188,10 @@
                                             <i class="fas fa-globe text-slate-400"></i>
                                             Anyone (Public)
                                         </td>
-                                        <td class="text-center"><input type="checkbox" x-model="form.permissions.any.create" class="w-4 h-4 text-anita-600 rounded focus:ring-2 focus:ring-anita-500"></td>
-                                        <td class="text-center"><input type="checkbox" x-model="form.permissions.any.read" class="w-4 h-4 text-anita-600 rounded focus:ring-2 focus:ring-anita-500"></td>
-                                        <td class="text-center"><input type="checkbox" x-model="form.permissions.any.update" class="w-4 h-4 text-anita-600 rounded focus:ring-2 focus:ring-anita-500"></td>
-                                        <td class="text-center"><input type="checkbox" x-model="form.permissions.any.delete" class="w-4 h-4 text-anita-600 rounded focus:ring-2 focus:ring-anita-500"></td>
+                                        <td class="text-center"><input type="checkbox" x-model="collection.permissions.any.create" class="w-4 h-4 text-anita-600 rounded focus:ring-2 focus:ring-anita-500"></td>
+                                        <td class="text-center"><input type="checkbox" x-model="collection.permissions.any.read" class="w-4 h-4 text-anita-600 rounded focus:ring-2 focus:ring-anita-500"></td>
+                                        <td class="text-center"><input type="checkbox" x-model="collection.permissions.any.update" class="w-4 h-4 text-anita-600 rounded focus:ring-2 focus:ring-anita-500"></td>
+                                        <td class="text-center"><input type="checkbox" x-model="collection.permissions.any.delete" class="w-4 h-4 text-anita-600 rounded focus:ring-2 focus:ring-anita-500"></td>
                                     </tr>
                                     <!-- DYNAMIC ROLES -->
                                     <template x-for="role in role_name" :key="role">
@@ -200,10 +200,10 @@
                                                 <i class="fas fa-user-label text-slate-400"></i>
                                                 <span x-text="role"></span>
                                             </td>
-                                            <td class="text-center"><input type="checkbox" x-model="form.permissions.roles[role].create" class="w-4 h-4 text-anita-600 rounded focus:ring-2 focus:ring-anita-500"></td>
-                                            <td class="text-center"><input type="checkbox" x-model="form.permissions.roles[role].read" class="w-4 h-4 text-anita-600 rounded focus:ring-2 focus:ring-anita-500"></td>
-                                            <td class="text-center"><input type="checkbox" x-model="form.permissions.roles[role].update" class="w-4 h-4 text-anita-600 rounded focus:ring-2 focus:ring-anita-500"></td>
-                                            <td class="text-center"><input type="checkbox" x-model="form.permissions.roles[role].delete" class="w-4 h-4 text-anita-600 rounded focus:ring-2 focus:ring-anita-500"></td>
+                                            <td class="text-center"><input type="checkbox" x-model="collection.permissions.roles[role].create" class="w-4 h-4 text-anita-600 rounded focus:ring-2 focus:ring-anita-500"></td>
+                                            <td class="text-center"><input type="checkbox" x-model="collection.permissions.roles[role].read" class="w-4 h-4 text-anita-600 rounded focus:ring-2 focus:ring-anita-500"></td>
+                                            <td class="text-center"><input type="checkbox" x-model="collection.permissions.roles[role].update" class="w-4 h-4 text-anita-600 rounded focus:ring-2 focus:ring-anita-500"></td>
+                                            <td class="text-center"><input type="checkbox" x-model="collection.permissions.roles[role].delete" class="w-4 h-4 text-anita-600 rounded focus:ring-2 focus:ring-anita-500"></td>
                                         </tr>
                                     </template>
                                 </tbody>
@@ -242,7 +242,7 @@
                         </div>
 
                         <!-- Empty State -->
-                        <div x-show="!form.fields || form.fields.length === 0" class="text-center py-12 border-2 border-dashed border-slate-200 rounded-xl">
+                        <div x-show="!collection.fields || collection.fields.length === 0" class="text-center py-12 border-2 border-dashed border-slate-200 rounded-xl">
                             <i class="fas fa-layer-group text-4xl text-slate-300 mb-3"></i>
                             <p class="text-slate-500 font-medium mb-2">No fields defined yet</p>
                             <p class="text-sm text-slate-400 mb-4">Add your first field to start building your schema</p>
@@ -253,7 +253,7 @@
                         
                         <!-- Fields List -->
                         <div class="space-y-2">
-                            <template x-for="(field, index) in form.fields" :key="index">
+                            <template x-for="(field, index) in collection.fields" :key="index">
                                 <div class="flex gap-2 items-center bg-gradient-to-r from-slate-50 to-white p-3 rounded-xl border border-slate-200 hover:border-anita-300 hover:shadow-sm transition-all group">
                                     <div class="w-8 h-8 rounded-lg bg-anita-100 text-anita-600 font-bold text-xs flex items-center justify-center" x-text="index + 1"></div>
                                     <div class="flex-1 grid grid-cols-12 gap-2">

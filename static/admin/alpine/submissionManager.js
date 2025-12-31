@@ -1,6 +1,6 @@
 export default () =>  ({
         slug: '',
-        formDef: null,
+        collectionDef: null,
         submissions: [],
         isLoading: false,
         
@@ -19,7 +19,7 @@ export default () =>  ({
             this.slug = params.get('slug');
 
             if (!this.slug) {
-                Alpine.store('notifications').error('Missing Slug', 'No form slug specified in URL.');
+                Alpine.store('notifications').error('Missing Slug', 'No collection slug specified in URL.');
                 return;
             }
 
@@ -30,11 +30,11 @@ export default () =>  ({
             this.isLoading = true;
             try {
                 // A. Fetch Schema (to know columns/fields)
-                this.formDef = await this.$api.collections.get(this.slug).execute();
+                this.collectionDef = await this.$api.collections.get(this.slug).execute();
                 
-                // Parse Schema for Table & Form
-                if(this.formDef.schema && this.formDef.schema.fields) {
-                    this.fields = this.formDef.schema.fields;
+                // Parse Schema for Table & Collection
+                if(this.collectionDef.schema && this.collectionDef.schema.fields) {
+                    this.fields = this.collectionDef.schema.fields;
                     this.headers = this.fields.map(f => f.name);
                 }
 
@@ -72,7 +72,7 @@ export default () =>  ({
             try {
                 const payload = {
                     data: this.record,
-                    // If your backend requires form_slug or id in body, add it here
+                    // If your backend requires collection_slug or id in body, add it here
                     id: this.editId 
                 };
 

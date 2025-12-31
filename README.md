@@ -67,7 +67,7 @@ Usually, if you want a dynamic "Menu" page for a restaurant, you have to code a 
 
 With Anita, you just do this:
 - Open the Dashboard: Go to the "Collections" tab.
-- Create a Form: Name it cafe-menu.
+- Create a Collection: Name it cafe-menu.
 - Add Fields: Add a "Text Field" for the Dish Name and a "Number Field" for the Price.
 - Check the boxes for access permissions
 - Done.
@@ -136,11 +136,11 @@ You know what they say, a picture is worth a thousand words...
 <p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-structure-setting.png" alt="Admin UI Structure Setting" width="700"></p>
 <em>You want to separate projects, blogs, and gallery sections of your site??? Well with Anita it's a drag and drop interface~ You can set any page as home, as template, as the head of any top level navigation, and more! Comes with Access Control too!</em>
 
-#### Forms (aka Collections)
-<p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-forms.png" alt="Admin UI Forms" width="700"></p>
-<p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-forms-setting.png" alt="Admin UI Form Settings" width="700"></p>
-<p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-forms-creation.png" alt="Admin UI Form Creation" width="700"></p>
-<em>Oh you think this is for a contact form? It's a misnomer see? These are 'Collections', the no-code backend part of all this. You can make `contact-form`, but you can also make `cafe-menu`, `art-gallery`, and more, with role based permissions! Anita will create an entire GET/POST/PUT/DELETE route endpoint that accesses these forms you made!</em>
+#### Collections (aka Collections)
+<p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-collections.png" alt="Admin UI Collections" width="700"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-collections-setting.png" alt="Admin UI Collection Settings" width="700"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-collections-creation.png" alt="Admin UI Collection Creation" width="700"></p>
+<em>Oh you think this is for a contact collection? It's a misnomer see? These are 'Collections', the no-code backend part of all this. You can make `contact-collection`, but you can also make `cafe-menu`, `art-gallery`, and more, with role based permissions! Anita will create an entire GET/POST/PUT/DELETE route endpoint that accesses these collections you made!</em>
 
 #### Media & Files
 <p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-media.png" alt="Admin UI Media" width="700"></p>
@@ -249,7 +249,7 @@ python main.py
 - ~~HikarinJS Is Still Opt-in (should be default for all ai generated site)~~ Done! Hikarin JS is first class citizen now~
 - ~~Default Pages Still Uses script (Should use HikarinJS Instead)~~ Done! Script exists, but it uses Hikarin middleware now~
 - ~~System Page Labels Are Still Manual (Should be abstracted with switches / panel)~~ Done! Made new panel for Structure
-- ~~Form Page Labels Are Still Manual (Should be abstracted with switches / panel)~~ Done! With amazing RBAC Panel
+- ~~Collection Page Labels Are Still Manual (Should be abstracted with switches / panel)~~ Done! With amazing RBAC Panel
 - ~~User Roles and Perms Are Still Manual (Should be abstracted with switches / panel)~~ Done! Discord Flavored ABAC Panel~
 - No Labels and Sort Filter Yet
 - No Darkmode Yet (seriously?)
@@ -262,7 +262,7 @@ python main.py
 - ~~Implement Milkdown / Crepe to Asta~~ Done! Asta is Milkdown powered!
 - Give Asta (or Aina) a Search Engine Optimization capability 
 - Better test coverage
-- More graceful Form Seeding (currently don't exist, actually, only page, roles and config for now)
+- More graceful Collection Seeding (currently don't exist, actually, only page, roles and config for now)
 - Category and Labels are the same (should be separated)
 - Sandbox Aina properly (Dummy Browser, Dummy Database, Dummy Dynamic API... Goddammit, I'll add disclaimers for now)
 

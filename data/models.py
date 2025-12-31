@@ -12,9 +12,9 @@ page_labels = Table(
     Column('label_id', Integer, ForeignKey('labels.id'), primary_key=True)
 )
 
-form_labels = Table(
-    'form_labels', Base.metadata,
-    Column('form_id', Integer, ForeignKey('forms.id'), primary_key=True),
+collection_labels = Table(
+    'collection_labels', Base.metadata,
+    Column('collection_id', Integer, ForeignKey('collections.id'), primary_key=True),
     Column('label_id', Integer, ForeignKey('labels.id'), primary_key=True)
 )
 
@@ -50,8 +50,8 @@ class Page(Base):
     author = Column(String)
     custom = Column(JSON)
 
-class Form(Base):
-    __tablename__ = "forms"
+class Collection(Base):
+    __tablename__ = "collections"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     slug = Column(String, unique=True, nullable=False, index=True)
@@ -61,16 +61,16 @@ class Form(Base):
     created = Column(String)
     updated = Column(String)
     author = Column(String)
-    labels = relationship("Label", secondary=form_labels, backref="forms")
+    labels = relationship("Label", secondary=collection_labels, backref="collections")
     
     custom = Column(JSON)
-    submissions = relationship("Submission", back_populates="form", cascade="all, delete-orphan")
+    submissions = relationship("Submission", back_populates="collection", cascade="all, delete-orphan")
 
 class Submission(Base):
     __tablename__ = "submissions"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    form_slug = Column(String, ForeignKey("forms.slug", ondelete="CASCADE"), nullable=False)
+    collection_slug = Column(String, ForeignKey("collections.slug", ondelete="CASCADE"), nullable=False)
     data = Column("submission_json", JSON, nullable=False)
     created = Column(String)
     updated = Column(String)
@@ -78,7 +78,7 @@ class Submission(Base):
     custom = Column(JSON)
     labels = relationship("Label", secondary=submission_labels, backref="submissions")
 
-    form = relationship("Form", back_populates="submissions")
+    collection = relationship("Collection", back_populates="submissions")
 
 class User(Base):
     __tablename__ = "users"

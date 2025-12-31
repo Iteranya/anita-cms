@@ -21,12 +21,12 @@ from .pages import (
     delete_page
 )
 
-from .forms import (
-    get_form,
-    list_forms,
-    create_form,
-    update_form,
-    delete_form
+from .collections import (
+    get_collection,
+    list_collections,
+    create_collection,
+    update_collection,
+    delete_collection
 )
 
 from .submissions import (
@@ -58,12 +58,12 @@ from .settings import (
 
 from .stats import (
     get_total_pages_count,
-    get_total_forms_count,
+    get_total_collections_count,
     get_total_submissions_count,
     get_total_users_count,
     get_total_labels_count,
     get_pages_count_by_label,
-    get_top_forms_by_submission_count,
+    get_top_collections_by_submission_count,
     get_top_labels_by_page_usage,
     get_recent_pages,
     get_recently_updated_pages,

@@ -43,7 +43,6 @@ def get_current_user(
     Raises 401 Unauthorized if the user is not authenticated or the token is invalid.
     """
     if not access_token:
-        print("No Access Token")
         # Raise an exception instead of returning None to enforce authentication
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -53,7 +52,6 @@ def get_current_user(
     
     payload = auth_service.decode_access_token(access_token)
     if not payload:
-        print("No Payload")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
@@ -63,7 +61,6 @@ def get_current_user(
     try:
         return schemas.CurrentUser(**payload)
     except ValidationError:
-        print("Validation Error")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token payload",
@@ -84,10 +81,8 @@ def require_permission(permission: str):
         db: Session = Depends(get_db)
     ) -> schemas.CurrentUser:
         user_service = UserService(db)
-        user_role = current_user.role
         
-        all_roles = user_service.get_all_roles()
-        user_permissions = all_roles.get(user_role, [])
+        user_permissions = user_service.get_user_permissions(current_user.username)
         
         # Admin role with wildcard has all permissions
         if "*" in user_permissions:
@@ -130,10 +125,10 @@ def optional_user(
 # Eh, it's good to show what exists and what not
 require_admin = require_permission("*") 
 
-form_create = require_permission("form:create")
-form_read = require_permission("form:read")
-form_update = require_permission("form:update")
-form_delete = require_permission("form:delete")
+collection_create = require_permission("collection:create")
+collection_read = require_permission("collection:read")
+collection_update = require_permission("collection:update")
+collection_delete = require_permission("collection:delete")
 
 media_create = require_permission("media:create")
 media_read = require_permission("media:read") # List all media perm, by default, all media can be accessed publicly
@@ -163,8 +158,8 @@ page_update = require_permission("page:update")
 page_delete = require_permission("page:delete")
 
 # THESE ARE OVERRIDES
-# By default, per form submission CRUD is managed by the Form's own labels
-# It uses per-role basis, these ones are system level access to form's own permission
+# By default, per collection submission CRUD is managed by the Collection's own labels
+# It uses per-role basis, these ones are system level access to collection's own permission
 submission_create = require_permission("submission:create")
 submission_read = require_permission("submission:read")
 submission_update = require_permission("submission:update")

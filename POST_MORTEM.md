@@ -1,7 +1,7 @@
 # OH GOD WHY!?
 It is currently 10:45 PM 11/9/2025
 
-I just added a new feature on Anita-chan, the uhh, custom form feature. It's cool, I guess, kinda, maybe. I kinda like it...
+I just added a new feature on Anita-chan, the uhh, custom collection feature. It's cool, I guess, kinda, maybe. I kinda like it...
 
 But anyway, I decided to write this as a lesson for myself and anyone else that might bother reading. A lesson of passion, spite, and oh god why did I do that!?
 
@@ -175,7 +175,7 @@ I have integrated Aina with Ace Editor, do some funky metaprogramming, and creat
 
 You go to Aina, you got three tabs:
 
-Tab 1: Generator -> You click on selection of data from backend you want to access (auto populates your forms and custom collections and media files)
+Tab 1: Generator -> You click on selection of data from backend you want to access (auto populates your collections and custom collections and media files)
 
 Tab 2: Editor -> You have an editor to write HTML and Tailwind and Alpine stuff... You also got another editor to write CSS!!!
 

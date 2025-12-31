@@ -1,5 +1,5 @@
 export default () => ({
-    forms: [],
+    collections: [],
     isLoading: false,
     activeTab: 'settings', // settings | builder | submissions
     role_name: [], // This will be populated on init
@@ -9,8 +9,8 @@ export default () => ({
     mode: 'create',
     currentSlug: '',
 
-    // Form Structure
-    form: {
+    // Collection Structure
+    collection: {
         title: '',
         slug: '',
         description: '',
@@ -26,7 +26,7 @@ export default () => ({
     subsLoading: false,
 
     async init() {
-        // Fetch the main forms list
+        // Fetch the main collections list
         await this.refresh();
 
         // Now, fetch the role names using the new endpoint
@@ -43,7 +43,7 @@ export default () => ({
     async refresh() {
         this.isLoading = true;
         try {
-            this.forms = await this.$api.collections.list().execute();
+            this.collections = await this.$api.collections.list().execute();
         } catch (e) { console.error(e); }
         this.isLoading = false;
     },
@@ -51,7 +51,7 @@ export default () => ({
     // --- Slug Logic ---
     handleTitleInput() {
         if (this.mode === 'create') {
-            this.form.slug = this.form.title
+            this.collection.slug = this.collection.title
                 .toLowerCase()
                 .trim()
                 .replace(/\s+/g, '_')           // Spaces to underscores
@@ -60,7 +60,7 @@ export default () => ({
     },
 
     sanitizeSlug() {
-        this.form.slug = this.form.slug
+        this.collection.slug = this.collection.slug
             .toLowerCase()
             .replace(/\s+/g, '_')
             .replace(/[^\w]/g, '');
@@ -68,7 +68,7 @@ export default () => ({
 
     // --- Field Builder ---
     addField() {
-        this.form.fields.push({
+        this.collection.fields.push({
             name: '',
             label: '',
             type: 'text',
@@ -77,13 +77,13 @@ export default () => ({
     },
 
     removeField(index) {
-        this.form.fields.splice(index, 1);
+        this.collection.fields.splice(index, 1);
     },
 
     updateFieldSlug(index) {
         // Auto-gen field name from label if name is empty
-        if (!this.form.fields[index].name) {
-            this.form.fields[index].name = this.form.fields[index].label
+        if (!this.collection.fields[index].name) {
+            this.collection.fields[index].name = this.collection.fields[index].label
                 .toLowerCase()
                 .replace(/\s+/g, '_')
                 .replace(/[^\w]/g, '');
@@ -123,15 +123,15 @@ export default () => ({
     formatPermissionsToLabels() {
         const labels = [];
         // Handle 'any' permissions
-        for (const action in this.form.permissions.any) {
-            if (this.form.permissions.any[action]) {
+        for (const action in this.collection.permissions.any) {
+            if (this.collection.permissions.any[action]) {
                 labels.push(`any:${action}`);
             }
         }
         // Handle role-based permissions
-        for (const role in this.form.permissions.roles) {
-            for (const action in this.form.permissions.roles[role]) {
-                if (this.form.permissions.roles[role][action]) {
+        for (const role in this.collection.permissions.roles) {
+            for (const action in this.collection.permissions.roles[role]) {
+                if (this.collection.permissions.roles[role][action]) {
                     // CHANGE: Removed 'role:' prefix
                     labels.push(`${role}:${action}`);
                 }
@@ -145,7 +145,7 @@ export default () => ({
     openCreate() {
         this.mode = 'create';
         this.activeTab = 'settings';
-        this.form = {
+        this.collection = {
             title: '',
             slug: '',
             description: '',
@@ -161,7 +161,7 @@ export default () => ({
         this.activeTab = 'settings';
         this.currentSlug = item.slug;
 
-        this.form = {
+        this.collection = {
             title: item.title,
             slug: item.slug,
             description: item.description || '',
@@ -174,16 +174,16 @@ export default () => ({
     async save() {
         this.sanitizeSlug();
         const payload = {
-            title: this.form.title,
-            slug: this.form.slug,
-            description: this.form.description,
+            title: this.collection.title,
+            slug: this.collection.slug,
+            description: this.collection.description,
             labels: this.formatPermissionsToLabels(), // Convert permissions UI state back to labels
-            schema: { fields: this.form.fields },
+            schema: { fields: this.collection.fields },
             custom: {}
         };
 
         // Debug Payload
-        console.log("Saving Form:", payload);
+        console.log("Saving Collection:", payload);
 
         try {
             if (this.mode === 'create') {
@@ -198,12 +198,12 @@ export default () => ({
 
         } catch (e) {
             console.error(e);
-            Alpine.store('notifications').error('Could Not Save Form', e);
+            Alpine.store('notifications').error('Could Not Save Collection', e);
         }
     },
 
-    async deleteForm(slug) {
-        if (!confirm("Delete this form and all data?")) return;
+    async deleteCollection(slug) {
+        if (!confirm("Delete this collection and all data?")) return;
         await this.$api.collections.delete(slug).execute();
         this.refresh();
     },

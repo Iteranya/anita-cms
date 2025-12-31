@@ -11,7 +11,7 @@ export default () => ({
 
         // Details/Edit State
         detailsModalOpen: false,
-        editForm: { id: null, title: '', description: '', filename: '', size: '', link: '' },
+        editCollection: { id: null, title: '', description: '', filename: '', size: '', link: '' },
 
         async init() {
             await this.ensureSchema();
@@ -118,7 +118,7 @@ export default () => ({
         // --- EDIT / DELETE LOGIC ---
         openDetails(record) {
             const d = record.data;
-            this.editForm = {
+            this.editCollection = {
                 id: record.id,
                 title: d.friendly_name,
                 description: d.description,
@@ -132,17 +132,17 @@ export default () => ({
         async saveDetails() {
             const payload = {
                 data: {
-                    friendly_name: this.editForm.title,
-                    description: this.editForm.description,
+                    friendly_name: this.editCollection.title,
+                    description: this.editCollection.description,
                     // Keep existing technical data
-                    saved_filename: this.editForm.filename,
-                    size: this.editForm.size,
-                    public_link: this.editForm.link
+                    saved_filename: this.editCollection.filename,
+                    size: this.editCollection.size,
+                    public_link: this.editCollection.link
                 }
             };
 
             try {
-                await this.$api.collections.updateRecord('file-data', this.editForm.id, payload).execute();
+                await this.$api.collections.updateRecord('file-data', this.editCollection.id, payload).execute();
                 Alpine.store('notifications').success('Updated', 'File details saved.');
                 this.detailsModalOpen = false;
                 this.refresh();
@@ -155,11 +155,11 @@ export default () => ({
             if(!confirm("Delete this file permanently?")) return;
             try {
                 // CHANGED: Use .files.delete()
-                // Pass the filename (e.g. "report.pdf") from the editForm
-                await this.$api.files.delete(this.editForm.filename).execute();
+                // Pass the filename (e.g. "report.pdf") from the editCollection
+                await this.$api.files.delete(this.editCollection.filename).execute();
                 
                 // 2. Delete Registry Entry
-                await this.$api.collections.deleteRecord('file-data', this.editForm.id).execute();
+                await this.$api.collections.deleteRecord('file-data', this.editCollection.id).execute();
                 
                 Alpine.store('notifications').success('Deleted', 'File removed.');
                 this.detailsModalOpen = false;
@@ -180,7 +180,7 @@ export default () => ({
         },
 
         copyLink() {
-            navigator.clipboard.writeText(window.location.origin + this.editForm.link);
+            navigator.clipboard.writeText(window.location.origin + this.editCollection.link);
             Alpine.store('notifications').info('Copied', 'Link copied to clipboard');
         },
 

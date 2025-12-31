@@ -20,7 +20,7 @@ class DashboardService:
         # These are simple scalar values, no transformation needed.
         core_counts = {
             "pages": crud.get_total_pages_count(self.db),
-            "forms": crud.get_total_forms_count(self.db),
+            "collections": crud.get_total_collections_count(self.db),
             "submissions": crud.get_total_submissions_count(self.db),
             "users": crud.get_total_users_count(self.db),
             "labels": crud.get_total_labels_count(self.db),
@@ -35,10 +35,10 @@ class DashboardService:
         # --- 3. Fetch and Transform Activity Metrics ---
         # The CRUD layer returns a list of tuples. The service layer's job is to
         # transform this into a more API-friendly list of dictionaries.
-        top_forms_raw = crud.get_top_forms_by_submission_count(self.db, limit=5)
-        top_forms_formatted = [
+        top_collections_raw = crud.get_top_collections_by_submission_count(self.db, limit=5)
+        top_collections_formatted = [
             {"name": name, "slug": slug, "count": count} 
-            for name, slug, count in top_forms_raw  # <-- Unpack all three items
+            for name, slug, count in top_collections_raw  # <-- Unpack all three items
         ]
 
         top_labels_raw = crud.get_top_labels_by_page_usage(self.db, limit=10)
@@ -47,7 +47,7 @@ class DashboardService:
         ]
 
         activity = {
-            "top_forms_by_submission": top_forms_formatted,
+            "top_collections_by_submission": top_collections_formatted,
             "top_labels_on_pages": top_labels_formatted,
         }
 
