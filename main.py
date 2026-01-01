@@ -65,8 +65,12 @@ def interactive_setup():
             print("❌ No database templates found in /templates folder!")
             print("Please place your theme .db files there and restart.")
             sys.exit(1)
+        print("🏗️  Welcome to Anita CMS Setup!")
+        print("   We need to initialize your database.")
+        print("   Since this is a new installation, please select a Starter Template.")
+        print("   (This will configure your initial pages, roles, and settings)")
 
-        print("🎨 Please select a Theme (Database Template) to initialize:")
+        print("\n📂 Available Starter Templates:")
         for idx, temp in enumerate(available_templates, 1):
             print(f"   [{idx}] {temp.name}")
 
