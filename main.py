@@ -1,25 +1,30 @@
-# main.py
-
 import os
 import sys
+import shutil
+import secrets
+import glob
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, APIRouter, Depends
+from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from pathlib import Path
 
 # --- Configuration & Environment Loading ---
-# Load environment variables from .env file
-load_dotenv()
+BASE_DIR = Path(__file__).resolve().parent
+ENV_PATH = BASE_DIR / ".env"
 
-sys.path.append(str(Path(__file__).resolve().parent))
+# Load environment variables
+load_dotenv(ENV_PATH)
 
-# Now that the path is set, we can use absolute imports
-from data import crud, database
-# Import all your route modules
+sys.path.append(str(BASE_DIR))
+
+# Import database (after path setup)
+from data import database
+
+# Import all route modules
 from routes import (
     admin_route,
     aina_route,
@@ -35,34 +40,89 @@ from routes import (
     dashboard_route
 )
 
-# --- Pre-startup Checks ---
-if not os.getenv("JWT_SECRET"):
-    print("❌ ERROR: JWT_SECRET not found in .env file!")
-    print("Please add JWT_SECRET to your .env file before running the application.")
-    sys.exit(1)
+# --- Interactive Setup Helper ---
+def interactive_setup():
+    """
+    Handles initial setup:
+    1. Selects a database template (Theme) if anita.db is missing.
+    2. Generates JWT_SECRET if missing from .env.
+    """
+    
+    # 1. Database / Theme Selection
+    db_path = BASE_DIR / "anita.db"
+    templates_dir = BASE_DIR / "anita-template"
 
+    if not db_path.exists():
+        print("\n⚠️  No database found (anita.db).")
+        
+        # Find .db files in templates folder
+        if not templates_dir.exists():
+            os.makedirs(templates_dir)
+            
+        available_templates = list(templates_dir.glob("*.db"))
+        
+        if not available_templates:
+            print("❌ No database templates found in /templates folder!")
+            print("Please place your theme .db files there and restart.")
+            sys.exit(1)
 
-# --- Database Initialization & Seeding (using lifespan) ---
+        print("🎨 Please select a Theme (Database Template) to initialize:")
+        for idx, temp in enumerate(available_templates, 1):
+            print(f"   [{idx}] {temp.name}")
+
+        selected_index = -1
+        while selected_index < 0 or selected_index >= len(available_templates):
+            try:
+                choice = input("\nEnter the number of your choice: ")
+                selected_index = int(choice) - 1
+            except ValueError:
+                pass
+
+        selected_template = available_templates[selected_index]
+        print(f"🔄 Copying '{selected_template.name}' to 'anita.db'...")
+        shutil.copy(selected_template, db_path)
+        print("✅ Database initialized successfully.\n")
+    
+    # 2. JWT Secret Generation
+    # Reload env in case it was created/modified externally since script start
+    load_dotenv(ENV_PATH, override=True)
+    
+    if not os.getenv("JWT_SECRET"):
+        print("🔑 JWT_SECRET not found in .env.")
+        gen_choice = input("Generate a secure random secret now? [Y/n]: ").strip().lower()
+        
+        if gen_choice in ["", "y", "yes"]:
+            secret = secrets.token_hex(32)
+            
+            # Read current .env content
+            content = ""
+            if ENV_PATH.exists():
+                with open(ENV_PATH, "r") as f:
+                    content = f.read()
+            
+            # Append new secret
+            prefix = "\n" if content and not content.endswith("\n") else ""
+            with open(ENV_PATH, "a") as f:
+                f.write(f"{prefix}JWT_SECRET={secret}\n")
+            
+            print("✅ Generated new JWT_SECRET and saved to .env.")
+            # Reload environment to apply the change immediately
+            load_dotenv(ENV_PATH, override=True)
+        else:
+            print("❌ Cannot proceed without JWT_SECRET. Exiting.")
+            sys.exit(1)
+
+# --- Database Lifespan ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # This code runs on startup
     print("🚀 Application starting up...")
     
-    # Create database tables if they don't exist
+    # Ensure tables exist (Safety check, though the copied DB should have them)
     database.Base.metadata.create_all(bind=database.engine)
     
-    # Get a database session to perform seeding
-    db = database.SessionLocal()
-    try:
-        print("🌱 Seeding database if necessary...")
-        # Call all your seeding functions. They are idempotent (safe to run multiple times).
-        crud.seed_default_roles(db)
-        crud.seed_default_pages(db)
-        crud.seed_initial_settings(db)
-        # Add any other seeding functions here
-        print("✅ Seeding complete.")
-    finally:
-        db.close()
+    # NOTE: Seeding logic removed. 
+    # Data is now provided via the copied SQLite template in interactive_setup.
         
     yield # The application runs here
 
@@ -82,7 +142,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5469" # Sometimes, this is too strict for development, but do resist the urge to use * you will most likely forget it.
+        "http://localhost:5469" 
     ],
     allow_credentials=True, 
     allow_methods=["GET", "POST", "PUT", "DELETE"],
@@ -93,12 +153,10 @@ app.add_middleware(
 )
 
 # --- Static Files ---
-BASE_DIR = Path(__file__).resolve().parent
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static-directory")
 app.mount("/uploads", StaticFiles(directory=BASE_DIR / "uploads"), name="uploads-directory")
 
 # --- API Router Organization ---
-
 api_router = APIRouter()
 
 api_router.include_router(admin_route.router, tags=["Admin"])
@@ -114,14 +172,16 @@ api_router.include_router(pages_route.router, tags=["Pages"])
 api_router.include_router(auth_route.router, tags=["Authentication"]) 
 api_router.include_router(public_route.router, tags=["Public"])   
 
-
-# Finally, include the versioned API router in the main app
 app.include_router(api_router)
 
 
-# --- Main Entry Point for Uvicorn ---
+# --- Main Entry Point ---
 if __name__ == "__main__":
+    # Run the interactive setup (Theme picker & JWT Gen)
+    # This blocks until the user finishes setup
+    interactive_setup()
+    
     # Get port from command-line argument, default to 5469
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 5469
     print(f"Starting server on http://127.0.0.1:{port}")
-    uvicorn.run("main:app", host="127.0.0.1", port=port)
+    uvicorn.run("main:app", host="127.0.0.1", port=port, reload=True)

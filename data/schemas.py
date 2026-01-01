@@ -134,10 +134,6 @@ class PageMarkdownUpdate(BaseModel):
     @field_validator('markdown', mode='before')
     @classmethod
     def bleach_markdown(cls, v): return sanitize_text(v)
-
-    @field_validator('custom', mode='before')
-    @classmethod
-    def validate_and_bleach_dict(cls, v): return sanitize_recursively(v)
     
     model_config = ConfigDict(extra="ignore")
 

@@ -161,11 +161,12 @@ async save() {
 
         async doDelete() {
             try {
-                await this.$api.pages.delete(this.targetSlug).execute();
+                await this.$api.pages.delete().execute(this.targetSlug);
+                
                 this.deleteModalOpen = false;
                 this.refresh();
             } catch(e) {
-                Alpine.store('notifications').error('Delete Failed', e); ;
+                Alpine.store('notifications').error('Delete Failed', e);
             }
         },
 
