@@ -69,22 +69,4 @@ async def admin_router(
         shell_path = os.path.join(ADMIN_DIR, "index.html")
         return render_no_cache_html(shell_path, False)
 
-    # --- CASE B: Dynamic Database Page ---
-    if user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required")
-
-    page_service = PageService(db)
-    page = page_service.get_page_by_slug(slug)
-
-    is_admin_tool = any(t.name == "sys:admin" for t in page.labels)
-    if not is_admin_tool:
-        raise HTTPException(status_code=404, detail="Page is not an admin tool")
-
-    if page.type == 'html' and page.html:
-        # We also prevent caching for dynamic tools so updates show instantly
-        return HTMLResponse(
-            content=page.html, 
-            headers={"Cache-Control": "no-store, max-age=0"}
-        )
-
     raise HTTPException(status_code=404, detail="Content not available")

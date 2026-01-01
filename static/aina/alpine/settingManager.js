@@ -1,316 +1,231 @@
-export default (slug) => ({
-    slug: slug,
-    isLoading: false,
-    isSaving: false,
-    saveStatus: 'Ready',
+export default (slug) => {
+    // 1. Define configuration
+    const cspFields = [
+        { id: 'default-src', category: 'Essentials', label: 'Default Fallback', description: 'The safety net. If a specific directive is missing, the browser uses this.', placeholder: "'none'" },
+        { id: 'script-src', category: 'Essentials', label: 'Scripts', description: 'Whitelists allowed JavaScript sources. Critical for preventing XSS.', placeholder: "https://cdn.jsdelivr.net" },
+        { id: 'style-src', category: 'Essentials', label: 'Styles', description: 'Whitelists allowed CSS stylesheets.', placeholder: "https://fonts.googleapis.com" },
+        { id: 'connect-src', category: 'Fetch & Resources', label: 'Connections', description: 'Restricts URLs loaded by Fetch, XHR, and WebSockets.', placeholder: "https://api.stripe.com" },
+        { id: 'img-src', category: 'Fetch & Resources', label: 'Images', description: 'Defines valid sources for images and favicons.', placeholder: "https://images.unsplash.com" },
+        { id: 'font-src', category: 'Fetch & Resources', label: 'Fonts', description: 'Defines valid sources for web fonts.', placeholder: "https://fonts.gstatic.com" },
+        { id: 'media-src', category: 'Fetch & Resources', label: 'Media', description: 'Defines valid sources for audio and video.', placeholder: "https://cdn.vid.com" },
+        { id: 'object-src', category: 'Fetch & Resources', label: 'Plugins', description: 'Controls Flash/Java. Best set to \'none\'.', placeholder: "'none'" },
+        { id: 'frame-src', category: 'Embeds & Workers', label: 'Iframe Sources', description: 'Whitelists domains YOU can embed as iframes.', placeholder: "https://www.youtube.com" },
+        { id: 'worker-src', category: 'Embeds & Workers', label: 'Workers', description: 'Restricts Service Workers and Web Workers.', placeholder: "'self' blob:" },
+        { id: 'manifest-src', category: 'Embeds & Workers', label: 'Manifest', description: 'Restricts where the Web App Manifest can load from.', placeholder: "'self'" },
+        { id: 'base-uri', category: 'Security Boundaries', label: 'Base URI', description: 'Restricts the <base> element to prevent hijacking.', placeholder: "'self'" },
+        { id: 'form-action', category: 'Security Boundaries', label: 'Form Actions', description: 'Restricts where forms can be submitted.', placeholder: "'self'" },
+        { id: 'frame-ancestors', category: 'Security Boundaries', label: 'Frame Ancestors', description: 'Defines who can embed YOUR page.', placeholder: "'self' https://partner.com" },
+    ];
+
+    // 2. Pre-fill State
+    const initialRules = {};
+    const initialActive = {};
     
-    // --- State (Rebuilt from HTML every load) ---
-    // We use a Set for O(1) lookups, similar to selectedSlugs in generatorManager
-    activeModules: new Set(), 
-    
-    cspState: {
-        enabled: false,
-        rules: {
-            'script-src': [],
-            'style-src': [],
-            'connect-src': [],
-            'img-src': [],
-            'frame-ancestors': [] 
-        }
-    },
+    cspFields.forEach(f => {
+        initialRules[f.id] = [];
+        initialActive[f.id] = false; // Default everything to OFF
+    });
 
-    // Current Raw HTML (for previewing)
-    previewString: '',
-
-    // --- Configuration / Dictionary ---
-    // identifyingPart: A unique string/regex used to detect if this module is already inside the HTML
-    definitions: [
-        {
-            category: "Essentials",
-            items: [
-                { 
-                    id: 'charset', 
-                    type: 'boolean', 
-                    label: 'UTF-8 Charset', 
-                    desc: 'Standard character encoding.', 
-                    snippet: '<meta charset="UTF-8">',
-                    identifyingPart: 'charset="UTF-8"' 
-                },
-                { 
-                    id: 'viewport', 
-                    type: 'boolean', 
-                    label: 'Responsive Viewport', 
-                    desc: 'Essential for mobile responsiveness.', 
-                    snippet: '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
-                    identifyingPart: 'name="viewport"' 
-                },
-                {
-                    id: 'jquery',
-                    type: 'boolean',
-                    label: 'jQuery 3.7.0',
-                    desc: 'Legacy DOM manipulation.',
-                    snippet: '<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>',
-                    identifyingPart: 'code.jquery.com/jquery-3.7.0'
-                }
-            ]
+    return {
+        slug: slug,
+        isLoading: false,
+        isSaving: false,
+        saveStatus: 'Ready',
+        
+        // State
+        customHeadContent: '', 
+        cspState: {
+            enabled: false,
+            upgradeInsecure: false,
+            rules: initialRules,
+            active: initialActive // New: Track which specific rules are enabled
         },
-        {
-            category: "UI Frameworks",
-            items: [
-                { 
-                    id: 'tailwind', 
-                    type: 'boolean', 
-                    label: 'Tailwind CSS (CDN)', 
-                    desc: 'Utility-first CSS framework.', 
-                    snippet: '<script src="/static/hikarin/lib/tailwind.js"></script>',
-                    identifyingPart: 'cdn.tailwindcss.com' 
-                },
-                { 
-                    id: 'alpine', 
-                    type: 'boolean', 
-                    label: 'Alpine.js', 
-                    desc: 'Lightweight JavaScript framework.', 
-                    snippet: '<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>',
-                    identifyingPart: 'alpinejs@3.13.3' 
-                },
-                { 
-                    id: 'fontawesome', 
-                    type: 'boolean', 
-                    label: 'FontAwesome 6', 
-                    desc: 'Icon library.', 
-                    snippet: '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">',
-                    identifyingPart: 'font-awesome/6.4.0' 
-                }
-            ]
+        previewString: '',
+        cspFields: cspFields,
+
+        async init() {
+            await this.loadHead();
         },
-        {
-            category: "Security",
-            isSecurity: true,
-            items: [
-                { id: 'csp_master', type: 'master_switch', label: 'Enable CSP', desc: 'Content Security Policy' },
-                { id: 'script-src', type: 'list', label: 'Scripts (script-src)', placeholder: 'https://api.google.com' },
-                { id: 'style-src', type: 'list', label: 'Styles (style-src)', placeholder: 'https://fonts.googleapis.com' },
-                { id: 'connect-src', type: 'list', label: 'Connections (connect-src)', placeholder: 'https://api.stripe.com' }
-            ]
-        }
-    ],
 
-    // --- Lifecycle ---
+        async loadHead() {
+            this.isLoading = true;
+            try {
+                const response = await this.$api.aina.get(this.slug).execute();
+                const rawHtml = response.custom?.builder?.header || ''; 
+                this.parseStateFromHtml(rawHtml);
+                this.generatePreview(); 
+            } catch (error) {
+                console.error("Head load error", error);
+            } finally {
+                this.isLoading = false;
+            }
+        },
 
-    async init() {
-        await this.loadHead();
-    },
+        parseStateFromHtml(html) {
+            // Reset to clean slate
+            this.cspState.enabled = false;
+            this.cspState.upgradeInsecure = false;
+            Object.keys(this.cspState.rules).forEach(k => {
+                this.cspState.rules[k] = [];
+                this.cspState.active[k] = false;
+            });
 
-    // --- Parsing Logic (The Generator Technique) ---
+            if (!html) {
+                this.customHeadContent = '';
+                return;
+            }
 
-    async loadHead() {
-        this.isLoading = true;
-        try {
-            const response = await this.$api.aina.get(this.slug).execute();
-            // This raw string is our ONLY source of truth
-            const rawHtml = response.custom?.builder?.header || ''; 
+            const cspRegex = /<meta http-equiv="Content-Security-Policy" content="([^"]+)">/i;
+            const match = html.match(cspRegex);
             
-            this.parseStateFromHtml(rawHtml);
-            this.generatePreview(); // Sync preview string
+            if (match) {
+                this.cspState.enabled = true;
+                const rawCspString = match[1];
+                const directives = rawCspString.split(';').map(d => d.trim()).filter(d => d);
 
-        } catch (error) {
-            console.error("Head load error", error);
-        } finally {
-            this.isLoading = false;
-        }
-    },
-
-    parseStateFromHtml(html) {
-        // 1. Reset State
-        this.activeModules.clear();
-        this.cspState.enabled = false;
-        Object.keys(this.cspState.rules).forEach(k => this.cspState.rules[k] = []);
-
-        if (!html) return;
-
-        // 2. Detect Modules (Booleans)
-        this.definitions.forEach(group => {
-            group.items.forEach(item => {
-                if (item.type === 'boolean' && item.identifyingPart) {
-                    if (html.includes(item.identifyingPart)) {
-                        this.activeModules.add(item.id);
+                directives.forEach(dir => {
+                    if (dir === 'upgrade-insecure-requests') {
+                        this.cspState.upgradeInsecure = true;
+                        return;
                     }
-                }
-            });
-        });
-        
-        // 3. Detect CSP (The complex part)
-        // Regex to extract the content="..." from the meta label
-        const cspMatch = html.match(/<meta http-equiv="Content-Security-Policy" content="([^"]+)">/);
-        
-        if (cspMatch) {
-            this.cspState.enabled = true;
-            const rawCspString = cspMatch[1];
+
+                    const parts = dir.split(/\s+/);
+                    const type = parts[0]; 
+                    const values = parts.slice(1);
+
+                    // If this directive exists in our known fields
+                    if (this.cspState.rules[type] !== undefined) {
+                        this.cspState.active[type] = true; // MARK AS ACTIVE
+
+                        const ignored = ["'self'", "'unsafe-inline'", "'unsafe-eval'", "data:", "https:"];
+                        const userValues = values.filter(v => !ignored.includes(v));
+                        this.cspState.rules[type] = userValues;
+                    }
+                });
+
+                this.customHeadContent = html.replace(match[0], '').trim();
+            } else {
+                this.customHeadContent = html;
+            }
+        },
+
+        toggleCSP() {
+            this.cspState.enabled = !this.cspState.enabled;
             
-            // Split directives (e.g., "script-src 'self'; style-src 'self'")
-            const directives = rawCspString.split(';').map(d => d.trim()).filter(d => d);
-
-            directives.forEach(dir => {
-                const parts = dir.split(/\s+/);
-                const type = parts[0]; // e.g., 'script-src'
-                const values = parts.slice(1); // e.g., ["'self'", "https://cdn.foo.com"]
-
-                if (this.cspState.rules[type]) {
-                    // Filter out standard keywords we add automatically, so we only show USER CUSTOM domains
-                    const ignored = ["'self'", "'unsafe-inline'", "'unsafe-eval'", "data:", "https:"];
-                    
-                    // Also filter out domains belonging to active modules (e.g. if Tailwind is on, don't show cdn.tailwindcss.com in the list)
-                    const moduleDomains = this.getImpliedDomains(type);
-                    
-                    const userValues = values.filter(v => 
-                        !ignored.includes(v) && 
-                        !moduleDomains.includes(v)
-                    );
-
-                    this.cspState.rules[type] = userValues;
+            // Optional: If enabling for the first time and everything is off, 
+            // maybe enable 'default-src' so it does something. 
+            // Or just leave it all blank as requested.
+            if(this.cspState.enabled) {
+                const isAllOff = Object.values(this.cspState.active).every(v => v === false);
+                if(isAllOff) {
+                    this.cspState.active['default-src'] = true;
                 }
-            });
-        }
-        
-        // Force reactivity for the Set
-        this.activeModules = new Set(this.activeModules); 
-    },
-
-    // --- UI Actions ---
-
-    toggleModule(id) {
-        if (this.activeModules.has(id)) {
-            this.activeModules.delete(id);
-        } else {
-            this.activeModules.add(id);
-        }
-        this.activeModules = new Set(this.activeModules);
-        this.generatePreview();
-    },
-
-    isModuleActive(id) {
-        return this.activeModules.has(id);
-    },
-
-    toggleCSP() {
-        this.cspState.enabled = !this.cspState.enabled;
-        this.generatePreview();
-    },
-
-    addCspDomain(type, domain) {
-        if (!domain) return;
-        const d = domain.trim();
-        if (!this.cspState.rules[type].includes(d)) {
-            this.cspState.rules[type].push(d);
+            }
+            
             this.generatePreview();
-        }
-    },
+        },
 
-    removeCspDomain(type, index) {
-        this.cspState.rules[type].splice(index, 1);
-        this.generatePreview();
-    },
+        addCspDomain(type, domain) {
+            if (!domain) return;
+            const d = domain.trim();
+            if (!this.cspState.rules[type].includes(d)) {
+                this.cspState.rules[type].push(d);
+                this.generatePreview();
+            }
+        },
 
-    // --- Compiler (State -> HTML String) ---
+        removeCspDomain(type, index) {
+            this.cspState.rules[type].splice(index, 1);
+            this.generatePreview();
+        },
 
-    generatePreview() {
-        let lines = [];
-        
-        // 1. Add Enabled Modules
-        this.definitions.forEach(group => {
-            group.items.forEach(item => {
-                if (item.type === 'boolean' && this.activeModules.has(item.id)) {
-                    lines.push(item.snippet);
-                }
-            });
-        });
+        generatePreview() {
+            const parts = [];
+            if (this.customHeadContent && this.customHeadContent.trim() !== '') {
+                parts.push(this.customHeadContent.trim());
+            }
+            if (this.cspState.enabled) {
+                const cspString = this.buildCspMetaLabel();
+                if(cspString) parts.push(cspString);
+            }
+            this.previewString = parts.join('\n\n');
+        },
 
-        // 2. Add CSP if enabled
-        if (this.cspState.enabled) {
-            lines.push(this.buildCspMetaLabel());
-        }
+        buildCspMetaLabel() {
+            let policies = [];
 
-        this.previewString = lines.join('\n');
-    },
+            if (this.cspState.upgradeInsecure) {
+                policies.push('upgrade-insecure-requests');
+            }
 
-    buildCspMetaLabel() {
-        let policies = [];
-        
-        // Base Policy
-        policies.push("default-src 'self'");
-        policies.push("img-src 'self' data: https:");
+            // Helper to build a single directive string
+            const build = (type, defaults = []) => {
+                // KEY CHANGE: Check if this specific directive is active
+                if (!this.cspState.active[type]) return null;
 
-        // Helper to get domains that are implied by currently active modules
-        // e.g. if 'tailwind' is active, we need 'https://cdn.tailwindcss.com'
-        const getMergedList = (type) => {
-            const defaults = ["'self'", "'unsafe-inline'", "'unsafe-eval'"];
-            const implied = this.getImpliedDomains(type);
-            const user = this.cspState.rules[type] || [];
-            return [...defaults, ...implied, ...user];
-        };
-
-        policies.push(`script-src ${getMergedList('script-src').join(' ')}`);
-        policies.push(`style-src ${getMergedList('style-src').join(' ')}`);
-        
-        // Connect Src (usually just user defined + self)
-        const connectList = ["'self'", ...this.cspState.rules['connect-src']];
-        if (connectList.length > 1) {
-            policies.push(`connect-src ${connectList.join(' ')}`);
-        }
-
-        return `<meta http-equiv="Content-Security-Policy" content="${policies.join('; ')}">`;
-    },
-
-    // Lookup table for domains required by modules
-    getImpliedDomains(type) {
-        const domains = [];
-        
-        if (type === 'script-src') {
-            if (this.activeModules.has('tailwind')) domains.push('https://cdn.tailwindcss.com');
-            if (this.activeModules.has('alpine')) domains.push('https://cdn.jsdelivr.net');
-            if (this.activeModules.has('jquery')) domains.push('https://code.jquery.com');
-        }
-        
-        if (type === 'style-src') {
-            if (this.activeModules.has('fontawesome')) domains.push('https://cdnjs.cloudflare.com');
-        }
-
-        return domains;
-    },
-
-    // --- Saving ---
-
-    async saveHead() {
-        this.isSaving = true;
-        this.saveStatus = 'Saving...';
-        
-        // Ensure string is fresh
-        this.generatePreview();
-
-        try {
-            const currentData = await this.$api.aina.get(this.slug).execute();
-            const existingBuilder = currentData.custom?.builder || {};
-
-            // CLEANUP: We are removing headConfig if it existed previously
-            // We only save 'header' (the raw string)
-            const newBuilder = { ...existingBuilder, header: this.previewString };
-            delete newBuilder.headConfig; 
-
-            const payload = {
-                custom: {
-                    builder: newBuilder
-                }
+                const user = this.cspState.rules[type] || [];
+                const merged = [...defaults, ...user];
+                const unique = [...new Set(merged)];
+                
+                return `${type} ${unique.join(' ')}`;
             };
 
-            await this.$api.aina.updateHTML().execute(this.slug, payload);
+            // Define defaults here so we can inject them if active
+            const defs = {
+                'default-src': ["'self'"],
+                'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+                'style-src': ["'self'", "'unsafe-inline'"],
+                'img-src': ["'self'", "data:", "https:"],
+                'connect-src': ["'self'"],
+                'font-src': ["'self'"],
+                'frame-ancestors': ["'self'"]
+            };
 
-            this.saveStatus = 'Saved';
-            setTimeout(() => { this.saveStatus = 'Ready'; }, 2000);
-        } catch (error) {
-            console.error("Head save error", error);
-            this.saveStatus = 'Error';
-        } finally {
-            this.isSaving = false;
+            // Loop through all fields and build string if active
+            this.cspFields.forEach(field => {
+                const type = field.id;
+                const defaults = defs[type] || ["'self'"];
+                
+                const directiveString = build(type, defaults);
+                if (directiveString) {
+                    policies.push(directiveString);
+                }
+            });
+
+            if (policies.length === 0) return null;
+
+            return `<meta http-equiv="Content-Security-Policy" content="${policies.join('; ')}">`;
+        },
+
+        async saveHead() {
+            this.isSaving = true;
+            this.saveStatus = 'Saving...';
+            
+            this.generatePreview(); 
+
+            try {
+                const currentData = await this.$api.aina.get(this.slug).execute();
+                const existingBuilder = currentData.custom?.builder || {};
+
+                const newBuilder = { ...existingBuilder, header: this.previewString };
+                delete newBuilder.headConfig; 
+
+                const payload = {
+                    custom: {
+                        builder: newBuilder
+                    }
+                };
+
+                await this.$api.aina.updateHTML().execute(this.slug, payload);
+
+                this.saveStatus = 'Saved';
+                setTimeout(() => { this.saveStatus = 'Ready'; }, 2000);
+            } catch (error) {
+                console.error("Head save error", error);
+                this.saveStatus = 'Error';
+            } finally {
+                this.isSaving = false;
+            }
         }
-    }
-});
+    };
+};
