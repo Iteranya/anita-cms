@@ -1,6 +1,6 @@
 [project]
 name = "anita-cms"
-version = "0.1.0"
+version = "0.38.0"
 description = "A CMS Built From Ground Up with Fast API, Vanilla JS, and SQlite."
 readme = "README.md"
 requires-python = ">=3.10"

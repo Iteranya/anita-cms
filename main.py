@@ -62,8 +62,8 @@ def interactive_setup():
         available_templates = list(templates_dir.glob("*.db"))
         
         if not available_templates:
-            print("❌ No database templates found in /templates folder!")
-            print("Please place your theme .db files there and restart.")
+            print("❌ No database templates found in /anita-template folder!")
+            print("Please place your template .db files there and restart.")
             sys.exit(1)
         print("🏗️  Welcome to Anita CMS Setup!")
         print("   We need to initialize your database.")
@@ -95,7 +95,7 @@ def interactive_setup():
         print("🔑 JWT_SECRET not found in .env.")
         gen_choice = input("Generate a secure random secret now? [Y/n]: ").strip().lower()
         
-        if gen_choice in ["", "y", "yes"]:
+        if gen_choice in ["", "y", "yes", "Y"]:
             secret = secrets.token_hex(32)
             
             # Read current .env content
@@ -124,9 +124,6 @@ async def lifespan(app: FastAPI):
     
     # Ensure tables exist (Safety check, though the copied DB should have them)
     database.Base.metadata.create_all(bind=database.engine)
-    
-    # NOTE: Seeding logic removed. 
-    # Data is now provided via the copied SQLite template in interactive_setup.
         
     yield # The application runs here
 

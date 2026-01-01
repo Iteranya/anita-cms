@@ -1,6 +1,6 @@
 # file: data/database.py
 
-from sqlalchemy import create_engine, event  # <--- 1. Import event
+from sqlalchemy import create_engine, event 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 

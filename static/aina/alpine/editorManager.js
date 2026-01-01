@@ -61,7 +61,7 @@ export default (slug, initialData = {}) => ({
     /**
      * MODIFIED: Deploy Logic
      * Grabs the *already rendered* styles from the active preview iframe.
-     * TODO: Replace tailwind scrape from iFrame with Tailwind CLI
+     * TODO: Replace tailwind compilation scrape from iFrame with Tailwind CLI
      */
     async deployHtml() {
         this.isProcessing = true;
