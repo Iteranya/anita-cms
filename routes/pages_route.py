@@ -78,6 +78,11 @@ def create_page(
             detail=f"You do not have permission to create {page_in.type} pages."
         )
 
+    # 3. Seed 'custom' data from the default page template
+    default_page = page_service.get_page_by_slug("default-page")
+    if default_page and default_page.custom:
+        page_in.custom = default_page.custom
+
     page_in.author = user.username
     logger.info(f"User {user.username} creating {page_in.type} page: {page_in.slug}")
     return page_service.create_new_page(page_data=page_in)
