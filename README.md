@@ -291,6 +291,7 @@ python main.py
 - ~~Asta and Aina doesn't save their own prompt/configuration~~ Done! They save now!
 - ~~Remove AI Integration~~ Done! Aina is an IDE now~ 
 - ~~Implement Milkdown / Crepe to Asta~~ Done! Asta is Milkdown powered!
+- Fix templating system to be True SSR
 - Give Asta (or Aina) a Search Engine Optimization capability 
 - Better test coverage
 - ~~More graceful Collection Seeding (currently don't exist, actually, only page, roles and config for now)~~ Done! With Starter Kit Feature!

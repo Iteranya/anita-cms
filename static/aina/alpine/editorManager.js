@@ -236,16 +236,41 @@ export default (slug, initialData = {}) => ({
 </html>`;
     },
 
+    async copyPrompt() {
+        try {
+            // Generate the prompt text using your existing method
+            const promptText = await this.getPrompt();
+
+            // Write to system clipboard
+            await navigator.clipboard.writeText(promptText);
+
+            // Trigger UI feedback
+            this.copiedPrompt = true;
+            
+            // Reset button state after 2 seconds
+            setTimeout(() => {
+                this.copiedPrompt = false;
+            }, 2000);
+
+        } catch (err) {
+            console.error('Failed to copy prompt:', err);
+            this.$store.notifications.add({ 
+                type: 'error', 
+                message: 'Failed to copy to clipboard.' 
+            });
+        }
+    },
+
     async getPrompt() {
         const userHtml = this.editors.html.getValue();
         const userCss = this.editors.css.getValue();
         const response = await this.$api.aina.get(this.slug).execute();
         const head = response.custom?.builder?.header || "";
         
-        return `Your task is to create a UI based on the given template.
+        return `Your task is to create a UI partial based on the data.
 Constraints:
-1. Write HTML and CSS only.
-2. Interactivity must use Alpine.js (assume imported).
+1. Write HTML and Tailwind CSS only.
+2. Interactivity must use Alpine.js no <script> tags.
 3. Do NOT modify the <head>.
 
 Context - The current <head> contains:
@@ -258,18 +283,11 @@ ${userHtml}
 
 CSS:
 ${userCss}
+
+JS:
+${this.currentScript}
 ---
 
 Your task is: [TASK HERE]`;
-    },
-
-    async copyPrompt() {
-        try {
-            const text = await this.getPrompt();
-            await navigator.clipboard.writeText(text);
-            this.$store.notifications.add({ type: 'success', message: 'Prompt copied to clipboard' });
-        } catch (err) {
-            console.error('Failed to copy prompt', err);
-        }
     }
 });
