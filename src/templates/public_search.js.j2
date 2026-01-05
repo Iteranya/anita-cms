@@ -1,0 +1,77 @@
+document.addEventListener('alpine:init', () => {
+    Alpine.data('{{ component_name }}', (initialLabels = {{ default_labels | tojson }}) => ({
+        
+        // --- Configuration ---
+        /** 
+         * The base component name used for routing. 
+         * Injected from Python.
+         */
+        basePath: {{ base_path | tojson }},
+
+        // --- Data Structure Definitions ---
+        resultSchema: {{ result_schema | tojson }},
+        searchResults: [],    
+        
+        // --- State ---
+        searchQuery: '',         
+        defaultLabels: initialLabels,
+        isLoading: true,
+        error: null,          
+
+        async init() {
+            if (this.defaultLabels.length > 0) {
+                await this.search(this.defaultLabels);
+            } else {
+                this.isLoading = false;
+            }
+        },
+
+        /**
+         * Generates the link for a specific page slug.
+         * Format: /component_name/slug
+         */
+        getLink(slug) {
+            if (!slug) return '#';
+            // We strip leading slashes from slug to ensure clean concatenation
+            const cleanSlug = slug.replace(/^\/+/g, '');
+            return `/${this.basePath}/${cleanSlug}`;
+        },
+
+        async search(explicitLabels = null) {
+            this.isLoading = true;
+            this.error = null;
+            
+            let labels = [...this.defaultLabels]; 
+
+            if (Array.isArray(explicitLabels)) {
+                labels = explicitLabels;
+            } else {
+                const rawInput = (this.searchQuery || '').trim();
+                if (rawInput.length > 0) {
+                    const userLabels = rawInput.split(',')
+                        .map(t => t.trim())
+                        .filter(t => t.length > 0);
+                    
+                    // Merge unique
+                    labels = [...new Set([...labels, ...userLabels])];
+                }
+            }
+
+            try {
+                this.searchResults = await this.$api.public.search(labels).execute();
+            } catch (e) {
+                console.error('Search failed:', e);
+                this.error = 'Unable to fetch results.';
+                this.searchResults = []; 
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        clear() {
+            this.searchQuery = '';
+            this.searchResults = [];
+            this.error = null;
+        }
+    }));
+});

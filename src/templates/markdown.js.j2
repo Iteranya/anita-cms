@@ -1,0 +1,53 @@
+document.addEventListener('alpine:init', () => {
+    Alpine.data('markdownContent', () => ({
+        // --- State ---
+        // 'tojson' is crucial here. It converts the server-side text
+        // into a valid JS string, handling newlines and quotes automatically.
+        rawMarkdown: {{ markdown_content | default('') | tojson | safe}},
+        htmlContent: '',
+        author:'{{ author | default('') }}',
+        publised:'{{ published | default('') }}',
+        updated:'{{ updated | default('') }}',
+        title:'{{ title | default('') }}',
+        description:'{{ description | default('') }}',  // Also known as 'content'
+        thumb:'{{ thumb | default('')}}',
+        isLoading: true,
+
+        init() {
+            // 1. Safety Check
+            if (typeof marked === 'undefined') {
+                console.error('Error: marked.js is not loaded in the <head>.');
+                this.htmlContent = '<p class="text-red-500">Error: Renderer missing.</p>';
+                return;
+            }
+
+            // 2. Configure Marked
+            // This setup mirrors standard GFM (Milkdown) behavior.
+            marked.use({
+                gfm: true,        // Enable Tables, Strikethrough, Tasklists
+                breaks: true,     // Treats newlines as <br> (like GitHub comments)
+                pedantic: false,  // Be forgiving with messy markdown
+                mangle: false,    // Don't escape email addresses
+                headerIds: false  // Prevent auto-generating IDs if you don't need anchors (cleaner HTML)
+            });
+
+            // 3. Initial Render
+            this.render();
+            
+            // 4. (Optional) Watch for changes if this variable updates live
+            this.$watch('rawMarkdown', () => this.render());
+        },
+
+        render() {
+            try {
+                // Parse the markdown into HTML
+                this.htmlContent = marked.parse(this.rawMarkdown);
+            } catch (e) {
+                console.error('Markdown parsing error:', e);
+                this.htmlContent = '<p>Error rendering content.</p>';
+            } finally {
+                this.isLoading = false;
+            }
+        }
+    }));
+});
