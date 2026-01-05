@@ -14,6 +14,7 @@ import { AstaAPI } from './services/asta.js';
 export class HikarinApi {
     constructor(baseUrl = '') {
         this.baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+        this._request = this._request.bind(this);
         this.auth = new AuthAPI(this);
         this.config = new ConfigAPI(this);
         this.collections = new CollectionsAPI(this);
@@ -25,10 +26,28 @@ export class HikarinApi {
         this.public = new PublicAPI(this);
         this.aina = new AinaAPI(this);
         this.asta = new AstaAPI(this);
+        
+    }
+
+    _getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
     }
 
     async _request(method, endpoint, options = {}) {
         const url = `${this.baseUrl}${endpoint}`;
+        
+        
         const config = {
             method: method.toUpperCase(),
             headers: {},
@@ -41,6 +60,20 @@ export class HikarinApi {
             config.body = JSON.stringify(options.body);
         }
         if (!(options.body instanceof FormData)) config.headers['Accept'] = 'application/json';
+
+        const safeMethods = ['GET', 'HEAD', 'OPTIONS', 'TRACE'];
+        if (!safeMethods.includes(config.method)) {
+            
+            const csrfToken = this._getCookie('fastapi-csrf-token');
+            if (csrfToken) {
+                console.log(csrfToken)
+                config.headers['X-CSRF-Token'] = csrfToken;
+            } else {
+                // This can happen if the user's first action is a POST before visiting a page
+                // that sets the cookie. The backend will correctly reject this.
+                console.warn('CSRF token cookie not found. The request may be rejected.');
+            }
+        }
 
         const response = await fetch(url, config);
         

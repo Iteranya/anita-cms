@@ -286,8 +286,8 @@ python main.py
 - ~~Submission Sanitization not yet implemented~~ Done! (With ammonia, bleach is deprecated)
 - Pay Yozzun For Anita's Artwork
 - Add Event Bus and Background Handler
-- Fediverse/ActivityPub Implementation (I really, really want this but god this is HARD. Stupid Hard.)
-- Add better site audit, create snapshot of site structure, schema, role, permission, in JSON to make it possible to git diff
+- Export to SSG Button (HOW!?!?)
+- Add better site audit, create snapshot of site structure, schema, role, permission, in JSON to make it possible to track with git (but not revert, obviously, I don't think that's possible)
 - ~~Asta and Aina doesn't save their own prompt/configuration~~ Done! They save now!
 - ~~Remove AI Integration~~ Done! Aina is an IDE now~ 
 - ~~Implement Milkdown / Crepe to Asta~~ Done! Asta is Milkdown powered!
@@ -296,6 +296,7 @@ python main.py
 - Better test coverage
 - ~~More graceful Collection Seeding (currently don't exist, actually, only page, roles and config for now)~~ Done! With Starter Kit Feature!
 - ~~Category and Labels are the same (should be separated)~~ Done! We have tags (public) and labels (system) now
+- CSRF Token Protection
 - Sandbox Aina properly (Dummy Browser, Dummy Database, Dummy Dynamic API... Goddammit, I'll add disclaimers for now)
 
 Terrible Ideas That Won't Go Away
@@ -304,7 +305,7 @@ Terrible Ideas That Won't Go Away
 - Anita AI Chatbot on Dashboard
 - Rewrite Everything In Go
 - Rewrite Everything In Rust
-- Export to SSG Button (HOW!?!?)
+- Fediverse/ActivityHub Integration (If NLNet want to sponsor me :v)
 - Let Every User Bring Their Own API Key (The least terrible idea honestly, I should put it up there)
 - Hikarin Website Builder To Replace Aina (Note: Hikarin Website Builder Does Not Exist Yet)
 - Discord Integration (For... I'm not sure for what... But it'll be cool)

@@ -140,4 +140,5 @@ def update_yourself(
 @router.post("/logout")
 async def logout(response: Response):  
     response.delete_cookie("access_token")
+    response.delete_cookie("fastapi-csrf-token")
     return {"status": "success"}

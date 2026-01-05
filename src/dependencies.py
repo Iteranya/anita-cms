@@ -1,5 +1,6 @@
 # file: auth/dependencies.py
 
+import datetime
 from typing import Optional
 from fastapi import Depends, HTTPException, Request, status, Cookie
 from sqlalchemy.orm import Session
@@ -15,22 +16,21 @@ def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
     user_service = UserService(db)
     return AuthService(user_service)
 
-def csrf_protect_dependency( # This should be called 'Support Older Browser' Feature Instead of CSRF Feature
-    request: Request, 
+async def csrf_protect_post_put_delete( # 1. Changed 'def' to 'async def'
+    request: Request,
     csrf_protect: CsrfProtect = Depends()
 ):
     """
-    A dependency that enforces CSRF protection on state-changing methods.
-    
-    It checks the request method. If it's a "safe" method (GET, HEAD, OPTIONS),
-    it does nothing. For all other methods (POST, PUT, DELETE, PATCH), it
-    validates the CSRF token. This dependency should be applied at the router level
-    for all protected API endpoints.
+    A dependency that enforces CSRF protection ONLY on state-changing methods.
     """
+    print(f"[{datetime.datetime.now()}] --- CSRF Dependency Running for: {request.method} {request.url.path}")
+
     safe_methods = {"GET", "HEAD", "OPTIONS"}
-    
     if request.method.upper() not in safe_methods:
-        csrf_protect.validate_csrf_in_request()
+        print(f"[{datetime.datetime.now()}] --- VALIDATING CSRF for non-safe method.")
+        
+        # 2. Added 'await' here
+        await csrf_protect.validate_csrf(request) 
 
 
 def get_current_user(

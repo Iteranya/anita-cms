@@ -1,3 +1,5 @@
+# file: main.py
+
 import os
 import sys
 import shutil
@@ -8,9 +10,16 @@ from pathlib import Path
 
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Request, Depends, status # Added status for clarity
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
+
+# --- CSRF Protection Integration ---
+from fastapi_csrf_protect import CsrfProtect
+from fastapi_csrf_protect.exceptions import CsrfProtectError
+# --- FIX: Changed from pydantic_settings.BaseSettings to pydantic.BaseModel ---
+from pydantic import BaseModel # Use BaseModel for simple data validation, not BaseSettings for auto-env loading
 
 # --- Configuration & Environment Loading ---
 BASE_DIR = Path(__file__).resolve().parent
@@ -19,10 +28,13 @@ ENV_PATH = BASE_DIR / ".env"
 # Load environment variables
 load_dotenv(ENV_PATH)
 
+# Add base directory to sys.path for module discovery (e.g., 'src')
 sys.path.append(str(BASE_DIR))
 
 # Import database (after path setup)
 from data import database
+# --- Using the renamed dependency function as discussed ---
+from src.dependencies import csrf_protect_post_put_delete 
 
 # Import all route modules
 from routes import (
@@ -40,22 +52,31 @@ from routes import (
     dashboard_route
 )
 
+# --- CSRF Settings Model ---
+# --- FIX: Changed from BaseSettings to BaseModel and removed Config class ---
+class CsrfSettings(BaseModel):
+    """
+    Pydantic model for CSRF settings. Using BaseModel instead of BaseSettings
+    prevents it from automatically trying to load all environment variables,
+    which was causing the "extra inputs not permitted" validation error previously.
+    """
+    secret_key: str
+    httponly:bool
+
 # --- Interactive Setup Helper ---
 def interactive_setup():
     """
     Handles initial setup:
     1. Selects a database template (Theme) if anita.db is missing.
-    2. Generates JWT_SECRET if missing from .env.
+    2. Generates JWT_SECRET and CSRF_SECRET if missing from .env.
     """
     
-    # 1. Database / Theme Selection
     db_path = BASE_DIR / "anita.db"
     templates_dir = BASE_DIR / "anita-template"
 
     if not db_path.exists():
         print("\n⚠️  No database found (anita.db).")
         
-        # Find .db files in templates folder
         if not templates_dir.exists():
             os.makedirs(templates_dir)
             
@@ -87,47 +108,45 @@ def interactive_setup():
         shutil.copy(selected_template, db_path)
         print("✅ Database initialized successfully.\n")
     
-    # 2. JWT Secret Generation
+    # 2. Secret Generation (JWT & CSRF)
     # Reload env in case it was created/modified externally since script start
     load_dotenv(ENV_PATH, override=True)
     
-    if not os.getenv("JWT_SECRET"):
-        print("🔑 JWT_SECRET not found in .env.")
-        gen_choice = input("Generate a secure random secret now? [Y/n]: ").strip().lower()
-        
-        if gen_choice in ["", "y", "yes", "Y"]:
-            secret = secrets.token_hex(32)
-            
-            # Read current .env content
-            content = ""
-            if ENV_PATH.exists():
-                with open(ENV_PATH, "r") as f:
-                    content = f.read()
-            
-            # Append new secret
-            prefix = "\n" if content and not content.endswith("\n") else ""
-            with open(ENV_PATH, "a") as f:
-                f.write(f"{prefix}JWT_SECRET={secret}\n")
-            
-            print("✅ Generated new JWT_SECRET and saved to .env.")
-            # Reload environment to apply the change immediately
-            load_dotenv(ENV_PATH, override=True)
-        else:
-            print("❌ Cannot proceed without JWT_SECRET. Exiting.")
-            sys.exit(1)
+    secrets_to_check = {
+        "JWT_SECRET": "JSON Web Token authentication",
+        "CSRF_SECRET": "Cross-Site Request Forgery protection"
+    }
+
+    for secret_name, purpose in secrets_to_check.items():
+        if not os.getenv(secret_name):
+            print(f"🔑 {secret_name} for {purpose} not found in .env.")
+            gen_choice = input("Generate a secure random secret now? [Y/n]: ").strip().lower()
+
+            if gen_choice in ["", "y", "yes", "Y"]:
+                secret_value = secrets.token_hex(32)
+                
+                content = ""
+                if ENV_PATH.exists():
+                    with open(ENV_PATH, "r") as f:
+                        content = f.read()
+                
+                prefix = "\n" if content and not content.endswith("\n") else ""
+                with open(ENV_PATH, "a") as f:
+                    f.write(f"{prefix}{secret_name}={secret_value}\n")
+                
+                print(f"✅ Generated new {secret_name} and saved to .env.")
+                # Reload environment to apply the change immediately
+                load_dotenv(ENV_PATH, override=True) 
+            else:
+                print(f"❌ Cannot proceed without {secret_name}. Exiting.")
+                sys.exit(1)
 
 # --- Database Lifespan ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # This code runs on startup
     print("🚀 Application starting up...")
-    
-    # Ensure tables exist (Safety check, though the copied DB should have them)
     database.Base.metadata.create_all(bind=database.engine)
-        
-    yield # The application runs here
-
-    # This code runs on shutdown
+    yield
     print("👋 Application shutting down...")
 
 
@@ -139,18 +158,34 @@ app = FastAPI(
     redirect_slashes=True
 )
 
+# --- CSRF Exception Handler ---
+@app.exception_handler(CsrfProtectError)
+def csrf_protect_exception_handler(request: Request, exc: CsrfProtectError):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.message}
+    )
+
+# --- Load CSRF settings ---
+@CsrfProtect.load_config
+def get_csrf_config():
+    secret = os.getenv("CSRF_SECRET")
+    
+    if not secret:
+        raise ValueError("CSRF_SECRET environment variable not set. Please run setup or add it to .env.")
+
+    return CsrfSettings(
+        secret_key=secret,
+        httponly=False
+    )
+
 # --- Middleware ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5469" 
-    ],
+    allow_origins=["http://localhost:5469"],
     allow_credentials=True, 
     allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=[
-        "Content-Type",
-        "Authorization",
-    ],
+    allow_headers=["Content-Type", "Authorization", "X-CSRF-Token"],
 )
 
 # --- Static Files ---
@@ -160,29 +195,41 @@ app.mount("/uploads", StaticFiles(directory=BASE_DIR / "uploads"), name="uploads
 # --- API Router Organization ---
 api_router = APIRouter()
 
-api_router.include_router(admin_route.router, tags=["Admin"])
-api_router.include_router(dashboard_route.router, tags = ["Dashboard"])
-api_router.include_router(config_route.router, tags=["Config"])
-api_router.include_router(aina_route.router, tags=["Aina"])
-api_router.include_router(asta_route.router, tags=["Asta"])
-api_router.include_router(media_route.router, tags=["Media"])
-api_router.include_router(collections_route.router, tags=["Collections"])
-api_router.include_router(file_route.router, tags=["Files"])
-api_router.include_router(roles_route.router, tags=["Roles"])
-api_router.include_router(pages_route.router, tags=["Pages"]) 
-api_router.include_router(auth_route.router, tags=["Authentication"]) 
-api_router.include_router(public_route.router, tags=["Public"])   
+# 1. ROUTERS THAT REQUIRE SITE-WIDE CSRF PROTECTION
+# These routers will have csrf_protect_post_put_delete applied to ALL their endpoints
+# (except for GET/HEAD/OPTIONS, which are implicitly skipped by the dependency's internal logic)
+protected_routers = [
+    admin_route.router,
+    config_route.router,
+    aina_route.router,
+    asta_route.router,
+    collections_route.router,
+    file_route.router,
+    roles_route.router,
+    pages_route.router, 
+]
 
+# --- FIX: This is the crucial change. Apply dependencies using include_router's 'dependencies' argument ---
+for router in protected_routers:
+    api_router.include_router(
+        router,
+        dependencies=[Depends(csrf_protect_post_put_delete)] 
+    )
+
+# 2. ROUTERS THAT ARE EXEMPT FROM GLOBAL CSRF PROTECTION or HANDLE IT INTERNALLY
+# These routers are included WITHOUT the global CSRF dependency.
+# 'auth_route.router' is here because its GET endpoints must be accessible to set the cookie,
+# and its POST endpoints are protected individually within routes/auth_route.py.
+api_router.include_router(auth_route.router)
+api_router.include_router(dashboard_route.router)
+api_router.include_router(media_route.router)
+api_router.include_router(public_route.router)
+# Add the main API router to the FastAPI app
 app.include_router(api_router)
-
 
 # --- Main Entry Point ---
 if __name__ == "__main__":
-    # Run the interactive setup (Theme picker & JWT Gen)
-    # This blocks until the user finishes setup
     interactive_setup()
-    
-    # Get port from command-line argument, default to 5469
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 5469
     print(f"Starting server on http://127.0.0.1:{port}")
     uvicorn.run("main:app", host="127.0.0.1", port=port, reload=True)

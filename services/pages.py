@@ -32,7 +32,7 @@ class PageService:
         """
         # --- EXAMPLE BUSINESS LOGIC ---
         # 1. Check for forbidden slugs.
-        forbidden_slugs = {"admin", "api", "login", "static","blog"}
+        forbidden_slugs = {"admin", "api", "login", "static", "hikarin", "asta", "aina"}
         if page_data.slug in forbidden_slugs:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
