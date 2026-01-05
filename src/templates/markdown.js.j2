@@ -5,7 +5,7 @@ document.addEventListener('alpine:init', () => {
         // into a valid JS string, handling newlines and quotes automatically.
         rawMarkdown: {{ markdown_content | default('') | tojson | safe}},
         htmlContent: '',
-        author:'{{ author | default('') }}',
+        author:'{{ author | default('System') }}',
         publised:'{{ published | default('') }}',
         updated:'{{ updated | default('') }}',
         title:'{{ title | default('') }}',
