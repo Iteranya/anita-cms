@@ -2,7 +2,6 @@ import os
 import sys
 import shutil
 import secrets
-import glob
 from contextlib import asynccontextmanager
 from pathlib import Path
 

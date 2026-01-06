@@ -121,8 +121,6 @@ def optional_user(
     
 
 # List All Specific Permissions Here
-# Well, most aren't use since it's granular, but...
-# Eh, it's good to show what exists and what not
 require_admin = require_permission("*") 
 
 collection_create = require_permission("collection:create")

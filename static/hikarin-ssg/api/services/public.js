@@ -22,27 +22,13 @@ export class PublicAPI {
         return new ApiRequest(() => this._client._request('GET', url)); 
     }
 
-    /**
-     * Serves a generic top-level page by its slug (JSON).
-     * Maps to: GET /api/{slug}
-     */
     get(slug) { 
         return new ApiRequest(() => this._client._request('GET', `/api/${slug}`)); 
     }
 
-    /**
-     * Get a page by category and slug (JSON).
-     * Maps to: GET /api/{main}/{slug}
-     */
     getByCategory(main, slug) { 
         return new ApiRequest(() => this._client._request('GET', `/api/${main}/${slug}`)); 
     }
-
-    /* 
-       Note: The routes below serve raw HTML. 
-       Include these only if your client needs to fetch HTML strings directly 
-       (e.g., for hydrating a container) rather than letting the browser navigate.
-    */
 
     getHomeHtml() {
         return new ApiRequest(() => this._client._request('GET', `/`));

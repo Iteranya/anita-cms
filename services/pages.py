@@ -30,7 +30,6 @@ class PageService:
         """
         Creates a new page after performing business logic checks.
         """
-        # --- EXAMPLE BUSINESS LOGIC ---
         # 1. Check for forbidden slugs.
         forbidden_slugs = {"admin", "api", "login", "static","blog"}
         if page_data.slug in forbidden_slugs:
