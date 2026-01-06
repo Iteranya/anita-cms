@@ -1,10 +1,7 @@
-
-// 1. Import Alpine and plugin
 import Alpine from '/static/hikarin/lib/alpine.js';
 import sort from '/static/hikarin/lib/alpine-sort.js';
 import  collapse  from '/static/hikarin/lib/alpine-collapse.js';
 
-// 2. Import your API and Managers
 import { HikarinApi } from '../hikarin/api/client.js';
 import notificationsStore from '../hikarin/alpine/notifications.js'
 import schemaManager from './alpine/schemaManager.js';

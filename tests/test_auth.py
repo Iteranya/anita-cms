@@ -3,8 +3,6 @@ import pytest
 from services.users import hash_password
 from data.models import User
 
-# Note: Adjust the URL prefix if your auth_route in main.py 
-# is mounted with a prefix (e.g., "/auth")
 LOGIN_URL = "/auth/login" 
 
 def test_login_success(client, db_session):

@@ -159,9 +159,6 @@ export default () =>  ({
         async changePassword() {
             // Assuming a custom endpoint or generic update
             try {
-                // If your API has a specific endpoint, use that. 
-                // Otherwise, some systems allow password update via standard PUT if permissions allow.
-                // We'll try the standard update first.
                 await this.$api.users.update(this.passwordCollection.username, { 
                     password: this.passwordCollection.new_password 
                 }).execute();

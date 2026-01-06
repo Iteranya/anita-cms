@@ -132,7 +132,6 @@ export default () => ({
         if (!movedPage) return; // Should not happen
 
         // 2. INSERT into New Category (Optimistic update)
-        // Ensure destination array exists
         if (!this.pageTree[newCategoryName]) {
             this.pageTree[newCategoryName] = [];
         }
@@ -140,8 +139,6 @@ export default () => ({
         this.pageTree[newCategoryName].splice(position, 0, movedPage);
 
         // 3. PREPARE API PAYLOAD
-        // We reuse your existing logic to parse/compile labels
-        // Reset collection just for calculation purposes
         this.collection = { permissions: this.getEmptyPermissions() }; 
         this.parseLabelsToCollection(movedPage.labels || []);
         
@@ -156,9 +153,6 @@ export default () => ({
         try {
             await this.$api.pages.update().execute(itemSlug, payload);
             Alpine.store('notifications').success('Page Moved', `Moved to ${newCategoryName}`);
-            
-            // Optional: Background refresh to ensure server consistency
-            // We don't await this, so UI stays responsive
             this.refresh(); 
         } catch (e) {
             console.error("Failed to move page:", e);

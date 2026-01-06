@@ -3,7 +3,7 @@
 import Alpine from './lib/alpine.js';
 import sort from './lib/alpine-sort.js'; // <-- Correct ESM import
 
-// 2. Import your API and Managers
+// 2. Import the API and Managers
 import { HikarinApi } from './api/client.js';
 import notificationsStore from './alpine/notifications.js'
 

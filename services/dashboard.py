@@ -17,7 +17,6 @@ class DashboardService:
         """
         
         # --- 1. Fetch Core Entity Counts ---
-        # These are simple scalar values, no transformation needed.
         core_counts = {
             "pages": crud.get_total_pages_count(self.db),
             "collections": crud.get_total_collections_count(self.db),
@@ -33,8 +32,6 @@ class DashboardService:
         }
         
         # --- 3. Fetch and Transform Activity Metrics ---
-        # The CRUD layer returns a list of tuples. The service layer's job is to
-        # transform this into a more API-friendly list of dictionaries.
         top_collections_raw = crud.get_top_collections_by_submission_count(self.db, limit=5)
         top_collections_formatted = [
             {"name": name, "slug": slug, "count": count} 
@@ -52,9 +49,6 @@ class DashboardService:
         }
 
         # --- 4. Fetch Lists of Recent Items ---
-        # The CRUD functions return full SQLAlchemy model objects. These can be
-        # passed directly to the API layer, which will serialize them using
-        # your Pydantic schemas.
         recent_items = {
             "newest_pages": crud.get_recent_pages(self.db, limit=5),
             "latest_updates": crud.get_recently_updated_pages(self.db, limit=5),
@@ -62,7 +56,6 @@ class DashboardService:
         }
 
         # --- 5. Assemble the Final Response ---
-        # Combine all the fetched and transformed data into the final payload.
         return {
             "core_counts": core_counts,
             "page_stats": page_stats,

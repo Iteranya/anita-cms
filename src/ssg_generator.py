@@ -1,9 +1,8 @@
-import os
 import json
 import shutil
 from pathlib import Path
 from typing import Any, List, Dict
-
+from sqlalchemy import inspect
 from sqlalchemy.orm import Session
 from jinja2 import Environment, BaseLoader
 
@@ -34,7 +33,8 @@ class SSGGenerator:
     def _serialize_model(self, model_instance, exclude: List[str] = None) -> Dict[str, Any]:
         """
         Converts a SQLAlchemy model to a dictionary.
-        Handles Relationships (tags/labels) and excludes specified fields.
+        Correctly handles cases where DB column name != Python attribute name.
+        (e.g. Column("schema_json") -> model.schema)
         """
         if not model_instance:
             return {}
@@ -44,15 +44,19 @@ class SSGGenerator:
 
         data = {}
         
-        # 1. Get standard columns
-        for column in model_instance.__table__.columns:
-            if column.name not in exclude:
-                val = getattr(model_instance, column.name)
-                # Handle potential non-serializable types here if necessary
-                data[column.name] = val
+        # 1. Use Inspector to look up Python Attribute names (not just DB columns)
+        inst_state = inspect(model_instance)
+        
+        # Iterate over mapped column attributes
+        for attr in inst_state.mapper.column_attrs:
+            key = attr.key  # This is the Python name (e.g. 'schema', 'data')
+            
+            if key not in exclude:
+                # Safely get the value
+                val = getattr(model_instance, key)
+                data[key] = val
 
         # 2. Handle Relationships manually (Tags and Labels)
-        # We assume we want lists of strings for tags/labels
         if hasattr(model_instance, 'tags') and 'tags' not in exclude:
             data['tags'] = [t.name for t in model_instance.tags]
         
@@ -106,7 +110,7 @@ class SSGGenerator:
         # --- JSON API GENERATION ---
         print("💾 Generating JSON API files...")
         self._generate_page_index_json(all_pages)
-        # self._generate_collection_json() # Nothing for now, collection is a little bit complex, will support later
+        self._generate_collection_json() 
         
         self.db.close()
 
@@ -186,34 +190,49 @@ class SSGGenerator:
             json.dump(pages_data, f, default=str) # indent=2 for debug, none for prod
 
     def _generate_collection_json(self):
-        """Generates one JSON file per collection, including its submissions."""
-        print("   🗂️  Generating Collection JSONs...")
+        """Generates a single JSON file. Only includes collections with 'any:read'."""
+        print("   🗂️  Generating Single Collections JSON...")
 
-        api_col_dir = self.output_dir / "static/data" / "collections"
-        api_col_dir.mkdir(parents=True, exist_ok=True)
+        api_data_dir = self.output_dir / "static/data"
+        api_data_dir.mkdir(parents=True, exist_ok=True)
 
-        # Fetch all collections directly from DB
+        # 1. Container for final JSON
+        all_collections_data = []
+
+        # 2. Fetch from DB
+        # Optimization TODO: Move filtering to SQL query to avoid fetching unauthorized rows
         collections = self.db.query(models.Collection).all()
-
+        
+        # 3. Process 
         for col in collections:
-            # 1. Serialize Collection Metadata
+            # --- FILTER LOGIC START ---
+            # Get list of label names for this collection
+            labels = {l.name for l in col.labels}
+            
+            # Skip if it doesn't have the public read label
+            if "any:read" not in labels:
+                continue
+            # --- FILTER LOGIC END ---
+
+            # Serialize Collection Metadata
             col_data = self._serialize_model(col, exclude=['submissions'])
             
-            # 2. Serialize Submissions associated with this collection
-            # Assuming relationship is set up correctly in models (back_populates)
+            # Serialize Submissions (Handle empty submissions safely)
             submissions_data = []
-            for sub in col.submissions:
-                sub_data = self._serialize_model(sub)
-                submissions_data.append(sub_data)
+            if hasattr(col, 'submissions'):
+                for sub in col.submissions:
+                    sub_data = self._serialize_model(sub)
+                    submissions_data.append(sub_data)
             
-            # 3. Construct Final JSON Structure
-            final_data = {
+            entry = {
                 "meta": col_data,
                 "items": submissions_data
             }
+            all_collections_data.append(entry)
 
-            # 4. Write to file
-            output_file = api_col_dir / f"{col.slug}.json"
-            print(f"      -> {col.slug}.json")
-            with open(output_file, "w", encoding="utf-8") as f:
-                json.dump(final_data, f, default=str)
+        # 4. Write Result
+        output_file = api_data_dir / "collections.json"
+        print(f"      -> {output_file.name} (Exported {len(all_collections_data)} collections)")
+        
+        with open(output_file, "w", encoding="utf-8") as f:
+            json.dump(all_collections_data, f, default=str)

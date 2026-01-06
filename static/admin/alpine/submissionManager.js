@@ -72,7 +72,6 @@ export default () =>  ({
             try {
                 const payload = {
                     data: this.record,
-                    // If your backend requires collection_slug or id in body, add it here
                     id: this.editId 
                 };
 

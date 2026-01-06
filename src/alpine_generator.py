@@ -200,7 +200,6 @@ def generate_public_alpine_components(label_service: LabelService) -> List[Alpin
         base_name = label.removeprefix("main:")
         component_name = f"{base_name}_component"
         
-        # Note: 'base_path' is what used to be 'label' in your Python logic for getLink
         alpine_data = generate_public_search_js(
             component_name=component_name,
             default_labels=["any:read", label],

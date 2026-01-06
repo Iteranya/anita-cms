@@ -85,7 +85,7 @@ Because Anita is built on FastAPI (Python), it's comical how lightweight she is
 
 If you're a freelancer, you can host a dozen instance of Anita in a single server. (Given you handle CI/CD yourself, but that's another thing entirely)
 
-## The "No-Code" Backend
+## The "Low-Code" Backend
 
 The coolest part. No black magic, just logic.
 
@@ -99,6 +99,31 @@ With Anita, you just do this:
 - Done.
 
 Anita automatically generates a secure API endpoint. The IDE is now aware of the api route and you can easily inject the required scripts (no code required), then you can simply code your own front end with Alpine and Tailwind through Aina IDE.
+
+## Export To SSG
+
+*For when you really, **really**, can't afford a hosting*
+
+People say that trying to be good at everything is not a good idea
+
+I agree, Anita is designed to be good at one thing and one thing only: Efficiency
+
+Anita comes prepackaged with a simple pythons script that you can just run just like your main.py
+
+That will create an entire dist folder containing an SSG Version of the site you made.
+
+Current Features:
+
+- Reflects Your Site Structure
+- Reflects Your Blog/Page Listing/Search functions (if you use Aina)
+- Creates a simple database of all your public page (Page must be marked as public to count)
+
+Upcoming Probably Next Week Features:
+
+- Creates A Reflection Your Collection Database
+- Lets Your Custom Pages Display Those Collections
+
+In other words, if you use Aina to generate your database, you can trust her that any GET public routes become accessible anywhere, even as static sites! 
 
 ---
 
@@ -126,8 +151,8 @@ Anita is designed with a simple, foundational architecture in mind. No black box
 
 | Layer      | Technology                                    |
 | :--------- | :-------------------------------------------- |
-| **Backend**  | FastAPI & SQLAlchemy                          |
-| **Frontend**   | Tailwind, AlpineJS & HTMX                     |
+| **Backend**  | FastAPI, SQLAlchemy                          |
+| **Frontend**   | Tailwind, AlpineJS, HTMX                     |
 
 Yes, that's all of them, seriously... 
 
@@ -304,7 +329,7 @@ Terrible Ideas That Won't Go Away
 - Anita AI Chatbot on Dashboard
 - Rewrite Everything In Go
 - Rewrite Everything In Rust
-- Export to SSG Button (HOW!?!?)
+- ~~Export to SSG Button (HOW!?!?)~~ HOLY SHIT I ACTUALLY FIGURED IT OUT!!!
 - Let Every User Bring Their Own API Key (The least terrible idea honestly, I should put it up there)
 - Hikarin Website Builder To Replace Aina (Note: Hikarin Website Builder Does Not Exist Yet)
 - Discord Integration (For... I'm not sure for what... But it'll be cool)
@@ -333,7 +358,7 @@ Q: Should I just use Postgre?
 A: Do you have 500 editors???
 
 Q: I need version control!
-A: Just skip Aina and bring your own Frontend... You can still use Asta for the markdown (unless you want to version control markdown??? In which case, I'll think about adding that feature to Asta)
+A: Just skip Aina and bring your own Frontend... You can still use Asta for the markdown (unless you want to version control markdown??? In which case, I'll think about adding that feature to Asta). Ah but if you skip Aina you lost the Export to SSG Feature~ Well... Drawbacks, I suppose... You can theoretically version control your SSG, now that I think about it, but you can't version control Aina/Asta editor itself...
 
 Q: Anita? Hikarin? Asta? Aina?
 A: THEY'RE CUTE! FIGHT ME!!!
