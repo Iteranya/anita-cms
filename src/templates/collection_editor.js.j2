@@ -1,0 +1,78 @@
+document.addEventListener('alpine:init', () => {
+    Alpine.data('{{ component_name }}', (initialData = null) => ({
+        // State
+        submissionId: null,
+        isEditing: false,
+        isLoading: false,
+
+        // --- Schema Fields ---
+        {% for field in fields %}
+        {{ field.name }}: {{ field.default_value }},
+        {% endfor %}
+
+        init() {
+            if (initialData) {
+                this.loadData(initialData);
+            }
+        },
+
+        loadData(data) {
+            // Unwrap data if it comes wrapped in a 'data' property (common in some CMSs)
+            const flatData = data.data ? data.data : data;
+            
+            {% for field in fields %}
+            if(data['{{ field.name }}'] !== undefined) this.{{ field.name }} = data['{{ field.name }}'];
+            {% endfor %}
+            
+            if(data.id) this.submissionId = data.id;
+            this.isEditing = true;
+        },
+
+        async save() {
+            this.isLoading = true;
+            
+            const submissionBody = {
+                {% for field in fields %}
+                {{ field.name }}: this.{{ field.name }}{{ "," if not loop.last }}
+                {% endfor %}
+            };
+
+            try {
+                if (this.isEditing && this.submissionId) {
+                    // --- UPDATE ---
+                    const payload = { data: submissionBody };
+                    await this.$api.collections.updateRecord('{{ collection_slug }}', this.submissionId, payload).execute();
+                    if(Alpine.store('notifications')) Alpine.store('notifications').success('Saved', 'Submission updated.');
+
+                } else {
+                    // --- CREATE ---
+                    const payload = {
+                        collection_slug: '{{ collection_slug }}',
+                        data: submissionBody
+                    };
+                    
+                    await this.$api.collections.createRecord('{{ collection_slug }}', payload).execute();
+                    
+                    if(Alpine.store('notifications')) Alpine.store('notifications').success('Success', 'Submission created.');
+                    this.resetCollection();
+                }
+                
+                this.$dispatch('submission-saved');
+
+            } catch(e) {
+                console.error(e);
+                if(Alpine.store('notifications')) Alpine.store('notifications').error('Error', 'Could not save submission.');
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        resetCollection() {
+            this.submissionId = null;
+            this.isEditing = false;
+            {% for field in fields %}
+            this.{{ field.name }} = {{ field.default_value }};
+            {% endfor %}
+        }
+    }));
+});

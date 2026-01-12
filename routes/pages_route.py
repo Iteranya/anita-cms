@@ -24,11 +24,11 @@ router = APIRouter(prefix="/page", tags=["Pages"])
 
 # --- Helper Logic ---
 
-def get_tag_names(db_tags) -> Set[str]:
-    """Extract string names from SQLAlchemy tag objects."""
-    if not db_tags:
+def get_label_names(db_labels) -> Set[str]:
+    """Extract string names from SQLAlchemy label objects."""
+    if not db_labels:
         return set()
-    return {t.name for t in db_tags}
+    return {t.name for t in db_labels}
 
 def check_type_permission(permissions: List[str], page_type: str, action: str):
     """
@@ -78,6 +78,11 @@ def create_page(
             detail=f"You do not have permission to create {page_in.type} pages."
         )
 
+    # 3. Seed 'custom' data from the default page template
+    default_page = page_service.get_page_by_slug("default-page")
+    if default_page and default_page.custom:
+        page_in.custom = default_page.custom
+
     page_in.author = user.username
     logger.info(f"User {user.username} creating {page_in.type} page: {page_in.slug}")
     return page_service.create_new_page(page_data=page_in)
@@ -105,10 +110,10 @@ def list_pages(
 
     accessible_pages = []
     for page in all_pages:
-        tag_names = get_tag_names(page.tags)
+        label_names = get_label_names(page.labels)
         
-        is_public = "any:read" in tag_names
-        role_allowed = f"{user_role}:read" in tag_names
+        is_public = "any:read" in label_names
+        role_allowed = f"{user_role}:read" in label_names
         is_author = user and page.author == user.username
 
         if is_public or role_allowed or is_author:
@@ -128,10 +133,10 @@ def get_page(
     if not page:
         raise HTTPException(status_code=404, detail="Page not found")
 
-    tag_names = get_tag_names(page.tags)
+    label_names = get_label_names(page.labels)
     
     # 1. Public Access (No type check needed just to view the website)
-    if "any:read" in tag_names:
+    if "any:read" in label_names:
         return page
 
     if not user:
@@ -141,7 +146,7 @@ def get_page(
     
     # 2. Access Rights
     is_admin = "*" in user_permissions or "page:read" in user_permissions
-    role_allowed = f"{user.role}:read" in tag_names
+    role_allowed = f"{user.role}:read" in label_names
     is_author = page.author == user.username
 
     if is_admin or role_allowed or is_author:
@@ -160,20 +165,20 @@ def update_page(
 ):
     """
     Updates page metadata or content.
-    Checks BOTH page ownership/tags AND editor capability (Aina/Asta).
+    Checks BOTH page ownership/labels AND editor capability (Aina/Asta).
     """
     db_page = page_service.get_page_by_slug(slug)
     if not db_page:
         raise HTTPException(status_code=404, detail="Page not found")
 
-    tag_names = get_tag_names(db_page.tags)
+    label_names = get_label_names(db_page.labels)
     user_permissions = user_service.get_user_permissions(user.username)
 
     # 1. Access Rights (Can I touch this page?)
     is_admin = "*" in user_permissions or "page:update" in user_permissions
     is_author = db_page.author == user.username
-    role_allowed = f"{user.role}:update" in tag_names
-    is_open_update = "any:update" in tag_names
+    role_allowed = f"{user.role}:update" in label_names
+    is_open_update = "any:update" in label_names
 
     has_access_right = (is_admin or is_author or role_allowed or is_open_update)
 
@@ -216,13 +221,13 @@ def delete_page(
     if not db_page:
         return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-    tag_names = get_tag_names(db_page.tags)
+    label_names = get_label_names(db_page.labels)
     user_permissions = user_service.get_user_permissions(user.username)
 
     # 1. Access Rights
     is_admin = "*" in user_permissions or "page:delete" in user_permissions
     is_author = db_page.author == user.username
-    role_allowed = f"{user.role}:delete" in tag_names
+    role_allowed = f"{user.role}:delete" in label_names
 
     if not (is_admin or is_author or role_allowed):
         raise HTTPException(status_code=403, detail="Permission denied")
@@ -260,7 +265,7 @@ def update_page_markdown(
     if db_page.type != "markdown":
          raise HTTPException(status_code=400, detail="Endpoint only for markdown pages.")
 
-    tag_names = get_tag_names(db_page.tags)
+    label_names = get_label_names(db_page.labels)
     user_permissions = user_service.get_user_permissions(user.username)
 
     # 2. Access Rights
@@ -268,8 +273,8 @@ def update_page_markdown(
         "*" in user_permissions or 
         "page:update" in user_permissions or 
         db_page.author == user.username or 
-        f"{user.role}:update" in tag_names or
-        "any:update" in tag_names
+        f"{user.role}:update" in label_names or
+        "any:update" in label_names
     )
 
     if not authorized_access:
@@ -300,7 +305,7 @@ def update_page_html(
     if db_page.type != "html":
          raise HTTPException(status_code=400, detail="Endpoint only for html pages.")
 
-    tag_names = get_tag_names(db_page.tags)
+    label_names = get_label_names(db_page.labels)
     user_permissions = user_service.get_user_permissions(user.username)
 
     # 2. Access Rights
@@ -308,8 +313,8 @@ def update_page_html(
         "*" in user_permissions or 
         "page:update" in user_permissions or 
         db_page.author == user.username or 
-        f"{user.role}:update" in tag_names or
-        "any:update" in tag_names
+        f"{user.role}:update" in label_names or
+        "any:update" in label_names
     )
 
     if not authorized_access:

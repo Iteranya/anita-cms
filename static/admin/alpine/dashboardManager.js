@@ -9,9 +9,9 @@ export default () => ({
     activeTab: 'welcome', // 'welcome' | 'stats' | 'settings'
 
     stats: {
-        core_counts: { pages: 0, forms: 0, submissions: 0, users: 0, tags: 0 },
+        core_counts: { pages: 0, collections: 0, submissions: 0, users: 0, labels: 0 },
         page_stats: { public_count: 0, blog_posts_count: 0 },
-        activity: { top_forms_by_submission: [], top_tags_on_pages: [] },
+        activity: { top_collections_by_submission: [], top_labels_on_pages: [] },
         recent_items: { newest_pages: [], latest_updates: [], latest_submissions: [] }
     },
     user: {
@@ -24,8 +24,8 @@ export default () => ({
         custom: { about_me: '' }
     },
     
-    // --- Profile Edit Form State ---
-    profileForm: {
+    // --- Profile Edit Collection State ---
+    profileCollection: {
         display_name: '',
         pfp_url: '',
         settings: {
@@ -67,7 +67,7 @@ export default () => ({
                         slug: "media-data",
                         title: "Media Metadata",
                         description: "System metadata for uploaded files",
-                        tags: ["editor:create","editor:read", "editor:delete", "editor:update"],
+                        labels: ["editor:create","editor:read", "editor:delete", "editor:update"],
                         schema: { fields: [
                             {name: "slug", label: "Slug", type: "text"},
                             { name: "saved_filename", label: "Filename", type: "text" },
@@ -90,7 +90,7 @@ export default () => ({
                         slug: "file-data",
                         title: "File Registry",
                         description: "Registry for documents and generic files",
-                        tags: ["editor:create","editor:read", "editor:delete", "editor:update"],
+                        labels: ["editor:create","editor:read", "editor:delete", "editor:update"],
                         schema: { fields: [
                             {name: "slug", label: "Slug", type: "text"},
                             { name: "saved_filename", label: "Filename", type: "text" },
@@ -125,8 +125,8 @@ export default () => ({
             this.user.custom = { about_me: '', ...this.user.custom };
             // --- END FIX ---
 
-            // After fetching and normalizing, populate the profile form
-            this.populateProfileForm();
+            // After fetching and normalizing, populate the profile collection
+            this.populateProfileCollection();
 
         } catch (e) {
             console.error("Failed to load dashboard data:", e);
@@ -136,23 +136,23 @@ export default () => ({
         }
     },
 
-    // --- Profile Form Logic ---
+    // --- Profile Collection Logic ---
 
-     populateProfileForm() {
+     populateProfileCollection() {
         // This code is now safer because we know user.custom and user.settings exist
-        this.profileForm.display_name = this.user.display_name || '';
-        this.profileForm.pfp_url = this.user.pfp_url || '';
-        this.profileForm.settings.dark_mode = this.user.settings.dark_mode || false;
-        this.profileForm.custom.about_me = this.user.custom.about_me || '';
+        this.profileCollection.display_name = this.user.display_name || '';
+        this.profileCollection.pfp_url = this.user.pfp_url || '';
+        this.profileCollection.settings.dark_mode = this.user.settings.dark_mode || false;
+        this.profileCollection.custom.about_me = this.user.custom.about_me || '';
         this.pfpPreviewUrl = null; 
     },
 
     async saveProfile() {
         const payload = {
-            display_name: this.profileForm.display_name,
-            pfp_url: this.profileForm.pfp_url,
-            settings: this.profileForm.settings,
-            custom: this.profileForm.custom
+            display_name: this.profileCollection.display_name,
+            pfp_url: this.profileCollection.pfp_url,
+            settings: this.profileCollection.settings,
+            custom: this.profileCollection.custom
         };
         
         try {
@@ -163,7 +163,7 @@ export default () => ({
             this.user.settings = { dark_mode: false, ...this.user.settings };
             this.user.custom = { about_me: '', ...this.user.custom };
 
-            this.populateProfileForm();
+            this.populateProfileCollection();
             
             Alpine.store('notifications').success('Profile Updated', 'Your changes have been saved.');
         } catch(e) {
@@ -202,7 +202,7 @@ export default () => ({
             const res = await this.$api.media.upload().execute([file]);
             
             if (res.files && res.files.length > 0) {
-                this.profileForm.pfp_url = '/media/' + res.files[0].saved_as;
+                this.profileCollection.pfp_url = '/media/' + res.files[0].saved_as;
             } else {
                  throw new Error("Upload response did not contain file data.");
             }

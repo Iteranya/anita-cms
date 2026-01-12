@@ -12,9 +12,9 @@ page_tags = Table(
     Column('tag_id', Integer, ForeignKey('tags.id'), primary_key=True)
 )
 
-form_tags = Table(
-    'form_tags', Base.metadata,
-    Column('form_id', Integer, ForeignKey('forms.id'), primary_key=True),
+collection_tags = Table(
+    'collection_tags', Base.metadata,
+    Column('collection_id', Integer, ForeignKey('collections.id'), primary_key=True),
     Column('tag_id', Integer, ForeignKey('tags.id'), primary_key=True)
 )
 
@@ -24,7 +24,32 @@ submission_tags = Table(
     Column('tag_id', Integer, ForeignKey('tags.id'), primary_key=True)
 )
 
+
+page_labels = Table(
+    'page_labels', Base.metadata,
+    Column('page_slug', String, ForeignKey('pages.slug'), primary_key=True),
+    Column('label_id', Integer, ForeignKey('labels.id'), primary_key=True)
+)
+
+collection_labels = Table(
+    'collection_labels', Base.metadata,
+    Column('collection_id', Integer, ForeignKey('collections.id'), primary_key=True),
+    Column('label_id', Integer, ForeignKey('labels.id'), primary_key=True)
+)
+
+submission_labels = Table(
+    'submission_labels', Base.metadata,
+    Column('submission_id', Integer, ForeignKey('submissions.id'), primary_key=True),
+    Column('label_id', Integer, ForeignKey('labels.id'), primary_key=True)
+)
+
 # --- THE TAG DICTIONARY ---
+
+class Label(Base):
+    __tablename__ = 'labels'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True) 
 
 class Tag(Base):
     __tablename__ = 'tags'
@@ -42,6 +67,7 @@ class Page(Base):
     content = Column(Text)
     markdown = Column(Text)
     html = Column(Text)
+    labels = relationship("Label", secondary=page_labels, backref="pages")
     tags = relationship("Tag", secondary=page_tags, backref="pages")
     thumb = Column(String)
     type = Column(String)
@@ -50,8 +76,8 @@ class Page(Base):
     author = Column(String)
     custom = Column(JSON)
 
-class Form(Base):
-    __tablename__ = "forms"
+class Collection(Base):
+    __tablename__ = "collections"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     slug = Column(String, unique=True, nullable=False, index=True)
@@ -61,24 +87,25 @@ class Form(Base):
     created = Column(String)
     updated = Column(String)
     author = Column(String)
-    tags = relationship("Tag", secondary=form_tags, backref="forms")
+    labels = relationship("Label", secondary=collection_labels, backref="collections")
+    tags = relationship("Tag", secondary=collection_tags, backref="collections")
     
     custom = Column(JSON)
-    submissions = relationship("Submission", back_populates="form", cascade="all, delete-orphan")
+    submissions = relationship("Submission", back_populates="collection", cascade="all, delete-orphan")
 
 class Submission(Base):
     __tablename__ = "submissions"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    form_slug = Column(String, ForeignKey("forms.slug", ondelete="CASCADE"), nullable=False)
+    collection_slug = Column(String, ForeignKey("collections.slug", ondelete="CASCADE"), nullable=False)
     data = Column("submission_json", JSON, nullable=False)
     created = Column(String)
     updated = Column(String)
     author = Column(String)
     custom = Column(JSON)
+    labels = relationship("Label", secondary=submission_labels, backref="submissions")
     tags = relationship("Tag", secondary=submission_tags, backref="submissions")
-
-    form = relationship("Form", back_populates="submissions")
+    collection = relationship("Collection", back_populates="submissions")
 
 class User(Base):
     __tablename__ = "users"

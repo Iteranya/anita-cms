@@ -5,7 +5,7 @@ from typing import List
 from bs4 import BeautifulSoup
 from sqlalchemy.orm import Session
 
-from src.alpine_generator import generate_form_alpine_components
+from src.alpine_generator import generate_collection_alpine_components
 from data.schemas import AlpineData
 
 # --- Helper Classes and Functions ---
@@ -31,12 +31,12 @@ class WebsiteBuilderService:
         components = []
         head = soup.find('head')
         if head:
-            tags = head.find_all(['script', 'style', 'link'])
-            for tag in tags:
-                if tag.name == 'link' and tag.get('rel') == ['stylesheet']:
-                    components.append(str(tag))
-                elif tag.name in ['script', 'style']:
-                    components.append(str(tag))
+            labels = head.find_all(['script', 'style', 'link'])
+            for label in labels:
+                if label.name == 'link' and label.get('rel') == ['stylesheet']:
+                    components.append(str(label))
+                elif label.name in ['script', 'style']:
+                    components.append(str(label))
         navbar = soup.find('nav') or soup.find('header')
         if navbar: 
             components.append(str(navbar))

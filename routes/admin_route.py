@@ -12,7 +12,7 @@ from src.dependencies import optional_user
 router = APIRouter(tags=["Admin SPA"])
 
 ADMIN_DIR = "static/admin"
-SPA_VIEWS = {"dashboard", "page", "structure", "users", "forms", "files", "media", "config"}
+SPA_VIEWS = {"dashboard", "page", "structure", "users", "collections", "files", "media", "config"}
 
 def render_no_cache_html(file_path: str, is_partial: bool):
     """
@@ -44,7 +44,7 @@ async def admin_root():
 @router.get("/admin/submissions", response_class=HTMLResponse)
 async def view_submissions_manager(request: Request, user: dict = Depends(optional_user)):
     if not user: 
-        return RedirectResponse("/auth/login")
+        return RedirectResponse("/auth")
     # Use the helper to ensure this page also doesn't stick in cache strangely
     return render_no_cache_html(os.path.join(ADMIN_DIR, "submissions.html"), False)
 
@@ -56,7 +56,7 @@ async def admin_router(
     db: Session = Depends(get_db)
 ):
     if not user:
-        return RedirectResponse(url="/auth/login", status_code=302)
+        return RedirectResponse(url="/auth", status_code=302)
 
     # --- CASE A: Static SPA View ---
     if slug in SPA_VIEWS:
@@ -68,23 +68,5 @@ async def admin_router(
         # 2. Otherwise, it's the Browser (The Shell)
         shell_path = os.path.join(ADMIN_DIR, "index.html")
         return render_no_cache_html(shell_path, False)
-
-    # --- CASE B: Dynamic Database Page ---
-    if user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required")
-
-    page_service = PageService(db)
-    page = page_service.get_page_by_slug(slug)
-
-    is_admin_tool = any(t.name == "sys:admin" for t in page.tags)
-    if not is_admin_tool:
-        raise HTTPException(status_code=404, detail="Page is not an admin tool")
-
-    if page.type == 'html' and page.html:
-        # We also prevent caching for dynamic tools so updates show instantly
-        return HTMLResponse(
-            content=page.html, 
-            headers={"Cache-Control": "no-store, max-age=0"}
-        )
 
     raise HTTPException(status_code=404, detail="Content not available")

@@ -1,7 +1,7 @@
 # OH GOD WHY!?
 It is currently 10:45 PM 11/9/2025
 
-I just added a new feature on Anita-chan, the uhh, custom form feature. It's cool, I guess, kinda, maybe. I kinda like it...
+I just added a new feature on Anita-chan, the uhh, custom collection feature. It's cool, I guess, kinda, maybe. I kinda like it...
 
 But anyway, I decided to write this as a lesson for myself and anyone else that might bother reading. A lesson of passion, spite, and oh god why did I do that!?
 
@@ -139,7 +139,7 @@ Or better yet, you can actually hack this thing!!! Create something that is more
 
 (Ah, also, A-GPL-3 License, so you need to share that too~ :3)
 
-Edit: Added RBAC, I need a life, Anita now has ABAC, RBAC, and that tag object thing. Why am I doing this to myself?
+Edit: Added RBAC, I need a life, Anita now has ABAC, RBAC, and that label object thing. Why am I doing this to myself?
 
 # React? Svelte?
 
@@ -175,7 +175,7 @@ I have integrated Aina with Ace Editor, do some funky metaprogramming, and creat
 
 You go to Aina, you got three tabs:
 
-Tab 1: Generator -> You click on selection of data from backend you want to access (auto populates your forms and custom collections and media files)
+Tab 1: Generator -> You click on selection of data from backend you want to access (auto populates your collections and custom collections and media files)
 
 Tab 2: Editor -> You have an editor to write HTML and Tailwind and Alpine stuff... You also got another editor to write CSS!!!
 

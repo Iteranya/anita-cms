@@ -1,7 +1,10 @@
-from typing import List, Optional
+import json
+from typing import List, Optional, Any
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
+from jinja2 import Environment, BaseLoader
+
 from data.database import get_db
 from data import schemas
 from services.pages import PageService
@@ -12,20 +15,35 @@ def get_page_service(db: Session = Depends(get_db)) -> PageService:
 
 router = APIRouter(tags=["Public"])
 
+# --- Helper: String Template Rendering ---
+def render_db_template(template_str: str, context: dict) -> str:
+    """
+    Renders a Jinja2 template stored as a string (from DB).
+    Adds the 'tojson' filter manually to match standard web framework behavior.
+    """
+    env = Environment(loader=BaseLoader(), autoescape=True)
+    
+    # Define tojson filter to handle Python -> JSON string conversion for JS variables
+    def to_json_filter(value: Any) -> str:
+        return json.dumps(value, default=str) # default=str handles datetime objects safely
+    
+    env.filters['tojson'] = to_json_filter
+    
+    template = env.from_string(template_str)
+    return template.render(**context)
+
+
 # ==========================================
 # 🖼️ HTML SERVING ROUTES
 # ==========================================
 
-# TODO: Add slowapi for rate limit (not everyone set this up in Caddy/Nginx)
-
 @router.get("/", response_class=HTMLResponse)
 def serve_home_page(page_service: PageService = Depends(get_page_service)):
-    """Serves the page tagged as 'home'."""
-    page = page_service.get_first_page_by_tags(['sys:home','any:read'])
+    """Serves the page labeled as 'home'."""
+    page = page_service.get_first_page_by_labels(['sys:home','any:read'])
     if not page:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Critical: Home page not configured, notify site owner.")
 
-    # We serve the pre-rendered HTML directly from the database
     return HTMLResponse(content=page.html, status_code=200)
 
 # ==========================================
@@ -34,45 +52,28 @@ def serve_home_page(page_service: PageService = Depends(get_page_service)):
 
 @router.get("/api/{slug}", response_class=schemas.Page)
 def serve_generic_page(slug: str, page_service: PageService = Depends(get_page_service)):
-    """
-    Serves a generic top-level page by its slug.
-    This acts as a catch-all for any slug not matched by other routes.
-    """
     page = page_service.get_page_by_slug(slug)
-    if not page.tags or not {'sys:head', 'any:read'}.issubset(tag.name for tag in page.tags):
+    if not page.labels or not {'sys:head', 'any:read'}.issubset(label.name for label in page.labels):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found in this category.")
     return page
 
 @router.get("/api/{main}/{slug}", response_model=schemas.Page)
 def api_get_any_page(main:str, slug: str, page_service: PageService = Depends(get_page_service)):
-    """
-    API endpoint to get a single public page by its slug.
-    """
     page = page_service.get_page_by_slug(slug)
     
-    if not page.tags or not {f'main:{main}', 'any:read'}.issubset(tag.name for tag in page.tags):
+    if not page.labels or not {f'main:{main}', 'any:read'}.issubset(label.name for label in page.labels):
          raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found in this category.")
 
     return page
 
 @router.get("/search", response_model=list[schemas.PageData])
-def api_search_pages_by_tags(
-    # Changed "..." to "None" to make it optional
-    tags: Optional[List[str]] = Query(None, description="List of tags to filter pages by"),
+def api_search_pages_by_labels(
+    labels: Optional[List[str]] = Query(None, description="List of labels to filter pages by"),
     page_service: PageService = Depends(get_page_service),
 ):
-    """
-    Search pages by tags.
-    All provided tags must be present on the page.
-    If no tags are provided, returns all pages with 'any:read'.
-    """
-    # Initialize as empty list if no tags were provided to prevent crashing on .append()
-    search_tags = tags if tags is not None else []
-    print(search_tags)
-    search_tags.append("any:read")
-    
-    pages = page_service.get_pages_by_tags(search_tags)
-
+    search_labels = labels if labels is not None else []
+    search_labels.append("any:read")
+    pages = page_service.get_pages_by_labels(search_labels)
     return pages
 
 # ==========================================
@@ -85,36 +86,57 @@ def serve_top_level_page(
     page_service: PageService = Depends(get_page_service),
 ):
     page = page_service.get_page_by_slug(slug)
-
     if not page:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Page not found",
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found")
 
-    tag_names = {tag.name for tag in page.tags}
+    label_names = {label.name for label in page.labels}
+    required_labels = {"sys:head", "any:read"}
 
-    required_tags = {"sys:head", "any:read"}
-
-    if not required_tags.issubset(tag_names):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Page not found",
-        )
+    if not required_labels.issubset(label_names):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found")
 
     return HTMLResponse(content=page.html, status_code=200)
 
     
 @router.get("/{main}/{slug}", response_class=HTMLResponse)
-def serve_any_post(slug: str, main:str,page_service: PageService = Depends(get_page_service)):
-    """Serves a single page."""
+def serve_any_post(slug: str, main:str, page_service: PageService = Depends(get_page_service)):
+    """
+    Serves a single page with SSR.
+    1. Fetches the content page.
+    2. Fetches the layout template.
+    3. Renders the template with content injected before sending to client.
+    """
     if main == slug:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found.")
-    page = page_service.get_page_by_slug(slug) # Service handles 404 if slug doesn't exist
-    markdown_template = page_service.get_first_page_by_tags(['sys:template','any:read'])
-    if not page.tags or not {f'main:{main}', 'any:read'}.issubset(tag.name for tag in page.tags):
+    
+    # 1. Fetch the actual content page
+    page = page_service.get_page_by_slug(slug) 
+    
+    # 2. Security/Logic Check
+    if not page.labels or not {f'main:{main}', 'any:read'}.issubset(label.name for label in page.labels):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found.")
+
+    # 3. If it's already static HTML, return it
     if page.type == 'html':
         return HTMLResponse(content=page.html, status_code=200)
-    else: # Patch, markdown_template will retrieve page from client side, will fix later
-        return HTMLResponse(content=markdown_template.html, status_code=200)
+
+    # 4. Handle Markdown/Dynamic Pages (SSR)
+    # Fetch the template
+    markdown_template = page_service.get_first_page_by_labels(['sys:template', 'any:read'])
+    if not markdown_template:
+        raise HTTPException(status_code=500, detail="System Error: Markdown template missing.")
+    
+    context = {
+        "title": page.title,
+        "markdown_content": page.markdown,  # Assuming 'content' holds the markdown
+        "author": page.author if hasattr(page, 'author') else "Unknown",
+        "published": page.created if hasattr(page, 'created_at') else "",
+        "updated": page.updated if hasattr(page, 'updated_at') else "",
+        "description": page.content if hasattr(page, 'description') else "",
+        "thumb": page.thumb if hasattr(page, 'thumbnail') else ""
+    }
+
+    # Render on Server
+    rendered_html = render_db_template(markdown_template.html, context)
+    
+    return HTMLResponse(content=rendered_html, status_code=200)

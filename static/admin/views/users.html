@@ -134,7 +134,7 @@
                     <div class="h-16 border-b border-slate-100 flex items-center justify-between px-8 bg-white z-10 shrink-0">
                         <div class="flex-1 mr-4">
                             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Role Name</label>
-                            <input type="text" x-model="roleForm.role_name" class="w-full max-w-sm px-0 py-0 text-xl font-bold text-slate-800 border-none focus:ring-0 placeholder-slate-300 bg-transparent" placeholder="Enter Role Name">
+                            <input type="text" x-model="roleCollection.role_name" class="w-full max-w-sm px-0 py-0 text-xl font-bold text-slate-800 border-none focus:ring-0 placeholder-slate-300 bg-transparent" placeholder="Enter Role Name">
                         </div>
                         <button id="save-role-btn" @click="saveRole" class="bg-anita-600 hover:bg-anita-700 text-white px-6 py-2.5 rounded-lg shadow-md font-bold text-sm transition transform hover:-translate-y-0.5">
                             <i class="fas fa-save mr-2"></i>Save Changes
@@ -158,7 +158,7 @@
                                             <div class="relative inline-block w-11 h-6 align-middle select-none shrink-0 mt-1">
                                                 <input type="checkbox" :id="perm.key" 
                                                        class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-slate-200 transition-all duration-300 top-0.5 z-10" 
-                                                       :checked="roleForm.permissions.includes(perm.key)"
+                                                       :checked="roleCollection.permissions.includes(perm.key)"
                                                        @change="togglePermission(perm.key)"/>
                                                 <label :for="perm.key" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-200 cursor-pointer transition-colors duration-300"></label>
                                             </div>
@@ -192,17 +192,17 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Username</label>
-                        <input type="text" x-model="userForm.username" :disabled="isEditingUser" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none disabled:bg-slate-100 font-mono text-sm">
+                        <input type="text" x-model="userCollection.username" :disabled="isEditingUser" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none disabled:bg-slate-100 font-mono text-sm">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Display Name</label>
-                        <input type="text" x-model="userForm.display_name" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none">
+                        <input type="text" x-model="userCollection.display_name" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none">
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Role</label>
                     <div class="relative">
-                        <select x-model="userForm.role" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none bg-white appearance-none">
+                        <select x-model="userCollection.role" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none bg-white appearance-none">
                             <template x-for="r in roles" :key="r.role_name">
                                 <option :value="r.role_name" x-text="r.role_name"></option>
                             </template>
@@ -212,10 +212,10 @@
                 </div>
                 <div x-show="!isEditingUser">
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Password</label>
-                    <input type="password" x-model="userForm.password" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none">
+                    <input type="password" x-model="userCollection.password" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none">
                 </div>
                 <div x-show="isEditingUser" class="flex items-center gap-2 pt-2">
-                    <input type="checkbox" id="userDisabled" x-model="userForm.disabled" class="w-4 h-4 text-anita-600 rounded">
+                    <input type="checkbox" id="userDisabled" x-model="userCollection.disabled" class="w-4 h-4 text-anita-600 rounded">
                     <label for="userDisabled" class="text-sm font-bold text-slate-600">Disable Account</label>
                 </div>
             </div>
@@ -231,8 +231,8 @@
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="passwordModalOpen = false"></div>
         <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 animate-fade-in border border-slate-100">
             <h3 class="text-lg font-bold text-slate-800 mb-2">Reset Password</h3>
-            <p class="text-sm text-slate-500 mb-6">New password for <span class="font-bold text-slate-700 font-mono" x-text="passwordForm.username"></span></p>
-            <input type="password" x-model="passwordForm.new_password" placeholder="New Password" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none mb-6">
+            <p class="text-sm text-slate-500 mb-6">New password for <span class="font-bold text-slate-700 font-mono" x-text="passwordCollection.username"></span></p>
+            <input type="password" x-model="passwordCollection.new_password" placeholder="New Password" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none mb-6">
             <div class="flex justify-end gap-3">
                 <button @click="passwordModalOpen = false" class="px-4 py-2 text-sm font-bold text-slate-500 bg-white border border-slate-200 rounded-lg hover:bg-slate-50">Cancel</button>
                 <button @click="changePassword" class="px-6 py-2 text-sm font-bold text-white bg-slate-900 rounded-lg hover:bg-slate-800 shadow-lg">Update</button>

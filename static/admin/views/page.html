@@ -44,7 +44,7 @@
                                 <h4 class="font-bold text-slate-800 leading-none truncate" x-text="page.title"></h4>
                                 <span class="text-[10px] uppercase font-extrabold px-1.5 py-0.5 rounded border flex-shrink-0"
                                     :class="page.type === 'markdown' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-pink-50 text-pink-700 border-pink-200'"
-                                    x-text="page.type === 'markdown' ? 'MD' : 'HTML'">
+                                    x-text="page.type === 'markdown' ? 'MARKDOWN - ASTA' : 'HTML - AINA'">
                                 </span>
                             </div>
                             <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
@@ -111,15 +111,15 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div class="col-span-1 sm:col-span-2">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Title *</label>
-                        <input type="text" x-model="form.title" @input="generateSlug" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none font-bold text-slate-800">
+                        <input type="text" x-model="collection.title" @input="generateSlug" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none font-bold text-slate-800">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Slug *</label>
-                        <input type="text" x-model="form.slug" :disabled="mode === 'edit'" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none disabled:bg-slate-100 disabled:text-slate-500 font-mono text-sm">
+                        <input type="text" x-model="collection.slug" :disabled="mode === 'edit'" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none disabled:bg-slate-100 disabled:text-slate-500 font-mono text-sm">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Content Type *</label>
-                        <select x-model="form.type" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none bg-white">
+                        <select x-model="collection.type" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none bg-white">
                             <option value="markdown">Markdown (Asta)</option>
                             <option value="html">HTML (Aina)</option>
                         </select>
@@ -129,11 +129,11 @@
                 <!-- 2. Editor Prompt (Visual Aid) -->
                 <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 shadow-sm flex items-center gap-3">
                     <div class="w-10 h-10 rounded-lg flex items-center justify-center text-lg" 
-                         :class="form.type === 'markdown' ? 'bg-purple-100 text-purple-600' : 'bg-pink-100 text-pink-600'">
-                        <i class="fas" :class="form.type === 'markdown' ? 'fa-pen-nib' : 'fa-code'"></i>
+                         :class="collection.type === 'markdown' ? 'bg-purple-100 text-purple-600' : 'bg-pink-100 text-pink-600'">
+                        <i class="fas" :class="collection.type === 'markdown' ? 'fa-pen-nib' : 'fa-code'"></i>
                     </div>
                     <div class="flex-1">
-                        <p class="text-sm font-bold text-slate-700" x-text="form.type === 'markdown' ? 'Using Asta Editor' : 'Using Aina Builder'"></p>
+                        <p class="text-sm font-bold text-slate-700" x-text="collection.type === 'markdown' ? 'Using Asta Editor' : 'Using Aina Builder'"></p>
                         <p class="text-xs text-slate-500">You can edit the content after saving this page.</p>
                     </div>
                 </div>
@@ -148,14 +148,14 @@
                     <!-- Description -->
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Description</label>
-                        <textarea x-model="form.description" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none text-sm"></textarea>
+                        <textarea x-model="collection.description" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none text-sm"></textarea>
                     </div>
 
                     <!-- Thumbnail -->
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Thumbnail</label>
                         <div class="flex gap-2">
-                            <input type="text" x-model="form.thumb" placeholder="/media/image.webp" class="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none text-sm font-mono">
+                            <input type="text" x-model="collection.thumb" placeholder="/media/image.webp" class="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-anita-500 outline-none text-sm font-mono">
                             <label class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-lg font-bold text-sm border border-slate-200 transition cursor-pointer flex items-center whitespace-nowrap">
                                 <i class="fas fa-upload mr-2"></i> 
                                 <input type="file" class="hidden" accept="image/*" @change="uploadThumbnail">
@@ -163,35 +163,17 @@
                         </div>
                     </div>
 
-                    <!-- Tags -->
+                    <!-- Labels -->
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tags</label>
                         <div class="flex flex-wrap gap-2 p-2 border border-slate-200 rounded-lg bg-white focus-within:ring-2 focus-within:ring-anita-500 min-h-[42px]">
-                            <template x-for="(tag, index) in form.tags" :key="index">
+                            <template x-for="(tag, index) in collection.tags" :key="index">
                                 <span class="bg-slate-100 text-slate-700 px-2 py-1 rounded text-xs font-bold flex items-center gap-1 border border-slate-200">
                                     <span x-text="tag"></span>
                                     <button @click="removeTag(index)" class="hover:text-red-500"><i class="fas fa-times"></i></button>
                                 </span>
                             </template>
-                            <input type="text" x-model="form.tagInput" @keydown.enter.prevent="addTag" placeholder="Add tag + Enter" class="flex-1 min-w-[100px] outline-none text-sm bg-transparent">
-                        </div>
-                    </div>
-                    
-                    <!-- Custom Fields -->
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <label class="block text-xs font-bold text-slate-500 uppercase">Custom Fields</label>
-                            <button @click="addCustomField" class="text-xs font-bold text-anita-600 hover:text-anita-700">+ Add Field</button>
-                        </div>
-                        <div class="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-100">
-                            <template x-for="(field, index) in form.customFields" :key="index">
-                                <div class="flex gap-2 items-center">
-                                    <input type="text" x-model="field.k" placeholder="Key" class="w-1/3 px-3 py-2 border border-slate-200 rounded-lg text-xs outline-none focus:border-anita-500 bg-white">
-                                    <input type="text" x-model="field.v" placeholder="Value" class="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-xs outline-none focus:border-anita-500 bg-white">
-                                    <button @click="removeCustomField(index)" class="text-slate-400 hover:text-red-500 p-1"><i class="fas fa-trash"></i></button>
-                                </div>
-                            </template>
-                            <div x-show="form.customFields.length === 0" class="text-center text-xs text-slate-400 italic py-2">No custom fields</div>
+                            <input type="text" x-model="collection.tagInput" @keydown.enter.prevent="addTag" placeholder="Add tag + Enter" class="flex-1 min-w-[100px] outline-none text-sm bg-transparent">
                         </div>
                     </div>
                 </div>

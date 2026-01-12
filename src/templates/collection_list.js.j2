@@ -1,0 +1,66 @@
+document.addEventListener('alpine:init', () => {
+    Alpine.data('{{ component_name }}', () => ({
+        submissions: [],
+        isLoading: false,
+        page: 1,
+        limit: 50,
+        totalItems: 0,
+        totalPages: 0,
+        
+        async init() {
+            await this.refresh();
+        },
+
+        async refresh() {
+            this.isLoading = true;
+            try {
+                // Expects response format: { items: [], totalItems: 0, totalPages: 0 }
+                const response = await this.$api.collections.listRecords('{{ collection_slug }}', this.page, this.limit).execute();
+                this.submissions = response.items || response; 
+                this.totalItems = response.totalItems || 0;
+                this.totalPages = response.totalPages || 0;
+            } catch(e) {
+                console.error('Failed to load submissions', e);
+                if(Alpine.store('notifications')) Alpine.store('notifications').error('Error', 'Could not load data');
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        async deleteSubmission(id) {
+            if(!confirm('Are you sure you want to delete this submission?')) return;
+            
+            this.isLoading = true;
+            try {
+                await this.$api.collections.deleteRecord('{{ collection_slug }}', id).execute();
+                if(Alpine.store('notifications')) Alpine.store('notifications').success('Deleted', 'Record removed.');
+                await this.refresh();
+            } catch(e) {
+                console.error(e);
+                if(Alpine.store('notifications')) Alpine.store('notifications').error('Error', 'Delete failed');
+            } finally {
+                this.isLoading = false;
+            }
+        },
+        
+        getValue(submission, fieldName) {
+            return (submission.data && submission.data[fieldName] !== undefined) 
+                ? submission.data[fieldName] 
+                : '';
+        },
+
+        nextPage() {
+            if(this.page < this.totalPages) {
+                this.page++;
+                this.refresh();
+            }
+        },
+
+        prevPage() {
+            if(this.page > 1) {
+                this.page--;
+                this.refresh();
+            }
+        }
+    }));
+});

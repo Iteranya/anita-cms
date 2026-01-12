@@ -3,26 +3,29 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 
 from data import models, schemas
-from .tags import get_or_create_tags, apply_tag_filters
+from .tags import get_or_create_tags
+from .labels import get_or_create_labels, apply_label_filters
 
 
 def get_submission(db: Session, submission_id: int) -> Optional[models.Submission]:
     return db.query(models.Submission).filter(models.Submission.id == submission_id).first()
 
-def list_submissions(db: Session, form_slug: str, skip: int = 0, limit: int = 100) -> List[models.Submission]:
-    return db.query(models.Submission).filter(models.Submission.form_slug == form_slug).order_by(models.Submission.created.desc()).offset(skip).limit(limit).all()
+def list_submissions(db: Session, collection_slug: str, skip: int = 0, limit: int = 100) -> List[models.Submission]:
+    return db.query(models.Submission).filter(models.Submission.collection_slug == collection_slug).order_by(models.Submission.created.desc()).offset(skip).limit(limit).all()
 
 def search_submissions(db: Session, query_str: str) -> List[models.Submission]:
     query = db.query(models.Submission)
-    query = apply_tag_filters(query, models.Submission, query_str)
+    query = apply_label_filters(query, models.Submission, query_str)
     return query.order_by(models.Submission.created.desc()).all()
 
 def create_submission(db: Session, submission: schemas.SubmissionCreate) -> models.Submission:
     now = datetime.now(timezone.utc).isoformat()
-    sub_data = submission.model_dump(exclude={'tags'})
-    tag_objects = get_or_create_tags(db, submission.tags)
+    sub_data = submission.model_dump(exclude={'labels','tags'})
+    label_objects = get_or_create_labels(db, submission.labels)
+    tag_objects = get_or_create_labels(db, submission.tags)
 
     db_submission = models.Submission(**sub_data, created=now, updated=now)
+    db_submission.labels = label_objects
     db_submission.tags = tag_objects
 
     db.add(db_submission)
@@ -36,7 +39,12 @@ def update_submission(db: Session, submission_id: int, submission_update: schema
         return None
     
     update_data = submission_update.model_dump(exclude_unset=True)
-    update_data.pop('form_slug', None)
+    update_data.pop('collection_slug', None)
+    
+    if 'labels' in update_data:
+        new_labels = update_data.pop('labels')
+        if new_labels is not None:
+            db_submission.labels = get_or_create_labels(db, new_labels)
     
     if 'tags' in update_data:
         new_tags = update_data.pop('tags')

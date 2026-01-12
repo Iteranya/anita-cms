@@ -18,7 +18,7 @@
                 <!-- Inline Dropdown for New Group -->
                 <div x-show="open" class="absolute top-full right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-100 p-3 z-50" x-transition>
                     <p class="text-xs font-bold text-slate-400 uppercase mb-2">Group Name</p>
-                    <input type="text" x-model="newGroupName" @keydown.enter="addNewGroup(); open=false" placeholder="e.g. Portfolio" class="w-full form-input text-sm mb-2">
+                    <input type="text" x-model="newGroupName" @keydown.enter="addNewGroup(); open=false" placeholder="e.g. Portfolio" class="w-full collection-input text-sm mb-2">
                     <button @click="addNewGroup(); open=false" class="w-full bg-slate-800 text-white text-xs font-bold py-2 rounded-lg hover:bg-slate-700">Create Folder</button>
                 </div>
             </div>
@@ -98,16 +98,16 @@
                           :class="page.type === 'html' ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-blue-50 text-blue-600 border-blue-100'">
                         <i class="fas" :class="page.type === 'html' ? 'fa-code' : 'fa-file-alt'"></i>
                     </span>
-                    <template x-if="page.tags.includes('sys:home')">
+                    <template x-if="page.labels.includes('sys:home')">
                         <span class="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-bold">Home</span>
                     </template>
-                    <template x-if="page.tags.includes('sys:template')">
+                    <template x-if="page.labels.includes('sys:template')">
                         <span class="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-bold">Template</span>
                     </template>
-                    <template x-if="page.tags.includes('any:read')">
+                    <template x-if="page.labels.includes('any:read')">
                         <span class="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-bold">Public</span>
                     </template>
-                    <template x-if="page.tags.includes('sys:head')">
+                    <template x-if="page.labels.includes('sys:head')">
                         <span class="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-bold">Head</span>
                     </template>
                 </div>
@@ -195,8 +195,8 @@
                 <button @click="modalOpen = false" class="text-slate-400 hover:text-red-500"><i class="fas fa-times text-xl"></i></button>
             </div>
 
-            <!-- Page Settings Form -->
-<!-- Page Settings Form -->
+            <!-- Page Settings Collection -->
+<!-- Page Settings Collection -->
 <div class="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
     <div class="max-w-4xl mx-auto space-y-12">
 
@@ -208,7 +208,7 @@
                 <input 
                     id="pageTitle" 
                     type="text" 
-                    x-model="form.title" 
+                    x-model="collection.title" 
                     @input="handleTitleInput" 
                     class="mt-1 block w-full bg-transparent border-0 p-0 text-xl font-bold text-slate-900 placeholder:text-slate-400 focus:ring-0" 
                     placeholder="My Awesome New Page"
@@ -222,7 +222,7 @@
                     <input 
                         id="pageSlug" 
                         type="text" 
-                        x-model="form.slug" 
+                        x-model="collection.slug" 
                         :disabled="mode === 'edit'" 
                         class="w-full rounded-md border-transparent bg-slate-100 px-3 py-2 font-mono text-sm text-slate-700 focus:border-indigo-500 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:text-slate-500"
                     >
@@ -235,7 +235,7 @@
                 <label for="pageContent" class="block text-sm font-medium text-slate-500">Description</label>
                 <textarea 
                     id="pageContent" 
-                    x-model="form.content" 
+                    x-model="collection.content" 
                     rows="2" 
                     class="mt-1 block w-full bg-transparent border-0 p-0 text-slate-600 placeholder:text-slate-400 focus:ring-0" 
                     placeholder="A brief summary for search engines and page listings."
@@ -255,7 +255,7 @@
                 
                 <!-- Public Access Toggle -->
                 <label class="flex items-center p-4 bg-white border border-slate-200 rounded-lg hover:border-slate-300 transition cursor-pointer">
-                    <input type="checkbox" x-model="form.isPublic" class="sr-only peer">
+                    <input type="checkbox" x-model="collection.isPublic" class="sr-only peer">
                     <div class="w-10 h-6 bg-slate-300 rounded-full peer-checked:bg-green-500 transition-colors relative">
                         <div class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform transform peer-checked:translate-x-4"></div>
                     </div>
@@ -267,7 +267,7 @@
 
                 <!-- Template Toggle -->
                 <label class="flex items-center p-4 bg-white border border-slate-200 rounded-lg hover:border-slate-300 transition cursor-pointer">
-                    <input type="checkbox" x-model="form.isTemplate" class="sr-only peer">
+                    <input type="checkbox" x-model="collection.isTemplate" class="sr-only peer">
                     <div class="w-10 h-6 bg-slate-300 rounded-full peer-checked:bg-indigo-500 transition-colors relative">
                         <div class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform transform peer-checked:translate-x-4"></div>
                     </div>
@@ -279,7 +279,7 @@
 
                 <!-- Homepage Toggle -->
                 <label class="flex items-center p-4 bg-white border border-slate-200 rounded-lg hover:border-slate-300 transition cursor-pointer col-span-1 md:col-span-2">
-                    <input type="checkbox" x-model="form.isHome" class="sr-only peer">
+                    <input type="checkbox" x-model="collection.isHome" class="sr-only peer">
                     <div class="w-10 h-6 bg-slate-300 rounded-full peer-checked:bg-blue-500 transition-colors relative">
                         <div class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform transform peer-checked:translate-x-4"></div>
                     </div>
@@ -291,7 +291,7 @@
                 
                 <!-- Head Toggle -->
                 <label class="flex items-center p-4 bg-white border border-slate-200 rounded-lg hover:border-slate-300 transition cursor-pointer col-span-1 md:col-span-2">
-                    <input type="checkbox" x-model="form.isHead" class="sr-only peer">
+                    <input type="checkbox" x-model="collection.isHead" class="sr-only peer">
                     <div class="w-10 h-6 bg-slate-300 rounded-full peer-checked:bg-blue-500 transition-colors relative">
                         <div class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform transform peer-checked:translate-x-4"></div>
                     </div>
@@ -329,37 +329,37 @@
                                 
                                 <!-- Column: Create -->
                                 <td class="p-3 text-center">
-                                    <template x-if="form.permissions[role]">
+                                    <template x-if="collection.permissions[role]">
                                         <input type="checkbox" 
-                                            x-model="form.permissions[role].create" 
-                                            class="form-checkbox rounded text-indigo-600 focus:ring-indigo-500">
+                                            x-model="collection.permissions[role].create" 
+                                            class="collection-checkbox rounded text-indigo-600 focus:ring-indigo-500">
                                     </template>
                                 </td>
 
                                 <!-- Column: Read -->
                                 <td class="p-3 text-center">
-                                    <template x-if="form.permissions[role]">
+                                    <template x-if="collection.permissions[role]">
                                         <input type="checkbox" 
-                                            x-model="form.permissions[role].read" 
-                                            class="form-checkbox rounded text-indigo-600 focus:ring-indigo-500">
+                                            x-model="collection.permissions[role].read" 
+                                            class="collection-checkbox rounded text-indigo-600 focus:ring-indigo-500">
                                     </template>
                                 </td>
 
                                 <!-- Column: Update -->
                                 <td class="p-3 text-center">
-                                    <template x-if="form.permissions[role]">
+                                    <template x-if="collection.permissions[role]">
                                         <input type="checkbox" 
-                                            x-model="form.permissions[role].update" 
-                                            class="form-checkbox rounded text-indigo-600 focus:ring-indigo-500">
+                                            x-model="collection.permissions[role].update" 
+                                            class="collection-checkbox rounded text-indigo-600 focus:ring-indigo-500">
                                     </template>
                                 </td>
 
                                 <!-- Column: Delete -->
                                 <td class="p-3 text-center">
-                                    <template x-if="form.permissions[role]">
+                                    <template x-if="collection.permissions[role]">
                                         <input type="checkbox" 
-                                            x-model="form.permissions[role].delete" 
-                                            class="form-checkbox rounded text-indigo-600 focus:ring-indigo-500">
+                                            x-model="collection.permissions[role].delete" 
+                                            class="collection-checkbox rounded text-indigo-600 focus:ring-indigo-500">
                                     </template>
                                 </td>
                             </tr>

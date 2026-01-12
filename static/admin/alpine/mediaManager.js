@@ -8,12 +8,12 @@ export default () => ({
     uploadModalOpen: false,
     detailsModalOpen: false,
 
-    // Details Form
+    // Details Collection
     targetFilename: '',
     targetId: null,
-    form: { title: '', description: '', link: '' },
+    collection: { title: '', description: '', link: '' },
 
-    // Upload Form
+    // Upload Collection
     uploadFile: null,
     uploadMeta: { title: '', description: '' },
     isUploading: false,
@@ -45,7 +45,7 @@ export default () => ({
                     slug: "media-data",
                     title: "Media Metadata",
                     description: "System metadata for uploaded files",
-                    tags: ["editor:create", "editor:read", "editor:delete", "editor:update"],
+                    labels: ["editor:create", "editor:read", "editor:delete", "editor:update"],
                     schema: {
                         fields: [
                             { name: "slug", label: "Slug", type: "text" },
@@ -159,24 +159,24 @@ export default () => ({
 
     openDetails(filename) {
         this.targetFilename = filename;
-        this.form.link = window.location.origin + '/media/' + filename;
+        this.collection.link = window.location.origin + '/media/' + filename;
 
         const meta = this.metaMap[filename];
         if (meta) {
             this.targetId = meta.id;
-            this.form.title = meta.title;
-            this.form.description = meta.description;
+            this.collection.title = meta.title;
+            this.collection.description = meta.description;
         } else {
             this.targetId = null;
-            this.form.title = filename.split('.')[0];
-            this.form.description = '';
+            this.collection.title = filename.split('.')[0];
+            this.collection.description = '';
         }
 
         this.detailsModalOpen = true;
     },
 
     async saveDetails() {
-        const baseSlug = this.slugify(this.form.title);
+        const baseSlug = this.slugify(this.collection.title);
         
         // Optional: Keep original slug ID if editing, or create new unique one
         const uniqueSlug = this.targetId 
@@ -187,8 +187,8 @@ export default () => ({
             data: {
                 slug: uniqueSlug,
                 saved_filename: this.targetFilename,
-                friendly_name: this.form.title,
-                description: this.form.description,
+                friendly_name: this.collection.title,
+                description: this.collection.description,
                 public_link: '/media/' + this.targetFilename
             }
         };
@@ -224,6 +224,6 @@ export default () => ({
     },
 
     copyLink() {
-        navigator.clipboard.writeText(this.form.link);
+        navigator.clipboard.writeText(this.collection.link);
     }
 });

@@ -108,7 +108,7 @@ Usually, if you want a dynamic "Menu" page for a restaurant, you have to code a 
 
 With Anita, you just do this:
 - Open the Dashboard: Go to the "Collections" tab.
-- Create a Form: Name it cafe-menu.
+- Create a Collection: Name it cafe-menu.
 - Add Fields: Add a "Text Field" for the Dish Name and a "Number Field" for the Price.
 - Check the boxes for access permissions
 - Done.
@@ -349,7 +349,7 @@ Long answer: We have trust issues.
 - Transparent Architecture: No hidden binaries. What you see in main.py is what runs.
 - Input Sanitization: We use Ammonia (Rust-based) to scrub every input.
 - Discord-Style Permissions: We use ABAC. You can set exactly who can see or edit your cafe-menu.
-- No script Tags: We bleach anything resembling script *before* they touch the database.
+- No script Labels: We bleach anything resembling script *before* they touch the database.
 
 <details>
   <summary> About Security </summary>
@@ -388,7 +388,7 @@ Long answer: We have trust issues.
     </td>
     <td>
       <strong>Artes</strong><br/>
-      I'll make it optional and configurable per-form and per-submission
+      I'll make it optional and configurable per-collection and per-submission
     </td>
   </tr>
   <tr>
@@ -442,7 +442,7 @@ Long answer: We have trust issues.
     </td>
     <td>
       <strong>Artes</strong><br/>
-      It's temporary, don't worry, I'll figure out per-page CSP and Form/Submission security through Hikarin. Oh and drag and drop website builder with GrapeJS.
+      It's temporary, don't worry, I'll figure out per-page CSP and Collection/Submission security through Hikarin. Oh and drag and drop website builder with GrapeJS.
     </td>
   </tr>
 </tbody>
@@ -468,11 +468,11 @@ You know what they say, a picture is worth a thousand words...
 <p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-structure-setting.png" alt="Admin UI Structure Setting" width="700"></p>
 <em>You want to separate projects, blogs, and gallery sections of your site??? Well with Anita it's a drag and drop interface~ You can set any page as home, as template, as the head of any top level navigation, and more! Comes with Access Control too!</em>
 
-#### Forms (aka Collections)
-<p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-forms.png" alt="Admin UI Forms" width="700"></p>
-<p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-forms-setting.png" alt="Admin UI Form Settings" width="700"></p>
-<p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-forms-creation.png" alt="Admin UI Form Creation" width="700"></p>
-<em>Oh you think this is for a contact form? Nyahaha~ It's a misnomer see? These are 'Collections', the no-code backend part of all this. You can make `contact-form`, but you can also make `cafe-menu`, `art-gallery`, and more, with role based permissions! Anita will create an entire GET/POST/PUT/DELETE route endpoint that accesses these forms you made!</em>
+#### Collections (aka Collections)
+<p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-collections.png" alt="Admin UI Collections" width="700"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-collections-setting.png" alt="Admin UI Collection Settings" width="700"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-collections-creation.png" alt="Admin UI Collection Creation" width="700"></p>
+<em>Oh you think this is for a contact collection? Nyahaha~ It's a misnomer see? These are 'Collections', the no-code backend part of all this. You can make `contact-collection`, but you can also make `cafe-menu`, `art-gallery`, and more, with role based permissions! Anita will create an entire GET/POST/PUT/DELETE route endpoint that accesses these collections you made!</em>
 
 #### Media & Files
 <p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-media.png" alt="Admin UI Media" width="700"></p>
@@ -618,7 +618,7 @@ Using our strict Attribute-Based Access Control (ABAC) and Security Matrix, you 
 
 - The "Menu Updater" Role: Does the restaurant owner only need to change prices? Create a role that has UPDATE permission on the cafe-menu collection, but NO ACCESS to Pages, Settings, or Media. They won't even see the other buttons.
 - The "Blog Writer" Role: Give them access to Asta (Markdown) to write news, but block access to Aina (Builder) so they can't break the layout.
-- System Locks: Critical pages (like Home or 404) are protected by System Tags. Even if you give a client "Delete Page" permissions, Anita will refuse to delete a System-Tagged page.
+- System Locks: Critical pages (like Home or 404) are protected by System Labels. Even if you give a client "Delete Page" permissions, Anita will refuse to delete a System-Labelged page.
 - Advanced: Create your client their very own custom admin page that they can use to update their menu without touching the admin panel
 
 Result: They feel empowered to update their content. You sleep soundly knowing they can't nuke the database.
@@ -737,10 +737,10 @@ python main.py
 - ~~CSP Configuration Is Still Globally Strict (should be configurable per-page basis)~~ Done! Per-page CSP Implemented!
 - ~~HikarinJS Is Still Opt-in (should be default for all ai generated site)~~ Done! Hikarin JS is first class citizen now~
 - ~~Default Pages Still Uses script (Should use HikarinJS Instead)~~ Done! Script exists, but it uses Hikarin middleware now~
-- ~~System Page Tags Are Still Manual (Should be abstracted with switches / panel)~~ Done! Made new panel for Structure
-- ~~Form Page Tags Are Still Manual (Should be abstracted with switches / panel)~~ Done! With amazing RBAC Panel
+- ~~System Page Labels Are Still Manual (Should be abstracted with switches / panel)~~ Done! Made new panel for Structure
+- ~~Collection Page Labels Are Still Manual (Should be abstracted with switches / panel)~~ Done! With amazing RBAC Panel
 - ~~User Roles and Perms Are Still Manual (Should be abstracted with switches / panel)~~ Done! Discord Flavored ABAC Panel~
-- No Tags and Sort Filter Yet
+- No Labels and Sort Filter Yet
 - No Darkmode Yet (seriously?)
 - ~~Submission Sanitization not yet implemented~~ Done! (With ammonia, bleach is deprecated)
 - Pay Yozzun For Anita's Artwork
@@ -748,8 +748,8 @@ python main.py
 - ~~Remove AI Integration~~ Done! Aina is an IDE now~ 
 - Implement Milkdown / Crepe to Asta
 - Better test coverage
-- More graceful Form Seeding (currently don't exist, actually, only page, roles and config for now)
-- Category and Tags are the same (should be separated)
+- More graceful Collection Seeding (currently don't exist, actually, only page, roles and config for now)
+- Category and Labels are the same (should be separated)
 - Sandbox Aina properly (Dummy Browser, Dummy Database, Dummy Dynamic API... Goddammit, I'll add disclaimers for now)
 - Fediverse/ActivityPub Implementation (I really, really want this but god this is HARD)
 

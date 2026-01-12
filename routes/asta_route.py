@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from data.database import get_db
 from src.embeds_generator import generate_media_embeds, generate_page_embeds
 from data.schemas import EmbedData
-from services.forms import FormService
+from services.collections import CollectionService
 from services.pages import PageService
 from src.dependencies import get_current_user
 
@@ -47,12 +47,12 @@ def render_template(file_path: str, context: dict = None):
 async def api_get_all_routes(db: Session = Depends(get_db), user: Optional[dict] = Depends(get_current_user)):
     """API Endpoint: Provides the list of components for the Generator."""
     page_service = PageService(db)
-    form_service = FormService(db)
+    collection_service = CollectionService(db)
     all_routes: List[EmbedData] = []
     
     try:
         all_routes.extend(generate_page_embeds(page_service))
-        all_routes.extend(generate_media_embeds(form_service))
+        all_routes.extend(generate_media_embeds(collection_service))
     except Exception as e:
         print(f"Error generating embeds: {e}")
 

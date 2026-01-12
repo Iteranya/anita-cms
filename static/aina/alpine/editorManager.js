@@ -61,7 +61,7 @@ export default (slug, initialData = {}) => ({
     /**
      * MODIFIED: Deploy Logic
      * Grabs the *already rendered* styles from the active preview iframe.
-     * TODO: Replace tailwind scrape from iFrame with Tailwind CLI
+     * TODO: Replace tailwind compilation scrape from iFrame with Tailwind CLI
      */
     async deployHtml() {
         this.isProcessing = true;
@@ -129,7 +129,7 @@ export default (slug, initialData = {}) => ({
     },
 
     /**
-     * Scrapes the contents of all <style> tags inside the preview iframe.
+     * Scrapes the contents of all <style> labels inside the preview iframe.
      * Iterates explicitly to ensure we catch Tailwind's injected styles.
      */
     getGeneratedStylesFromIframe() {
@@ -139,38 +139,38 @@ export default (slug, initialData = {}) => ({
             return '';
         }
 
-        // Get all style tags (Includes user CSS and Tailwind generated CSS)
-        const styleTags = iframe.contentDocument.querySelectorAll('style');
+        // Get all style labels (Includes user CSS and Tailwind generated CSS)
+        const styleLabels = iframe.contentDocument.querySelectorAll('style');
         
-        // Use Array.from to map nicely, filter out empty tags if needed
-        return Array.from(styleTags)
-            .map(tag => tag.innerHTML)
+        // Use Array.from to map nicely, filter out empty labels if needed
+        return Array.from(styleLabels)
+            .map(label => label.innerHTML)
             .join('\n');
     },
 
     // --- Helpers for Compilation ---
 
     /**
-     * Scrapes the contents of all <style> tags inside the preview iframe.
-     * The Tailwind CDN injects its generated CSS into a style tag here.
+     * Scrapes the contents of all <style> labels inside the preview iframe.
+     * The Tailwind CDN injects its generated CSS into a style label here.
      */
     getGeneratedStylesFromIframe() {
         const iframe = this.$refs.previewFrame;
         if (!iframe || !iframe.contentDocument) return '';
 
-        // Get all style tags (Includes user CSS and Tailwind generated CSS)
-        const styleTags = iframe.contentDocument.querySelectorAll('style');
+        // Get all style labels (Includes user CSS and Tailwind generated CSS)
+        const styleLabels = iframe.contentDocument.querySelectorAll('style');
         
         let allStyles = '';
-        styleTags.forEach(tag => {
-            allStyles += tag.innerHTML + '\n';
+        styleLabels.forEach(label => {
+            allStyles += label.innerHTML + '\n';
         });
 
         return allStyles;
     },
 
     /**
-     * Removes the Tailwind CDN script tag from the header string
+     * Removes the Tailwind CDN script label from the header string
      * so it doesn't run in production.
      */
     stripTailwindScript(headContent) {
@@ -216,7 +216,7 @@ export default (slug, initialData = {}) => ({
     compilePreviewPage(htmlContent, cssContent, headContent, jsContent) {
         const isTailwind = headContent.includes('tailwindcss');
         // If Tailwind is present, we use the special type to let the CDN process @apply
-        const styleTag = isTailwind 
+        const styleLabel = isTailwind 
             ? `<style type="text/tailwindcss">${cssContent}</style>`
             : `<style>${cssContent}</style>`;
 
@@ -224,7 +224,7 @@ export default (slug, initialData = {}) => ({
 <html>
     <head>
         ${headContent}
-        ${styleTag}
+        ${styleLabel}
     </head>
     <body>
         ${htmlContent}
@@ -236,16 +236,41 @@ export default (slug, initialData = {}) => ({
 </html>`;
     },
 
+    async copyPrompt() {
+        try {
+            // Generate the prompt text using your existing method
+            const promptText = await this.getPrompt();
+
+            // Write to system clipboard
+            await navigator.clipboard.writeText(promptText);
+
+            // Trigger UI feedback
+            this.copiedPrompt = true;
+            
+            // Reset button state after 2 seconds
+            setTimeout(() => {
+                this.copiedPrompt = false;
+            }, 2000);
+
+        } catch (err) {
+            console.error('Failed to copy prompt:', err);
+            this.$store.notifications.add({ 
+                type: 'error', 
+                message: 'Failed to copy to clipboard.' 
+            });
+        }
+    },
+
     async getPrompt() {
         const userHtml = this.editors.html.getValue();
         const userCss = this.editors.css.getValue();
         const response = await this.$api.aina.get(this.slug).execute();
         const head = response.custom?.builder?.header || "";
         
-        return `Your task is to create a UI based on the given template.
+        return `Your task is to create a UI partial based on the data.
 Constraints:
-1. Write HTML and CSS only.
-2. Interactivity must use Alpine.js (assume imported).
+1. Write HTML and Tailwind CSS only.
+2. Interactivity must use Alpine.js no <script> tags.
 3. Do NOT modify the <head>.
 
 Context - The current <head> contains:
@@ -258,18 +283,11 @@ ${userHtml}
 
 CSS:
 ${userCss}
+
+JS:
+${this.currentScript}
 ---
 
 Your task is: [TASK HERE]`;
-    },
-
-    async copyPrompt() {
-        try {
-            const text = await this.getPrompt();
-            await navigator.clipboard.writeText(text);
-            this.$store.notifications.add({ type: 'success', message: 'Prompt copied to clipboard' });
-        } catch (err) {
-            console.error('Failed to copy prompt', err);
-        }
     }
 });

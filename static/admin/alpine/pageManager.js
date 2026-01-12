@@ -9,12 +9,13 @@ export default () =>  ({
         mode: 'create', // 'create' | 'edit'
         targetSlug: '',
 
-        // Form Data
-        form: {
+        // Collection Data
+        collection: {
             title: '',
             slug: '',
             description: '',
             thumb: '',
+            tags:[],
             type: 'markdown', // markdown | html
             tagInput: '',
             tags: [],
@@ -38,11 +39,11 @@ export default () =>  ({
             }
         },
 
-        // --- Form Logic ---
+        // --- Collection Logic ---
 
         openCreate() {
             this.mode = 'create';
-            this.resetForm();
+            this.resetCollection();
             this.modalOpen = true;
         },
 
@@ -50,53 +51,54 @@ export default () =>  ({
             this.mode = 'edit';
             this.targetSlug = page.slug;
             
-            // Map API data to Form
-            this.form.title = page.title;
-            this.form.slug = page.slug;
-            this.form.type = page.type || 'markdown';
-            this.form.thumb = page.thumb || '';
-            this.form.description = page.description || (page.custom ? page.custom.description : '') || '';
-            this.form.tags = page.tags ? [...page.tags] : [];
+            // Map API data to Collection
+            this.collection.title = page.title;
+            this.collection.slug = page.slug;
+            this.collection.type = page.type || 'markdown';
+            this.collection.tags = page.tags ? [...page.tags] : [];
+            this.collection.thumb = page.thumb || '';
+            this.collection.description = page.description || (page.custom ? page.custom.description : '') || '';
+            this.collection.labels = page.labels ? [...page.labels] : [];
             
             // Handle Custom Fields (Convert Object -> Array)
-            this.form.customFields = [];
+            this.collection.customFields = [];
             if (page.custom) {
                 Object.entries(page.custom).forEach(([k, v]) => {
-                    if(k !== 'description') this.form.customFields.push({k, v});
+                    if(k !== 'description') this.collection.customFields.push({k, v});
                 });
             }
             
             this.modalOpen = true;
         },
 
-        resetForm() {
-            this.form = {
-                title: '', slug: '', description: '', thumb: '',
-                type: 'markdown', tagInput: '', tags: [], customFields: []
+        resetCollection() {
+            this.collection = {
+                title: '', slug: '', description: '', thumb: '', tags:[],
+                type: 'markdown', labelInput: '', labels: [], customFields: []
             };
         },
 
         generateSlug() {
             if (this.mode === 'create') {
-                this.form.slug = this.form.title.toLowerCase()
+                this.collection.slug = this.collection.title.toLowerCase()
                     .replace(/[^\w\s-]/g, '')
                     .replace(/\s+/g, '-');
             }
         },
 
-        // --- Tag & Field Logic ---
+        // --- Label & Field Logic ---
 
         addTag() {
-            const val = this.form.tagInput.trim();
-            if (val && !this.form.tags.includes(val)) {
-                this.form.tags.push(val);
+            const val = this.collection.tagInput.trim();
+            if (val && !this.collection.tags.includes(val)) {
+                this.collection.tags.push(val);
             }
-            this.form.tagInput = '';
+            this.collection.tagInput = '';
         },
-        removeTag(index) { this.form.tags.splice(index, 1); },
+        removeTag(index) { this.collection.tags.splice(index, 1); },
 
-        addCustomField() { this.form.customFields.push({k: '', v: ''}); },
-        removeCustomField(index) { this.form.customFields.splice(index, 1); },
+        addCustomField() { this.collection.customFields.push({k: '', v: ''}); },
+        removeCustomField(index) { this.collection.customFields.splice(index, 1); },
 
         // --- Actions ---
 
@@ -107,7 +109,7 @@ export default () =>  ({
                     const req = this.$api.media.upload();
                     const res = await req.execute(files);
                     if(res.files && res.files.length > 0) {
-                        this.form.thumb = '/media/' + res.files[0].saved_as;
+                        this.collection.thumb = '/media/' + res.files[0].saved_as;
                     }
                 } catch(err) { 
                     Alpine.store('notifications').error('Upload Failed', err); ; 
@@ -117,16 +119,17 @@ export default () =>  ({
 
 async save() {
             // 1. Prepare Metadata
-            const customObj = { description: this.form.description };
-            this.form.customFields.forEach(f => { if(f.k) customObj[f.k] = f.v; });
+            const customObj = { description: this.collection.description };
+            this.collection.customFields.forEach(f => { if(f.k) customObj[f.k] = f.v; });
 
             // 2. Construct Payload
             const payload = {
-                title: this.form.title,
-                slug: this.form.slug,
-                type: this.form.type,
-                thumb: this.form.thumb,
-                tags: this.form.tags,
+                title: this.collection.title,
+                slug: this.collection.slug,
+                type: this.collection.type,
+                thumb: this.collection.thumb,
+                tags:this.collection.tags,
+                labels: this.collection.labels,
                 custom: customObj
             };
 
@@ -158,11 +161,12 @@ async save() {
 
         async doDelete() {
             try {
-                await this.$api.pages.delete(this.targetSlug).execute();
+                await this.$api.pages.delete().execute(this.targetSlug);
+                
                 this.deleteModalOpen = false;
                 this.refresh();
             } catch(e) {
-                Alpine.store('notifications').error('Delete Failed', e); ;
+                Alpine.store('notifications').error('Delete Failed', e);
             }
         },
 

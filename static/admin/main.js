@@ -1,10 +1,7 @@
-
-// 1. Import Alpine and plugin
 import Alpine from '/static/hikarin/lib/alpine.js';
 import sort from '/static/hikarin/lib/alpine-sort.js';
 import  collapse  from '/static/hikarin/lib/alpine-collapse.js';
 
-// 2. Import your API and Managers
 import { HikarinApi } from '../hikarin/api/client.js';
 import notificationsStore from '../hikarin/alpine/notifications.js'
 import schemaManager from './alpine/schemaManager.js';
@@ -12,7 +9,7 @@ import dataManager from './alpine/dataManager.js';
 import pageManager from './alpine/pageManager.js'; 
 import userManager from './alpine/userManager.js';
 import mediaManager from './alpine/mediaManager.js';
-import formManager from './alpine/formManager.js';
+import collectionManager from './alpine/collectionManager.js';
 import configManager from './alpine/configManager.js';
 import fileManager from './alpine/fileManager.js';
 import submissionManager from './alpine/submissionManager.js';
@@ -39,7 +36,7 @@ Alpine.data('pageManager', pageManager);
 Alpine.data('structureManager', structureManager)
 Alpine.data('userManager', userManager);
 Alpine.data('mediaManager', mediaManager);
-Alpine.data('formManager', formManager);
+Alpine.data('collectionManager', collectionManager);
 Alpine.data('configManager', configManager);
 Alpine.data('fileManager', fileManager);
 Alpine.data('submissionManager', submissionManager);

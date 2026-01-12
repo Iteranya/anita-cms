@@ -1,5 +1,0 @@
-{
-  "admin": ["*"],
-  "editor": ["media:upload", "page:create"],
-  "viewer": ["page:read"]
-}

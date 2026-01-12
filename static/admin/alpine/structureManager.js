@@ -18,13 +18,14 @@ export default () => ({
     mode: 'create', 
     targetSlug: '',
 
-    // Form Data
-    form: {
+    // Collection Data
+    collection: {
         title: '',
         slug: '',
         content: '', 
         type: 'markdown', 
         thumb: '',
+        tags:[],
         category: '', 
         isPublic: false, 
         isHome: false,   
@@ -76,8 +77,8 @@ export default () => ({
 
         // 3. Distribute pages
         this.pages.forEach(page => {
-            const mainTag = (page.tags || []).find(t => t.startsWith('main:'));
-            const groupName = mainTag ? mainTag.split(':')[1] : 'uncategorized';
+            const mainLabel = (page.labels || []).find(t => t.startsWith('main:'));
+            const groupName = mainLabel ? mainLabel.split(':')[1] : 'uncategorized';
 
             if (!tree[groupName]) {
                 tree[groupName] = [];
@@ -131,7 +132,6 @@ export default () => ({
         if (!movedPage) return; // Should not happen
 
         // 2. INSERT into New Category (Optimistic update)
-        // Ensure destination array exists
         if (!this.pageTree[newCategoryName]) {
             this.pageTree[newCategoryName] = [];
         }
@@ -139,25 +139,20 @@ export default () => ({
         this.pageTree[newCategoryName].splice(position, 0, movedPage);
 
         // 3. PREPARE API PAYLOAD
-        // We reuse your existing logic to parse/compile tags
-        // Reset form just for calculation purposes
-        this.form = { permissions: this.getEmptyPermissions() }; 
-        this.parseTagsToForm(movedPage.tags || []);
+        this.collection = { permissions: this.getEmptyPermissions() }; 
+        this.parseLabelsToCollection(movedPage.labels || []);
         
-        // Update the category in the form data
-        this.form.category = (newCategoryName === 'uncategorized') ? '' : newCategoryName;
+        // Update the category in the collection data
+        this.collection.category = (newCategoryName === 'uncategorized') ? '' : newCategoryName;
         
-        // Recompile tags
-        const newTags = this.compileTagsFromForm();
-        const payload = { ...movedPage, tags: newTags };
+        // Recompile labels
+        const newLabels = this.compileLabelsFromCollection();
+        const payload = { ...movedPage, labels: newLabels };
 
         // 4. SEND API REQUEST
         try {
             await this.$api.pages.update().execute(itemSlug, payload);
             Alpine.store('notifications').success('Page Moved', `Moved to ${newCategoryName}`);
-            
-            // Optional: Background refresh to ensure server consistency
-            // We don't await this, so UI stays responsive
             this.refresh(); 
         } catch (e) {
             console.error("Failed to move page:", e);
@@ -178,7 +173,7 @@ export default () => ({
         this.isCreatingGroup = false;
     },
 
-    // --- Permission & Tag Logic (Unchanged) ---
+    // --- Permission & Label Logic (Unchanged) ---
     getEmptyPermissions() {
         const perms = {};
         this.roles.forEach(role => {
@@ -187,54 +182,54 @@ export default () => ({
         return perms;
     },
 
-    parseTagsToForm(tags = []) {
-        this.form.category = '';
-        this.form.isPublic = false;
-        this.form.isHome = false;
-        this.form.isTemplate = false;
-        this.form.isHead = false;
-        this.form.permissions = this.getEmptyPermissions();
+    parseLabelsToCollection(labels = []) {
+        this.collection.category = '';
+        this.collection.isPublic = false;
+        this.collection.isHome = false;
+        this.collection.isTemplate = false;
+        this.collection.isHead = false;
+        this.collection.permissions = this.getEmptyPermissions();
 
-        tags.forEach(tag => {
-            if (tag === 'any:read') { this.form.isPublic = true; return; }
-            if (tag === 'sys:home') { this.form.isHome = true; return; }
-            if (tag === 'sys:template') {this.form.isTemplate = true; return;}
-            if (tag === 'sys:head') {this.form.isHead = true; return;}
-            if (tag.startsWith('main:')) { this.form.category = tag.split(':')[1]; return; }
+        labels.forEach(label => {
+            if (label === 'any:read') { this.collection.isPublic = true; return; }
+            if (label === 'sys:home') { this.collection.isHome = true; return; }
+            if (label === 'sys:template') {this.collection.isTemplate = true; return;}
+            if (label === 'sys:head') {this.collection.isHead = true; return;}
+            if (label.startsWith('main:')) { this.collection.category = label.split(':')[1]; return; }
 
-            const parts = tag.split(':');
+            const parts = label.split(':');
             if (parts.length === 2) {
                 const [role, action] = parts;
-                if (this.form.permissions[role]) this.form.permissions[role][action] = true;
+                if (this.collection.permissions[role]) this.collection.permissions[role][action] = true;
             }
         });
     },
 
-    compileTagsFromForm() {
-        const tags = [];
-        if (this.form.category) {
-            const cleanCat = this.slugify(this.form.category);
-            tags.push(`main:${cleanCat}`);
+    compileLabelsFromCollection() {
+        const labels = [];
+        if (this.collection.category) {
+            const cleanCat = this.slugify(this.collection.category);
+            labels.push(`main:${cleanCat}`);
         }
-        if (this.form.isPublic) tags.push('any:read');
-        if (this.form.isHome) tags.push('sys:home');
-        if (this.form.isTemplate) tags.push('sys:template');
-        if (this.form.isHead) tags.push('sys:head');
+        if (this.collection.isPublic) labels.push('any:read');
+        if (this.collection.isHome) labels.push('sys:home');
+        if (this.collection.isTemplate) labels.push('sys:template');
+        if (this.collection.isHead) labels.push('sys:head');
 
-        Object.entries(this.form.permissions).forEach(([role, actions]) => {
+        Object.entries(this.collection.permissions).forEach(([role, actions]) => {
             Object.entries(actions).forEach(([action, isEnabled]) => {
-                if (isEnabled) tags.push(`${role}:${action}`);
+                if (isEnabled) labels.push(`${role}:${action}`);
             });
         });
-        return tags;
+        return labels;
     },
 
-    // --- Form Handling ---
+    // --- Collection Handling ---
     async openCreate() {
         if (this.rolesPromise) await this.rolesPromise;
         this.mode = 'create';
         this.activeTab = 'general';
-        this.form = {
+        this.collection = {
             title: '', slug: '', content: '', type: 'markdown', thumb: '',
             category: '', isPublic: false, isHome: false, isTemplate: false,
             permissions: this.getEmptyPermissions()
@@ -247,20 +242,21 @@ export default () => ({
         this.mode = 'edit';
         this.targetSlug = page.slug;
         this.activeTab = 'general';
-        this.form.title = page.title;
-        this.form.slug = page.slug;
-        this.form.type = page.type || 'markdown';
-        this.form.thumb = page.thumb || '';
-        this.form.content = page.content || '';
-        this.parseTagsToForm(page.tags || []);
+        this.collection.title = page.title;
+        this.collection.slug = page.slug;
+        this.collection.type = page.type || 'markdown';
+        this.collection.thumb = page.thumb || '';
+        this.collection.content = page.content || '';
+        this.collection.tags = page.tags || [];
+        this.parseLabelsToCollection(page.labels || []);
         this.modalOpen = true;
     },
 
     handleTitleInput() {
-        if (this.mode === 'create') this.form.slug = this.slugify(this.form.title);
+        if (this.mode === 'create') this.collection.slug = this.slugify(this.collection.title);
     },
     handleCategoryInput() {
-        this.form.category = this.slugify(this.form.category);
+        this.collection.category = this.slugify(this.collection.category);
     },
     slugify(text) {
         return text.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
@@ -274,7 +270,7 @@ export default () => ({
                 const req = this.$api.media.upload();
                 const res = await req.execute(files);
                 if(res.files && res.files.length > 0) {
-                    this.form.thumb = '/media/' + res.files[0].saved_as;
+                    this.collection.thumb = '/media/' + res.files[0].saved_as;
                 }
             } catch(err) { 
                 Alpine.store('notifications').error('Upload Failed', err);
@@ -284,13 +280,18 @@ export default () => ({
 
     async save() {
         this.isSaving = true;
-        this.form.slug = this.slugify(this.form.slug);
-        if(this.form.category) this.form.category = this.slugify(this.form.category);
+        this.collection.slug = this.slugify(this.collection.slug);
+        if(this.collection.category) this.collection.category = this.slugify(this.collection.category);
 
         const payload = {
-            title: this.form.title, slug: this.form.slug, type: this.form.type,
-            thumb: this.form.thumb, content: this.form.content,
-            tags: this.compileTagsFromForm(), custom: {}
+            title: this.collection.title, 
+            slug: this.collection.slug, 
+            type: this.collection.type,
+            thumb: this.collection.thumb, 
+            content: this.collection.content,
+            tags:this.collection.tags,
+            labels: this.compileLabelsFromCollection(), 
+            custom: {}
         };
 
         try {

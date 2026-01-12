@@ -30,7 +30,7 @@ def validate_slug_format(v: Any) -> str:
 
 def sanitize_text(v: Any) -> Any:
     """
-    Strips all HTML tags and attributes from a string using nh3.
+    Strips all HTML labels and attributes from a string using nh3.
     """
     if isinstance(v, str):
         return nh3.clean(v, tags=set(), attributes={}, strip_comments=True).strip()
@@ -61,16 +61,16 @@ def sanitize_recursively(value: Any) -> Any:
         
     return value
 
-# --- Tag Flattening Utility ---
+# --- Label Flattening Utility ---
 
-def flatten_tags_to_strings(v: Any) -> List[str]:
-    """Converts Tag objects, sanitizes, and cleans for API output."""
+def flatten_labels_to_strings(v: Any) -> List[str]:
+    """Converts Label objects, sanitizes, and cleans for API output."""
     if not v: 
         return []
     if isinstance(v[0], str):
         return [sanitize_text(t).replace("<", "").replace(">", "") for t in v]
     if hasattr(v[0], 'name'):
-        return [sanitize_text(tag.name).replace("<", "").replace(">", "") for tag in v]
+        return [sanitize_text(label.name).replace("<", "").replace(">", "") for label in v]
     return v
 
 
@@ -81,7 +81,8 @@ class PageBase(BaseModel):
     content: Optional[str] = None # Short description only, not actual page content
     markdown: Optional[str] = None # Sanitized Until Per-Page CSP is Implemented
     html: Optional[str] = None  # EXEMPTED / UNTOUCHED / LITERALLY THE ENTIRE SITE
-    tags: Optional[List[str]] = []
+    labels: Optional[List[str]] = []
+    tags: Optional[List[str]] = [] 
     thumb: Optional[str] = None
     type: Optional[str] = "markdown"
     author: Optional[str] = None
@@ -93,7 +94,7 @@ class PageBase(BaseModel):
         return sanitize_text(v)
 
 class PageCreate(PageBase):
-    slug: str
+    slug: str # FOREVER IMMUTABLE
     html: None = Field(default=None, exclude=True)
     markdown: None = Field(default=None, exclude=True)
 
@@ -112,28 +113,27 @@ class Page(PageBase):
     slug: str
     created: str
     updated: str
-    @field_validator('tags', mode='before')
+    @field_validator('labels', 'tags', mode='before')
     @classmethod
-    def clean_tags_output(cls, v): return flatten_tags_to_strings(v)
+    def clean_labels_output(cls, v): return flatten_labels_to_strings(v)
     model_config = ConfigDict(from_attributes=True)
 
 class PageUpdateHTML(BaseModel):
     html: Optional[str] = None
-    custom: Optional[Dict[str, Any]] = None
     tags: Optional[List[str]] = None
+    custom: Optional[Dict[str, Any]] = None
+    labels: Optional[List[str]] = None
 
 class PageMarkdownUpdate(BaseModel):
     markdown: str
-    custom: Optional[Dict[str, Any]] = None
     tags: Optional[List[str]] = None
+    custom: Optional[Dict[str, Any]] = None
+    labels: Optional[List[str]] = None
+    
 
     @field_validator('markdown', mode='before')
     @classmethod
     def bleach_markdown(cls, v): return sanitize_text(v)
-
-    @field_validator('custom', mode='before')
-    @classmethod
-    def validate_and_bleach_dict(cls, v): return sanitize_recursively(v)
     
     model_config = ConfigDict(extra="ignore")
 
@@ -149,42 +149,43 @@ class PageSeed(PageBase):
     def validate_slug(cls, v): return validate_slug_format(v)
 
 
-# --- Form Schemas ---
+# --- Collection Schemas ---
 
-class FormBase(BaseModel):
+class CollectionBase(BaseModel):
     title: str
     schema: Dict[str, Any] = Field(alias='schema') 
     description: Optional[str] = None
     tags: Optional[List[str]] = []
+    labels: Optional[List[str]] = []
     custom: Optional[Dict[str, Any]] = {}
     author: Optional[str] = None
 
     @field_validator('title', 'description', 'author', mode='before')
     @classmethod
-    def bleach_form_fields(cls, v): return sanitize_text(v)
+    def bleach_collection_fields(cls, v): return sanitize_text(v)
 
     @field_validator('custom', 'schema', mode='before')
     @classmethod
     def validate_and_bleach_dicts(cls, v): return sanitize_recursively(v)
 
-class FormCreate(FormBase):
+class CollectionCreate(CollectionBase):
     slug: str
     @field_validator('slug', mode='before')
     @classmethod
     def validate_slug(cls, v): return validate_slug_format(v)
 
-class FormUpdate(FormBase):
+class CollectionUpdate(CollectionBase):
     title: Optional[str] = None
     schema: Optional[Dict[str, Any]] = Field(default=None, alias='schema')
 
-class Form(FormBase):
+class Collection(CollectionBase):
     id: int
     slug: str
     created: str
     updated: str
-    @field_validator('tags', mode='before')
+    @field_validator('labels', 'tags', mode='before')
     @classmethod
-    def clean_tags_output(cls, v): return flatten_tags_to_strings(v)
+    def clean_labels_output(cls, v): return flatten_labels_to_strings(v)
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -194,6 +195,7 @@ class SubmissionBase(BaseModel): # Bleach Everything Until Whitelist is Implemen
     data: Dict[str, Any]
     author: Optional[str] = None
     custom: Optional[Dict[str, Any]] = {}
+    labels: Optional[List[str]] = []
     tags: Optional[List[str]] = []
     
     @field_validator('author', mode='before')
@@ -207,15 +209,15 @@ class SubmissionBase(BaseModel): # Bleach Everything Until Whitelist is Implemen
         return sanitize_recursively(v)
 
 class SubmissionCreate(SubmissionBase):
-    form_slug: str
-    @field_validator('form_slug', mode='before')
+    collection_slug: str
+    @field_validator('collection_slug', mode='before')
     @classmethod
     def validate_slug(cls, v): return validate_slug_format(v)
 
 class SubmissionUpdate(BaseModel):
     data: Optional[Dict[str, Any]] = None
     custom: Optional[Dict[str, Any]] = None
-    tags: Optional[List[str]] = None
+    labels: Optional[List[str]] = None
 
     @field_validator('data', 'custom', mode='before')
     @classmethod
@@ -224,12 +226,12 @@ class SubmissionUpdate(BaseModel):
     
 class Submission(SubmissionBase):
     id: int
-    form_slug: str
+    collection_slug: str
     created: str
     updated: str
-    @field_validator('tags', mode='before')
+    @field_validator('labels', 'tags', mode='before')
     @classmethod
-    def clean_tags_output(cls, v): return flatten_tags_to_strings(v)
+    def clean_labels_output(cls, v): return flatten_labels_to_strings(v)
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -349,10 +351,10 @@ class UploadResult(BaseModel):
 
 class DashboardCoreCounts(BaseModel):
     pages: int
-    forms: int
+    collections: int
     submissions: int
     users: int
-    tags: int
+    labels: int
 
 class DashboardPageStats(BaseModel):
     public_count: int
@@ -364,8 +366,8 @@ class DashboardActivityItem(BaseModel):
     count: int
 
 class DashboardActivity(BaseModel):
-    top_forms_by_submission: List[DashboardActivityItem]
-    top_tags_on_pages: List[DashboardActivityItem]
+    top_collections_by_submission: List[DashboardActivityItem]
+    top_labels_on_pages: List[DashboardActivityItem]
 
 class DashboardRecentItems(BaseModel):
     newest_pages: List[Page]

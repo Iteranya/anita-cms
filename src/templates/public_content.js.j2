@@ -1,0 +1,19 @@
+document.addEventListener('alpine:init', () => {
+    Alpine.data('{{ component_name }}', () => ({
+        content: null,
+        isLoading: false,
+        error: null,
+
+        async loadBySlug(slug) {
+            this.isLoading = true;
+            this.error = null;
+            try {
+                this.content = await this.$api.public.getContent(slug).execute();
+            } catch (e) {
+                this.error = 'Content not found';
+            } finally {
+                this.isLoading = false;
+            }
+        }
+    }));
+});

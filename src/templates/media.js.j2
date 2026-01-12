@@ -1,0 +1,5 @@
+document.addEventListener('alpine:init', () => {
+    Alpine.data('{{ safe_slug }}', () => ({
+        mediaUrl: '{{ public_link }}'
+    }));
+});
