@@ -301,6 +301,7 @@ python main.py
 - Mitochondria Is The Powerhouse of Cell 
 - ~~Bleach Is Not Implemented Properly Yet~~ Done! (With ammonia, bleach is deprecated)
 - ~~CSP Configuration Is Still Globally Strict (should be configurable per-page basis)~~ Done! Per-page CSP Implemented!
+- CSRF Token (Come on... Why is this so hard???)
 - ~~HikarinJS Is Still Opt-in (should be default for all ai generated site)~~ Done! Hikarin JS is first class citizen now~
 - ~~Default Pages Still Uses script (Should use HikarinJS Instead)~~ Done! Script exists, but it uses Hikarin middleware now~
 - ~~System Page Labels Are Still Manual (Should be abstracted with switches / panel)~~ Done! Made new panel for Structure
