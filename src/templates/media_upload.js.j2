@@ -1,0 +1,48 @@
+document.addEventListener('alpine:init', () => {
+    Alpine.data('mediaUploader', () => ({
+        // State
+        isLoading: false,
+        error: null,
+        uploadedFiles: [], // Stores the response from the last successful upload
+
+        /**
+         * Handles the file input change event and triggers the upload.
+         * @param {Event} event - The file input change event.
+         */
+        async handleUpload(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) {
+                return; // No files selected
+            }
+
+            this.isLoading = true;
+            this.error = null;
+            this.uploadedFiles = [];
+
+            try {
+                // The API's upload method expects an array/iterable of files
+                const result = await this.$api.media.upload().execute(files);
+                
+                this.uploadedFiles = result;
+                if (Alpine.store('notifications')) {
+                    Alpine.store('notifications').success('Upload Complete', `${files.length} file(s) uploaded.`);
+                }
+                
+                // Dispatch a global event that other components can listen to.
+                // This is useful for telling the media list to refresh itself.
+                this.$dispatch('media-updated');
+
+            } catch (e) {
+                console.error("Upload failed:", e);
+                this.error = e.message || 'An unknown error occurred during upload.';
+                if (Alpine.store('notifications')) {
+                    Alpine.store('notifications').error('Upload Failed', this.error);
+                }
+            } finally {
+                this.isLoading = false;
+                // Reset the file input so the user can upload the same file again
+                event.target.value = null; 
+            }
+        }
+    }));
+});

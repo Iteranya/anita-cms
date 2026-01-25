@@ -128,7 +128,7 @@ def serve_any_post(slug: str, main:str, page_service: PageService = Depends(get_
     
     context = {
         "title": page.title,
-        "markdown_content": page.markdown,  # Assuming 'content' holds the markdown
+        "markdown_content": page.markdown,
         "author": page.author if hasattr(page, 'author') else "Unknown",
         "published": page.created if hasattr(page, 'created_at') else "",
         "updated": page.updated if hasattr(page, 'updated_at') else "",

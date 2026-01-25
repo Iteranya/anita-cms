@@ -1,3 +1,6 @@
+// This is used to retrieve a list of PAGE object.
+// Some collection might require the SLUG of the page
+// The page retrieved for this specific function is called {{ component_name }}
 document.addEventListener('alpine:init', () => {
     Alpine.data('{{ component_name }}', (initialLabels = {{ default_labels | tojson }}) => ({
         

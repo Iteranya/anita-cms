@@ -23,7 +23,7 @@ def _get_default_value(field_type: str) -> str:
         return 'false'
     if field_type == 'number':
         return 'null'
-    if field_type in ('json', 'labels'):
+    if field_type in ('json', 'labels','object'):
         return '[]'
     return "''" # Default string
 
@@ -49,7 +49,8 @@ def generate_collection_editor_js(collection_slug: str, fields: List[dict]) -> s
     for f in fields:
         processed_fields.append({
             'name': f['name'],
-            'default_value': _get_default_value(f.get('type', 'text'))
+            'default_value': _get_default_value(f.get('type', 'text')),
+            'type': f.get('type', 'text')
         })
 
     return template.render(
@@ -103,6 +104,22 @@ def generate_public_content_js(component_name: str) -> str:
 def generate_markdown_js() -> str:
     """Reads the raw content of the markdown template, bypassing Jinja."""
     file_path = os.path.join(TEMPLATE_DIR, 'markdown.js.j2')
+    
+    # Open the file and read it as a plain string
+    with open(file_path, 'r', encoding='utf-8') as f:
+        return f.read()
+    
+def upload_media_js() -> str:
+    """Reads the raw content of the markdown template, bypassing Jinja."""
+    file_path = os.path.join(TEMPLATE_DIR, 'media_upload.js.j2')
+    
+    # Open the file and read it as a plain string
+    with open(file_path, 'r', encoding='utf-8') as f:
+        return f.read()
+    
+def list_media_js() -> str:
+    """Reads the raw content of the markdown template, bypassing Jinja."""
+    file_path = os.path.join(TEMPLATE_DIR, 'media_list.js.j2')
     
     # Open the file and read it as a plain string
     with open(file_path, 'r', encoding='utf-8') as f:
@@ -174,6 +191,59 @@ def generate_media_alpine_components(collection_service: CollectionService) -> L
 def generate_public_alpine_components(label_service: LabelService) -> List[AlpineData]:
     alpine_registry: List[AlpineData] = []
 
+    #0. Create the Relational Code
+    alpine_registry.append(AlpineData(
+        slug="relational-code",
+        name="Relational Code",
+        description="A Glue Code that combines x-data together",
+        category="Utility",
+        data="""document.addEventListener('alpine:init', () => {
+    
+    // --- 1. Universal Data Store (The Bridge) ---
+    Alpine.store('data_bridge', {
+        cache: {}, 
+
+        async get(collectionName, api) {
+            if (this.cache[collectionName]) return this.cache[collectionName];
+            try {
+                const response = await api.collections.listRecords(collectionName, 0, 500).execute();
+                this.cache[collectionName] = response.items || response;
+                return this.cache[collectionName];
+            } catch (e) {
+                console.error(`Failed to load relational data for ${collectionName}`, e);
+                return [];
+            }
+        }
+    });
+
+    // --- 2. Universal Relational Picker Component ---
+    Alpine.data('relation_picker', (foreignCollectionName) => ({
+        items: [],
+        selected: [],
+        isLoading: true,
+
+        async init() {
+            // Fetch all foreign items
+            this.items = await Alpine.store('data_bridge').get(foreignCollectionName, this.$api);
+            this.isLoading = false;
+
+            // REMOVED: The code block that tried to access 'this.$parent.menu_slugs'
+            // We now rely entirely on x-effect in the HTML to handle the sync.
+
+            // Emit changes back to parent
+            this.$watch('selected', (newSelection) => {
+                // Prevent infinite loops by checking if the value actually differs
+                // (Though Alpine usually handles basic primitive array loops okay)
+                this.$dispatch('relation-changed', { 
+                    collection: foreignCollectionName, 
+                    values: newSelection 
+                });
+            });
+        }
+    }));
+});"""
+    ))
+
     # 1. Public Search Component
     search_js = generate_public_search_js("public_search", default_labels=["any:read"])
     alpine_registry.append(AlpineData(
@@ -225,6 +295,34 @@ def generate_markdown_renderer_js() -> List[AlpineData]:
         slug="markdown_renderer",
         name="Markdown Renderer",
         description="This component lets this page render markdown content",
-        category="Pages",
+        category="Utility",
+        data=raw_content
+    )]
+
+def generate_media_upload_js() -> List[AlpineData]:
+    """Generates the JS for the Markdown renderer component."""
+    
+    # Get the raw string from the helper function above
+    raw_content = upload_media_js()
+    
+    return [AlpineData(
+        slug="media_upload",
+        name="Media Upload",
+        description="This component lets this page upload media",
+        category="Utility",
+        data=raw_content
+    )]
+
+def generate_media_list() -> List[AlpineData]:
+    """Generates the JS for the Markdown renderer component."""
+    
+    # Get the raw string from the helper function above
+    raw_content = list_media_js()
+    
+    return [AlpineData(
+        slug="media_list",
+        name="Media List",
+        description="This component lets this page list ALL media",
+        category="Utility",
         data=raw_content
     )]

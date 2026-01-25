@@ -322,7 +322,6 @@ python main.py
 - Better test coverage
 - ~~More graceful Collection Seeding (currently don't exist, actually, only page, roles and config for now)~~ Done! With Starter Kit Feature!
 - ~~Category and Labels are the same (should be separated)~~ Done! We have tags (public) and labels (system) now
-- Sandbox Aina properly (Dummy Browser, Dummy Database, Dummy Dynamic API... Goddammit, I'll add disclaimers for now)
 
 Terrible Ideas That Won't Go Away
 
@@ -331,8 +330,6 @@ Terrible Ideas That Won't Go Away
 - Rewrite Everything In Go
 - Rewrite Everything In Rust
 - ~~Export to SSG Button (HOW!?!?)~~ HOLY SHIT I ACTUALLY FIGURED IT OUT!!!
-- Let Every User Bring Their Own API Key (The least terrible idea honestly, I should put it up there)
-- Hikarin Website Builder To Replace Aina (Note: Hikarin Website Builder Does Not Exist Yet)
 - Discord Integration (For... I'm not sure for what... But it'll be cool)
 - ~~Make Domain Specific Language For Themes and Plugins~~ No Themes, Only Starter Kits!
 

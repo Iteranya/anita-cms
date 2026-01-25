@@ -1,15 +1,18 @@
 # file: api/admin.py
 
 import os
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
 from data.database import get_db
+from routes.public_route import render_db_template
 from services.pages import PageService
 from src.dependencies import optional_user
 
 router = APIRouter(tags=["Admin SPA"])
+def get_page_service(db: Session = Depends(get_db)) -> PageService:
+    return PageService(db)
 
 ADMIN_DIR = "static/admin"
 SPA_VIEWS = {"dashboard", "page", "structure", "users", "collections", "files", "media", "config"}
@@ -70,3 +73,40 @@ async def admin_router(
         return render_no_cache_html(shell_path, False)
 
     raise HTTPException(status_code=404, detail="Content not available")
+
+@router.get("/admin/preview/{slug}", response_class=HTMLResponse)
+def serve_any_post(slug: str, page_service: PageService = Depends(get_page_service)):
+    """
+    Serves a single page with SSR.
+    1. Fetches the content page.
+    2. Fetches the layout template.
+    3. Renders the template with content injected before sending to client.
+    """
+    
+    # 1. Fetch the actual content page
+    page = page_service.get_page_by_slug(slug) 
+
+    # 2. If it's already static HTML, return it
+    if page.type == 'html':
+        return HTMLResponse(content=page.html, status_code=200)
+
+    # 3. Handle Markdown/Dynamic Pages (SSR)
+    # Fetch the template
+    markdown_template = page_service.get_first_page_by_labels(['sys:template', 'any:read'])
+    if not markdown_template:
+        raise HTTPException(status_code=500, detail="System Error: Markdown template missing.")
+    
+    context = {
+        "title": page.title,
+        "markdown_content": page.markdown,
+        "author": page.author if hasattr(page, 'author') else "Unknown",
+        "published": page.created if hasattr(page, 'created_at') else "",
+        "updated": page.updated if hasattr(page, 'updated_at') else "",
+        "description": page.content if hasattr(page, 'description') else "",
+        "thumb": page.thumb if hasattr(page, 'thumbnail') else ""
+    }
+
+    # Render on Server
+    rendered_html = render_db_template(markdown_template.html, context)
+    
+    return HTMLResponse(content=rendered_html, status_code=200)

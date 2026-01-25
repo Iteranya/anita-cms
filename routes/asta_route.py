@@ -18,6 +18,7 @@ router = APIRouter(tags=["Asta Markdown Editor"])
 
 # --- CONFIG ---
 ASTA_INDEX_PATH = "static/asta/index.html"
+RAW_INDEX_PATH = "static/aina-raw/index.html"
 
 # --- HELPER ---
 def render_template(file_path: str, context: dict = None):
@@ -29,15 +30,8 @@ def render_template(file_path: str, context: dict = None):
 
     if context:
         for key, value in context.items():
-            # --- THIS IS THE CORRECTED PART ---
-            # Create a regex pattern to find "{{ key }}", allowing for optional spaces
-            # For key="slug", this becomes: r"{{\s*slug\s*}}"
-            # \s* matches zero or more whitespace characters
             pattern = re.compile(r"{{\s*" + re.escape(key) + r"\s*}}")
-            
-            # Use re.sub() for robust replacement
             content = pattern.sub(str(value), content)
-            # --- END OF CORRECTION ---
 
     return HTMLResponse(content)
 
@@ -73,3 +67,18 @@ async def asta_editor_view(
 
     # This will now correctly inject the slug
     return render_template(ASTA_INDEX_PATH, {"slug": slug})
+
+@router.get("/raw/editor/{slug}", response_class=HTMLResponse)
+async def raw_editor_view(
+    slug: str, 
+    request: Request, 
+    user: Optional[dict] = Depends(get_current_user)
+):
+    """
+    Serves the Single Page Application for the Editor.
+    """
+    if not user:
+        return RedirectResponse(url=f"/auth/login?next=/asta/editor/{slug}", status_code=302)
+
+    # This will now correctly inject the slug
+    return render_template(RAW_INDEX_PATH, {"slug": slug})

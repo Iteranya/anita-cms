@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 # Data & Logic
 from services.labels import LabelService
-from src.alpine_generator import generate_collection_alpine_components, generate_media_alpine_components, generate_public_alpine_components,generate_markdown_renderer_js
+from src.alpine_generator import generate_collection_alpine_components, generate_media_alpine_components, generate_public_alpine_components,generate_markdown_renderer_js, generate_media_list,generate_media_upload_js
 from data.database import get_db
 from data.schemas import AlpineData
 from services.collections import CollectionService
@@ -87,6 +87,12 @@ async def api_get_all_routes(
     except Exception as e:
         print(f"Error generating public components: {e}")
 
+    # 4. Media Util
+    try:
+        all_routes.extend(generate_media_list())
+        all_routes.extend(generate_media_upload_js())
+    except Exception as e:
+        print(f"Error generating public components: {e}")
 
     return all_routes
 

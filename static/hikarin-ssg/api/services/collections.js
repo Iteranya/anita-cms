@@ -1,5 +1,7 @@
 import { ApiRequest } from "../core.js";
 
+// TODO: Turn this into true SSG
+
 export class CollectionsAPI {
     constructor(client) { this._client = client; }
     

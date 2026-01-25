@@ -1,13 +1,18 @@
+// --- Editor with Integrated Media Uploader: {{ collection_name }} ---
 document.addEventListener('alpine:init', () => {
     Alpine.data('{{ component_name }}', (initialData = null) => ({
-        // State
+        // === Form State ===
         submissionId: null,
         isEditing: false,
-        isLoading: false,
+        isLoading: false, // For saving the form
 
+        // === Uploader State (namespaced to avoid conflicts) ===
+        isUploading: false,
+        uploadError: null,
+        
         // --- Schema Fields ---
         {% for field in fields %}
-        {{ field.name }}: {{ field.default_value }},
+        {{ field.name }}: {{ field.default_value }}, //{{field.type}}
         {% endfor %}
 
         init() {
@@ -17,11 +22,10 @@ document.addEventListener('alpine:init', () => {
         },
 
         loadData(data) {
-            // Unwrap data if it comes wrapped in a 'data' property (common in some CMSs)
             const flatData = data.data ? data.data : data;
             
             {% for field in fields %}
-            if(data['{{ field.name }}'] !== undefined) this.{{ field.name }} = data['{{ field.name }}'];
+            if(flatData['{{ field.name }}'] !== undefined) this.{{ field.name }} = flatData['{{ field.name }}'];
             {% endfor %}
             
             if(data.id) this.submissionId = data.id;
@@ -29,36 +33,25 @@ document.addEventListener('alpine:init', () => {
         },
 
         async save() {
+            // ... (save logic remains exactly the same)
             this.isLoading = true;
-            
             const submissionBody = {
                 {% for field in fields %}
                 {{ field.name }}: this.{{ field.name }}{{ "," if not loop.last }}
                 {% endfor %}
             };
-
             try {
                 if (this.isEditing && this.submissionId) {
-                    // --- UPDATE ---
                     const payload = { data: submissionBody };
                     await this.$api.collections.updateRecord('{{ collection_slug }}', this.submissionId, payload).execute();
                     if(Alpine.store('notifications')) Alpine.store('notifications').success('Saved', 'Submission updated.');
-
                 } else {
-                    // --- CREATE ---
-                    const payload = {
-                        collection_slug: '{{ collection_slug }}',
-                        data: submissionBody
-                    };
-                    
+                    const payload = { collection_slug: '{{ collection_slug }}', data: submissionBody };
                     await this.$api.collections.createRecord('{{ collection_slug }}', payload).execute();
-                    
                     if(Alpine.store('notifications')) Alpine.store('notifications').success('Success', 'Submission created.');
                     this.resetCollection();
                 }
-                
                 this.$dispatch('submission-saved');
-
             } catch(e) {
                 console.error(e);
                 if(Alpine.store('notifications')) Alpine.store('notifications').error('Error', 'Could not save submission.');
@@ -73,6 +66,63 @@ document.addEventListener('alpine:init', () => {
             {% for field in fields %}
             this.{{ field.name }} = {{ field.default_value }};
             {% endfor %}
+        },
+
+        // === Integrated Uploader Logic ===
+        /**
+         * Handles file upload and updates a specific field in the component's state.
+         * @param {Event} event - The file input change event.
+         * @param {string} targetField - The name of the component property to update (e.g., 'thumb').
+         */
+        // === Uploader for SINGLE files (thumb, banner, etc.) ===
+        async handleUpload(event, targetField) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            this.isUploading = true;
+            this.uploadError = null;
+            try {
+                const result = await this.$api.media.upload().execute([file]);
+                if (result && result.files && result.files.length > 0) {
+                    this[targetField] = result.files[0].url; // Overwrites the field with a single URL string
+                    if (Alpine.store('notifications')) Alpine.store('notifications').success('Upload Complete');
+                    this.$dispatch('media-updated');
+                } else { throw new Error('Upload response was invalid.'); }
+            } catch (e) {
+                this.uploadError = e.message || 'An unknown error occurred.';
+                if (Alpine.store('notifications')) Alpine.store('notifications').error('Upload Failed', this.uploadError);
+            } finally {
+                this.isUploading = false;
+                event.target.value = null; 
+            }
+        },
+
+        async handleGalleryUpload(event, targetField) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            this.isUploading = true;
+            this.uploadError = null;
+            try {
+                const result = await this.$api.media.upload().execute(files); // Uploads all files at once
+
+                if (result && result.files && result.files.length > 0) {
+                    // Extract all the new URLs from the response
+                    const newUrls = result.files.map(file => file.url);
+
+                    // Append the new URLs to the existing gallery array
+                    this[targetField] = [...this[targetField], ...newUrls];
+
+                    if (Alpine.store('notifications')) Alpine.store('notifications').success(`${newUrls.length} image(s) added to gallery.`);
+                    this.$dispatch('media-updated');
+                } else { throw new Error('Upload response was invalid.'); }
+            } catch (e) {
+                this.uploadError = e.message || 'An unknown error occurred.';
+                if (Alpine.store('notifications')) Alpine.store('notifications').error('Upload Failed', this.uploadError);
+            } finally {
+                this.isUploading = false;
+                event.target.value = null;
+            }
         }
     }));
 });

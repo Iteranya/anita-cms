@@ -1,0 +1,69 @@
+document.addEventListener('alpine:init', () => {
+    Alpine.data('mediaManager', () => ({
+        // State
+        isLoading: true, // Start in loading state
+        error: null,
+        mediaItems: [], // Holds the array of media files from the API
+
+        // The init() function is automatically called by Alpine when the component is initialized.
+        init() {
+            this.loadMedia();
+
+            // Listen for the custom event dispatched by the uploader to refresh the list.
+            // The `@media-updated.window` syntax means we listen on the global window object.
+            this.$watch('$listeners.media-updated', () => {
+                console.log('Media list refreshing due to media-updated event...');
+                this.loadMedia();
+            });
+        },
+
+        /**
+         * Fetches the list of media items from the API.
+         */
+        async loadMedia() {
+            this.isLoading = true;
+            this.error = null;
+            try {
+                // Call the API to get the list of media
+                const result = await this.$api.media.list().execute();
+                this.mediaItems = result || []; // Ensure it's an array even if API returns null
+            } catch (e) {
+                console.error("Failed to load media:", e);
+                this.error = e.message || 'Could not fetch media library.';
+                if (Alpine.store('notifications')) {
+                    Alpine.store('notifications').error('Error', this.error);
+                }
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        /**
+         * Deletes a specific media file.
+         * @param {string} filename - The unique identifier/filename of the media to delete.
+         */
+        async deleteMedia(filename) {
+            // Simple confirmation dialog
+            if (!confirm(`Are you sure you want to delete "${filename}"?`)) {
+                return;
+            }
+
+            try {
+                await this.$api.media.delete(filename).execute();
+                
+                // Remove the item from the local array for an instant UI update
+                this.mediaItems = this.mediaItems.filter(item => item.filename !== filename);
+                
+                if (Alpine.store('notifications')) {
+                    Alpine.store('notifications').success('Deleted', `"${filename}" was successfully deleted.`);
+                }
+
+            } catch (e) {
+                console.error(`Failed to delete ${filename}:`, e);
+                if (Alpine.store('notifications')) {
+                    Alpine.store('notifications').error('Delete Failed', e.message);
+                }
+            }
+        }
+    }));
+});

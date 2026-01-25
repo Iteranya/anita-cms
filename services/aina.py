@@ -1,12 +1,9 @@
 # file: services/aina.py
 
 import re
-from typing import List
 from bs4 import BeautifulSoup
 from sqlalchemy.orm import Session
 
-from src.alpine_generator import generate_collection_alpine_components
-from data.schemas import AlpineData
 
 # --- Helper Classes and Functions ---
     

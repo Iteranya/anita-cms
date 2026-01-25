@@ -1,6 +1,7 @@
 import { HikarinApiError } from './core.js';
 import { CollectionsAPI } from './services/collections.js';
 import { PublicAPI } from './services/public.js';
+
 export class HikarinApi {
     constructor(baseUrl = '') {
         this.baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
