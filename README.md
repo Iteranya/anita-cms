@@ -18,39 +18,41 @@
     <img src="https://img.shields.io/badge/ORM-SQLAlchemy-red.svg" alt="SQLAlchemy">
   </a>
 </p>
-<h1 align="center">Anita CMS - The No-Code Hybrid Content Management System</h1>
+<h1 align="center">Anita Web Studio - The Freelancer's Delivery Stack</h1>
 <h3 align="center">Alpha Release: Here Be Dragons</h2>
 
 ---
 
-## What Is Anita?
+## Why Is Anita?
 
-Anita is a tool you use to create a website.
+Anita Web Studio is a self-hosted, full featured web development kit designed for freelancer to create a secure and bespoke website. You use Anita when:
 
-Anita is a self-hosted, hybrid CMS designed to be the "lite" alternative to WordPress/Wix/Squarespace/Drupal/Joomla/Directus/EveryCMSUnderTheSun. She is built for people who want a portfolio, a gallery, a shop, or a blog, but don't want to deal with complex databases or expensive server costs. 
+- You are tired of boiler code and writing custom site from scratch
+- You have PTSD from clients breaking your website
+- You do not want to teach client how to use a CMS Admin Page
+- You want a very specific 'website template' that works everytime without the JS Library Rot
+- You want something extremely efficient, lightweight, and easy to deploy
 
-(Note: She still can't replace SSG, sorry)
-
-I call Anita Hybrid because:
-
-- She handles the Backend: You define the data, she builds the API.
-- She helps with the Frontend: She includes an Integrated IDE (Aina) and Markdown Editor (Asta).
+In other words, Anita is designed to solve the very specific pain point of every web freelancer out there
 
 ## The "One-File" Wonder
 
-*The ultimate portable CMS.*
+*The ultimate portable website.*
 
-Most CMSs require a database server, a file server, and a config file. Moving them is a nightmare.
+Most CMS and Website require a database server, a file server, and a config file. Moving them is a nightmare.
 
-Anita stores EVERYTHING in a single file.
+Anita stores EVERYTHING in a single file. 
 
 - Want to backup your site? Copy anita.db and your uploads folder to Google Drive.
 - Want to move servers? git pull the repo, paste your anita.db and uploads folder, and you're live.
 - Need to scale? Since it uses SQLAlchemy, you can switch to PostgreSQL with one config change if you ever hit 1 million users (but for 99% of us, SQLite is faster, and Anita uses WAL by default).
 
-This is *not* an exaggeration, yes, your entire site, this includes your custom home page and blog page and everything in between. Your configurations, your users, your roles, it's all in a single .db file. (No we don't store media file in db, we're not monsters)
+This is *not* an exaggeration, yes, your entire site, this includes your custom home page and blog page and everything in between. Your configurations, your users, your roles, it's all in a single .db file. 
+(No we don't store media file in db, we're not monsters)
 
-## Starter Kits!
+Of course this does not apply if you use Anita merely as a Headless CMS, which is another feature she supports.
+
+## Website Scaffolding
 
 *Starting from a blank slate sucks. Anita knows this.*
 
@@ -62,20 +64,20 @@ When you run `main.py` for the first time (and Anita sees you don't have an `ani
 2. She lists every `.db` file found there.
 3. She asks: *"What are we building today?"*
 
-You might see options like:
+You *might* see options like:
 - `anita-blog.db`
 - `anita-cafe.db` 
 - `anita-art.db` 
-- `anita-sass.db` 
+- `anita-sass.db`
+
+(Note: As of writing this, there is only one template available, the default one, sorry)
 
 Once you pick a number, she duplicates that template, renames it to `anita.db`, generates your security keys, and **boom**—your site is pre-populated and ready to go.
 
-**Want to make your own Starter Kit?**
-Configure a site exactly how you like it, run the 'seedmakinghelper.py', and drag the sanitized_anita.db into `anita-template/` folder, and rename it to whatever you like. Now you can reuse that setup forever.
+**Want to make your own Scaffolds?**
+Configure a site exactly how you like it, run the 'seedmakinghelper.py', and drag the sanitized_anita.db into `anita-template/` folder, and rename it to whatever you like. Now you can reuse that setup forever. Perfect if you have repeat clients who ask for similar website every time.
 
-## Runs on a Potato
-
-*I'm broke so I know what 'broke hosting' is like*
+## Margin So Big It Feels Illegal
 
 Because Anita is built on FastAPI (Python), it's comical how lightweight she is
 - Low RAM Usage: Unlike Java or Node apps, she sips memory.
@@ -83,11 +85,11 @@ Because Anita is built on FastAPI (Python), it's comical how lightweight she is
 - No Build Step: No compiling assets on the server. Just run and go.
 - No Database Overhead: SQLite runs natively in Python and it's literally just a single file
 
-If you're a freelancer, you can host a dozen instance of Anita in a single server. (Given you handle CI/CD yourself, but that's another thing entirely)
+If you're a freelancer, you can host a dozen instance of Anita in a single server, without having to worry about plugin maintenance, and charge premium for a custom website with branded admin page.
 
-## The "Low-Code" Backend
+## The Schema Creator
 
-The coolest part. No black magic, just logic.
+Just like Pocketbase and most BAAS, Anita is designed to ease the use of 'schema creation'.
 
 Usually, if you want a dynamic "Menu" page for a restaurant, you have to code a database model and an API route.
 
@@ -98,19 +100,19 @@ With Anita, you just do this:
 - Check the boxes for access permissions
 - Done.
 
-Anita automatically generates a secure API endpoint. The IDE is now aware of the api route and you can easily inject the required scripts (no code required), then you can simply code your own front end with Alpine and Tailwind through Aina IDE.
+Anita automatically generates a Secure API endpoint. 
+Yes, with a single interface, you can create a collection and a **Secure** API Route 
 
 ## Export To SSG
 
-*For when you really, **really**, can't afford a hosting*
+*The Client Will Fall In Love With You*
 
-People say that trying to be good at everything is not a good idea
+Imagine this, you offer monthly payment to the client. And then say:
+> 'If you fail to pay the monthly price, your website will stay online and accessible, though your custom admin dashboard will be disabled'
 
-I agree, Anita is designed to be good at one thing and one thing only: Efficiency
+That's the kind of deal that builds trust and Anita makes this *trivial*
 
-Anita comes prepackaged with a simple pythons script that you can just run just like your main.py
-
-That will create an entire dist folder containing an SSG Version of the site you made.
+With a simple command, you can generate a 'dist' folder and host that on Github or Netlify.
 
 Current Features:
 
@@ -123,25 +125,8 @@ Upcoming Probably Next Week Features:
 - Creates A Reflection Your Collection Database
 - Lets Your Custom Pages Display Those Collections
 
-In other words, if you use Aina to generate your database, you can trust her that any GET public routes become accessible anywhere, even as static sites! 
+In other words, if you use the Integrated IDE to make your website, you can trust her that any GET public routes become accessible anywhere, even as static sites! 
 
----
-
-## Why Anita?
-
-The better question is, 'When is Anita'?
-
--   When you want a portfolio website
--   A little corner of the web that is yours
--   A neat shop, catalogue, or gallery page
--   Information Page for Local School or even City
--   Low to Medium Traffic Website
--   Literally Anything Wordpress Can Offer You
--   Okay maybe wordpress without the ecosystem
-
-**Is Anita designed to replace wordpress?**
-
-In a sense, yes. It is designed to be a safer alternative to Wordpress, with lots and lots of safeguards, performance and optimizations.
 
 ---
 
@@ -169,29 +154,29 @@ Long answer: We have trust issues.
 - Input Sanitization: We use Ammonia (Rust-based) to scrub every input.
 - Discord-Style Permissions: We use ABAC. You can set exactly who can see or edit your cafe-menu. This means you don't give your intern or Karen from accounting the ability to break the website's homepage.
 
-## The Admin Page
+## The Web Studio
 
-You know what they say, a picture is worth a thousand words...
+These may look like a gorgeous User Friendly Dashboard. But trust me, this is a set of tools you use to create and manage your entire website. This is where you, the developer create the website and everything. Not for the client to add content into the website. You can use the Web Studio to create all the pages of your website, setup the routes of your website, create the schemas and the required API Endpoint, and all the security access control, and the Roles required (defining what client can / cannot do).
 
-#### Dashboard
+#### Main Studio
 <p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-dashboard.png" alt="Admin UI Dashboard" width="700"></p>
-<em>Honestly not that impressive, but hey, it's a dashboard~ No worries, Page Metric Feature Coming Up Real Soon!</em>
+<em>This is for your eyes only, a general overview of what the site looks like</em>
 
 #### Pages
 <p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-pages.png" alt="Admin UI Pages" width="700"></p>
 <p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-pages-setting.png" alt="Admin UI Pages Setting" width="700"></p>
-<em>Is it too simple? That's a compliment. Does it work? Hell yes. This is where you look for and modify pages you see? Mark page as html or markdown, change title and description and more!</em>
+<em>In this page, you can create site, (yes, the html front facing site), and the templates and even custom admin pages</em>
 
 #### Structures
 <p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-structure.png" alt="Admin UI Structures" width="700"></p>
 <p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-structure-setting.png" alt="Admin UI Structure Setting" width="700"></p>
-<em>You want to separate projects, blogs, and gallery sections of your site??? Well with Anita it's a drag and drop interface~ You can set any page as home, as template, as the head of any top level navigation, and more! Comes with Access Control too!</em>
+<em>This is where you configure the site structure once you have finished making the site. You can also add security here, making sure only certain roles have access to certain sites. Simply create an 'owner' category and put 'menu-edit' page there and the client can easily access `/owner/menu-edit` to change their Cafe Menu</em>
 
 #### Collections (aka Collections)
 <p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-collections.png" alt="Admin UI Collections" width="700"></p>
 <p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-collections-setting.png" alt="Admin UI Collection Settings" width="700"></p>
 <p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-collections-creation.png" alt="Admin UI Collection Creation" width="700"></p>
-<em>Oh you think this is for a contact collection? It's a misnomer see? These are 'Collections', the no-code backend part of all this. You can make `contact-collection`, but you can also make `cafe-menu`, `art-gallery`, and more, with role based permissions! Anita will create an entire GET/POST/PUT/DELETE route endpoint that accesses these collections you made!</em>
+<em>No more FastAPI Boiler Code just to add new data types. You can make `contact-collection`, but you can also make `cafe-menu`, `art-gallery`, and more, with role based permissions! Anita will create an entire GET/POST/PUT/DELETE route endpoint that accesses these collections you made! And yes, It Is Secure By Default!!!</em>
 
 #### Media & Files
 <p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/admin-ui-media.png" alt="Admin UI Media" width="700"></p>
@@ -219,11 +204,11 @@ Introducing, Aina Integrated Web IDE!!!
 
 But what if I want to code in VS Code? I hear you asking. What if I want to have version control? I hear you asking.
 
-Just use Anita headless, that works too, Hybrid, remember?
+Just use Anita as headless CMS, simple~
 
 #### Asta Markdown Editor
 <p align="center"><img src="https://raw.githubusercontent.com/iteranya/anita-cms/main/docs/asta-editor.png" alt="Aina Frontend IDE" width="700"></p>
-<em>Built on top of the absolute gorgeous Milkdown Crepe, we present to you Asta Markdown Editor. A gorgeous UI to write your content with minimal fluff. You can save draft and simply publish them! And you can choose which template to use to render the post you've made!</em>
+<em>Built on top of the absolute gorgeous Milkdown Crepe, we present to you Asta Markdown Editor. A gorgeous UI to write your content with minimal fluff. You can save draft and simply publish them! And you can choose which template to use to render the post you've made! You can ship this to the client also! Give them the power to write blog/article without giving them access to the main Studio Panel</em>
 
 ---
 
@@ -239,33 +224,8 @@ Not to mention that you still get to use the Admin Panel to manage your users, y
 
 ---
 
-## For Freelancers: The "Client-Proof" CMS
-
-*Give them the keys to the car, but weld the hood shut.*
-
-Look, client clicking a glowing 'update all' button is what kept us all up at night. Or maybe even clicking the theme thinking they can change the site without you knowing. We've all been there.
-
-Anita, however, allows you to "Client-Proof" the delivery.
-
-Using our strict Attribute-Based Access Control (ABAC) and Security Matrix, you can curate the exact experience your client needs—and nothing more.
-
-- The "Menu Updater" Role: Does the restaurant owner only need to change prices? Create a role that has UPDATE permission on the cafe-menu collection, but NO ACCESS to Pages, Settings, or Media. They won't even see the other buttons.
-- The "Blog Writer" Role: Give them access to Asta (Markdown) to write news, but block access to Aina (Builder) so they can't break the layout.
-- System Locks: Critical pages (like Home or 404) are protected by System Labels. Even if you give a client "Delete Page" permissions, Anita will refuse to delete a System-Labelged page.
-- Advanced: Create your client their very own custom admin page that they can use to update their menu without touching the admin panel
-
-Result: They feel empowered to update their content. You sleep soundly knowing they can't nuke the database.
-
----
-
 ## Installation
 
-#### Windows (One-Click)
-1.  Download the `anita_installer.bat` file from the Release Page.
-2.  Double-click to install.
-3.  Launch via the desktop shortcut.
-
-#### Mac / Linux / Manual Setup
 We recommend using `uv` for lightning-fast dependency management.
 
 ```bash
@@ -280,7 +240,7 @@ source venv/bin/activate  # or .\venv\Scripts\activate on Windows
 # 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. Configuration
+# 4. Configuration (Optional, main.py can auto generate this part for you)
 cp example.env .env
 # Edit .env to add your JWT_SECRET
 
@@ -337,6 +297,9 @@ Terrible Ideas That Won't Go Away
 
 ## QnA
 
+Q: Is this a CMS?
+A: *deep sigh* It used to be, but no, not anymore
+
 Q: Is this project ready for..
 A: No
 
@@ -347,7 +310,7 @@ Q: What if I...
 A: No Gatekeeping
 
 Q: Do I need to be good at python???
-A: The admin page is designed so that you don't have to touch a single line of Python. Tailwind and Alpine experience will help you much, much more than Python knowledge.
+A: You have to be at least *decent* at python if you wish to add additional features not shipped with base Anita, such as payment gateway and more. But if you only know html, css, js, or even tailwind and alpine? You don't need python.
 
 Q: Documentation? Plugins?
 A: After I implement the Event Bridge, because honestly I'll have to rewrite the documentation from scratch if I write it now.
